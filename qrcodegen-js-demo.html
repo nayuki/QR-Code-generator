@@ -1,0 +1,81 @@
+<!--
+  - QR Code generator library (C++)
+  - 
+  - Copyright (c) 2016 Project Nayuki
+  - https://www.nayuki.io/page/qr-code-generator-library
+  - 
+  - (MIT License)
+  - Permission is hereby granted, free of charge, to any person obtaining a copy of
+  - this software and associated documentation files (the "Software"), to deal in
+  - the Software without restriction, including without limitation the rights to
+  - use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  - the Software, and to permit persons to whom the Software is furnished to do so,
+  - subject to the following conditions:
+  - * The above copyright notice and this permission notice shall be included in
+  -   all copies or substantial portions of the Software.
+  - * The Software is provided "as is", without warranty of any kind, express or
+  -   implied, including but not limited to the warranties of merchantability,
+  -   fitness for a particular purpose and noninfringement. In no event shall the
+  -   authors or copyright holders be liable for any claim, damages or other
+  -   liability, whether in an action of contract, tort or otherwise, arising from,
+  -   out of or in connection with the Software or the use or other dealings in the
+  -   Software.
+  -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QR Code generator library demo (JavaScript)</title>
+	<style type="text/css">
+	td {
+		vertical-align: top;
+	}
+	</style>
+</head>
+
+<body>
+<h1>QR Code generator demo library (JavaScript)</h1>
+<form action="#" method="get" onsubmit="return false;">
+	<table class="noborder" style="width:100%">
+		<tbody>
+			<tr>
+				<td>Text string:</td>
+				<td style="width:100%"><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:100%; max-width:30em; height:5em; font-family:inherit" oninput="redrawQrCode();"></textarea></td>
+			</tr>
+			<tr>
+				<td>Error&#xA0;correction:</td>
+				<td>
+					<input type="radio" name="errcorlvl" id="errcorlvl-low" onchange="redrawQrCode();" checked="checked"><label for="errcorlvl-low">Low</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-medium" onchange="redrawQrCode();"><label for="errcorlvl-medium">Medium</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-quartile" onchange="redrawQrCode();"><label for="errcorlvl-quartile">Quartile</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-high" onchange="redrawQrCode();"><label for="errcorlvl-high">High</label>
+				</td>
+			</tr>
+			<tr>
+				<td>Scale:</td>
+				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
+			</tr>
+			<tr>
+				<td>Border:</td>
+				<td><input type="number" value="4" min="0" max="100" step="1" id="border-input" style="width:4em" oninput="redrawQrCode();"> modules</td>
+			</tr>
+			<tr>
+				<td>Statistics:</td>
+				<td id="statistics-output" style="white-space:pre"></td>
+			</tr>
+			<tr>
+				<td>QR&#xA0;Code:</td>
+				<td>
+					<canvas id="qrcode-canvas" style="padding:1em; background-color:#E8E8E8"></canvas>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
+<script type="application/javascript" src="qrcodegen.js"></script>
+<script type="application/javascript" src="qrcodegen-demo.js"></script>
+
+<hr>
+<p>Copyright © 2016 Project Nayuki – <a href="https://www.nayuki.io/page/qr-code-generator-library">https://www.nayuki.io/page/qr-code-generator-library</a></p>
+</body>
+</html>
