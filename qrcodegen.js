@@ -27,16 +27,16 @@
 
 /* 
  * Module "qrcodegen". Public members inside this namespace:
- * - Function encodeText(str text, Ecc ecl) -> QrCode
+ * - Function encodeText(str text, QrCode.Ecc ecl) -> QrCode
  * - Function encodeTextToSegment(str text) -> QrSegment
- * - Function encodeBinary(list<int> data, Ecc ecl) -> QrCode
- * - Function encodeSegments(list<QrSegment> segs, Ecc ecl) -> QrCode
+ * - Function encodeBinary(list<int> data, QrCode.Ecc ecl) -> QrCode
+ * - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl) -> QrCode
  * - Class QrCode:
  *   - Constructor QrCode(QrCode qr, int mask)
- *   - Constructor QrCode(list<int> bytes, int mask, int version, Ecc ecl)
+ *   - Constructor QrCode(list<int> bytes, int mask, int version, QrCode.Ecc ecl)
  *   - Method getVersion() -> int
  *   - Method getSize() -> int
- *   - Method getErrorCorrectionLevel() -> Ecc
+ *   - Method getErrorCorrectionLevel() -> QrCode.Ecc
  *   - Method getMask() -> int
  *   - Method getModule(int x, int y) -> int
  *   - Method isFunctionModule(int x, int y) -> bool
@@ -48,8 +48,8 @@
  *   - Function makeBytes(list<int> data) -> QrSegment
  *   - Function makeNumeric(str data) -> QrSegment
  *   - Function makeAlphanumeric(str data) -> QrSegment
- *   - Constructor QrSegment(Mode mode, int numChars, list<int> bitData)
- *   - Method getMode() -> Mode
+ *   - Constructor QrSegment(QrSegment.Mode mode, int numChars, list<int> bitData)
+ *   - Method getMode() -> QrSegment.Mode
  *   - Method getNumChars() -> int
  *   - Method getBits() -> list<int>
  *   - Enum Mode:
@@ -155,11 +155,13 @@ var qrcodegen = new function() {
 	
 	
 	
+	/*---- QR Code symbol class ----*/
+	
 	/* 
 	 * A class that represents an immutable square grid of black and white cells for a QR Code symbol,
 	 * with associated static functions to create a QR Code from user-supplied textual or binary data.
 	 * This class covers the QR Code model 2 specification, supporting all versions (sizes)
-	 * from 1 to 40, all 4 error correction levels, and only 3 character encoding modes.
+	 * from 1 to 40, all 4 error correction levels.
 	 * 
 	 * This constructor can be called in one of two ways:
 	 * - new QrCode(bytes, mask, version, errCorLvl):
@@ -179,17 +181,15 @@ var qrcodegen = new function() {
 		// Handle simple scalar fields
 		if (mask < -1 || mask > 7)
 			throw "Mask value out of range";
-		var size;
 		if (initData instanceof Array) {
 			if (version < 1 || version > 40)
 				throw "Version value out of range";
-			size = version * 4 + 17;
 		} else if (initData instanceof qrcodegen.QrCode) {
 			version = initData.getVersion();
-			size = initData.getSize();
 			errCorLvl = initData.getErrorCorrectionLevel();
 		} else
 			throw "Invalid initial data";
+		var size = version * 4 + 17;
 		
 		// Initialize both grids to be size*size arrays of Boolean false
 		var row = [];
@@ -204,7 +204,7 @@ var qrcodegen = new function() {
 		
 		// Handle grid fields
 		if (initData instanceof Array) {
-			// Draw function patterns, draw all codewords, do masking
+			// Draw function patterns, draw all codewords
 			drawFunctionPatterns();
 			var allCodewords = appendErrorCorrection(initData);
 			drawCodewords(allCodewords);
@@ -267,19 +267,19 @@ var qrcodegen = new function() {
 		// Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
 		// left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then 0 (white) is returned.
 		this.getModule = function(x, y) {
-			if (x < 0 || x >= size || y < 0 || y >= size)
-				return 0;  // Infinite white border
-			else
+			if (0 <= x && x < size && 0 <= y && y < size)
 				return modules[y][x] ? 1 : 0;
+			else
+				return 0;  // Infinite white border
 		};
 		
 		// Tests whether the module at the given coordinates is a function module (true) or not (false). The top left
 		// corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then false is returned.
 		this.isFunctionModule = function(x, y) {
-			if (x < 0 || x >= size || y < 0 || y >= size)
-				return false;  // Infinite border
-			else
+			if (0 <= x && x < size && 0 <= y && y < size)
 				return isFunction[y][x];
+			else
+				return false;  // Infinite border
 		};
 		
 		
@@ -345,7 +345,7 @@ var qrcodegen = new function() {
 		
 		
 		// Draws two copies of the format bits (with its own error correction code)
-		// based on this object's error correction level and mask fields.
+		// based on the given mask and this object's error correction level field.
 		function drawFormatBits(mask) {
 			// Calculate error correction code and pack bits
 			var data = errCorLvl.formatBits << 3 | mask;  // errCorrLvl is uint2, mask is uint3
@@ -392,8 +392,7 @@ var qrcodegen = new function() {
 			// Draw two copies
 			for (var i = 0; i < 18; i++) {
 				var bit = ((data >>> i) & 1) != 0;
-				var a = size - 11 + i % 3;
-				var b = Math.floor(i / 3);
+				var a = size - 11 + i % 3, b = Math.floor(i / 3);
 				setFunctionModule(a, b, bit);
 				setFunctionModule(b, a, bit);
 			}
@@ -405,8 +404,7 @@ var qrcodegen = new function() {
 			for (var i = -4; i <= 4; i++) {
 				for (var j = -4; j <= 4; j++) {
 					var dist = Math.max(Math.abs(i), Math.abs(j));  // Chebyshev/infinity norm
-					var xx = x + j;
-					var yy = y + i;
+					var xx = x + j, yy = y + i;
 					if (0 <= xx && xx < size && 0 <= yy && yy < size)
 						setFunctionModule(xx, yy, dist != 2 && dist != 4);
 				}
@@ -489,7 +487,7 @@ var qrcodegen = new function() {
 						var upwards = ((right & 2) == 0) ^ (x < 6);
 						var y = upwards ? size - 1 - vert : vert;  // Actual y coordinate
 						if (!isFunction[y][x] && i < data.length * 8) {
-							modules[y][x] = (data[i >>> 3] >>> (7 - (i & 7)) & 1) != 0;
+							modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) != 0;
 							i++;
 						}
 					}
@@ -614,9 +612,9 @@ var qrcodegen = new function() {
 	
 	var QrCode = {};  // Private object to assign properties to
 	
-	// Returns a set of positions of the alignment patterns in ascending order. These positions are
-	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
-	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
+	// Returns a sequence of positions of the alignment patterns in ascending order. These positions are
+	// used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
+	// This stateless pure function could be implemented as table of 40 variable-length lists of integers.
 	QrCode.getAlignmentPatternPositions = function(ver) {
 		if (ver < 1 || ver > 40)
 			throw "Version number out of range";
@@ -705,6 +703,8 @@ var qrcodegen = new function() {
 	
 	
 	
+	/*---- Data segment class ----*/
+	
 	/* 
 	 * A public class that represents a character string to be encoded in a QR Code symbol.
 	 * Each segment has a mode, and a sequence of characters that is already encoded as
@@ -714,6 +714,9 @@ var qrcodegen = new function() {
 	 * Any segment longer than this is meaningless for the purpose of generating QR Codes.
 	 */
 	this.QrSegment = function(mode, numChars, bitData) {
+		if (numChars < 0 || !(mode instanceof Mode))
+			throw "Invalid argument";
+		
 		/*-- Accessor methods --*/
 		this.getMode = function() {
 			return mode;
@@ -726,7 +729,7 @@ var qrcodegen = new function() {
 		};
 	};
 	
-	/*-- Static factory functions --*/
+	/*-- Public static factory functions --*/
 	
 	// Returns a segment representing the given binary data encoded in byte mode.
 	this.QrSegment.makeBytes = function(data) {
@@ -819,36 +822,15 @@ var qrcodegen = new function() {
 	
 	// Returns a new array of bytes representing the given string encoded in UTF-8.
 	function toUtf8ByteArray(str) {
+		str = encodeURI(str);
 		var result = [];
 		for (var i = 0; i < str.length; i++) {
-			var c = str.charCodeAt(i);
-			if (c < 0x80)
-				result.push(c);
-			else if (c < 0x800) {
-				result.push(0xC0 | ((c >>> 6) & 0x1F));
-				result.push(0x80 | ((c >>> 0) & 0x3F));
-			} else if (0xD800 <= c && c < 0xDC00) {  // High surrogate
-				i++;
-				if (i < str.length) {
-					var d = str.charCodeAt(i);
-					if (0xDC00 <= d && d < 0xE000) {  // Low surrogate
-						c = ((c & 0x3FF) << 10 | (d & 0x3FF)) + 0x10000;
-						result.push(0xF0 | ((c >>> 18) & 0x07));
-						result.push(0x80 | ((c >>> 12) & 0x3F));
-						result.push(0x80 | ((c >>>  6) & 0x3F));
-						result.push(0x80 | ((c >>>  0) & 0x3F));
-						continue;
-					}
-				}
-				throw "Invalid UTF-16 string";
-			} else if (0xDC00 <= c && c < 0xE000)  // Low surrogate
-				throw "Invalid UTF-16 string";
-			else if (c < 0x10000) {
-				result.push(0xE0 | ((c >>> 12) & 0x0F));
-				result.push(0x80 | ((c >>>  6) & 0x3F));
-				result.push(0x80 | ((c >>>  0) & 0x3F));
-			} else
-				throw "Assertion error";
+			if (str.charAt(i) != "%")
+				result.push(str.charCodeAt(i));
+			else {
+				result.push(parseInt(str.substr(i + 1, 2), 16));
+				i += 2;
+			}
 		}
 		return result;
 	}

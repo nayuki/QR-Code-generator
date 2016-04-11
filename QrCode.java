@@ -53,14 +53,27 @@ public final class QrCode {
 	public static QrCode encodeText(String text, Ecc ecl) {
 		if (text == null || ecl == null)
 			throw new NullPointerException();
-		QrSegment seg;  // Select the most efficient segment encoding automatically
-		if (QrSegment.NUMERIC_REGEX.matcher(text).matches())
-			seg = QrSegment.makeNumeric(text);
-		else if (QrSegment.ALPHANUMERIC_REGEX.matcher(text).matches())
-			seg = QrSegment.makeAlphanumeric(text);
-		else
-			seg = QrSegment.makeBytes(text.getBytes(StandardCharsets.UTF_8));
+		QrSegment seg = encodeTextToSegment(text);
 		return encodeSegments(Arrays.asList(seg), ecl);
+	}
+	
+	
+	/**
+	 * Returns a QR Code segment representing the specified Unicode text string.
+	 * @param text the text to be encoded, which can be any Unicode string
+	 * @return a QR Code representing the text
+	 * @throws NullPointerException if the text is {@code null}
+	 */
+	public static QrSegment encodeTextToSegment(String text) {
+		if (text == null)
+			throw new NullPointerException();
+		// Select the most efficient segment encoding automatically
+		if (QrSegment.NUMERIC_REGEX.matcher(text).matches())
+			return QrSegment.makeNumeric(text);
+		else if (QrSegment.ALPHANUMERIC_REGEX.matcher(text).matches())
+			return QrSegment.makeAlphanumeric(text);
+		else
+			return QrSegment.makeBytes(text.getBytes(StandardCharsets.UTF_8));
 	}
 	
 	
@@ -255,10 +268,10 @@ public final class QrCode {
 	 * @return the module's color, which is either 0 (white) or 1 (black)
 	 */
 	public int getModule(int x, int y) {
-		if (x < 0 || x >= size || y < 0 || y >= size)
-			return 0;  // Infinite white border
-		else
+		if (0 <= x && x < size && 0 <= y && y < size)
 			return modules[y][x] ? 1 : 0;
+		else
+			return 0;  // Infinite white border
 	}
 	
 	
@@ -353,7 +366,7 @@ public final class QrCode {
 	
 	
 	// Draws two copies of the format bits (with its own error correction code)
-	// based on this object's error correction level and mask fields.
+	// based on the given mask and this object's error correction level field.
 	private void drawFormatBits(int mask) {
 		// Calculate error correction code and pack bits
 		int data = errorCorrectionLevel.formatBits << 3 | mask;  // errCorrLvl is uint2, mask is uint3
@@ -400,8 +413,9 @@ public final class QrCode {
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
 			boolean bit = ((data >>> i) & 1) != 0;
-			setFunctionModule(size - 11 + i % 3, i / 3, bit);
-			setFunctionModule(i / 3, size - 11 + i % 3, bit);
+			int a = size - 11 + i % 3, b = i / 3;
+			setFunctionModule(a, b, bit);
+			setFunctionModule(b, a, bit);
 		}
 	}
 	
@@ -411,8 +425,7 @@ public final class QrCode {
 		for (int i = -4; i <= 4; i++) {
 			for (int j = -4; j <= 4; j++) {
 				int dist = Math.max(Math.abs(i), Math.abs(j));  // Chebyshev/infinity norm
-				int xx = x + j;
-				int yy = y + i;
+				int xx = x + j, yy = y + i;
 				if (0 <= xx && xx < size && 0 <= yy && yy < size)
 					setFunctionModule(xx, yy, dist != 2 && dist != 4);
 			}
@@ -495,7 +508,7 @@ public final class QrCode {
 					boolean upwards = ((right & 2) == 0) ^ (x < 6);
 					int y = upwards ? size - 1 - vert : vert;  // Actual y coordinate
 					if (!isFunction[y][x] && i < data.length * 8) {
-						modules[y][x] = (data[i >>> 3] >>> (7 - (i & 7)) & 1) != 0;
+						modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) != 0;
 						i++;
 					}
 				}
