@@ -66,7 +66,7 @@ final class BitBuffer {
 	// Appends the given number of bits of the given value to this sequence.
 	// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
 	public void appendBits(int val, int len) {
-		if (len < 0 || len > 32 || len < 32 && (val & ((1 << len) - 1)) != val)
+		if (len < 0 || len > 32 || len < 32 && (val >>> len) != 0)
 			throw new IllegalArgumentException("Value out of range");
 		ensureCapacity(bitLength + len);
 		for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
@@ -88,7 +88,7 @@ final class BitBuffer {
 	
 	// Expands the buffer if necessary, so that it can hold at least the given bit length.
 	private void ensureCapacity(int newBitLen) {
-		while (data.length < newBitLen)
+		while (data.length * 8 < newBitLen)
 			data = Arrays.copyOf(data, data.length * 2);
 	}
 	

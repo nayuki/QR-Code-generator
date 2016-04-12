@@ -566,10 +566,10 @@ var qrcodegen = new function() {
 			// 2*2 blocks of modules having same color
 			for (var y = 0; y < size - 1; y++) {
 				for (var x = 0; x < size - 1; x++) {
-					var color = modules[y][x];
-					if (    color == modules[y][x + 1] &&
-							color == modules[y + 1][x] &&
-							color == modules[y + 1][x + 1])
+					var   color = modules[y][x];
+					if (  color == modules[y][x + 1] &&
+					      color == modules[y + 1][x] &&
+					      color == modules[y + 1][x + 1])
 						result += QrCode.PENALTY_N2;
 				}
 			}
@@ -658,6 +658,8 @@ var qrcodegen = new function() {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	QrCode.getNumDataCodewords = function(ver, ecl) {
+		if (ver < 1 || ver > 40)
+			throw "Version number out of range";
 		return Math.floor(QrCode.getNumRawDataModules(ver) / 8) - QrCode.NUM_ERROR_CORRECTION_CODEWORDS[ecl.ordinal][ver];
 	};
 	
@@ -890,7 +892,7 @@ var qrcodegen = new function() {
 	// This static function returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and
 	// result are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
 	ReedSolomonGenerator.multiply = function(x, y) {
-		if ((x & 0xFF) != x || (y & 0xFF) != y)
+		if (x >>> 8 != 0 || y >>> 8 != 0)
 			throw "Byte out of range";
 		// Russian peasant multiplication
 		var z = 0;
@@ -898,7 +900,7 @@ var qrcodegen = new function() {
 			z = (z << 1) ^ ((z >>> 7) * 0x11D);
 			z ^= ((y >>> i) & 1) * x;
 		}
-		if ((z & 0xFF) != z)
+		if (z >>> 8 != 0)
 			throw "Assertion error";
 		return z;
 	};
@@ -940,7 +942,7 @@ var qrcodegen = new function() {
 		// Appends the given number of bits of the given value to this sequence.
 		// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
 		this.appendBits = function(val, len) {
-			if (len < 0 || len > 32 || len < 32 && (val & ((1 << len) - 1)) != val)
+			if (len < 0 || len > 32 || len < 32 && (val >>> len) != 0)
 				throw "Value out of range";
 			for (var i = len - 1; i >= 0; i--)  // Append bit by bit
 				bitData.push((val >>> i) & 1);

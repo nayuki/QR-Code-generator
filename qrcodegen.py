@@ -548,6 +548,8 @@ class QrCode(object):
 		"""Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 		QR Code of the given version number and error correction level, with remainder bits discarded.
 		This stateless pure function could be implemented as a (40*4)-cell lookup table."""
+		if not 1 <= ver <= 40:
+			raise ValueError("Version number out of range")
 		return QrCode._get_num_raw_data_modules(ver) // 8 - QrCode._NUM_ERROR_CORRECTION_CODEWORDS[ecl.ordinal][ver]
 	
 	
@@ -588,14 +590,14 @@ class QrCode(object):
 	
 	
 	# ---- Public helper enumeration ----
-
+	
 	class Ecc(object):
 		"""Represents the error correction level used in a QR Code symbol."""
 		# Private constructor
 		def __init__(self, i, fb):
 			self.ordinal = i      # In the range 0 to 3 (unsigned 2-bit integer)
 			self.formatbits = fb  # In the range 0 to 3 (unsigned 2-bit integer)
-
+	
 	# Create the class constants outside the class
 	Ecc.LOW      = Ecc(0, 1)
 	Ecc.MEDIUM   = Ecc(1, 0)
@@ -765,14 +767,14 @@ class _ReedSolomonGenerator(object):
 	def multiply(x, y):
 		"""Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 		are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8."""
-		if x & 0xFF != x or y & 0xFF != y:
+		if x >> 8 != 0 or y >> 8 != 0:
 			raise ValueError("Byte out of range")
 		# Russian peasant multiplication
 		z = 0
 		for i in reversed(range(8)):
 			z = (z << 1) ^ ((z >> 7) * 0x11D)
 			z ^= ((y >> i) & 1) * x
-		assert z & 0xFF == z
+		assert z >> 8 == 0
 		return z
 
 

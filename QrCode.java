@@ -613,9 +613,9 @@ public final class QrCode {
 		for (int y = 0; y < size - 1; y++) {
 			for (int x = 0; x < size - 1; x++) {
 				boolean color = modules[y][x];
-				if (    color == modules[y][x + 1] &&
-				        color == modules[y + 1][x] &&
-				        color == modules[y + 1][x + 1])
+				if (  color == modules[y][x + 1] &&
+				      color == modules[y + 1][x] &&
+				      color == modules[y + 1][x + 1])
 					result += PENALTY_N2;
 			}
 		}
@@ -694,7 +694,7 @@ public final class QrCode {
 		result -= 64 * 3;           // Subtract the three finders with separators
 		result -= 15 * 2 + 1;       // Subtract the format information and black module
 		result -= (size - 16) * 2;  // Subtract the timing patterns
-		// The four lines above are equivalent to: int result = (16 * ver + 128) * ver + 64;
+		// The five lines above are equivalent to: int result = (16 * ver + 128) * ver + 64;
 		if (ver >= 2) {
 			int numAlign = ver / 7 + 2;
 			result -= (numAlign - 1) * (numAlign - 1) * 25;  // Subtract alignment patterns not overlapping with timing patterns
@@ -711,6 +711,8 @@ public final class QrCode {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	private static int getNumDataCodewords(int ver, Ecc ecl) {
+		if (ver < 1 || ver > 40)
+			throw new IllegalArgumentException("Version number out of range");
 		return getNumRawDataModules(ver) / 8 - NUM_ERROR_CORRECTION_CODEWORDS[ecl.ordinal()][ver];
 	}
 	
@@ -759,13 +761,13 @@ public final class QrCode {
 		// Constructor.
 		private Ecc(int fb) {
 			formatBits = fb;
-		}		
+		}
 	}
 	
 	
 	
 	/*---- Private helper class ----*/
-
+	
 	/**
 	 * Computes the Reed-Solomon error correction codewords for a sequence of data codewords
 	 * at a given degree. Objects are immutable, and the state only depends on the degree.
@@ -843,7 +845,7 @@ public final class QrCode {
 		// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 		// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
 		private static int multiply(int x, int y) {
-			if ((x & 0xFF) != x || (y & 0xFF) != y)
+			if (x >>> 8 != 0 || y >>> 8 != 0)
 				throw new IllegalArgumentException("Byte out of range");
 			// Russian peasant multiplication
 			int z = 0;
@@ -851,7 +853,7 @@ public final class QrCode {
 				z = (z << 1) ^ ((z >>> 7) * 0x11D);
 				z ^= ((y >>> i) & 1) * x;
 			}
-			if ((z & 0xFF) != z)
+			if (z >>> 8 != 0)
 				throw new AssertionError();
 			return z;
 		}
