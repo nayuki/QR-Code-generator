@@ -294,7 +294,7 @@ class QrCode(object):
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537)
 		data = data << 10 | rem
 		data ^= 0x5412  # uint15
-		assert data & ((1 << 15) - 1) == data
+		assert data >> 15 == 0
 		
 		# Draw first copy
 		for i in range(0, 6):
@@ -324,7 +324,7 @@ class QrCode(object):
 		for _ in range(12):
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25)
 		data = self._version << 12 | rem  # uint18
-		assert data & ((1 << 18) - 1) == data
+		assert data >> 18 == 0
 		
 		# Draw two copies
 		for i in range(18):

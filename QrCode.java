@@ -375,7 +375,7 @@ public final class QrCode {
 			rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
 		data = data << 10 | rem;
 		data ^= 0x5412;  // uint15
-		if ((data & ((1 << 15) - 1)) != data)
+		if (data >>> 15 != 0)
 			throw new AssertionError();
 		
 		// Draw first copy
@@ -407,7 +407,7 @@ public final class QrCode {
 		for (int i = 0; i < 12; i++)
 			rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
 		int data = version << 12 | rem;  // uint18
-		if ((data & ((1 << 18) - 1)) != data)
+		if (data >>> 18 != 0)
 			throw new AssertionError();
 		
 		// Draw two copies
