@@ -75,7 +75,7 @@ public:
 	
 	
 	/* 
-	 * Returns a QR Code segment representing the given Unicode text string.
+	 * Returns a QR segment representing the given Unicode text string.
 	 */
 	static QrSegment encodeTextToSegment(const char *text);
 	

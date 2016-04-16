@@ -69,7 +69,7 @@ def encode_text(text, ecl):
 	
 
 def encode_text_to_segment(text):
-	"""Returns a QR Code segment representing the given Unicode text string."""
+	"""Returns a QR segment representing the given Unicode text string."""
 	if not isinstance(text, str) and (sys.version_info[0] >= 3 or not isinstance(text, unicode)):
 		raise TypeError("Text string expected")
 	# Select the most efficient segment encoding automatically

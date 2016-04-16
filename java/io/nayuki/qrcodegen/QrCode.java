@@ -59,9 +59,9 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a QR Code segment representing the specified Unicode text string.
+	 * Returns a QR segment representing the specified Unicode text string.
 	 * @param text the text to be encoded, which can be any Unicode string
-	 * @return a QR Code representing the text
+	 * @return a QR segment containing the text
 	 * @throws NullPointerException if the text is {@code null}
 	 */
 	public static QrSegment encodeTextToSegment(String text) {
