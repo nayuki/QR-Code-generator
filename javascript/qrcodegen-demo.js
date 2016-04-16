@@ -78,17 +78,17 @@ function redrawQrCode() {
 			stats += "alphanumeric";
 		else if (mode == qrcodegen.QrSegment.Mode.BYTE)
 			stats += "byte";
-		else if (mode == qrcodegen.QrSegment.Mode.BYTE)
+		else if (mode == qrcodegen.QrSegment.Mode.KANJI)
 			stats += "kanji";
 		else
 			stats += "unknown";
 	} else
 		stats += "multiple";
+	stats += ", error correction = level " + "LMQH".charAt(qr.getErrorCorrectionLevel().ordinal) + ", ";
 	var databits = 0;
 	segs.forEach(function(seg) {
 		databits += 4 + seg.getMode().numCharCountBits(qr.getVersion()) + seg.getBits().length;
 	});
-	stats += ", error correction = level " + "LMQH".charAt(qr.getErrorCorrectionLevel().ordinal) + ", ";
 	stats += "data bits = " + databits + ".";
 	var elem = document.getElementById("statistics-output");
 	while (elem.firstChild != null)
