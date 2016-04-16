@@ -24,7 +24,10 @@
 
 package io.nayuki.qrcodegen;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 
@@ -101,6 +104,31 @@ public final class QrSegment {
 		if (i < text.length())  // 1 character remaining
 			bb.appendBits(ALPHANUMERIC_ENCODING_TABLE[text.charAt(i) - ' '], 6);
 		return new QrSegment(Mode.ALPHANUMERIC, text.length(), bb.getBytes(), bb.bitLength());
+	}
+	
+	
+	/**
+	 * Returns a new mutable list of zero or more segments to represent the specified Unicode text string.
+	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
+	 * @param text the text to be encoded, which can be any Unicode string
+	 * @return a list of segments containing the text
+	 * @throws NullPointerException if the text is {@code null}
+	 */
+	public static List<QrSegment> makeSegments(String text) {
+		if (text == null)
+			throw new NullPointerException();
+		
+		// Select the most efficient segment encoding automatically
+		if (text.equals(""))
+			return new ArrayList<>();
+		QrSegment seg;
+		if (NUMERIC_REGEX.matcher(text).matches())
+			seg = makeNumeric(text);
+		else if (ALPHANUMERIC_REGEX.matcher(text).matches())
+			seg = makeAlphanumeric(text);
+		else
+			seg = makeBytes(text.getBytes(StandardCharsets.UTF_8));
+		return Arrays.asList(seg);
 	}
 	
 	

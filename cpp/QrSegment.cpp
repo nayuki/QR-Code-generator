@@ -100,6 +100,24 @@ qrcodegen::QrSegment qrcodegen::QrSegment::makeAlphanumeric(const char *text) {
 }
 
 
+std::vector<qrcodegen::QrSegment> qrcodegen::QrSegment::makeSegments(const char *text) {
+	// Select the most efficient segment encoding automatically
+	std::vector<QrSegment> result;
+	if (*text == '\0');  // Leave the vector empty
+	else if (QrSegment::isNumeric(text))
+		result.push_back(QrSegment::makeNumeric(text));
+	else if (QrSegment::isAlphanumeric(text))
+		result.push_back(QrSegment::makeAlphanumeric(text));
+	else {
+		std::vector<uint8_t> bytes;
+		for (; *text != '\0'; text++)
+			bytes.push_back(static_cast<uint8_t>(*text));
+		result.push_back(QrSegment::makeBytes(bytes));
+	}
+	return result;
+}
+
+
 qrcodegen::QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uint8_t> &b, int bitLen) :
 		mode(md),
 		numChars(numCh),

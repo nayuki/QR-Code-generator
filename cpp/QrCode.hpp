@@ -75,12 +75,6 @@ public:
 	
 	
 	/* 
-	 * Returns a QR segment representing the given Unicode text string.
-	 */
-	static QrSegment encodeTextToSegment(const char *text);
-	
-	
-	/* 
 	 * Returns a QR Code symbol representing the given binary data string at the given error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.

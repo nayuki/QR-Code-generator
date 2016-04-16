@@ -25,7 +25,6 @@
 package io.nayuki.qrcodegen;
 
 import java.awt.image.BufferedImage;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,27 +52,8 @@ public final class QrCode {
 	public static QrCode encodeText(String text, Ecc ecl) {
 		if (text == null || ecl == null)
 			throw new NullPointerException();
-		QrSegment seg = encodeTextToSegment(text);
-		return encodeSegments(Arrays.asList(seg), ecl);
-	}
-	
-	
-	/**
-	 * Returns a QR segment representing the specified Unicode text string.
-	 * @param text the text to be encoded, which can be any Unicode string
-	 * @return a QR segment containing the text
-	 * @throws NullPointerException if the text is {@code null}
-	 */
-	public static QrSegment encodeTextToSegment(String text) {
-		if (text == null)
-			throw new NullPointerException();
-		// Select the most efficient segment encoding automatically
-		if (QrSegment.NUMERIC_REGEX.matcher(text).matches())
-			return QrSegment.makeNumeric(text);
-		else if (QrSegment.ALPHANUMERIC_REGEX.matcher(text).matches())
-			return QrSegment.makeAlphanumeric(text);
-		else
-			return QrSegment.makeBytes(text.getBytes(StandardCharsets.UTF_8));
+		List<QrSegment> segs = QrSegment.makeSegments(text);
+		return encodeSegments(segs, ecl);
 	}
 	
 	

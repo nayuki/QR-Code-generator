@@ -28,7 +28,6 @@ import itertools, re, sys
 """
 Public members inside this module "qrcodegen":
 - Function encode_text(str text, QrCode.Ecc ecl) -> QrCode
-- Function encode_text_to_segment(str text) -> QrSegment
 - Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
 - Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl) -> QrCode
 - Class QrCode:
@@ -47,6 +46,7 @@ Public members inside this module "qrcodegen":
   - Function make_bytes(bytes data) -> QrSegment
   - Function make_numeric(str digits) -> QrSegment
   - Function make_alphanumeric(str text) -> QrSegment
+  - Function make_segments(str text) -> list<QrSegment>
   - Constructor QrSegment(QrSegment.Mode mode, int numch, list<int> bitdata)
   - Method get_mode() -> QrSegment.Mode
   - Method get_num_chars() -> int
@@ -64,21 +64,8 @@ def encode_text(text, ecl):
 	"""Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 	As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
 	code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output."""
-	seg = encode_text_to_segment(text)
-	return encode_segments([seg], ecl)
-
-
-def encode_text_to_segment(text):
-	"""Returns a QR segment representing the given Unicode text string."""
-	if not isinstance(text, str) and (sys.version_info[0] >= 3 or not isinstance(text, unicode)):
-		raise TypeError("Text string expected")
-	# Select the most efficient segment encoding automatically
-	if QrSegment.NUMERIC_REGEX.match(text) is not None:
-		return QrSegment.make_numeric(text)
-	elif QrSegment.ALPHANUMERIC_REGEX.match(text) is not None:
-		return QrSegment.make_alphanumeric(text)
-	else:
-		return QrSegment.make_bytes(text.encode("UTF-8"))
+	segs = QrSegment.make_segments(text)
+	return encode_segments(segs, ecl)
 
 
 def encode_binary(data, ecl):
@@ -657,6 +644,24 @@ class QrSegment(object):
 		if len(text) % 2 > 0:  # 1 character remaining
 			bb.append_bits(QrSegment.ALPHANUMERIC_ENCODING_TABLE[text[-1]], 6)
 		return QrSegment(QrSegment.Mode.ALPHANUMERIC, len(text), bb.get_bits())
+	
+	
+	@staticmethod
+	def make_segments(text):
+		"""Returns a new mutable list of zero or more segments to represent the given Unicode text string.
+		The result may use various segment modes and switch modes to optimize the length of the bit stream."""
+		if not isinstance(text, str) and (sys.version_info[0] >= 3 or not isinstance(text, unicode)):
+			raise TypeError("Text string expected")
+		
+		# Select the most efficient segment encoding automatically
+		if text == "":
+			return []
+		elif QrSegment.NUMERIC_REGEX.match(text) is not None:
+			return [QrSegment.make_numeric(text)]
+		elif QrSegment.ALPHANUMERIC_REGEX.match(text) is not None:
+			return [QrSegment.make_alphanumeric(text)]
+		else:
+			return [QrSegment.make_bytes(text.encode("UTF-8"))]
 	
 	
 	# -- Constructor --

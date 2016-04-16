@@ -28,7 +28,6 @@
 /* 
  * Module "qrcodegen". Public members inside this namespace:
  * - Function encodeText(str text, QrCode.Ecc ecl) -> QrCode
- * - Function encodeTextToSegment(str text) -> QrSegment
  * - Function encodeBinary(list<int> data, QrCode.Ecc ecl) -> QrCode
  * - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl) -> QrCode
  * - Class QrCode:
@@ -48,6 +47,7 @@
  *   - Function makeBytes(list<int> data) -> QrSegment
  *   - Function makeNumeric(str data) -> QrSegment
  *   - Function makeAlphanumeric(str data) -> QrSegment
+ *   - Function makeSegments(str text) -> list<QrSegment>
  *   - Constructor QrSegment(QrSegment.Mode mode, int numChars, list<int> bitData)
  *   - Method getMode() -> QrSegment.Mode
  *   - Method getNumChars() -> int
@@ -67,22 +67,8 @@ var qrcodegen = new function() {
 	 * code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
 	 */
 	this.encodeText = function(text, ecl) {
-		var seg = this.encodeTextToSegment(text);
-		return this.encodeSegments([seg], ecl);
-	};
-	
-	
-	/* 
-	 * Returns a single QR segment representing the given Unicode text string.
-	 */
-	this.encodeTextToSegment = function(text) {
-		// Select the most efficient segment encoding automatically
-		if (QrSegment.NUMERIC_REGEX.test(text))
-			return this.QrSegment.makeNumeric(text);
-		else if (QrSegment.ALPHANUMERIC_REGEX.test(text))
-			return this.QrSegment.makeAlphanumeric(text);
-		else
-			return this.QrSegment.makeBytes(toUtf8ByteArray(text));
+		var segs = this.QrSegment.makeSegments(text);
+		return this.encodeSegments(segs, ecl);
 	};
 	
 	
@@ -771,6 +757,22 @@ var qrcodegen = new function() {
 		if (i < text.length)  // 1 character remaining
 			bb.appendBits(QrSegment.ALPHANUMERIC_ENCODING_TABLE[text.charCodeAt(i) - 32], 6);
 		return new this(this.Mode.ALPHANUMERIC, text.length, bb.getBits());
+	};
+	
+	/* 
+	 * Returns a new mutable list of zero or more segments to represent the given Unicode text string.
+	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
+	 */
+	this.QrSegment.makeSegments = function(text) {
+		// Select the most efficient segment encoding automatically
+		if (text == "")
+			return [];
+		else if (QrSegment.NUMERIC_REGEX.test(text))
+			return [this.makeNumeric(text)];
+		else if (QrSegment.ALPHANUMERIC_REGEX.test(text))
+			return [this.makeAlphanumeric(text)];
+		else
+			return [this.makeBytes(toUtf8ByteArray(text))];
 	};
 	
 	/*-- Constants --*/

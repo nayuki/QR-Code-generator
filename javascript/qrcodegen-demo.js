@@ -39,7 +39,8 @@ function redrawQrCode() {
 	
 	// Get text and compute QR Code
 	var text = document.getElementById("text-input").value;
-	var qr = qrcodegen.encodeText(text, ecl);
+	var segs = qrcodegen.QrSegment.makeSegments(text);
+	var qr = qrcodegen.encodeSegments(segs, ecl);
 	
 	// Get scale and border
 	var scale = parseInt(document.getElementById("scale-input").value, 10);
@@ -67,18 +68,27 @@ function redrawQrCode() {
 	stats += "mask pattern = " + qr.getMask() + ", ";
 	stats += "character count = " + countUnicodeChars(text) + ",\n";
 	stats += "encoding mode = ";
-	var seg = qrcodegen.encodeTextToSegment(text);
-	if (seg.getMode() == qrcodegen.QrSegment.Mode.NUMERIC)
-		stats += "numeric";
-	else if (seg.getMode() == qrcodegen.QrSegment.Mode.ALPHANUMERIC)
-		stats += "alphanumeric";
-	else if (seg.getMode() == qrcodegen.QrSegment.Mode.BYTE)
-		stats += "byte";
-	else if (seg.getMode() == qrcodegen.QrSegment.Mode.BYTE)
-		stats += "kanji";
-	else
-		stats += "unknown";
-	stats += ", data bits = " + (4 + seg.getMode().numCharCountBits(qr.getVersion()) + seg.getBits().length) + ".";
+	if (segs.length == 0)
+		stats += "none";
+	else if (segs.length == 1) {
+		var mode = segs[0].getMode();
+		if (mode == qrcodegen.QrSegment.Mode.NUMERIC)
+			stats += "numeric";
+		else if (mode == qrcodegen.QrSegment.Mode.ALPHANUMERIC)
+			stats += "alphanumeric";
+		else if (mode == qrcodegen.QrSegment.Mode.BYTE)
+			stats += "byte";
+		else if (mode == qrcodegen.QrSegment.Mode.BYTE)
+			stats += "kanji";
+		else
+			stats += "unknown";
+	} else
+		stats += "multiple";
+	var databits = 0;
+	segs.forEach(function(seg) {
+		databits += 4 + seg.getMode().numCharCountBits(qr.getVersion()) + seg.getBits().length;
+	});
+	stats += ", data bits = " + databits + ".";
 	var elem = document.getElementById("statistics-output");
 	while (elem.firstChild != null)
 		elem.removeChild(elem.firstChild);

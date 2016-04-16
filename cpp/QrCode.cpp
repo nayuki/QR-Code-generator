@@ -43,24 +43,8 @@ const qrcodegen::QrCode::Ecc qrcodegen::QrCode::Ecc::HIGH    (3, 2);
 
 
 qrcodegen::QrCode qrcodegen::QrCode::encodeText(const char *text, const Ecc &ecl) {
-	std::vector<QrSegment> segs;
-	segs.push_back(encodeTextToSegment(text));
+	std::vector<QrSegment> segs(QrSegment::makeSegments(text));
 	return encodeSegments(segs, ecl);
-}
-
-
-qrcodegen::QrSegment qrcodegen::QrCode::encodeTextToSegment(const char *text) {
-	// Select the most efficient segment encoding automatically
-	if (QrSegment::isNumeric(text))
-		return QrSegment::makeNumeric(text);
-	else if (QrSegment::isAlphanumeric(text))
-		return QrSegment::makeAlphanumeric(text);
-	else {
-		std::vector<uint8_t> bytes;
-		for (; *text != '\0'; text++)
-			bytes.push_back(static_cast<uint8_t>(*text));
-		return QrSegment::makeBytes(bytes);
-	}
 }
 
 
