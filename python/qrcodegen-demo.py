@@ -110,7 +110,7 @@ def do_segment_demo():
 
 # ---- Utilities ----
 
-def print_qr(qrcode):	
+def print_qr(qrcode):
 	"""Prints the given QrCode object to the console."""
 	border = 4
 	for y in range(-border, qrcode.get_size() + border):

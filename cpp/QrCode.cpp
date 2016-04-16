@@ -545,7 +545,6 @@ int qrcodegen::QrCode::getNumDataCodewords(int ver, const Ecc &ecl) {
 
 /*---- Tables of constants ----*/
 
-// For use in getPenaltyScore(), when evaluating which mask is best.
 const int qrcodegen::QrCode::PENALTY_N1 = 3;
 const int qrcodegen::QrCode::PENALTY_N2 = 3;
 const int qrcodegen::QrCode::PENALTY_N3 = 40;

@@ -66,7 +66,7 @@ def encode_text(text, ecl):
 	code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output."""
 	seg = encode_text_to_segment(text)
 	return encode_segments([seg], ecl)
-	
+
 
 def encode_text_to_segment(text):
 	"""Returns a QR segment representing the given Unicode text string."""

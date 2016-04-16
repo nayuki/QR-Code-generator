@@ -31,7 +31,7 @@
 
 namespace qrcodegen {
 
-/**
+/* 
  * An appendable sequence of bits. Bits are packed in big endian within a byte.
  */
 class BitBuffer final {
