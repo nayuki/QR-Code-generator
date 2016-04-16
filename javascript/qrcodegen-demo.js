@@ -26,18 +26,20 @@
 
 
 function redrawQrCode() {
-	// Get error correction level
-	var ecl;
-	if (document.getElementById("errcorlvl-medium").checked)
-		ecl = qrcodegen.QrCode.Ecc.MEDIUM;
-	else if (document.getElementById("errcorlvl-quartile").checked)
-		ecl = qrcodegen.QrCode.Ecc.QUARTILE;
-	else if (document.getElementById("errcorlvl-high").checked)
-		ecl = qrcodegen.QrCode.Ecc.HIGH;
-	else  // In case no radio button is depressed
-		ecl = qrcodegen.QrCode.Ecc.LOW;
+	// Returns a QrCode.Ecc object based on the radio buttons in the HTML form.
+	function getInputErrorCorrectionLevel() {
+		if (document.getElementById("errcorlvl-medium").checked)
+			return qrcodegen.QrCode.Ecc.MEDIUM;
+		else if (document.getElementById("errcorlvl-quartile").checked)
+			return qrcodegen.QrCode.Ecc.QUARTILE;
+		else if (document.getElementById("errcorlvl-high").checked)
+			return qrcodegen.QrCode.Ecc.HIGH;
+		else  // In case no radio button is depressed
+			return qrcodegen.QrCode.Ecc.LOW;
+	}
 	
-	// Get text and compute QR Code
+	// Get form inputs and compute QR Code
+	var ecl = getInputErrorCorrectionLevel();
 	var text = document.getElementById("text-input").value;
 	var segs = qrcodegen.QrSegment.makeSegments(text);
 	var qr = qrcodegen.encodeSegments(segs, ecl);
@@ -63,55 +65,52 @@ function redrawQrCode() {
 		}
 	}
 	
-	// Show statistics
+	
+	// Returns a string to describe the given list of segments.
+	function describeSegments(segs) {
+		if (segs.length == 0)
+			return "none";
+		else if (segs.length == 1) {
+			var mode = segs[0].getMode();
+			var Mode = qrcodegen.QrSegment.Mode;
+			if (mode == Mode.NUMERIC     )  return "numeric";
+			if (mode == Mode.ALPHANUMERIC)  return "alphanumeric";
+			if (mode == Mode.BYTE        )  return "byte";
+			if (mode == Mode.KANJI       )  return "kanji";
+			return "unknown";
+		} else
+			return "multiple";
+	}
+	
+	// Returns the number of Unicode code points in the given UTF-16 string.
+	function countUnicodeChars(str) {
+		var result = 0;
+		for (var i = 0; i < str.length; i++, result++) {
+			var c = str.charCodeAt(i);
+			if (c < 0xD800 || c >= 0xE000)
+				continue;
+			else if (0xD800 <= c && c < 0xDC00) {  // High surrogate
+				i++;
+				var d = str.charCodeAt(i);
+				if (0xDC00 <= d && d < 0xE000)  // Low surrogate
+					continue;
+			}
+			throw "Invalid UTF-16 string";
+		}
+		return result;
+	}
+	
+	// Show the QR Code symbol's statistics as a string
 	var stats = "QR Code version = " + qr.getVersion() + ", ";
 	stats += "mask pattern = " + qr.getMask() + ", ";
 	stats += "character count = " + countUnicodeChars(text) + ",\n";
-	stats += "encoding mode = ";
-	if (segs.length == 0)
-		stats += "none";
-	else if (segs.length == 1) {
-		var mode = segs[0].getMode();
-		if (mode == qrcodegen.QrSegment.Mode.NUMERIC)
-			stats += "numeric";
-		else if (mode == qrcodegen.QrSegment.Mode.ALPHANUMERIC)
-			stats += "alphanumeric";
-		else if (mode == qrcodegen.QrSegment.Mode.BYTE)
-			stats += "byte";
-		else if (mode == qrcodegen.QrSegment.Mode.KANJI)
-			stats += "kanji";
-		else
-			stats += "unknown";
-	} else
-		stats += "multiple";
-	stats += ", error correction = level " + "LMQH".charAt(qr.getErrorCorrectionLevel().ordinal) + ", ";
-	var databits = 0;
-	segs.forEach(function(seg) {
-		databits += 4 + seg.getMode().numCharCountBits(qr.getVersion()) + seg.getBits().length;
-	});
-	stats += "data bits = " + databits + ".";
+	stats += "encoding mode = " + describeSegments(segs) + ", ";
+	stats += "error correction = level " + "LMQH".charAt(qr.getErrorCorrectionLevel().ordinal) + ", ";
+	stats += "data bits = " + qrcodegen.QrSegment.getTotalBits(segs, qr.getVersion()) + ".";
 	var elem = document.getElementById("statistics-output");
 	while (elem.firstChild != null)
 		elem.removeChild(elem.firstChild);
 	elem.appendChild(document.createTextNode(stats));
-}
-
-
-function countUnicodeChars(str) {
-	var result = 0;
-	for (var i = 0; i < str.length; i++, result++) {
-		var c = str.charCodeAt(i);
-		if (c < 0xD800 || c >= 0xE000)
-			continue;
-		else if (0xD800 <= c && c < 0xDC00) {  // High surrogate
-			i++;
-			var d = str.charCodeAt(i);
-			if (0xDC00 <= d && d < 0xE000)  // Low surrogate
-				continue;
-		}
-		throw "Invalid UTF-16 string";
-	}
-	return result;
 }
 
 
