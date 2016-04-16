@@ -55,34 +55,34 @@ qrcodegen::QrCode qrcodegen::QrCode::encodeBinary(const std::vector<uint8_t> &da
 }
 
 
-qrcodegen::QrCode qrcodegen::QrCode::encodeSegments(const std::vector<QrSegment> &segs, const Ecc &ecl) {
+qrcodegen::QrCode qrcodegen::QrCode::encodeSegments(const std::vector<QrSegment> &segs, const Ecc &ecl,
+		int minVersion, int maxVersion, int mask, bool boostEcl) {
+	if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
+		throw "Invalid value";
+	
 	// Find the minimal version number to use
-	int version, dataCapacityBits;
-	for (version = 1; ; version++) {  // Increment until the data fits in the QR Code
-		if (version > 40)  // All versions could not fit the given data
-			throw "Data too long";
-		dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-		
-		// Calculate the total number of bits needed at this version number
-		// to encode all the segments (i.e. segment metadata and payloads)
-		int dataUsedBits = 0;
-		for (size_t i = 0; i < segs.size(); i++) {
-			const QrSegment &seg(segs.at(i));
-			if (seg.numChars < 0)
-				throw "Assertion error";
-			int ccbits = seg.mode.numCharCountBits(version);
-			if (seg.numChars >= (1 << ccbits)) {
-				// Segment length value doesn't fit in the length field's bit-width, so fail immediately
-				goto continueOuter;
-			}
-			dataUsedBits += 4 + ccbits + seg.bitLength;
-		}
-		if (dataUsedBits <= dataCapacityBits)
+	int version, dataUsedBits;
+	for (version = minVersion; ; version++) {
+		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
+		dataUsedBits = QrSegment::getTotalBits(segs, version);
+		if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
 			break;  // This version number is found to be suitable
-		continueOuter:;
+		if (version >= maxVersion)  // All versions in the range could not fit the given data
+			throw "Data too long";
+	}
+	if (dataUsedBits == -1)
+		throw "Assertion error";
+	
+	// Increase the error correction level while the data still fits in the current version number
+	const Ecc *newEcl = &ecl;
+	if (boostEcl) {
+		if (dataUsedBits <= getNumDataCodewords(version, Ecc::MEDIUM  ) * 8)  newEcl = &Ecc::MEDIUM  ;
+		if (dataUsedBits <= getNumDataCodewords(version, Ecc::QUARTILE) * 8)  newEcl = &Ecc::QUARTILE;
+		if (dataUsedBits <= getNumDataCodewords(version, Ecc::HIGH    ) * 8)  newEcl = &Ecc::HIGH    ;
 	}
 	
 	// Create the data bit string by concatenating all segments
+	int dataCapacityBits = getNumDataCodewords(version, *newEcl) * 8;
 	BitBuffer bb;
 	for (size_t i = 0; i < segs.size(); i++) {
 		const QrSegment &seg(segs.at(i));
@@ -102,7 +102,7 @@ qrcodegen::QrCode qrcodegen::QrCode::encodeSegments(const std::vector<QrSegment>
 		throw "Assertion error";
 	
 	// Create the QR Code symbol
-	return QrCode(version, ecl, bb.getBytes(), -1);
+	return QrCode(version, *newEcl, bb.getBytes(), mask);
 }
 
 

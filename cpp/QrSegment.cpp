@@ -22,6 +22,7 @@
  *   Software.
  */
 
+#include <cstddef>
 #include "BitBuffer.hpp"
 #include "QrSegment.hpp"
 
@@ -125,6 +126,22 @@ qrcodegen::QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uin
 		bitLength(bitLen) {
 	if (numCh < 0 || bitLen < 0 || b.size() != static_cast<unsigned int>((bitLen + 7) / 8))
 		throw "Invalid value";
+}
+
+
+int qrcodegen::QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
+	if (version < 1 || version > 40)
+		throw "Version number out of range";
+	int result = 0;
+	for (size_t i = 0; i < segs.size(); i++) {
+		const QrSegment &seg(segs.at(i));
+		int ccbits = seg.mode.numCharCountBits(version);
+		// Fail if segment length value doesn't fit in the length field's bit-width
+		if (seg.numChars >= (1 << ccbits))
+			return -1;
+		result += 4 + ccbits + seg.bitLength;
+	}
+	return result;
 }
 
 

@@ -88,7 +88,8 @@ function redrawQrCode() {
 	segs.forEach(function(seg) {
 		databits += 4 + seg.getMode().numCharCountBits(qr.getVersion()) + seg.getBits().length;
 	});
-	stats += ", data bits = " + databits + ".";
+	stats += ", error correction = level " + "LMQH".charAt(qr.getErrorCorrectionLevel().ordinal) + ", ";
+	stats += "data bits = " + databits + ".";
 	var elem = document.getElementById("statistics-output");
 	while (elem.firstChild != null)
 		elem.removeChild(elem.firstChild);

@@ -83,13 +83,14 @@ public:
 	
 	
 	/* 
-	 * Returns a QR Code symbol representing the given data segments at the given error
-	 * correction level. The smallest possible QR Code version is automatically chosen for the output.
+	 * Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
+	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
 	 * This function allows the user to create a custom sequence of segments that switches
-	 * between modes (such as alphanumeric and binary) to encode text more efficiently. This
-	 * function is considered to be lower level than simply encoding text or binary data.
+	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
+	 * This function is considered to be lower level than simply encoding text or binary data.
 	 */
-	static QrCode encodeSegments(const std::vector<QrSegment> &segs, const Ecc &ecl);
+	static QrCode encodeSegments(const std::vector<QrSegment> &segs, const Ecc &ecl,
+		int minVersion=1, int maxVersion=40, int mask=-1, bool boostEcl=true);  // All optional parameters
 	
 	
 	

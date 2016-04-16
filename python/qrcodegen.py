@@ -29,7 +29,8 @@ import itertools, re, sys
 Public members inside this module "qrcodegen":
 - Function encode_text(str text, QrCode.Ecc ecl) -> QrCode
 - Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
-- Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl) -> QrCode
+- Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
+      int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
 - Class QrCode:
   - Constructor QrCode(QrCode qr, int mask)
   - Constructor QrCode(bytes bytes, int mask, int version, QrCode.Ecc ecl)
@@ -77,35 +78,34 @@ def encode_binary(data, ecl):
 	return QrCode.encode_segments([QrSegment.make_bytes(data)], ecl)
 
 
-def encode_segments(segs, ecl):
-	"""Returns a QR Code symbol representing the given data segments at the given error
-	correction level. The smallest possible QR Code version is automatically chosen for the output.
+def encode_segments(segs, ecl, minversion=1, maxversion=40, mask=-1, boostecl=True):
+	"""Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
+	The smallest possible QR Code version within the specified range is automatically chosen for the output.
 	This function allows the user to create a custom sequence of segments that switches
-	between modes (such as alphanumeric and binary) to encode text more efficiently. This
-	function is considered to be lower level than simply encoding text or binary data."""
+	between modes (such as alphanumeric and binary) to encode text more efficiently.
+	This function is considered to be lower level than simply encoding text or binary data."""
+	
+	if not 1 <= minversion <= maxversion <= 40 or not -1 <= mask <= 7:
+		raise ValueError("Invalid value")
 	
 	# Find the minimal version number to use
-	for version in itertools.count(1):  # Increment until the data fits in the QR Code
-		if version > 40:  # All versions could not fit the given data
-			raise ValueError("Data too long")
+	for version in range(minversion, maxversion + 1):
 		datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8  # Number of data bits available
-		
-		# Calculate the total number of bits needed at this version number
-		# to encode all the segments (i.e. segment metadata and payloads)
-		datausedbits = 0
-		for seg in segs:
-			if seg.get_num_chars() < 0:
-				raise AssertionError()
-			ccbits = seg.get_mode().num_char_count_bits(version)
-			if seg.get_num_chars() >= (1 << ccbits):
-				# Segment length value doesn't fit in the length field's bit-width, so fail immediately
-				break
-			datausedbits += 4 + ccbits + len(seg.get_bits())
-		else:  # If the loop above did not break
-			if datausedbits <= datacapacitybits:
-				break  # This version number is found to be suitable
+		datausedbits = QrSegment.get_total_bits(segs, version)
+		if datausedbits is not None and datausedbits <= datacapacitybits:
+			break  # This version number is found to be suitable
+		if version >= maxversion:  # All versions in the range could not fit the given data
+			raise ValueError("Data too long")
+	if datausedbits is None:
+		raise AssertionError()
+	
+	# Increase the error correction level while the data still fits in the current version number
+	for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):
+		if boostecl and datausedbits <= QrCode._get_num_data_codewords(version, newecl) * 8:
+			ecl = newecl
 	
 	# Create the data bit string by concatenating all segments
+	datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8
 	bb = _BitBuffer()
 	for seg in segs:
 		bb.append_bits(seg.get_mode().get_mode_bits(), 4)
@@ -124,7 +124,7 @@ def encode_segments(segs, ecl):
 	assert bb.bit_length() % 8 == 0
 	
 	# Create the QR Code symbol
-	return QrCode(datacodewords=bb.get_bytes(), mask=-1, version=version, errcorlvl=ecl)
+	return QrCode(None, bb.get_bytes(), mask, version, ecl)
 
 
 
@@ -684,6 +684,21 @@ class QrSegment(object):
 	
 	def get_bits(self):
 		return list(self._bitdata)  # Defensive copy
+	
+	
+	# Package-private helper function.
+	@staticmethod
+	def get_total_bits(segs, version):
+		if not 1 <= version <= 40:
+			raise ValueError("Version number out of range")
+		result = 0
+		for seg in segs:
+			ccbits = seg.get_mode().num_char_count_bits(version)
+			# Fail if segment length value doesn't fit in the length field's bit-width
+			if seg.get_num_chars() >= (1 << ccbits):
+				return None
+			result += 4 + ccbits + len(seg.get_bits())
+		return result
 	
 	
 	# -- Constants --

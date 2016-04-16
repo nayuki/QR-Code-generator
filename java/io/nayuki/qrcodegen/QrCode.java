@@ -76,49 +76,66 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a QR Code symbol representing the specified data segments at the specified error
-	 * correction level. The smallest possible QR Code version is automatically chosen for the output.
+	 * Returns a QR Code symbol representing the specified data segments at the specified error correction
+	 * level or higher. The smallest possible QR Code version is automatically chosen for the output.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently. This
 	 * function is considered to be lower level than simply encoding text or binary data.</p>
 	 * @param segs the segments to encode
-	 * @param ecl the error correction level to use
+	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the segments
 	 * @throws NullPointerException if the list of segments, a segment, or the error correction level is {@code null}
-	 * @throws IllegalArgumentException if the data fails to fit in the largest version QR Code, which means it is too long
+	 * @throws IllegalArgumentException if the data is too long to fit in the largest version QR Code at the ECL
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl) {
+		return encodeSegments(segs, ecl, 1, 40, -1, true);
+	}
+	
+	
+	/**
+	 * Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
+	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
+	 * <p>This function allows the user to create a custom sequence of segments that switches
+	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
+	 * This function is considered to be lower level than simply encoding text or binary data.</p>
+	 * @param segs the segments to encode
+	 * @param ecl the error correction level to use (may be boosted)
+	 * @param minVersion the minimum allowed version of the QR symbol (at least 1)
+	 * @param maxVersion the maximum allowed version of the QR symbol (at most 40)
+	 * @param mask the mask pattern to use, which is either -1 for automatic choice or from 0 to 7 for fixed choice
+	 * @param boostEcl increases the error correction level if it can be done without increasing the version number
+	 * @return a QR Code representing the segments
+	 * @throws NullPointerException if the list of segments, a segment, or the error correction level is {@code null}
+	 * @throws IllegalArgumentException if 1 &le; minVersion &le; maxVersion &le; 40 is violated, or if mask
+	 * &lt; &minus;1 or mask > 7, or if the data is too long to fit in a QR Code at maxVersion at the ECL
+	 */
+	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
 		if (segs == null || ecl == null)
 			throw new NullPointerException();
+		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
+			throw new IllegalArgumentException("Invalid value");
 		
 		// Find the minimal version number to use
-		int version, dataCapacityBits;
-		outer:
-		for (version = 1; ; version++) {  // Increment until the data fits in the QR Code
-			if (version > 40)  // All versions could not fit the given data
-				throw new IllegalArgumentException("Data too long");
-			dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-			
-			// Calculate the total number of bits needed at this version number
-			// to encode all the segments (i.e. segment metadata and payloads)
-			int dataUsedBits = 0;
-			for (QrSegment seg : segs) {
-				if (seg == null)
-					throw new NullPointerException();
-				if (seg.numChars < 0)
-					throw new AssertionError();
-				int ccbits = seg.mode.numCharCountBits(version);
-				if (seg.numChars >= (1 << ccbits)) {
-					// Segment length value doesn't fit in the length field's bit-width, so fail immediately
-					continue outer;
-				}
-				dataUsedBits += 4 + ccbits + seg.bitLength;
-			}
-			if (dataUsedBits <= dataCapacityBits)
+		int version, dataUsedBits;
+		for (version = minVersion; ; version++) {
+			int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
+			dataUsedBits = QrSegment.getTotalBits(segs, version);
+			if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
 				break;  // This version number is found to be suitable
+			if (version >= maxVersion)  // All versions in the range could not fit the given data
+				throw new IllegalArgumentException("Data too long");
+		}
+		if (dataUsedBits == -1)
+			throw new AssertionError();
+		
+		// Increase the error correction level while the data still fits in the current version number
+		for (Ecc newEcl : Ecc.values()) {
+			if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
+				ecl = newEcl;
 		}
 		
 		// Create the data bit string by concatenating all segments
+		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 		BitBuffer bb = new BitBuffer();
 		for (QrSegment seg : segs) {
 			bb.appendBits(seg.mode.modeBits, 4);
@@ -137,7 +154,7 @@ public final class QrCode {
 			throw new AssertionError();
 		
 		// Create the QR Code symbol
-		return new QrCode(version, ecl, bb.getBytes(), -1);
+		return new QrCode(version, ecl, bb.getBytes(), mask);
 	}
 	
 	
@@ -732,7 +749,8 @@ public final class QrCode {
 	 * Represents the error correction level used in a QR Code symbol.
 	 */
 	public enum Ecc {
-		// Constants declared in ascending order of error protection.
+		// These enum constants must be declared in ascending order of error protection,
+		// for the sake of the implicit ordinal() method and values() function.
 		LOW(1), MEDIUM(0), QUARTILE(3), HIGH(2);
 		
 		// In the range 0 to 3 (unsigned 2-bit integer).

@@ -151,6 +151,10 @@ public:
 	QrSegment(const Mode &md, int numCh, const std::vector<uint8_t> &b, int bitLen);
 	
 	
+	// Package-private helper function.
+	static int getTotalBits(const std::vector<QrSegment> &segs, int version);
+	
+	
 	/*---- Constant ----*/
 private:
 	
