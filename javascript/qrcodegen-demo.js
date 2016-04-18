@@ -38,6 +38,11 @@ function redrawQrCode() {
 			return qrcodegen.QrCode.Ecc.LOW;
 	}
 	
+	// Reset canvas in case of early termination
+	var canvas = document.getElementById("qrcode-canvas");
+	canvas.width = 0;
+	canvas.height = 0;
+	
 	// Get form inputs and compute QR Code
 	var ecl = getInputErrorCorrectionLevel();
 	var text = document.getElementById("text-input").value;
@@ -55,12 +60,9 @@ function redrawQrCode() {
 		return;
 	
 	// Draw QR Code onto canvas
-	var canvas = document.getElementById("qrcode-canvas");
 	var width = (qr.getSize() + border * 2) * scale;
-	if (canvas.width != width) {
-		canvas.width = width;
-		canvas.height = width;
-	}
+	canvas.width = width;
+	canvas.height = width;
 	var ctx = canvas.getContext("2d");
 	for (var y = -border; y < qr.getSize() + border; y++) {
 		for (var x = -border; x < qr.getSize() + border; x++) {
