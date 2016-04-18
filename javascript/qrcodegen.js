@@ -778,13 +778,14 @@ var qrcodegen = new function() {
 		if (version < 1 || version > 40)
 			throw "Version number out of range";
 		var result = 0;
-		segs.forEach(function(seg) {
+		for (var i = 0; i < segs.length; i++) {
+			var seg = segs[i];
 			var ccbits = seg.getMode().numCharCountBits(version);
 			// Fail if segment length value doesn't fit in the length field's bit-width
 			if (seg.getNumChars() >= (1 << ccbits))
 				return null;
 			result += 4 + ccbits + seg.getBits().length;
-		});
+		}
 		return result;
 	};
 	
