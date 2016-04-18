@@ -39,7 +39,7 @@ def do_basic_demo():
 	"""Creates a single QR Code, then prints it to the console."""
 	text = u"Hello, world!"               # User-supplied Unicode text
 	errcorlvl = qrcodegen.QrCode.Ecc.LOW  # Error correction level
-	qr = qrcodegen.encode_text(text, errcorlvl)
+	qr = qrcodegen.QrCode.encode_text(text, errcorlvl)
 	print_qr(qr)
 
 
@@ -47,27 +47,27 @@ def do_variety_demo():
 	"""Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console."""
 	
 	# Project Nayuki URL
-	qr = qrcodegen.encode_text("https://www.nayuki.io/", qrcodegen.QrCode.Ecc.HIGH)
+	qr = qrcodegen.QrCode.encode_text("https://www.nayuki.io/", qrcodegen.QrCode.Ecc.HIGH)
 	qr = qrcodegen.QrCode(qrcode=qr, mask=3)  # Change mask, forcing to mask #3
 	print_qr(qr)
 	
 	# Numeric mode encoding (3.33 bits per digit)
-	qr = qrcodegen.encode_text("314159265358979323846264338327950288419716939937510", qrcodegen.QrCode.Ecc.MEDIUM)
+	qr = qrcodegen.QrCode.encode_text("314159265358979323846264338327950288419716939937510", qrcodegen.QrCode.Ecc.MEDIUM)
 	print_qr(qr)
 	
 	# Alphanumeric mode encoding (5.5 bits per character)
-	qr = qrcodegen.encode_text("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", qrcodegen.QrCode.Ecc.HIGH)
+	qr = qrcodegen.QrCode.encode_text("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", qrcodegen.QrCode.Ecc.HIGH)
 	print_qr(qr)
 	
 	# Unicode text as UTF-8, and different masks
-	qr = qrcodegen.encode_text(u"\u3053\u3093\u306B\u3061\u0077\u0061\u3001\u4E16\u754C\uFF01\u0020\u03B1\u03B2\u03B3\u03B4", qrcodegen.QrCode.Ecc.QUARTILE)
+	qr = qrcodegen.QrCode.encode_text(u"\u3053\u3093\u306B\u3061\u0077\u0061\u3001\u4E16\u754C\uFF01\u0020\u03B1\u03B2\u03B3\u03B4", qrcodegen.QrCode.Ecc.QUARTILE)
 	print_qr(qrcodegen.QrCode(qrcode=qr, mask=0))
 	print_qr(qrcodegen.QrCode(qrcode=qr, mask=1))
 	print_qr(qrcodegen.QrCode(qrcode=qr, mask=5))
 	print_qr(qrcodegen.QrCode(qrcode=qr, mask=7))
 	
 	# Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
-	qr = qrcodegen.encode_text("Alice was beginning to get very tired of sitting by her sister on the bank, "
+	qr = qrcodegen.QrCode.encode_text("Alice was beginning to get very tired of sitting by her sister on the bank, "
 		"and of having nothing to do: once or twice she had peeped into the book her sister was reading, "
 		"but it had no pictures or conversations in it, 'and what is the use of a book,' thought Alice "
 		"'without pictures or conversations?' So she was considering in her own mind (as well as she could, "
@@ -83,27 +83,27 @@ def do_segment_demo():
 	# Illustration "silver"
 	silver0 = "THE SQUARE ROOT OF 2 IS 1."
 	silver1 = "41421356237309504880168872420969807856967187537694807317667973799"
-	qr = qrcodegen.encode_text(silver0 + silver1, qrcodegen.QrCode.Ecc.LOW)
+	qr = qrcodegen.QrCode.encode_text(silver0 + silver1, qrcodegen.QrCode.Ecc.LOW)
 	print_qr(qr)
 	
 	segs = [
 		qrcodegen.QrSegment.make_alphanumeric(silver0),
 		qrcodegen.QrSegment.make_numeric(silver1)]
-	qr = qrcodegen.encode_segments(segs, qrcodegen.QrCode.Ecc.LOW)
+	qr = qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.LOW)
 	print_qr(qr)
 	
 	# Illustration "golden"
 	golden0 = u"Golden ratio \u03C6 = 1."
 	golden1 = u"6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374"
 	golden2 = u"......"
-	qr = qrcodegen.encode_text(golden0 + golden1 + golden2, qrcodegen.QrCode.Ecc.LOW)
+	qr = qrcodegen.QrCode.encode_text(golden0 + golden1 + golden2, qrcodegen.QrCode.Ecc.LOW)
 	print_qr(qr)
 	
 	segs = [
 		qrcodegen.QrSegment.make_bytes(golden0.encode("UTF-8")),
 		qrcodegen.QrSegment.make_numeric(golden1),
 		qrcodegen.QrSegment.make_alphanumeric(golden2)]
-	qr = qrcodegen.encode_segments(segs, qrcodegen.QrCode.Ecc.LOW)
+	qr = qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.LOW)
 	print_qr(qr)
 
 

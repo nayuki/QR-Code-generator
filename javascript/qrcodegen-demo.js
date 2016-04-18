@@ -42,7 +42,7 @@ function redrawQrCode() {
 	var ecl = getInputErrorCorrectionLevel();
 	var text = document.getElementById("text-input").value;
 	var segs = qrcodegen.QrSegment.makeSegments(text);
-	var qr = qrcodegen.encodeSegments(segs, ecl);
+	var qr = qrcodegen.QrCode.encodeSegments(segs, ecl);
 	
 	// Get scale and border
 	var scale = parseInt(document.getElementById("scale-input").value, 10);

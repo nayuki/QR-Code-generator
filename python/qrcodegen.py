@@ -27,11 +27,11 @@ import itertools, re, sys
 
 """
 Public members inside this module "qrcodegen":
-- Function encode_text(str text, QrCode.Ecc ecl) -> QrCode
-- Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
-- Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
-      int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
 - Class QrCode:
+-   Function encode_text(str text, QrCode.Ecc ecl) -> QrCode
+-   Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
+  - Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
+        int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
   - Constructor QrCode(QrCode qr, int mask)
   - Constructor QrCode(bytes bytes, int mask, int version, QrCode.Ecc ecl)
   - Method get_version() -> int
@@ -59,80 +59,80 @@ Public members inside this module "qrcodegen":
 """
 
 
-# ---- Public static factory functions for QrCode ----
-
-def encode_text(text, ecl):
-	"""Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
-	As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
-	code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output."""
-	segs = QrSegment.make_segments(text)
-	return encode_segments(segs, ecl)
-
-
-def encode_binary(data, ecl):
-	"""Returns a QR Code symbol representing the given binary data string at the given error correction level.
-	This function always encodes using the binary segment mode, not any text mode. The maximum number of
-	bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output."""
-	if not isinstance(data, bytes):
-		raise TypeError("Binary array expected")
-	return QrCode.encode_segments([QrSegment.make_bytes(data)], ecl)
-
-
-def encode_segments(segs, ecl, minversion=1, maxversion=40, mask=-1, boostecl=True):
-	"""Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
-	The smallest possible QR Code version within the specified range is automatically chosen for the output.
-	This function allows the user to create a custom sequence of segments that switches
-	between modes (such as alphanumeric and binary) to encode text more efficiently.
-	This function is considered to be lower level than simply encoding text or binary data."""
-	
-	if not 1 <= minversion <= maxversion <= 40 or not -1 <= mask <= 7:
-		raise ValueError("Invalid value")
-	
-	# Find the minimal version number to use
-	for version in range(minversion, maxversion + 1):
-		datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8  # Number of data bits available
-		datausedbits = QrSegment.get_total_bits(segs, version)
-		if datausedbits is not None and datausedbits <= datacapacitybits:
-			break  # This version number is found to be suitable
-		if version >= maxversion:  # All versions in the range could not fit the given data
-			raise ValueError("Data too long")
-	if datausedbits is None:
-		raise AssertionError()
-	
-	# Increase the error correction level while the data still fits in the current version number
-	for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):
-		if boostecl and datausedbits <= QrCode._get_num_data_codewords(version, newecl) * 8:
-			ecl = newecl
-	
-	# Create the data bit string by concatenating all segments
-	datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8
-	bb = _BitBuffer()
-	for seg in segs:
-		bb.append_bits(seg.get_mode().get_mode_bits(), 4)
-		bb.append_bits(seg.get_num_chars(), seg.get_mode().num_char_count_bits(version))
-		bb.append_all(seg)
-	
-	# Add terminator and pad up to a byte if applicable
-	bb.append_bits(0, min(4, datacapacitybits - bb.bit_length()))
-	bb.append_bits(0, -bb.bit_length() % 8)
-	
-	# Pad with alternate bytes until data capacity is reached
-	for padbyte in itertools.cycle((0xEC, 0x11)):
-		if bb.bit_length() >= datacapacitybits:
-			break
-		bb.append_bits(padbyte, 8)
-	assert bb.bit_length() % 8 == 0
-	
-	# Create the QR Code symbol
-	return QrCode(None, bb.get_bytes(), mask, version, ecl)
-
-
-
 # ---- QR Code symbol class ----
 
 class QrCode(object):
 	"""Represents an immutable square grid of black or white cells for a QR Code symbol. This class covers the
 	QR Code model 2 specification, supporting all versions (sizes) from 1 to 40, all 4 error correction levels."""
+	
+	# ---- Public static factory functions ----
+	
+	def encode_text(text, ecl):
+		"""Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
+		As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
+		code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output."""
+		segs = QrSegment.make_segments(text)
+		return QrCode.encode_segments(segs, ecl)
+	
+	
+	def encode_binary(data, ecl):
+		"""Returns a QR Code symbol representing the given binary data string at the given error correction level.
+		This function always encodes using the binary segment mode, not any text mode. The maximum number of
+		bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output."""
+		if not isinstance(data, bytes):
+			raise TypeError("Binary array expected")
+		return QrCode.encode_segments([QrSegment.make_bytes(data)], ecl)
+	
+	
+	@staticmethod
+	def encode_segments(segs, ecl, minversion=1, maxversion=40, mask=-1, boostecl=True):
+		"""Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
+		The smallest possible QR Code version within the specified range is automatically chosen for the output.
+		This function allows the user to create a custom sequence of segments that switches
+		between modes (such as alphanumeric and binary) to encode text more efficiently.
+		This function is considered to be lower level than simply encoding text or binary data."""
+		
+		if not 1 <= minversion <= maxversion <= 40 or not -1 <= mask <= 7:
+			raise ValueError("Invalid value")
+		
+		# Find the minimal version number to use
+		for version in range(minversion, maxversion + 1):
+			datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8  # Number of data bits available
+			datausedbits = QrSegment.get_total_bits(segs, version)
+			if datausedbits is not None and datausedbits <= datacapacitybits:
+				break  # This version number is found to be suitable
+			if version >= maxversion:  # All versions in the range could not fit the given data
+				raise ValueError("Data too long")
+		if datausedbits is None:
+			raise AssertionError()
+		
+		# Increase the error correction level while the data still fits in the current version number
+		for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):
+			if boostecl and datausedbits <= QrCode._get_num_data_codewords(version, newecl) * 8:
+				ecl = newecl
+		
+		# Create the data bit string by concatenating all segments
+		datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8
+		bb = _BitBuffer()
+		for seg in segs:
+			bb.append_bits(seg.get_mode().get_mode_bits(), 4)
+			bb.append_bits(seg.get_num_chars(), seg.get_mode().num_char_count_bits(version))
+			bb.append_all(seg)
+		
+		# Add terminator and pad up to a byte if applicable
+		bb.append_bits(0, min(4, datacapacitybits - bb.bit_length()))
+		bb.append_bits(0, -bb.bit_length() % 8)
+		
+		# Pad with alternate bytes until data capacity is reached
+		for padbyte in itertools.cycle((0xEC, 0x11)):
+			if bb.bit_length() >= datacapacitybits:
+				break
+			bb.append_bits(padbyte, 8)
+		assert bb.bit_length() % 8 == 0
+		
+		# Create the QR Code symbol
+		return QrCode(None, bb.get_bytes(), mask, version, ecl)
+	
 	
 	# ---- Constructor ----
 	

@@ -27,11 +27,11 @@
 
 /* 
  * Module "qrcodegen". Public members inside this namespace:
- * - Function encodeText(str text, QrCode.Ecc ecl) -> QrCode
- * - Function encodeBinary(list<int> data, QrCode.Ecc ecl) -> QrCode
- * - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
- *       int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
  * - Class QrCode:
+ *   - Function encodeText(str text, QrCode.Ecc ecl) -> QrCode
+ *   - Function encodeBinary(list<int> data, QrCode.Ecc ecl) -> QrCode
+ *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
+ *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
  *   - Constructor QrCode(QrCode qr, int mask)
  *   - Constructor QrCode(list<int> bytes, int mask, int version, QrCode.Ecc ecl)
  *   - Method getVersion() -> int
@@ -59,87 +59,6 @@
  *     - Method numCharCountBits(int ver) -> int
  */
 var qrcodegen = new function() {
-	
-	/*---- Public static factory functions for QrCode ----*/
-	
-	/* 
-	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
-	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
-	 * code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
-	 */
-	this.encodeText = function(text, ecl) {
-		var segs = this.QrSegment.makeSegments(text);
-		return this.encodeSegments(segs, ecl);
-	};
-	
-	
-	/* 
-	 * Returns a QR Code symbol representing the given binary data string at the given error correction level.
-	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
-	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
-	 */
-	this.encodeBinary = function(data, ecl) {
-		var seg = this.QrSegment.makeBytes(data);
-		return this.encodeSegments([seg], ecl);
-	};
-	
-	
-	/* 
-	 * Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
-	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
-	 * This function allows the user to create a custom sequence of segments that switches
-	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
-	 * This function is considered to be lower level than simply encoding text or binary data.
-	 */
-	this.encodeSegments = function(segs, ecl, minVersion, maxVersion, mask, boostEcl) {
-		if (minVersion == undefined) minVersion = 1;
-		if (maxVersion == undefined) maxVersion = 40;
-		if (mask == undefined) mask = -1;
-		if (boostEcl == undefined) boostEcl = true;
-		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
-			throw "Invalid value";
-		
-		// Find the minimal version number to use
-		var version, dataUsedBits;
-		for (version = minVersion; ; version++) {
-			var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-			dataUsedBits = this.QrSegment.getTotalBits(segs, version);
-			if (dataUsedBits != null && dataUsedBits <= dataCapacityBits)
-				break;  // This version number is found to be suitable
-			if (version >= maxVersion)  // All versions in the range could not fit the given data
-				throw "Data too long";
-		}
-		
-		// Increase the error correction level while the data still fits in the current version number
-		[this.QrCode.Ecc.MEDIUM, this.QrCode.Ecc.QUARTILE, this.QrCode.Ecc.HIGH].forEach(function(newEcl) {
-			if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
-				ecl = newEcl;
-		});
-		
-		// Create the data bit string by concatenating all segments
-		var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
-		var bb = new BitBuffer();
-		segs.forEach(function(seg) {
-			bb.appendBits(seg.getMode().getModeBits(), 4);
-			bb.appendBits(seg.getNumChars(), seg.getMode().numCharCountBits(version));
-			bb.appendData(seg);
-		});
-		
-		// Add terminator and pad up to a byte if applicable
-		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength()));
-		bb.appendBits(0, (8 - bb.bitLength() % 8) % 8);
-		
-		// Pad with alternate bytes until data capacity is reached
-		for (var padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-			bb.appendBits(padByte, 8);
-		if (bb.bitLength() % 8 != 0)
-			throw "Assertion error";
-		
-		// Create the QR Code symbol
-		return new this.QrCode(bb.getBytes(), mask, version, ecl);
-	};
-	
-	
 	
 	/*---- QR Code symbol class ----*/
 	
@@ -591,6 +510,85 @@ var qrcodegen = new function() {
 				result += QrCode.PENALTY_N4;
 			return result;
 		}
+	};
+	
+	
+	/*---- Public static factory functions for QrCode ----*/
+	
+	/* 
+	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
+	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
+	 * code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
+	 */
+	this.QrCode.encodeText = function(text, ecl) {
+		var segs = qrcodegen.QrSegment.makeSegments(text);
+		return this.encodeSegments(segs, ecl);
+	};
+	
+	
+	/* 
+	 * Returns a QR Code symbol representing the given binary data string at the given error correction level.
+	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
+	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
+	 */
+	this.QrCode.encodeBinary = function(data, ecl) {
+		var seg = qrcodegen.QrSegment.makeBytes(data);
+		return this.encodeSegments([seg], ecl);
+	};
+	
+	/* 
+	 * Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
+	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
+	 * This function allows the user to create a custom sequence of segments that switches
+	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
+	 * This function is considered to be lower level than simply encoding text or binary data.
+	 */
+	this.QrCode.encodeSegments = function(segs, ecl, minVersion, maxVersion, mask, boostEcl) {
+		if (minVersion == undefined) minVersion = 1;
+		if (maxVersion == undefined) maxVersion = 40;
+		if (mask == undefined) mask = -1;
+		if (boostEcl == undefined) boostEcl = true;
+		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
+			throw "Invalid value";
+		
+		// Find the minimal version number to use
+		var version, dataUsedBits;
+		for (version = minVersion; ; version++) {
+			var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
+			dataUsedBits = qrcodegen.QrSegment.getTotalBits(segs, version);
+			if (dataUsedBits != null && dataUsedBits <= dataCapacityBits)
+				break;  // This version number is found to be suitable
+			if (version >= maxVersion)  // All versions in the range could not fit the given data
+				throw "Data too long";
+		}
+		
+		// Increase the error correction level while the data still fits in the current version number
+		[this.Ecc.MEDIUM, this.Ecc.QUARTILE, this.Ecc.HIGH].forEach(function(newEcl) {
+			if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
+				ecl = newEcl;
+		});
+		
+		// Create the data bit string by concatenating all segments
+		var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
+		var bb = new BitBuffer();
+		segs.forEach(function(seg) {
+			bb.appendBits(seg.getMode().getModeBits(), 4);
+			bb.appendBits(seg.getNumChars(), seg.getMode().numCharCountBits(version));
+			bb.appendData(seg);
+		});
+		
+		// Add terminator and pad up to a byte if applicable
+		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength()));
+		bb.appendBits(0, (8 - bb.bitLength() % 8) % 8);
+		
+		// Pad with alternate bytes until data capacity is reached
+		for (var padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+			bb.appendBits(padByte, 8);
+		if (bb.bitLength() % 8 != 0)
+			throw "Assertion error";
+		
+		// Create the QR Code symbol
+		return new this(bb.getBytes(), mask, version, ecl);
 	};
 	
 	
