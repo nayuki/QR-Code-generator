@@ -60,12 +60,19 @@
 				</td>
 			</tr>
 			<tr>
-				<td>Scale:</td>
-				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
+				<td>Output&#xA0;format:</td>
+				<td>
+					<input type="radio" name="output-format" id="output-format-bitmap" onchange="redrawQrCode();" checked="checked"><label for="output-format-bitmap">Bitmap</label>
+					<input type="radio" name="output-format" id="output-format-vector" onchange="redrawQrCode();"><label for="output-format-vector">Vector</label>
+				</td>
 			</tr>
 			<tr>
 				<td>Border:</td>
 				<td><input type="number" value="4" min="0" max="100" step="1" id="border-input" style="width:4em" oninput="redrawQrCode();"> modules</td>
+			</tr>
+			<tr id="scale-row">
+				<td>Scale:</td>
+				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
 			</tr>
 			<tr>
 				<td>Statistics:</td>
@@ -75,6 +82,16 @@
 				<td>QR&#xA0;Code:</td>
 				<td>
 					<canvas id="qrcode-canvas" style="padding:1em; background-color:#E8E8E8"></canvas>
+					<svg id="qrcode-svg" style="width:30em; height:30em; padding:1em; background-color:#E8E8E8">
+						<rect width="100%" height="100%" fill="#FFFFFF" stroke-width="0"></rect>
+						<path d="" fill="#000000" stroke-width="0"></path>
+					</svg>
+				</td>
+			</tr>
+			<tr id="svg-xml-row">
+				<td>SVG&#xA0;XML&#xA0;code:</td>
+				<td>
+					<textarea id="svg-xml-output" readonly="readonly" style="width:100%; max-width:50em; height:15em; font-family:monospace"></textarea>
 				</td>
 			</tr>
 		</tbody>
