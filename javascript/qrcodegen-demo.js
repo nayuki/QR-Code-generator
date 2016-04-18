@@ -42,7 +42,11 @@ function redrawQrCode() {
 	var ecl = getInputErrorCorrectionLevel();
 	var text = document.getElementById("text-input").value;
 	var segs = qrcodegen.QrSegment.makeSegments(text);
-	var qr = qrcodegen.QrCode.encodeSegments(segs, ecl);
+	var minVer = parseInt(document.getElementById("version-min-input").value, 10);
+	var maxVer = parseInt(document.getElementById("version-max-input").value, 10);
+	var mask = parseInt(document.getElementById("mask-input").value, 10);
+	var boostEcc = document.getElementById("boost-ecc-input").checked;
+	var qr = qrcodegen.QrCode.encodeSegments(segs, ecl, minVer, maxVer, mask, boostEcc);
 	
 	// Get scale and border
 	var scale = parseInt(document.getElementById("scale-input").value, 10);
@@ -111,6 +115,23 @@ function redrawQrCode() {
 	while (elem.firstChild != null)
 		elem.removeChild(elem.firstChild);
 	elem.appendChild(document.createTextNode(stats));
+}
+
+
+function handleVersionMinMax(which) {
+	var minElem = document.getElementById("version-min-input");
+	var maxElem = document.getElementById("version-max-input");
+	var minVal = parseInt(minElem.value, 10);
+	var maxVal = parseInt(maxElem.value, 10);
+	minVal = Math.max(Math.min(minVal, 40), 1);
+	maxVal = Math.max(Math.min(maxVal, 40), 1);
+	if (which == "min" && minVal > maxVal)
+		maxVal = minVal;
+	else if (which == "max" && maxVal < minVal)
+		minVal = maxVal;
+	minElem.value = minVal.toString();
+	maxElem.value = maxVal.toString();
+	redrawQrCode();
 }
 
 

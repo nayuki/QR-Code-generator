@@ -52,6 +52,14 @@
 				</td>
 			</tr>
 			<tr>
+				<td>Advanced:</td>
+				<td>
+					Version min/max: <input type="number" value="1" min="1" max="40" step="1" id="version-min-input" style="width:4em" oninput="handleVersionMinMax('min');"> to <input type="number" value="40" min="1" max="40" step="1" id="version-max-input" style="width:4em" oninput="handleVersionMinMax('max');"><br>
+					Mask pattern: <input type="number" value="-1" min="-1" max="7" step="1" id="mask-input" style="width:4em" oninput="redrawQrCode();"> (−1 for automatic)<br>
+					<input type="checkbox" checked="checked" id="boost-ecc-input" onchange="redrawQrCode();"><label for="boost-ecc-input">Boost ECC</label>
+				</td>
+			</tr>
+			<tr>
 				<td>Scale:</td>
 				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
 			</tr>
