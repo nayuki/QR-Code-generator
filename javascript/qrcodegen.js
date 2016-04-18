@@ -198,6 +198,7 @@ var qrcodegen = new function() {
 			var result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 			result += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
 			result += "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 " + (size + border * 2) + " " + (size + border * 2) + "\">\n";
+			result += "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\" stroke-width=\"0\"/>\n";
 			result += "\t<path d=\"";
 			var head = true;
 			for (var y = -border; y < size + border; y++) {
