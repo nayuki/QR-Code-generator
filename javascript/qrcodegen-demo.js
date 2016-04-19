@@ -77,12 +77,12 @@ function redrawQrCode() {
 		if (scale <= 0 || scale > 30)
 			return;
 		// Draw QR Code onto canvas
-		var width = (qr.getSize() + border * 2) * scale;
+		var width = (qr.size + border * 2) * scale;
 		canvas.width = width;
 		canvas.height = width;
 		var ctx = canvas.getContext("2d");
-		for (var y = -border; y < qr.getSize() + border; y++) {
-			for (var x = -border; x < qr.getSize() + border; x++) {
+		for (var y = -border; y < qr.size + border; y++) {
+			for (var x = -border; x < qr.size + border; x++) {
 				ctx.fillStyle = qr.getModule(x, y) == 1 ? "#000000" : "#FFFFFF";
 				ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
 			}
@@ -102,7 +102,7 @@ function redrawQrCode() {
 		if (segs.length == 0)
 			return "none";
 		else if (segs.length == 1) {
-			var mode = segs[0].getMode();
+			var mode = segs[0].mode;
 			var Mode = qrcodegen.QrSegment.Mode;
 			if (mode == Mode.NUMERIC     )  return "numeric";
 			if (mode == Mode.ALPHANUMERIC)  return "alphanumeric";
@@ -132,12 +132,12 @@ function redrawQrCode() {
 	}
 	
 	// Show the QR Code symbol's statistics as a string
-	var stats = "QR Code version = " + qr.getVersion() + ", ";
-	stats += "mask pattern = " + qr.getMask() + ", ";
+	var stats = "QR Code version = " + qr.version + ", ";
+	stats += "mask pattern = " + qr.mask + ", ";
 	stats += "character count = " + countUnicodeChars(text) + ",\n";
 	stats += "encoding mode = " + describeSegments(segs) + ", ";
-	stats += "error correction = level " + "LMQH".charAt(qr.getErrorCorrectionLevel().ordinal) + ", ";
-	stats += "data bits = " + qrcodegen.QrSegment.getTotalBits(segs, qr.getVersion()) + ".";
+	stats += "error correction = level " + "LMQH".charAt(qr.errorCorrectionLevel.ordinal) + ", ";
+	stats += "data bits = " + qrcodegen.QrSegment.getTotalBits(segs, qr.version) + ".";
 	var elem = document.getElementById("statistics-output");
 	while (elem.firstChild != null)
 		elem.removeChild(elem.firstChild);
