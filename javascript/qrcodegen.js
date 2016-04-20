@@ -26,14 +26,14 @@
 
 
 /* 
- * Module "qrcodegen". Public members inside this namespace:
+ * Module "qrcodegen", public members:
  * - Class QrCode:
  *   - Function encodeText(str text, QrCode.Ecc ecl) -> QrCode
  *   - Function encodeBinary(list<int> data, QrCode.Ecc ecl) -> QrCode
  *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
  *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
  *   - Constructor QrCode(QrCode qr, int mask)
- *   - Constructor QrCode(list<int> bytes, int mask, int version, QrCode.Ecc ecl)
+ *   - Constructor QrCode(list<int> datacodewords, int mask, int version, QrCode.Ecc ecl)
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
  *   - Method getModule(int x, int y) -> int
@@ -67,10 +67,10 @@ var qrcodegen = new function() {
 	 * from 1 to 40, all 4 error correction levels.
 	 * 
 	 * This constructor can be called in one of two ways:
-	 * - new QrCode(bytes, mask, version, errCorLvl):
+	 * - new QrCode(datacodewords, mask, version, errCorLvl):
 	 *       Creates a new QR Code symbol with the given version number, error correction level, binary data array,
 	 *       and mask number. This cumbersome constructor can be invoked directly by the user, but is considered
-	 *       to be even lower level than qrcodegen.encodeSegments().
+	 *       to be even lower level than QrCode.encodeSegments().
 	 * - new QrCode(qr, mask):
 	 *       Creates a new QR Code symbol based on the given existing object, but with a potentially different
 	 *       mask pattern. The version, error correction level, codewords, etc. of the newly created object are
@@ -81,7 +81,7 @@ var qrcodegen = new function() {
 		
 		/*---- Constructor ----*/
 		
-		// Handle simple scalar fields
+		// Check arguments and handle simple scalar fields
 		if (mask < -1 || mask > 7)
 			throw "Mask value out of range";
 		if (initData instanceof Array) {
@@ -590,7 +590,7 @@ var qrcodegen = new function() {
 	
 	/*---- Private static helper functions QrCode ----*/
 	
-	var QrCode = {};  // Private object to assign properties to
+	var QrCode = {};  // Private object to assign properties to. Not the same object as 'this.QrCode'.
 	
 	
 	// Returns a sequence of positions of the alignment patterns in ascending order. These positions are
@@ -676,15 +676,17 @@ var qrcodegen = new function() {
 	
 	/*---- Public helper enumeration ----*/
 	
+	// Private constructor.
 	function Ecc(ord, fb) {
+		// (Public) In the range 0 to 3 (unsigned 2-bit integer)
 		Object.defineProperty(this, "ordinal", {value:ord});
+		
 		Object.defineProperty(this, "formatBits", {value:fb});
 	}
 	
 	
 	/* 
-	 * A public helper enumeration that represents the error correction level used in a QR Code symbol.
-	 * The fields 'ordinal' and 'formatBits' are in the range 0 to 3 (unsigned 2-bit integer).
+	 * Represents the error correction level used in a QR Code symbol.
 	 */
 	this.QrCode.Ecc = {
 		// Constants declared in ascending order of error protection
@@ -725,7 +727,9 @@ var qrcodegen = new function() {
 	
 	/*---- Public static factory functions for QrSegment ----*/
 	
-	// Returns a segment representing the given binary data encoded in byte mode.
+	/* 
+	 * Returns a segment representing the given binary data encoded in byte mode.
+	 */
 	this.QrSegment.makeBytes = function(data) {
 		var bb = new BitBuffer();
 		data.forEach(function(b) {
@@ -735,7 +739,9 @@ var qrcodegen = new function() {
 	};
 	
 	
-	// Returns a segment representing the given string of decimal digits encoded in numeric mode.
+	/* 
+	 * Returns a segment representing the given string of decimal digits encoded in numeric mode.
+	 */
 	this.QrSegment.makeNumeric = function(digits) {
 		if (!QrSegment.NUMERIC_REGEX.test(digits))
 			throw "String contains non-numeric characters";
@@ -749,8 +755,11 @@ var qrcodegen = new function() {
 		return new this(this.Mode.NUMERIC, digits.length, bb.getBits());
 	};
 	
-	// Returns a segment representing the given text string encoded in alphanumeric mode. The characters allowed are:
-	// 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	
+	/* 
+	 * Returns a segment representing the given text string encoded in alphanumeric mode. The characters allowed are:
+	 * 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 */
 	this.QrSegment.makeAlphanumeric = function(text) {
 		if (!QrSegment.ALPHANUMERIC_REGEX.test(text))
 			throw "String contains unencodable characters in alphanumeric mode";
@@ -803,7 +812,7 @@ var qrcodegen = new function() {
 	
 	/*---- Constants for QrSegment ----*/
 	
-	var QrSegment = {};  // Private object to assign properties to
+	var QrSegment = {};  // Private object to assign properties to. Not the same object as 'this.QrSegment'.
 	
 	// Can test whether a string is encodable in numeric mode (such as by using QrSegment.makeNumeric()).
 	QrSegment.NUMERIC_REGEX = /^[0-9]*$/;
@@ -811,6 +820,7 @@ var qrcodegen = new function() {
 	// Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
 	QrSegment.ALPHANUMERIC_REGEX = /^[A-Z0-9 $%*+.\/:-]*$/;
 	
+	// Maps shifted ASCII codes to alphanumeric mode character codes.
 	QrSegment.ALPHANUMERIC_ENCODING_TABLE = [
 		// SP,  !,  ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,,  -,  .,  /,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  :,  ;,  <,  =,  >,  ?,  @,  // ASCII codes 32 to 64
 		   36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1, -1,  // Array indices 0 to 32
@@ -822,8 +832,7 @@ var qrcodegen = new function() {
 	/*---- Public helper enumeration ----*/
 	
 	/* 
-	 * A public helper enumeration that represents the mode field of a segment.
-	 * Objects are immutable. Provides methods to retrieve closely related values.
+	 * Represents the mode field of a segment. Immutable.
 	 */
 	this.QrSegment.Mode = {  // Constants
 		NUMERIC     : new Mode(0x1, [10, 12, 14]),
@@ -833,7 +842,7 @@ var qrcodegen = new function() {
 	};
 	
 	
-	// Private constructor for the enum.
+	// Private constructor.
 	function Mode(mode, ccbits) {
 		// An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object.
 		Object.defineProperty(this, "modeBits", {value:mode});

@@ -162,6 +162,7 @@ public:
 	/*---- Private constant ----*/
 private:
 	
+	/* Maps shifted ASCII codes to alphanumeric mode character codes. */
 	static const int8_t ALPHANUMERIC_ENCODING_TABLE[59];
 	
 };

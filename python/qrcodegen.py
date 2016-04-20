@@ -26,14 +26,14 @@ import itertools, re, sys
 
 
 """
-Public members inside this module "qrcodegen":
+This module "qrcodegen", public members:
 - Class QrCode:
--   Function encode_text(str text, QrCode.Ecc ecl) -> QrCode
--   Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
+  - Function encode_text(str text, QrCode.Ecc ecl) -> QrCode
+  - Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
   - Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
         int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
   - Constructor QrCode(QrCode qr, int mask)
-  - Constructor QrCode(bytes bytes, int mask, int version, QrCode.Ecc ecl)
+  - Constructor QrCode(bytes datacodewords, int mask, int version, QrCode.Ecc ecl)
   - Method get_version() -> int
   - Method get_size() -> int
   - Method get_error_correction_level() -> QrCode.Ecc
@@ -141,14 +141,14 @@ class QrCode(object):
 		- QrCode(datacodewords=list<int>, mask=int, version=int, errcorlvl=QrCode.Ecc):
 		      Creates a new QR Code symbol with the given version number, error correction level, binary data array,
 		      and mask number. This cumbersome constructor can be invoked directly by the user, but is considered
-		      to be even lower level than qrcodegen.encode_segments().
+		      to be even lower level than QrCode.encode_segments().
 		- QrCode(qrcode=QrCode, mask=int):
 		      Creates a new QR Code symbol based on the given existing object, but with a potentially different
 		      mask pattern. The version, error correction level, codewords, etc. of the newly created object are
 		      all identical to the argument object; only the mask may differ.
 		In both cases, mask = -1 is for automatic choice or 0 to 7 for fixed choice."""
 		
-		# Handle simple scalar fields
+		# Check arguments and handle simple scalar fields
 		if not -1 <= mask <= 7:
 			raise ValueError("Mask value out of range")
 		if datacodewords is not None and qrcode is None:
@@ -586,7 +586,7 @@ class QrCode(object):
 			self.ordinal = i      # In the range 0 to 3 (unsigned 2-bit integer)
 			self.formatbits = fb  # In the range 0 to 3 (unsigned 2-bit integer)
 	
-	# Create the class constants outside the class
+	# Public constants. Create them outside the class.
 	Ecc.LOW      = Ecc(0, 1)
 	Ecc.MEDIUM   = Ecc(1, 0)
 	Ecc.QUARTILE = Ecc(2, 3)
@@ -717,13 +717,15 @@ class QrSegment(object):
 	# ---- Public helper enumeration ----
 	
 	class Mode(object):
-		"""The mode field of a segment. Immutable. Provides methods to retrieve closely related values."""
+		"""The mode field of a segment. Immutable."""
+		
 		# Private constructor
 		def __init__(self, modebits, charcounts):
 			self._modebits = modebits
 			self._charcounts = charcounts
 		
 		def get_mode_bits(self):
+			"""Returns an unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object."""
 			return self._modebits
 		
 		def num_char_count_bits(self, ver):
@@ -733,7 +735,7 @@ class QrSegment(object):
 			elif 27 <= ver <= 40:  return self._charcounts[2]
 			else:  raise ValueError("Version number out of range")
 	
-	# Create the class constants outside the class
+	# Public constants. Create them outside the class.
 	Mode.NUMERIC      = Mode(0x1, (10, 12, 14))
 	Mode.ALPHANUMERIC = Mode(0x2, ( 9, 11, 13))
 	Mode.BYTE         = Mode(0x4, ( 8, 16, 16))

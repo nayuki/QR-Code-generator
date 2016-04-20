@@ -38,6 +38,7 @@ static void printQr(const qrcodegen::QrCode &qr);
 
 
 
+// The main application program.
 int main(int argc, char **argv) {
 	doBasicDemo();
 	doVarietyDemo();
