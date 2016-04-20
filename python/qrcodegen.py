@@ -66,6 +66,7 @@ class QrCode(object):
 	
 	# ---- Public static factory functions ----
 	
+	@staticmethod
 	def encode_text(text, ecl):
 		"""Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 		As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
@@ -74,6 +75,7 @@ class QrCode(object):
 		return QrCode.encode_segments(segs, ecl)
 	
 	
+	@staticmethod
 	def encode_binary(data, ecl):
 		"""Returns a QR Code symbol representing the given binary data string at the given error correction level.
 		This function always encodes using the binary segment mode, not any text mode. The maximum number of

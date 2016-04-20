@@ -171,7 +171,7 @@ std::string qrcodegen::QrCode::toSvgString(int border) const {
 	sb << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
 	sb << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 ";
 	sb << (size + border * 2) << " " << (size + border * 2) << "\">\n";
-	sb << "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\" stroke-width=\"0\"/>\n"
+	sb << "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\" stroke-width=\"0\"/>\n";
 	sb << "\t<path d=\"";
 	bool head = true;
 	for (int y = -border; y < size + border; y++) {
