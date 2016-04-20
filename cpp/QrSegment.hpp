@@ -47,8 +47,10 @@ class QrSegment final {
 	 */
 public:
 	class Mode final {
-		// Constants.
+		
+		/*-- Constants --*/
 	public:
+		
 		static const Mode NUMERIC;
 		static const Mode ALPHANUMERIC;
 		static const Mode BYTE;
@@ -65,23 +67,25 @@ public:
 		int numBitsCharCount[3];
 		
 		
-		// Constructor.
+		/*-- Constructor --*/
+		
 	private:
 		Mode(int mode, int cc0, int cc1, int cc2);
 		
 		
 		/*-- Method --*/
-	public:
 		
 		/* 
 		 * Returns the bit width of the segment character count field for this mode object at the given version number.
 		 */
+	public:
 		int numCharCountBits(int ver) const;
+		
 	};
 	
 	
 	
-	/*---- Static factory functions ----*/
+	/*---- Public static factory functions ----*/
 public:
 	
 	/* 
@@ -110,7 +114,7 @@ public:
 	static std::vector<QrSegment> makeSegments(const char *text);
 	
 	
-	/*---- Static helper functions ----*/
+	/*---- Public static helper functions ----*/
 public:
 	
 	/* 
@@ -155,7 +159,7 @@ public:
 	static int getTotalBits(const std::vector<QrSegment> &segs, int version);
 	
 	
-	/*---- Constant ----*/
+	/*---- Private constant ----*/
 private:
 	
 	static const int8_t ALPHANUMERIC_ENCODING_TABLE[59];

@@ -79,7 +79,7 @@ var qrcodegen = new function() {
 	 */
 	this.QrCode = function(initData, mask, version, errCorLvl) {
 		
-		/*-- Constructor --*/
+		/*---- Constructor ----*/
 		
 		// Handle simple scalar fields
 		if (mask < -1 || mask > 7)
@@ -141,7 +141,8 @@ var qrcodegen = new function() {
 		drawFormatBits(mask);  // Overwrite old format bits
 		applyMask(mask);  // Apply the final choice of mask
 		
-		// Define read-only properties
+		
+		/*---- Read-only instance properties ----*/
 		
 		// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
 		Object.defineProperty(this, "version", {value:version});
@@ -160,7 +161,7 @@ var qrcodegen = new function() {
 		Object.defineProperty(this, "mask", {value:mask});
 		
 		
-		/*-- Accessor methods --*/
+		/*---- Accessor methods ----*/
 		
 		// Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
 		// left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then 0 (white) is returned.
@@ -181,7 +182,7 @@ var qrcodegen = new function() {
 		};
 		
 		
-		/*-- Public instance methods --*/
+		/*---- Public instance methods ----*/
 		
 		// Based on the given number of border modules to add as padding, this returns a
 		// string whose contents represents an SVG XML file that depicts this QR Code symbol.
@@ -211,7 +212,7 @@ var qrcodegen = new function() {
 		};
 		
 		
-		/*-- Private helper methods for constructor: Drawing function modules --*/
+		/*---- Private helper methods for constructor: Drawing function modules ----*/
 		
 		function drawFunctionPatterns() {
 			// Draw the horizontal and vertical timing patterns
@@ -530,6 +531,7 @@ var qrcodegen = new function() {
 		return this.encodeSegments([seg], ecl);
 	};
 	
+	
 	/* 
 	 * Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
 	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
@@ -586,9 +588,10 @@ var qrcodegen = new function() {
 	};
 	
 	
-	/*---- Private static helper functions ----*/
+	/*---- Private static helper functions QrCode ----*/
 	
 	var QrCode = {};  // Private object to assign properties to
+	
 	
 	// Returns a sequence of positions of the alignment patterns in ascending order. These positions are
 	// used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
@@ -616,6 +619,7 @@ var qrcodegen = new function() {
 		}
 	};
 	
+	
 	// Returns the number of raw data modules (bits) available at the given version number.
 	// These data modules are used for both user data codewords and error correction codewords.
 	// This stateless pure function could be implemented as a 40-entry lookup table.
@@ -632,6 +636,7 @@ var qrcodegen = new function() {
 		return result;
 	};
 	
+	
 	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
@@ -642,7 +647,7 @@ var qrcodegen = new function() {
 	};
 	
 	
-	/*---- Tables of constants ----*/
+	/*---- Private tables of constants for QrCode ----*/
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
 	QrCode.PENALTY_N1 = 3;
@@ -669,11 +674,13 @@ var qrcodegen = new function() {
 	];
 	
 	
-	// Private constructor for the enum.
+	/*---- Public helper enumeration ----*/
+	
 	function Ecc(ord, fb) {
 		Object.defineProperty(this, "ordinal", {value:ord});
 		Object.defineProperty(this, "formatBits", {value:fb});
 	}
+	
 	
 	/* 
 	 * A public helper enumeration that represents the error correction level used in a QR Code symbol.
@@ -715,7 +722,8 @@ var qrcodegen = new function() {
 		};
 	};
 	
-	/*-- Public static factory functions --*/
+	
+	/*---- Public static factory functions for QrSegment ----*/
 	
 	// Returns a segment representing the given binary data encoded in byte mode.
 	this.QrSegment.makeBytes = function(data) {
@@ -725,6 +733,7 @@ var qrcodegen = new function() {
 		});
 		return new this(this.Mode.BYTE, data.length, bb.getBits());
 	};
+	
 	
 	// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	this.QrSegment.makeNumeric = function(digits) {
@@ -757,6 +766,7 @@ var qrcodegen = new function() {
 		return new this(this.Mode.ALPHANUMERIC, text.length, bb.getBits());
 	};
 	
+	
 	/* 
 	 * Returns a new mutable list of zero or more segments to represent the given Unicode text string.
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
@@ -772,6 +782,7 @@ var qrcodegen = new function() {
 		else
 			return [this.makeBytes(toUtf8ByteArray(text))];
 	};
+	
 	
 	// Package-private helper function.
 	this.QrSegment.getTotalBits = function(segs, version) {
@@ -789,7 +800,8 @@ var qrcodegen = new function() {
 		return result;
 	};
 	
-	/*-- Constants --*/
+	
+	/*---- Constants for QrSegment ----*/
 	
 	var QrSegment = {};  // Private object to assign properties to
 	
@@ -807,6 +819,8 @@ var qrcodegen = new function() {
 	];
 	
 	
+	/*---- Public helper enumeration ----*/
+	
 	/* 
 	 * A public helper enumeration that represents the mode field of a segment.
 	 * Objects are immutable. Provides methods to retrieve closely related values.
@@ -817,6 +831,7 @@ var qrcodegen = new function() {
 		BYTE        : new Mode(0x4, [ 8, 16, 16]),
 		KANJI       : new Mode(0x8, [ 8, 10, 12]),
 	};
+	
 	
 	// Private constructor for the enum.
 	function Mode(mode, ccbits) {
@@ -928,8 +943,6 @@ var qrcodegen = new function() {
 	function BitBuffer() {
 		// Array of bits; each item is the integer 0 or 1
 		var bitData = [];
-		
-		/*-- Methods --*/
 		
 		// Returns the number of bits in the buffer, which is a non-negative value.
 		this.bitLength = function() {

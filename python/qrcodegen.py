@@ -541,7 +541,7 @@ class QrCode(object):
 		return QrCode._get_num_raw_data_modules(ver) // 8 - QrCode._NUM_ERROR_CORRECTION_CODEWORDS[ecl.ordinal][ver]
 	
 	
-	# ---- Tables of constants ----
+	# ---- Private tables of constants ----
 	
 	# For use in getPenaltyScore(), when evaluating which mask is best.
 	_PENALTY_N1 = 3
@@ -604,7 +604,7 @@ class QrSegment(object):
 	Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 	Any segment longer than this is meaningless for the purpose of generating QR Codes."""
 	
-	# -- Public static factory functions --
+	# ---- Public static factory functions ----
 	
 	@staticmethod
 	def make_bytes(data):
@@ -665,7 +665,7 @@ class QrSegment(object):
 			return [QrSegment.make_bytes(text.encode("UTF-8"))]
 	
 	
-	# -- Constructor --
+	# ---- Constructor ----
 	
 	def __init__(self, mode, numch, bitdata):
 		if numch < 0 or not isinstance(mode, QrSegment.Mode):
@@ -675,7 +675,7 @@ class QrSegment(object):
 		self._bitdata = list(bitdata)  # Defensive copy
 	
 	
-	# -- Accessor methods --
+	# ---- Accessor methods ----
 	
 	def get_mode(self):
 		return self._mode
@@ -702,7 +702,7 @@ class QrSegment(object):
 		return result
 	
 	
-	# -- Constants --
+	# ---- Constants ----
 	
 	# Can test whether a string is encodable in numeric mode (such as by using make_numeric())
 	NUMERIC_REGEX = re.compile("[0-9]*$")
@@ -714,7 +714,7 @@ class QrSegment(object):
 	ALPHANUMERIC_ENCODING_TABLE = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
 	
 	
-	# -- Helper enumeration --
+	# ---- Public helper enumeration ----
 	
 	class Mode(object):
 		"""The mode field of a segment. Immutable. Provides methods to retrieve closely related values."""

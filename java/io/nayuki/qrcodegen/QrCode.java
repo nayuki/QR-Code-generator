@@ -652,7 +652,7 @@ public final class QrCode {
 	
 	
 	
-	/*---- Static helper functions ----*/
+	/*---- Private static helper functions ----*/
 	
 	// Returns a set of positions of the alignment patterns in ascending order. These positions are
 	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
@@ -715,7 +715,7 @@ public final class QrCode {
 	}
 	
 	
-	/*---- Tables of constants ----*/
+	/*---- Private tables of constants ----*/
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
 	private static final int PENALTY_N1 = 3;

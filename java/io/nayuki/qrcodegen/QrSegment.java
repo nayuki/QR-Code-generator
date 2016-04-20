@@ -230,7 +230,9 @@ public final class QrSegment {
 	 * The mode field of a segment. Immutable. Provides methods to retrieve closely related values.
 	 */
 	public enum Mode {
-		// Constants.
+		
+		/*-- Constants --*/
+		
 		NUMERIC     (0x1, 10, 12, 14),
 		ALPHANUMERIC(0x2,  9, 11, 13),
 		BYTE        (0x4,  8, 16, 16),
@@ -245,7 +247,8 @@ public final class QrSegment {
 		private final int[] numBitsCharCount;
 		
 		
-		// Constructor.
+		/*-- Constructor --*/
+		
 		private Mode(int mode, int... ccbits) {
 			this.modeBits = mode;
 			numBitsCharCount = ccbits;
@@ -266,6 +269,7 @@ public final class QrSegment {
 			else if (27 <= ver && ver <= 40)  return numBitsCharCount[2];
 			else  throw new IllegalArgumentException("Version number out of range");
 		}
+		
 	}
 	
 }

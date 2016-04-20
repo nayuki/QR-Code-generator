@@ -225,7 +225,7 @@ private:
 	
 	
 	
-	/*---- Static helper functions ----*/
+	/*---- Private static helper functions ----*/
 private:
 	
 	// Returns a set of positions of the alignment patterns in ascending order. These positions are
@@ -246,7 +246,7 @@ private:
 	static int getNumDataCodewords(int ver, const Ecc &ecl);
 	
 	
-	/*---- Tables of constants ----*/
+	/*---- Private tables of constants ----*/
 private:
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
