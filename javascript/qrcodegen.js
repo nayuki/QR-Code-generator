@@ -50,6 +50,7 @@
  *   - Field QrSegment.Mode mode
  *   - Field int numChars
  *   - Method getBits() -> list<int>
+ *   - Constants RegExp NUMERIC_REGEX, ALPHANUMERIC_REGEX
  *   - Enum Mode:
  *     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI
  */
@@ -742,7 +743,7 @@ var qrcodegen = new function() {
 	 * Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	 */
 	this.QrSegment.makeNumeric = function(digits) {
-		if (!QrSegment.NUMERIC_REGEX.test(digits))
+		if (!this.NUMERIC_REGEX.test(digits))
 			throw "String contains non-numeric characters";
 		var bb = new BitBuffer();
 		var i;
@@ -760,7 +761,7 @@ var qrcodegen = new function() {
 	 * 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 */
 	this.QrSegment.makeAlphanumeric = function(text) {
-		if (!QrSegment.ALPHANUMERIC_REGEX.test(text))
+		if (!this.ALPHANUMERIC_REGEX.test(text))
 			throw "String contains unencodable characters in alphanumeric mode";
 		var bb = new BitBuffer();
 		var i;
@@ -783,9 +784,9 @@ var qrcodegen = new function() {
 		// Select the most efficient segment encoding automatically
 		if (text == "")
 			return [];
-		else if (QrSegment.NUMERIC_REGEX.test(text))
+		else if (this.NUMERIC_REGEX.test(text))
 			return [this.makeNumeric(text)];
-		else if (QrSegment.ALPHANUMERIC_REGEX.test(text))
+		else if (this.ALPHANUMERIC_REGEX.test(text))
 			return [this.makeAlphanumeric(text)];
 		else
 			return [this.makeBytes(toUtf8ByteArray(text))];
@@ -813,11 +814,11 @@ var qrcodegen = new function() {
 	
 	var QrSegment = {};  // Private object to assign properties to. Not the same object as 'this.QrSegment'.
 	
-	// Can test whether a string is encodable in numeric mode (such as by using QrSegment.makeNumeric()).
-	QrSegment.NUMERIC_REGEX = /^[0-9]*$/;
+	// (Public) Can test whether a string is encodable in numeric mode (such as by using QrSegment.makeNumeric()).
+	this.QrSegment.NUMERIC_REGEX = /^[0-9]*$/;
 	
-	// Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
-	QrSegment.ALPHANUMERIC_REGEX = /^[A-Z0-9 $%*+.\/:-]*$/;
+	// (Public) Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
+	this.QrSegment.ALPHANUMERIC_REGEX = /^[A-Z0-9 $%*+.\/:-]*$/;
 	
 	// Maps shifted ASCII codes to alphanumeric mode character codes.
 	QrSegment.ALPHANUMERIC_ENCODING_TABLE = [

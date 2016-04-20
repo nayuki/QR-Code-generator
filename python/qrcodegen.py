@@ -637,11 +637,11 @@ class QrSegment(object):
 			raise ValueError("String contains unencodable characters in alphanumeric mode")
 		bb = _BitBuffer()
 		for i in range(0, len(text) - 1, 2):  # Process groups of 2
-			temp = QrSegment.ALPHANUMERIC_ENCODING_TABLE[text[i]] * 45
-			temp += QrSegment.ALPHANUMERIC_ENCODING_TABLE[text[i + 1]]
+			temp = QrSegment._ALPHANUMERIC_ENCODING_TABLE[text[i]] * 45
+			temp += QrSegment._ALPHANUMERIC_ENCODING_TABLE[text[i + 1]]
 			bb.append_bits(temp, 11)
 		if len(text) % 2 > 0:  # 1 character remaining
-			bb.append_bits(QrSegment.ALPHANUMERIC_ENCODING_TABLE[text[-1]], 6)
+			bb.append_bits(QrSegment._ALPHANUMERIC_ENCODING_TABLE[text[-1]], 6)
 		return QrSegment(QrSegment.Mode.ALPHANUMERIC, len(text), bb.get_bits())
 	
 	
@@ -708,8 +708,8 @@ class QrSegment(object):
 	# Can test whether a string is encodable in alphanumeric mode (such as by using make_alphanumeric())
 	ALPHANUMERIC_REGEX = re.compile("[A-Z0-9 $%*+./:-]*$")
 	
-	# Dictionary of "0"->0, "A"->10, "$"->37, etc.
-	ALPHANUMERIC_ENCODING_TABLE = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
+	# (Private) Dictionary of "0"->0, "A"->10, "$"->37, etc.
+	_ALPHANUMERIC_ENCODING_TABLE = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
 	
 	
 	# ---- Public helper enumeration ----
