@@ -161,7 +161,7 @@ var qrcodegen = new function() {
 		
 		/*---- Accessor methods ----*/
 		
-		// Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
+		// (Public) Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
 		// left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then 0 (white) is returned.
 		this.getModule = function(x, y) {
 			if (0 <= x && x < size && 0 <= y && y < size)
@@ -820,7 +820,7 @@ var qrcodegen = new function() {
 	// (Public) Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
 	this.QrSegment.ALPHANUMERIC_REGEX = /^[A-Z0-9 $%*+.\/:-]*$/;
 	
-	// Maps shifted ASCII codes to alphanumeric mode character codes.
+	// (Private) Maps shifted ASCII codes to alphanumeric mode character codes.
 	QrSegment.ALPHANUMERIC_ENCODING_TABLE = [
 		// SP,  !,  ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,,  -,  .,  /,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  :,  ;,  <,  =,  >,  ?,  @,  // ASCII codes 32 to 64
 		   36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1, -1,  // Array indices 0 to 32

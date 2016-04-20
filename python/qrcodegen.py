@@ -52,6 +52,7 @@ This module "qrcodegen", public members:
   - Method get_mode() -> QrSegment.Mode
   - Method get_num_chars() -> int
   - Method get_bits() -> list<int>
+  - Constants regex NUMERIC_REGEX, ALPHANUMERIC_REGEX
   - Enum Mode:
     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI
 """
@@ -581,7 +582,7 @@ class QrCode(object):
 		"""Represents the error correction level used in a QR Code symbol."""
 		# Private constructor
 		def __init__(self, i, fb):
-			self.ordinal = i      # In the range 0 to 3 (unsigned 2-bit integer)
+			self.ordinal = i  # (Public) In the range 0 to 3 (unsigned 2-bit integer)
 			self.formatbits = fb  # (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
 	
 	# Public constants. Create them outside the class.
@@ -702,10 +703,10 @@ class QrSegment(object):
 	
 	# ---- Constants ----
 	
-	# Can test whether a string is encodable in numeric mode (such as by using make_numeric())
+	# (Public) Can test whether a string is encodable in numeric mode (such as by using make_numeric())
 	NUMERIC_REGEX = re.compile("[0-9]*$")
 	
-	# Can test whether a string is encodable in alphanumeric mode (such as by using make_alphanumeric())
+	# (Public) Can test whether a string is encodable in alphanumeric mode (such as by using make_alphanumeric())
 	ALPHANUMERIC_REGEX = re.compile("[A-Z0-9 $%*+./:-]*$")
 	
 	# (Private) Dictionary of "0"->0, "A"->10, "$"->37, etc.
