@@ -675,16 +675,6 @@ var qrcodegen = new function() {
 	
 	/*---- Public helper enumeration ----*/
 	
-	// Private constructor.
-	function Ecc(ord, fb) {
-		// (Public) In the range 0 to 3 (unsigned 2-bit integer)
-		Object.defineProperty(this, "ordinal", {value:ord});
-		
-		// (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
-		Object.defineProperty(this, "formatBits", {value:fb});
-	}
-	
-	
 	/* 
 	 * Represents the error correction level used in a QR Code symbol.
 	 */
@@ -695,6 +685,16 @@ var qrcodegen = new function() {
 		QUARTILE: new Ecc(2, 3),
 		HIGH    : new Ecc(3, 2),
 	};
+	
+	
+	// Private constructor.
+	function Ecc(ord, fb) {
+		// (Public) In the range 0 to 3 (unsigned 2-bit integer)
+		Object.defineProperty(this, "ordinal", {value:ord});
+		
+		// (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
+		Object.defineProperty(this, "formatBits", {value:fb});
+	}
 	
 	
 	
