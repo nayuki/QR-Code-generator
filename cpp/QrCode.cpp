@@ -348,7 +348,7 @@ void qrcodegen::QrCode::drawCodewords(const std::vector<uint8_t> &data) {
 				bool upwards = ((right & 2) == 0) ^ (x < 6);
 				int y = upwards ? size - 1 - vert : vert;  // Actual y coordinate
 				if (!isFunction.at(y).at(x) && i < data.size() * 8) {
-					modules.at(y).at(x) = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0;
+					modules.at(y).at(x) = ((data.at(i >> 3) >> (7 - (i & 7))) & 1) != 0;
 					i++;
 				}
 			}

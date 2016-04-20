@@ -86,6 +86,8 @@ var qrcodegen = new function() {
 			if (version < 1 || version > 40)
 				throw "Version value out of range";
 		} else if (initData instanceof qrcodegen.QrCode) {
+			if (version != undefined || errCorLvl != undefined)
+				throw "Values must be undefined";
 			version = initData.version;
 			errCorLvl = initData.errorCorrectionLevel;
 		} else

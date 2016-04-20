@@ -158,6 +158,8 @@ class QrCode(object):
 			if not isinstance(errcorlvl, QrCode.Ecc):
 				raise TypeError("QrCode.Ecc expected")
 		elif qrcode is not None and datacodewords is None:
+			if version is not None or errcorlvl is not None:
+				raise ValueError("Values must be None")
 			version = qrcode._version
 			errcorlvl = qrcode._errcorlvl
 		else:
