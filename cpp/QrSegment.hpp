@@ -59,7 +59,7 @@ public:
 		
 		/*-- Fields --*/
 		
-		/* An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object. */
+		/* (Package-private) An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object. */
 	public:
 		const int modeBits;
 		
@@ -76,7 +76,7 @@ public:
 		/*-- Method --*/
 		
 		/* 
-		 * Returns the bit width of the segment character count field for this mode object at the given version number.
+		 * (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.
 		 */
 	public:
 		int numCharCountBits(int ver) const;

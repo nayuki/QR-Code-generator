@@ -755,7 +755,7 @@ public final class QrCode {
 		LOW(1), MEDIUM(0), QUARTILE(3), HIGH(2);
 		
 		// In the range 0 to 3 (unsigned 2-bit integer).
-		public final int formatBits;
+		final int formatBits;
 		
 		// Constructor.
 		private Ecc(int fb) {

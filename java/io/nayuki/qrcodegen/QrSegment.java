@@ -243,7 +243,7 @@ public final class QrSegment {
 		/*-- Fields --*/
 		
 		/** An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object. */
-		public final int modeBits;
+		final int modeBits;
 		
 		private final int[] numBitsCharCount;
 		
@@ -264,7 +264,7 @@ public final class QrSegment {
 		 * @return the number of bits for the character count, which is between 8 to 16, inclusive
 		 * @throws IllegalArgumentException if the version number is out of range
 		 */
-		public int numCharCountBits(int ver) {
+		int numCharCountBits(int ver) {
 			if      ( 1 <= ver && ver <=  9)  return numBitsCharCount[0];
 			else if (10 <= ver && ver <= 26)  return numBitsCharCount[1];
 			else if (27 <= ver && ver <= 40)  return numBitsCharCount[2];

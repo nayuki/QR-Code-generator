@@ -42,7 +42,7 @@ This module "qrcodegen", public members:
   - Method to_svg_str(int border) -> str
   - Enum Ecc:
     - Constants LOW, MEDIUM, QUARTILE, HIGH
-    - Fields int ordinal, formatbits
+    - Field int ordinal
 - Class QrSegment:
   - Function make_bytes(bytes data) -> QrSegment
   - Function make_numeric(str digits) -> QrSegment
@@ -54,8 +54,6 @@ This module "qrcodegen", public members:
   - Method get_bits() -> list<int>
   - Enum Mode:
     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI
-    - Method get_mode_bits() -> int
-    - Method num_char_count_bits(int ver) -> int
 """
 
 
@@ -584,7 +582,7 @@ class QrCode(object):
 		# Private constructor
 		def __init__(self, i, fb):
 			self.ordinal = i      # In the range 0 to 3 (unsigned 2-bit integer)
-			self.formatbits = fb  # In the range 0 to 3 (unsigned 2-bit integer)
+			self.formatbits = fb  # (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
 	
 	# Public constants. Create them outside the class.
 	Ecc.LOW      = Ecc(0, 1)
@@ -724,10 +722,12 @@ class QrSegment(object):
 			self._modebits = modebits
 			self._charcounts = charcounts
 		
+		# Package-private method
 		def get_mode_bits(self):
 			"""Returns an unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object."""
 			return self._modebits
 		
+		# Package-private method
 		def num_char_count_bits(self, ver):
 			"""Returns the bit width of the segment character count field for this mode object at the given version number."""
 			if    1 <= ver <=  9:  return self._charcounts[0]

@@ -37,11 +37,10 @@
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
  *   - Method getModule(int x, int y) -> int
- *   - Method isFunctionModule(int x, int y) -> bool
  *   - Method toSvgString(int border) -> str
  *   - Enum Ecc:
  *     - Constants LOW, MEDIUM, QUARTILE, HIGH
- *     - Fields int ordinal, formatBits
+ *     - Field int ordinal
  * - Class QrSegment:
  *   - Function makeBytes(list<int> data) -> QrSegment
  *   - Function makeNumeric(str data) -> QrSegment
@@ -53,8 +52,6 @@
  *   - Method getBits() -> list<int>
  *   - Enum Mode:
  *     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI
- *     - Field int modeBits
- *     - Method numCharCountBits(int ver) -> int
  */
 var qrcodegen = new function() {
 	
@@ -172,8 +169,9 @@ var qrcodegen = new function() {
 				return 0;  // Infinite white border
 		};
 		
-		// Tests whether the module at the given coordinates is a function module (true) or not (false). The top left
-		// corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then false is returned.
+		// (Package-private) Tests whether the module at the given coordinates is a function module (true) or not (false).
+		// The top left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then false is returned.
+		// The JavaScript version of this library has this method because it is impossible to access private variables of another object.
 		this.isFunctionModule = function(x, y) {
 			if (0 <= x && x < size && 0 <= y && y < size)
 				return isFunction[y][x];
@@ -681,6 +679,7 @@ var qrcodegen = new function() {
 		// (Public) In the range 0 to 3 (unsigned 2-bit integer)
 		Object.defineProperty(this, "ordinal", {value:ord});
 		
+		// (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
 		Object.defineProperty(this, "formatBits", {value:fb});
 	}
 	
@@ -844,10 +843,10 @@ var qrcodegen = new function() {
 	
 	// Private constructor.
 	function Mode(mode, ccbits) {
-		// An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object.
+		// (Package-private) An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object.
 		Object.defineProperty(this, "modeBits", {value:mode});
 		
-		// Returns the bit width of the segment character count field for this mode object at the given version number.
+		// (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.
 		this.numCharCountBits = function(ver) {
 			if      ( 1 <= ver && ver <=  9)  return ccbits[0];
 			else if (10 <= ver && ver <= 26)  return ccbits[1];

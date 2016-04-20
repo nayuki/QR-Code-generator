@@ -54,7 +54,7 @@ public:
 		// Fields.
 	public:
 		const int ordinal;     // In the range 0 to 3 (unsigned 2-bit integer).
-		const int formatBits;  // In the range 0 to 3 (unsigned 2-bit integer).
+		const int formatBits;  // (Package-private) In the range 0 to 3 (unsigned 2-bit integer).
 		
 		// Constructor.
 	private:
