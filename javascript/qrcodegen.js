@@ -337,18 +337,21 @@ var qrcodegen = new function() {
 		function appendErrorCorrection(data) {
 			if (data.length != QrCode.getNumDataCodewords(version, errCorLvl))
 				throw "Invalid argument";
+			
+			// Calculate parameter numbers
 			var numBlocks = QrCode.NUM_ERROR_CORRECTION_BLOCKS[errCorLvl.ordinal][version];
-			var numEcc = QrCode.NUM_ERROR_CORRECTION_CODEWORDS[errCorLvl.ordinal][version];
-			if (numEcc % numBlocks != 0)
+			var totalEcc = QrCode.NUM_ERROR_CORRECTION_CODEWORDS[errCorLvl.ordinal][version];
+			if (totalEcc % numBlocks != 0)
 				throw "Assertion error";
-			var eccLen = Math.floor(numEcc / numBlocks);
+			var blockEccLen = Math.floor(totalEcc / numBlocks);
 			var numShortBlocks = numBlocks - Math.floor(QrCode.getNumRawDataModules(version) / 8) % numBlocks;
 			var shortBlockLen = Math.floor(QrCode.getNumRawDataModules(version) / (numBlocks * 8));
 			
+			// Split data into blocks and append ECC to each block
 			var blocks = [];
-			var rs = new ReedSolomonGenerator(eccLen);
+			var rs = new ReedSolomonGenerator(blockEccLen);
 			for (var i = 0, k = 0; i < numBlocks; i++) {
-				var dat = data.slice(k, k + shortBlockLen - eccLen + (i < numShortBlocks ? 0 : 1));
+				var dat = data.slice(k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
 				k += dat.length;
 				var ecc = rs.getRemainder(dat);
 				if (i < numShortBlocks)
@@ -359,10 +362,12 @@ var qrcodegen = new function() {
 				blocks.push(dat);
 			}
 			
+			// Interleave (not concatenate) the bytes from every block into a single sequence
 			var result = [];
 			for (var i = 0; i < blocks[0].length; i++) {
 				for (var j = 0; j < blocks.length; j++) {
-					if (i != shortBlockLen - eccLen || j >= numShortBlocks)
+					// Skip the padding byte in short blocks
+					if (i != shortBlockLen - blockEccLen || j >= numShortBlocks)
 						result.push(blocks[j][i]);
 				}
 			}

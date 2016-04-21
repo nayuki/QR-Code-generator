@@ -301,19 +301,22 @@ void qrcodegen::QrCode::setFunctionModule(int x, int y, bool isBlack) {
 std::vector<uint8_t> qrcodegen::QrCode::appendErrorCorrection(const std::vector<uint8_t> &data) const {
 	if (data.size() != static_cast<unsigned int>(getNumDataCodewords(version, errorCorrectionLevel)))
 		throw "Invalid argument";
+	
+	// Calculate parameter numbers
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.ordinal][version];
-	int numEcc = NUM_ERROR_CORRECTION_CODEWORDS[errorCorrectionLevel.ordinal][version];
-	if (numEcc % numBlocks != 0)
+	int totalEcc = NUM_ERROR_CORRECTION_CODEWORDS[errorCorrectionLevel.ordinal][version];
+	if (totalEcc % numBlocks != 0)
 		throw "Assertion error";
-	int eccLen = numEcc / numBlocks;
+	int blockEccLen = totalEcc / numBlocks;
 	int numShortBlocks = numBlocks - getNumRawDataModules(version) / 8 % numBlocks;
 	int shortBlockLen = getNumRawDataModules(version) / 8 / numBlocks;
 	
+	// Split data into blocks and append ECC to each block
 	std::vector<std::vector<uint8_t>> blocks;
-	const ReedSolomonGenerator rs(eccLen);
+	const ReedSolomonGenerator rs(blockEccLen);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
 		std::vector<uint8_t> dat;
-		dat.insert(dat.begin(), data.begin() + k, data.begin() + (k + shortBlockLen - eccLen + (i < numShortBlocks ? 0 : 1)));
+		dat.insert(dat.begin(), data.begin() + k, data.begin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
 		k += dat.size();
 		const std::vector<uint8_t> ecc(rs.getRemainder(dat));
 		if (i < numShortBlocks)
@@ -322,10 +325,12 @@ std::vector<uint8_t> qrcodegen::QrCode::appendErrorCorrection(const std::vector<
 		blocks.push_back(dat);
 	}
 	
+	// Interleave (not concatenate) the bytes from every block into a single sequence
 	std::vector<uint8_t> result;
 	for (int i = 0; static_cast<unsigned int>(i) < blocks.at(0).size(); i++) {
 		for (int j = 0; static_cast<unsigned int>(j) < blocks.size(); j++) {
-			if (i != shortBlockLen - eccLen || j >= numShortBlocks)
+			// Skip the padding byte in short blocks
+			if (i != shortBlockLen - blockEccLen || j >= numShortBlocks)
 				result.push_back(blocks.at(j).at(i));
 		}
 	}

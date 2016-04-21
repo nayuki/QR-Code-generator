@@ -455,29 +455,34 @@ public final class QrCode {
 	private byte[] appendErrorCorrection(byte[] data) {
 		if (data.length != getNumDataCodewords(version, errorCorrectionLevel))
 			throw new IllegalArgumentException();
+		
+		// Calculate parameter numbers
 		int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.ordinal()][version];
-		int numEcc = NUM_ERROR_CORRECTION_CODEWORDS[errorCorrectionLevel.ordinal()][version];
-		if (numEcc % numBlocks != 0)
+		int totalEcc = NUM_ERROR_CORRECTION_CODEWORDS[errorCorrectionLevel.ordinal()][version];
+		if (totalEcc % numBlocks != 0)
 			throw new AssertionError();
-		int eccLen = numEcc / numBlocks;
+		int blockEccLen = totalEcc / numBlocks;
 		int numShortBlocks = numBlocks - getNumRawDataModules(version) / 8 % numBlocks;
 		int shortBlockLen = getNumRawDataModules(version) / 8 / numBlocks;
 		
+		// Split data into blocks and append ECC to each block
 		byte[][] blocks = new byte[numBlocks][];
-		ReedSolomonGenerator rs = new ReedSolomonGenerator(eccLen);
+		ReedSolomonGenerator rs = new ReedSolomonGenerator(blockEccLen);
 		for (int i = 0, k = 0; i < numBlocks; i++) {
-			byte[] dat = Arrays.copyOfRange(data, k, k + shortBlockLen - eccLen + (i < numShortBlocks ? 0 : 1));
+			byte[] dat = Arrays.copyOfRange(data, k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
 			byte[] block = Arrays.copyOf(dat, shortBlockLen + 1);
 			k += dat.length;
 			byte[] ecc = rs.getRemainder(dat);
-			System.arraycopy(ecc, 0, block, block.length - eccLen, ecc.length);
+			System.arraycopy(ecc, 0, block, block.length - blockEccLen, ecc.length);
 			blocks[i] = block;
 		}
 		
+		// Interleave (not concatenate) the bytes from every block into a single sequence
 		byte[] result = new byte[getNumRawDataModules(version) / 8];
 		for (int i = 0, k = 0; i < blocks[0].length; i++) {
 			for (int j = 0; j < blocks.length; j++) {
-				if (i != shortBlockLen - eccLen || j >= numShortBlocks) {
+				// Skip the padding byte in short blocks
+				if (i != shortBlockLen - blockEccLen || j >= numShortBlocks) {
 					result[k] = blocks[j][i];
 					k++;
 				}

@@ -357,18 +357,21 @@ class QrCode(object):
 		codewords appended to it, based on this object's version and error correction level."""
 		version = self._version
 		assert len(data) == QrCode._get_num_data_codewords(version, self._errcorlvl)
+		
+		# Calculate parameter numbers
 		numblocks = QrCode._NUM_ERROR_CORRECTION_BLOCKS[self._errcorlvl.ordinal][version]
-		numecc = QrCode._NUM_ERROR_CORRECTION_CODEWORDS[self._errcorlvl.ordinal][version]
-		assert numecc % numblocks == 0
-		ecclen = numecc // numblocks
+		totalecc = QrCode._NUM_ERROR_CORRECTION_CODEWORDS[self._errcorlvl.ordinal][version]
+		assert totalecc % numblocks == 0
+		blockecclen = totalecc // numblocks
 		numshortblocks = numblocks - QrCode._get_num_raw_data_modules(version) // 8 % numblocks
 		shortblocklen = self._get_num_raw_data_modules(version) // 8 // numblocks
 		
+		# Split data into blocks and append ECC to each block
 		blocks = []
-		rs = _ReedSolomonGenerator(ecclen)
+		rs = _ReedSolomonGenerator(blockecclen)
 		k = 0
 		for i in range(numblocks):
-			dat = data[k : k + shortblocklen - ecclen + (0 if i < numshortblocks else 1)]
+			dat = data[k : k + shortblocklen - blockecclen + (0 if i < numshortblocks else 1)]
 			k += len(dat)
 			ecc = rs.get_remainder(dat)
 			if i < numshortblocks:
@@ -377,10 +380,12 @@ class QrCode(object):
 			blocks.append(dat)
 		assert k == len(data)
 		
+		# Interleave (not concatenate) the bytes from every block into a single sequence
 		result = []
 		for i in range(len(blocks[0])):
 			for (j, blk) in enumerate(blocks):
-				if i != shortblocklen - ecclen or j >= numshortblocks:
+				# Skip the padding byte in short blocks
+				if i != shortblocklen - blockecclen or j >= numshortblocks:
 					result.append(blk[i])
 		assert len(result) == QrCode._get_num_raw_data_modules(version) // 8
 		return result
