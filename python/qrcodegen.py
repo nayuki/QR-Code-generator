@@ -235,8 +235,8 @@ class QrCode(object):
 		if border < 0:
 			raise ValueError("Border must be non-negative")
 		parts = []
-		for y in range(-border, self.size + border):
-			for x in range(-border, self.size + border):
+		for y in range(-border, self._size + border):
+			for x in range(-border, self._size + border):
 				if self.get_module(x, y) == 1:
 					parts.append("M{},{}h1v1h-1z".format(x + border, y + border))
 		return """<?xml version="1.0" encoding="UTF-8"?>
@@ -245,7 +245,7 @@ class QrCode(object):
 	<rect width="100%" height="100%" fill="#FFFFFF" stroke-width="0"/>
 	<path d="{1}" fill="#000000" stroke-width="0"/>
 </svg>
-""".format(self.size + border * 2, " ".join(parts))
+""".format(self._size + border * 2, " ".join(parts))
 	
 	
 	# ---- Private helper methods for constructor: Drawing function modules ----
