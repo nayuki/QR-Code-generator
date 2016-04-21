@@ -334,6 +334,8 @@ std::vector<uint8_t> qrcodegen::QrCode::appendErrorCorrection(const std::vector<
 				result.push_back(blocks.at(j).at(i));
 		}
 	}
+	if (result.size() != static_cast<unsigned int>(getNumRawDataModules(version) / 8))
+		throw "Assertion error";
 	return result;
 }
 
