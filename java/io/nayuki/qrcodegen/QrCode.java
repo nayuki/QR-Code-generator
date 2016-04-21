@@ -713,7 +713,7 @@ public final class QrCode {
 	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
-	private static int getNumDataCodewords(int ver, Ecc ecl) {
+	static int getNumDataCodewords(int ver, Ecc ecl) {
 		if (ver < 1 || ver > 40)
 			throw new IllegalArgumentException("Version number out of range");
 		return getNumRawDataModules(ver) / 8 - NUM_ERROR_CORRECTION_CODEWORDS[ecl.ordinal()][ver];
