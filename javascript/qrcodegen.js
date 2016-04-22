@@ -37,6 +37,7 @@
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
  *   - Method getModule(int x, int y) -> int
+ *   - Method drawCanvas(int scale, int border, HTMLCanvasElement canvas) -> void
  *   - Method toSvgString(int border) -> str
  *   - Enum Ecc:
  *     - Constants LOW, MEDIUM, QUARTILE, HIGH
@@ -184,6 +185,24 @@ var qrcodegen = new function() {
 		
 		
 		/*---- Public instance methods ----*/
+		
+		// Draws this QR Code symbol with the given module scale and number of modules onto the given HTML canvas element.
+		// The canvas will be resized to a width and height of (this.size + border * 2) * scale. The painted image will be purely
+		// black and white with no transparent regions. The scale must be a positive integer, and the border must be a non-negative integer.
+		this.drawCanvas = function(scale, border, canvas) {
+			if (scale <= 0 || border < 0)
+				throw "Value out of range";
+			var width = (size + border * 2) * scale;
+			canvas.width = width;
+			canvas.height = width;
+			var ctx = canvas.getContext("2d");
+			for (var y = -border; y < size + border; y++) {
+				for (var x = -border; x < size + border; x++) {
+					ctx.fillStyle = this.getModule(x, y) == 1 ? "#000000" : "#FFFFFF";
+					ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
+				}
+			}
+		};
 		
 		// Based on the given number of border modules to add as padding, this returns a
 		// string whose contents represents an SVG XML file that depicts this QR Code symbol.

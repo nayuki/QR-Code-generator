@@ -76,17 +76,7 @@ function redrawQrCode() {
 		var scale = parseInt(document.getElementById("scale-input").value, 10);
 		if (scale <= 0 || scale > 30)
 			return;
-		// Draw QR Code onto canvas
-		var width = (qr.size + border * 2) * scale;
-		canvas.width = width;
-		canvas.height = width;
-		var ctx = canvas.getContext("2d");
-		for (var y = -border; y < qr.size + border; y++) {
-			for (var x = -border; x < qr.size + border; x++) {
-				ctx.fillStyle = qr.getModule(x, y) == 1 ? "#000000" : "#FFFFFF";
-				ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
-			}
-		}
+		qr.drawCanvas(scale, border, canvas);
 		canvas.style.removeProperty("display");
 	} else {
 		var code = qr.toSvgString(border);
