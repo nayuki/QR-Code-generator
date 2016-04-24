@@ -68,12 +68,12 @@ Python language:
     from qrcodegen import *
     
     # Simple operation
-    qr0 = QrCode.encode_text("Hello, world!", QrCode.Ecc.MEDIUM);
+    qr0 = QrCode.encode_text("Hello, world!", QrCode.Ecc.MEDIUM)
     svg = qr0.to_svg_str(4)
     
     # Manual operation
-    segs = QrSegment.make_segments("3141592653589793238462643383");
-    qr1 = QrCode.encode_segments(segs, QrCode.Ecc.HIGH, 5, 5, 2, False);
+    segs = QrSegment.make_segments("3141592653589793238462643383")
+    qr1 = QrCode.encode_segments(segs, QrCode.Ecc.HIGH, 5, 5, 2, False)
 
 C++ language:
 
