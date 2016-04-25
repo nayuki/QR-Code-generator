@@ -22,10 +22,10 @@
 #   Software.
 # 
 
-import distutils.core
+import setuptools
 
 
-distutils.core.setup(
+setuptools.setup(
 	name = "qrcodegen",
 	description = "High quality QR Code generator library for Python 2 and 3",
 	version = "1.0.0",
