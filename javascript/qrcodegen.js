@@ -415,6 +415,8 @@ var qrcodegen = new function() {
 							modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) != 0;
 							i++;
 						}
+						// If there are any remainder bits (0 to 7), they are already
+						// set to 0/false/white when the grid of modules was initialized
 					}
 				}
 			}

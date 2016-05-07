@@ -409,6 +409,8 @@ class QrCode(object):
 					if not self._isfunction[y][x] and i < len(data) * 8:
 						self._modules[y][x] = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0
 						i += 1
+					# If there are any remainder bits (0 to 7), they are already
+					# set to 0/false/white when the grid of modules was initialized
 		assert i == len(data) * 8
 	
 	
