@@ -70,7 +70,8 @@ class QrCode(object):
 	def encode_text(text, ecl):
 		"""Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 		As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
-		code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output."""
+		code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
+		The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version."""
 		segs = QrSegment.make_segments(text)
 		return QrCode.encode_segments(segs, ecl)
 	
@@ -79,7 +80,8 @@ class QrCode(object):
 	def encode_binary(data, ecl):
 		"""Returns a QR Code symbol representing the given binary data string at the given error correction level.
 		This function always encodes using the binary segment mode, not any text mode. The maximum number of
-		bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output."""
+		bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
+		The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version."""
 		if not isinstance(data, bytes):
 			raise TypeError("Binary array expected")
 		return QrCode.encode_segments([QrSegment.make_bytes(data)], ecl)
@@ -141,8 +143,8 @@ class QrCode(object):
 		"""This constructor can be called in one of two ways:
 		- QrCode(datacodewords=list<int>, mask=int, version=int, errcorlvl=QrCode.Ecc):
 		      Creates a new QR Code symbol with the given version number, error correction level, binary data array,
-		      and mask number. This cumbersome constructor can be invoked directly by the user, but is considered
-		      to be even lower level than QrCode.encode_segments().
+		      and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
+		      To go one level up, see the QrCode.encode_segments() function.
 		- QrCode(qrcode=QrCode, mask=int):
 		      Creates a new QR Code symbol based on the given existing object, but with a potentially different
 		      mask pattern. The version, error correction level, codewords, etc. of the newly created object are

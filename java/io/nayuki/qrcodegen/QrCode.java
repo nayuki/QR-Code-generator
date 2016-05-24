@@ -43,8 +43,9 @@ public final class QrCode {
 	 * Returns a QR Code symbol representing the specified Unicode text string at the specified error correction level.
 	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
 	 * code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
+	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 * @param text the text to be encoded, which can be any Unicode string
-	 * @param ecl the error correction level to use
+	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the text
 	 * @throws NullPointerException if the text or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the text fails to fit in the largest version QR Code, which means it is too long
@@ -61,8 +62,9 @@ public final class QrCode {
 	 * Returns a QR Code symbol representing the specified binary data string at the specified error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
+	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 * @param data the binary data to encode
-	 * @param ecl the error correction level to use
+	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the binary data
 	 * @throws NullPointerException if the data or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the data fails to fit in the largest version QR Code, which means it is too long
@@ -187,9 +189,9 @@ public final class QrCode {
 	/*---- Constructors ----*/
 	
 	/**
-	 * Creates a new QR Code symbol with the specified version number, error correction level, binary data string, and mask number.
-	 * <p>This cumbersome constructor can be invoked directly by the user, but is considered
-	 * to be even lower level than {@link #encodeSegments(List,Ecc)}.</p>
+	 * Creates a new QR Code symbol with the specified version number, error correction level, binary data array, and mask number.
+	 * <p>This is a cumbersome low-level constructor that should not be invoked directly by the user.
+	 * To go one level up, see the {@link #encodeSegments(List,Ecc)} function.</p>
 	 * @param ver the version number to use, which must be in the range 1 to 40, inclusive
 	 * @param ecl the error correction level to use
 	 * @param dataCodewords the raw binary user data to encode

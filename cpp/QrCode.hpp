@@ -70,6 +70,7 @@ public:
 	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
 	 * code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
+	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 */
 	static QrCode encodeText(const char *text, const Ecc &ecl);
 	
@@ -78,6 +79,7 @@ public:
 	 * Returns a QR Code symbol representing the given binary data string at the given error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
+	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 */
 	static QrCode encodeBinary(const std::vector<uint8_t> &data, const Ecc &ecl);
 	
@@ -126,9 +128,9 @@ private:
 public:
 	
 	/* 
-	 * Creates a new QR Code symbol with the given version number, error correction level, binary data string, and mask number.
-	 * This cumbersome constructor can be invoked directly by the user, but is considered
-	 * to be even lower level than encodeSegments().
+	 * Creates a new QR Code symbol with the given version number, error correction level, binary data array,
+	 * and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
+	 * To go one level up, see the encodeSegments() function.
 	 */
 	QrCode(int ver, const Ecc &ecl, const std::vector<uint8_t> &dataCodewords, int mask);
 	

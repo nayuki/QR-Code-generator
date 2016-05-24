@@ -68,8 +68,8 @@ var qrcodegen = new function() {
 	 * This constructor can be called in one of two ways:
 	 * - new QrCode(datacodewords, mask, version, errCorLvl):
 	 *       Creates a new QR Code symbol with the given version number, error correction level, binary data array,
-	 *       and mask number. This cumbersome constructor can be invoked directly by the user, but is considered
-	 *       to be even lower level than QrCode.encodeSegments().
+	 *       and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
+	 *       To go one level up, see the QrCode.encodeSegments() function.
 	 * - new QrCode(qr, mask):
 	 *       Creates a new QR Code symbol based on the given existing object, but with a potentially different
 	 *       mask pattern. The version, error correction level, codewords, etc. of the newly created object are
@@ -541,6 +541,7 @@ var qrcodegen = new function() {
 	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
 	 * code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
+	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 */
 	this.QrCode.encodeText = function(text, ecl) {
 		var segs = qrcodegen.QrSegment.makeSegments(text);
@@ -552,6 +553,7 @@ var qrcodegen = new function() {
 	 * Returns a QR Code symbol representing the given binary data string at the given error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
+	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 */
 	this.QrCode.encodeBinary = function(data, ecl) {
 		var seg = qrcodegen.QrSegment.makeBytes(data);
