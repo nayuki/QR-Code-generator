@@ -77,6 +77,7 @@ Python language:
 
 C++ language:
 
+    #include <string>
     #include <vector>
     #include "QrCode.hpp"
     using namespace qrcodegen;
