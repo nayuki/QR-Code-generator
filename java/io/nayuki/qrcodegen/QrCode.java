@@ -841,8 +841,8 @@ public final class QrCode {
 				int factor = (b ^ result[0]) & 0xFF;
 				System.arraycopy(result, 1, result, 0, result.length - 1);
 				result[result.length - 1] = 0;
-				for (int j = 0; j < result.length; j++)
-					result[j] ^= multiply(coefficients[j] & 0xFF, factor);
+				for (int i = 0; i < result.length; i++)
+					result[i] ^= multiply(coefficients[i] & 0xFF, factor);
 			}
 			return result;
 		}

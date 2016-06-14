@@ -950,8 +950,8 @@ var qrcodegen = new function() {
 				var factor = b ^ result[0];
 				result.shift();
 				result.push(0);
-				for (var j = 0; j < result.length; j++)
-					result[j] ^= ReedSolomonGenerator.multiply(coefficients[j], factor);
+				for (var i = 0; i < result.length; i++)
+					result[i] ^= ReedSolomonGenerator.multiply(coefficients[i], factor);
 			});
 			return result;
 		};
