@@ -639,11 +639,9 @@ var qrcodegen = new function() {
 			else  // C-C-C-Combo breaker!
 				step = 26;
 			
-			var result = [];
-			for (var i = numAlign - 1, pos = size - 7; i >= 1; i--, pos -= step)
-				result.push(pos);
-			result.push(6);
-			result.reverse();
+			var result = [6];
+			for (var i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
+				result.splice(1, 0, pos);
 			return result;
 		}
 	};

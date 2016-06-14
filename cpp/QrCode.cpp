@@ -506,11 +506,11 @@ std::vector<int> qrcodegen::QrCode::getAlignmentPatternPositions(int ver) {
 		else  // C-C-C-Combo breaker!
 			step = 26;
 		
-		std::vector<int> result(numAlign);
+		std::vector<int> result;
 		int size = ver * 4 + 17;
-		result.at(0) = 6;
-		for (int i = numAlign - 1, pos = size - 7; i >= 1; i--, pos -= step)
-			result.at(i) = pos;
+		for (int i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
+			result.insert(result.begin(), pos);
+		result.insert(result.begin(), 6);
 		return result;
 	}
 }
