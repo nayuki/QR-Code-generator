@@ -234,7 +234,7 @@ public final class QrSegmentAdvanced {
 	 * @param text the text to be encoded, which must fall in the kanji mode subset of characters
 	 * @return a segment containing the data
 	 * @throws NullPointerException if the string is {@code null}
-	 * @throws IllegalArgumentException if the string contains non-kanji-mode characters 
+	 * @throws IllegalArgumentException if the string contains non-kanji-mode characters
 	 * @see #isEncodableAsKanji(String)
 	 */
 	public static QrSegment makeKanjiSegment(String text) {
