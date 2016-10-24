@@ -29,7 +29,7 @@
  * Module "qrcodegen", public members:
  * - Class QrCode:
  *   - Function encodeText(str text, QrCode.Ecc ecl) -> QrCode
- *   - Function encodeBinary(list<int> data, QrCode.Ecc ecl) -> QrCode
+ *   - Function encodeBinary(list<byte> data, QrCode.Ecc ecl) -> QrCode
  *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
  *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
  *   - Constructor QrCode(QrCode qr, int mask)
@@ -153,7 +153,6 @@ var qrcodegen = new function() {
 		Object.defineProperty(this, "size", {value:size});
 		
 		// The error correction level used in this QR Code symbol.
-		
 		Object.defineProperty(this, "errorCorrectionLevel", {value:errCorLvl});
 		
 		// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
