@@ -468,8 +468,7 @@ class QrCode(object):
 		# 2*2 blocks of modules having same color
 		for y in range(size - 1):
 			for x in range(size - 1):
-				color = modules[y][x]
-				if color == modules[y][x + 1] == modules[y + 1][x] == modules[y + 1][x + 1]:
+				if modules[y][x] == modules[y][x + 1] == modules[y + 1][x] == modules[y + 1][x + 1]:
 					result += QrCode._PENALTY_N2
 		
 		# Finder-like pattern in rows
@@ -488,11 +487,7 @@ class QrCode(object):
 					result += QrCode._PENALTY_N3
 		
 		# Balance of black and white modules
-		black = 0
-		for row in modules:
-			for color in row:
-				if color:
-					black += 1
+		black = sum(1 for x in range(size) for y in range(size) if modules[y][x])
 		total = size**2
 		# Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
 		for k in itertools.count():
@@ -622,10 +617,9 @@ class QrSegment(object):
 	def make_bytes(data):
 		"""Returns a segment representing the given binary data encoded in byte mode."""
 		bb = _BitBuffer()
+		py3 = sys.version_info.major >= 3
 		for b in data:
-			if sys.version_info[0] < 3:
-				b = ord(b)
-			bb.append_bits(b, 8)
+			bb.append_bits((b if py3 else ord(b)), 8)
 		return QrSegment(QrSegment.Mode.BYTE, len(data), bb.get_bits())
 	
 	
@@ -663,7 +657,7 @@ class QrSegment(object):
 	def make_segments(text):
 		"""Returns a new mutable list of zero or more segments to represent the given Unicode text string.
 		The result may use various segment modes and switch modes to optimize the length of the bit stream."""
-		if not isinstance(text, str) and (sys.version_info[0] >= 3 or not isinstance(text, unicode)):
+		if not (isinstance(text, str) or (sys.version_info.major < 3 and isinstance(text, unicode))):
 			raise TypeError("Text string expected")
 		
 		# Select the most efficient segment encoding automatically
