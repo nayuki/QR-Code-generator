@@ -561,8 +561,8 @@ var qrcodegen = new function() {
 	
 	
 	/* 
-	 * Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
-	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
+	 * Returns a QR Code symbol representing the given data segments with the given encoding parameters.
+	 * The smallest possible QR Code version within the given range is automatically chosen for the output.
 	 * This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
 	 * This function is considered to be lower level than simply encoding text or binary data.
