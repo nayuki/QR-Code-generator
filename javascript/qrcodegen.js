@@ -186,19 +186,28 @@ var qrcodegen = new function() {
 		/*---- Public instance methods ----*/
 		
 		// Draws this QR Code symbol with the given module scale and number of modules onto the given HTML canvas element.
-		// The canvas will be resized to a width and height of (this.size + border * 2) * scale. The painted image will be purely
-		// black and white with no transparent regions. The scale must be a positive integer, and the border must be a non-negative integer.
-		this.drawCanvas = function(scale, border, canvas) {
+		// The canvas will be resized to a width and height of (this.size + border * 2) * scale. The painted image will be 
+		// coloured according to the colours given for 'dark' and 'light'; if 'dark' is omitted, black is used; if 'light' 
+		// is omitted, the background is transparent. The scale must be a positive integer, and the border must be a 
+		// non-negative integer.
+		this.drawCanvas = function(scale, border, canvas, dark, light) {
 			if (scale <= 0 || border < 0)
 				throw "Value out of range";
 			var width = (size + border * 2) * scale;
 			canvas.width = width;
 			canvas.height = width;
 			var ctx = canvas.getContext("2d");
+			if (light) {
+				ctx.fillStyle = light;
+				ctx.fillRect(0, 0, width, width);
+			}
+			ctx.fillStyle = dark;
 			for (var y = -border; y < size + border; y++) {
-				for (var x = -border; x < size + border; x++) {
-					ctx.fillStyle = this.getModule(x, y) == 1 ? "#000000" : "#FFFFFF";
-					ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
+				for (var x = -border; x < size + border; /* no-op */) {
+					var moduleIsDark = this.getModule(x, y) == 1;
+					for (var w = 1; w < size + border - x; w ++) if (this.getModule(x + w, y) != moduleIsDark) break;
+					x += w;
+					if (moduleIsDark) ctx.fillRect((x + border - w) * scale, (y + border) * scale, scale * w, scale);
 				}
 			}
 		};
