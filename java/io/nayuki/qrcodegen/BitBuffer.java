@@ -25,6 +25,7 @@
 package io.nayuki.qrcodegen;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 
 /**
@@ -76,8 +77,7 @@ final class BitBuffer {
 	
 	// Appends the data of the given segment to this bit buffer.
 	public void appendData(QrSegment seg) {
-		if (seg == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(seg);
 		ensureCapacity(bitLength + seg.bitLength);
 		for (int i = 0; i < seg.bitLength; i++, bitLength++) {  // Append bit by bit
 			int bit = (seg.getByte(i >>> 3) >>> (7 - (i & 7))) & 1;

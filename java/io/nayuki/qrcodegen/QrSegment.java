@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 
@@ -50,8 +51,7 @@ public final class QrSegment {
 	 * @throws NullPointerException if the array is {@code null}
 	 */
 	public static QrSegment makeBytes(byte[] data) {
-		if (data == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(data);
 		return new QrSegment(Mode.BYTE, data.length, data, data.length * 8);
 	}
 	
@@ -64,8 +64,7 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the string contains non-digit characters
 	 */
 	public static QrSegment makeNumeric(String digits) {
-		if (digits == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(digits);
 		if (!NUMERIC_REGEX.matcher(digits).matches())
 			throw new IllegalArgumentException("String contains non-numeric characters");
 		
@@ -89,8 +88,7 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the string contains non-encodable characters
 	 */
 	public static QrSegment makeAlphanumeric(String text) {
-		if (text == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(text);
 		if (!ALPHANUMERIC_REGEX.matcher(text).matches())
 			throw new IllegalArgumentException("String contains unencodable characters in alphanumeric mode");
 		
@@ -115,8 +113,7 @@ public final class QrSegment {
 	 * @throws NullPointerException if the text is {@code null}
 	 */
 	public static List<QrSegment> makeSegments(String text) {
-		if (text == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(text);
 		
 		// Select the most efficient segment encoding automatically
 		List<QrSegment> result = new ArrayList<>();
@@ -160,8 +157,8 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the character count or bit length are negative or invalid
 	 */
 	public QrSegment(Mode md, int numCh, byte[] b, int bitLen) {
-		if (md == null || b == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(md);
+		Objects.requireNonNull(b);
 		if (numCh < 0 || bitLen < 0 || bitLen > b.length * 8L)
 			throw new IllegalArgumentException("Invalid value");
 		mode = md;
@@ -188,15 +185,13 @@ public final class QrSegment {
 	
 	// Package-private helper function.
 	static int getTotalBits(List<QrSegment> segs, int version) {
-		if (segs == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(segs);
 		if (version < 1 || version > 40)
 			throw new IllegalArgumentException("Version number out of range");
 		
 		int result = 0;
 		for (QrSegment seg : segs) {
-			if (seg == null)
-				throw new NullPointerException();
+			Objects.requireNonNull(seg);
 			int ccbits = seg.mode.numCharCountBits(version);
 			// Fail if segment length value doesn't fit in the length field's bit-width
 			if (seg.numChars >= (1 << ccbits))

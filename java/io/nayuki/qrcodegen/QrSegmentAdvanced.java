@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 
 public final class QrSegmentAdvanced {
@@ -57,8 +58,8 @@ public final class QrSegmentAdvanced {
 	 */
 	public static List<QrSegment> makeSegmentsOptimally(String text, QrCode.Ecc ecl, int minVersion, int maxVersion) {
 		// Check arguments
-		if (text == null || ecl == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(text);
+		Objects.requireNonNull(ecl);
 		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40))
 			throw new IllegalArgumentException("Invalid value");
 		
@@ -238,8 +239,7 @@ public final class QrSegmentAdvanced {
 	 * @see #isEncodableAsKanji(String)
 	 */
 	public static QrSegment makeKanjiSegment(String text) {
-		if (text == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(text);
 		BitBuffer bb = new BitBuffer();
 		for (int i = 0; i < text.length(); i++) {
 			int val = UNICODE_TO_QR_KANJI[text.charAt(i)];
@@ -262,8 +262,7 @@ public final class QrSegmentAdvanced {
 	 * @see #makeKanjiSegment(String)
 	 */
 	public static boolean isEncodableAsKanji(String text) {
-		if (text == null)
-			throw new NullPointerException();
+		Objects.requireNonNull(text);
 		for (int i = 0; i < text.length(); i++) {
 			if (UNICODE_TO_QR_KANJI[text.charAt(i)] == -1)
 				return false;
