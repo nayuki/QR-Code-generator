@@ -202,8 +202,8 @@ var qrcodegen = new function() {
 				ctx.fillRect(0, 0, width, width);
 			}
 			ctx.fillStyle = dark;
-			for (var y = -border; y < size + border; y++) {
-				for (var x = -border; x < size + border; /* no-op */) {
+			for (var y = 0; y < size; y++) {
+				for (var x = 0; x < size; /* no-op */) {
 					var moduleIsDark = this.getModule(x, y) == 1;
 					for (var w = 1; w < size + border - x; w ++) if (this.getModule(x + w, y) != moduleIsDark) break;
 					x += w;
