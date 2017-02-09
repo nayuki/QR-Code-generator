@@ -129,6 +129,13 @@ qrcodegen::QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uin
 }
 
 
+qrcodegen::QrSegment & qrcodegen::QrSegment::operator=(const QrSegment &seg)
+{
+	QrSegment(seg.mode, seg.numChars, seg.data, seg.bitLength);
+	return *this;
+}
+
+
 int qrcodegen::QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
 	if (version < 1 || version > 40)
 		throw "Version number out of range";

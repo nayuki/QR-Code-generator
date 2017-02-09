@@ -27,6 +27,9 @@
 #include <cstdint>
 #include <vector>
 
+#if defined(_MSC_VER) && _MSC_VER < 1800
+#define final
+#endif
 
 namespace qrcodegen {
 
@@ -154,6 +157,8 @@ public:
 	 */
 	QrSegment(const Mode &md, int numCh, const std::vector<uint8_t> &b, int bitLen);
 	
+	// Required in the instantiation of std::vector<QrSegment>.
+	QrSegment &operator=(const QrSegment &seg);
 	
 	// Package-private helper function.
 	static int getTotalBits(const std::vector<QrSegment> &segs, int version);
