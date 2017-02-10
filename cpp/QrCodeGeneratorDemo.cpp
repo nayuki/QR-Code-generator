@@ -4,7 +4,7 @@
  * Run this command-line program with no arguments. The program computes a bunch of demonstration
  * QR Codes and prints them to the console. Also, the SVG code for one QR Code is printed as a sample.
  * 
- * Copyright (c) 2016 Project Nayuki
+ * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/qr-code-generator-library
  * 
  * (MIT License)

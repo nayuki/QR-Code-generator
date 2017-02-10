@@ -95,7 +95,7 @@ C++ language:
 License
 -------
 
-Copyright © 2016 Project Nayuki  
+Copyright © 2017 Project Nayuki  
 [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
 (MIT License)

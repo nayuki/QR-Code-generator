@@ -1,7 +1,7 @@
 /* 
  * QR Code generator library - Optional advanced logic (Java)
  * 
- * Copyright (c) 2016 Project Nayuki
+ * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/qr-code-generator-library
  * 
  * (MIT License)

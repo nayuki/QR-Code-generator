@@ -1,7 +1,7 @@
 # 
 # QR Code generator demo (Python 2, 3)
 # 
-# Copyright (c) 2016 Project Nayuki
+# Copyright (c) Project Nayuki
 # https://www.nayuki.io/page/qr-code-generator-library
 # 
 # (MIT License)

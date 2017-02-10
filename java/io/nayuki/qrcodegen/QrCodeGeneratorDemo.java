@@ -4,7 +4,7 @@
  * Run this command-line program with no arguments. The program creates/overwrites a bunch of
  * PNG and SVG files in the current working directory to demonstrate the creation of QR Codes.
  * 
- * Copyright (c) 2016 Project Nayuki
+ * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/qr-code-generator-library
  * 
  * (MIT License)
