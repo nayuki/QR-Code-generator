@@ -109,7 +109,7 @@ public final class QrSegmentAdvanced {
 			char c = (char)data[i];
 			result[0][j] = result[0][i] + 48;  // 8 bits per byte
 			if (isAlphanumeric(c))
-				result[1][j] = result[1][i] + 39;  // 6.5 bits per alphanumeric char
+				result[1][j] = result[1][i] + 33;  // 5.5 bits per alphanumeric char
 			if (isNumeric(c))
 				result[2][j] = result[2][i] + 20;  // 3.33 bits per alphanumeric char
 			
@@ -148,7 +148,7 @@ public final class QrSegmentAdvanced {
 			if (curMode == NUMERIC) {
 				if (isNumeric(c))
 					curMode = NUMERIC;
-				else if (isAlphanumeric(c) && (bitCosts[1][i] + 39 + 5) / 6 * 6 + numberCost == bitCosts[2][i + 1])
+				else if (isAlphanumeric(c) && (bitCosts[1][i] + 33 + 5) / 6 * 6 + numberCost == bitCosts[2][i + 1])
 					curMode = ALPHANUMERIC;
 				else
 					curMode = BYTE;
@@ -162,7 +162,7 @@ public final class QrSegmentAdvanced {
 			} else if (curMode == BYTE) {
 				if (isNumeric(c) && (bitCosts[2][i] + 20 + 5) / 6 * 6 + bytesCost == bitCosts[0][i + 1])
 					curMode = NUMERIC;
-				else if (isAlphanumeric(c) && (bitCosts[1][i] + 39 + 5) / 6 * 6 + bytesCost == bitCosts[0][i + 1])
+				else if (isAlphanumeric(c) && (bitCosts[1][i] + 33 + 5) / 6 * 6 + bytesCost == bitCosts[0][i + 1])
 					curMode = ALPHANUMERIC;
 				else
 					curMode = BYTE;
