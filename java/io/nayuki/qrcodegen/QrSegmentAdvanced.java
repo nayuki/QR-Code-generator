@@ -111,7 +111,7 @@ public final class QrSegmentAdvanced {
 			if (isAlphanumeric(c))
 				result[1][j] = result[1][i] + 33;  // 5.5 bits per alphanumeric char
 			if (isNumeric(c))
-				result[2][j] = result[2][i] + 20;  // 3.33 bits per alphanumeric char
+				result[2][j] = result[2][i] + 20;  // 3.33 bits per digit
 			
 			// Switch modes, rounding up fractional bits
 			result[0][j] = Math.min((Math.min(result[1][j], result[2][j]) + 5) / 6 * 6 + bytesCost  , result[0][j]);
@@ -387,7 +387,7 @@ public final class QrSegmentAdvanced {
 	
 	private static short[] UNICODE_TO_QR_KANJI = new short[65536];
 	
-	static {
+	static {  // Unpack the Shift JIS table into a more computation-friendly form
 		Arrays.fill(UNICODE_TO_QR_KANJI, (short)-1);
 		byte[] bytes = Base64.getDecoder().decode(PACKED_QR_KANJI_TO_UNICODE);
 		for (int i = 0; i < bytes.length; i += 2) {
