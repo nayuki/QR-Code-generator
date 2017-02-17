@@ -5,9 +5,9 @@ QR Code generator library
 Introduction
 ------------
 
-This project aims to provide the best and clearest QR Code generator library. The primary goals are flexible options and absolute correctness. The secondary goals are compact implementation size and good documentation comments.
+This project aims to be the best, clearest QR Code generator library in multiple languages. The primary goals are flexible options and absolute correctness. The secondary goals are compact implementation size and good documentation comments.
 
-Home page with live JavaScript demo and extensive description: [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
+Home page with live JavaScript demo, extensive descriptions, and competitor comparisons: [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
 
 Features
