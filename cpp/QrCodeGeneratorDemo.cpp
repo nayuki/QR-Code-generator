@@ -26,6 +26,7 @@
  */
 
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -41,11 +42,11 @@ static void printQr(const qrcodegen::QrCode &qr);
 
 
 // The main application program.
-int main(int argc, char **argv) {
+int main() {
 	doBasicDemo();
 	doVarietyDemo();
 	doSegmentDemo();
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 
