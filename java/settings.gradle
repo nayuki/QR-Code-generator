@@ -1,4 +1,4 @@
-include ':common'
+include ':core'
 include ':advanced'
 include ':javase'
 include ':android'

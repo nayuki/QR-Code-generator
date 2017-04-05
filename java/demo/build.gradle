@@ -1,4 +1,4 @@
 dependencies {
-    compile project(':common')
+    compile project(':core')
     compile project(':javase')
 }
