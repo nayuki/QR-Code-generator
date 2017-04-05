@@ -33,7 +33,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 
 public final class QrSegmentAdvanced {
@@ -282,7 +281,8 @@ public final class QrSegmentAdvanced {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         InputStream is = null;
         try {
-            is = QrSegmentAdvanced.class.getResourceAsStream("qr_kanji_to_unicode.bin");
+            ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+            is = classloader.getResourceAsStream("qr_kanji_to_unicode.bin");
             byte[] buffer = new byte[8192];
             int read;
             while ((read = is.read(buffer)) != -1) {
