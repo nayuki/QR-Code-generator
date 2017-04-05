@@ -16,7 +16,7 @@ public class QrCodeAndroid {
      * @return a bitmap representing this QR Code, with padding and scaling
      * @throws IllegalArgumentException if the scale or border is out of range
      */
-    public Bitmap toBitmap(QrCode qrCode, int scale, int border, Bitmap.Config config) {
+    public static Bitmap toBitmap(QrCode qrCode, int scale, int border, Bitmap.Config config) {
         if (scale <= 0 || border < 0)
             throw new IllegalArgumentException("Value out of range");
         final int size = qrCode.size;

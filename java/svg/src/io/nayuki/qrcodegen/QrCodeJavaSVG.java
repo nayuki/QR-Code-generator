@@ -12,7 +12,7 @@ public class QrCodeJavaSVG {
      * @param border the number of border modules to add, which must be non-negative
      * @return a string representing this QR Code as an SVG document
      */
-    public String toSvgString(QrCode qr, int border) {
+    public static String toSvgString(QrCode qr, int border) {
         if (border < 0)
             throw new IllegalArgumentException("Border must be non-negative");
         final int size = qr.size;
