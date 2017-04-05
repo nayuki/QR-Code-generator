@@ -24,11 +24,10 @@
 
 package io.nayuki.qrcodegen;
 
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-
+import java.util.Locale;
 
 /**
  * Represents an immutable square grid of black and white cells for a QR Code symbol, and
@@ -52,8 +51,8 @@ public final class QrCode {
 	 * @throws IllegalArgumentException if the text fails to fit in the largest version QR Code, which means it is too long
 	 */
 	public static QrCode encodeText(String text, Ecc ecl) {
-		Objects.requireNonNull(text);
-		Objects.requireNonNull(ecl);
+		requireNonNull(text);
+		requireNonNull(ecl);
 		List<QrSegment> segs = QrSegment.makeSegments(text);
 		return encodeSegments(segs, ecl);
 	}
@@ -71,10 +70,10 @@ public final class QrCode {
 	 * @throws IllegalArgumentException if the data fails to fit in the largest version QR Code, which means it is too long
 	 */
 	public static QrCode encodeBinary(byte[] data, Ecc ecl) {
-		Objects.requireNonNull(data);
-		Objects.requireNonNull(ecl);
+		requireNonNull(data);
+		requireNonNull(ecl);
 		QrSegment seg = QrSegment.makeBytes(data);
-		return encodeSegments(Arrays.asList(seg), ecl);
+		return encodeSegments(Collections.singletonList(seg), ecl);
 	}
 	
 	
@@ -113,8 +112,8 @@ public final class QrCode {
 	 * &lt; &minus;1 or mask > 7, or if the data is too long to fit in a QR Code at maxVersion at the ECL
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
-		Objects.requireNonNull(segs);
-		Objects.requireNonNull(ecl);
+		requireNonNull(segs);
+		requireNonNull(ecl);
 		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Invalid value");
 		
@@ -202,10 +201,10 @@ public final class QrCode {
 	 */
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments
-		Objects.requireNonNull(ecl);
+		requireNonNull(ecl);
 		if (ver < 1 || ver > 40 || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Value out of range");
-		Objects.requireNonNull(dataCodewords);
+		requireNonNull(dataCodewords);
 		
 		// Initialize fields
 		version = ver;
@@ -233,7 +232,7 @@ public final class QrCode {
 	 */
 	public QrCode(QrCode qr, int mask) {
 		// Check arguments
-		Objects.requireNonNull(qr);
+		requireNonNull(qr);
 		if (mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Mask value out of range");
 		
@@ -271,66 +270,7 @@ public final class QrCode {
 			return 0;  // Infinite white border
 	}
 	
-	
-	/**
-	 * Returns a new image object representing this QR Code, with the specified module scale and number
-	 * of border modules. For example, the arguments scale=10, border=4 means to pad the QR Code symbol
-	 * with 4 white border modules on all four edges, then use 10*10 pixels to represent each module.
-	 * The resulting image only contains the hex colors 000000 and FFFFFF.
-	 * @param scale the module scale factor, which must be positive
-	 * @param border the number of border modules to add, which must be non-negative
-	 * @return an image representing this QR Code, with padding and scaling
-	 * @throws IllegalArgumentException if the scale or border is out of range
-	 */
-	public BufferedImage toImage(int scale, int border) {
-		if (scale <= 0 || border < 0)
-			throw new IllegalArgumentException("Value out of range");
-		BufferedImage result = new BufferedImage((size + border * 2) * scale, (size + border * 2) * scale, BufferedImage.TYPE_INT_RGB);
-		for (int y = 0; y < result.getHeight(); y++) {
-			for (int x = 0; x < result.getWidth(); x++) {
-				int val = getModule(x / scale - border, y / scale - border);  // 0 or 1
-				result.setRGB(x, y, val == 1 ? 0x000000 : 0xFFFFFF);
-			}
-		}
-		return result;
-	}
-	
-	
-	/**
-	 * Based on the specified number of border modules to add as padding, this returns a
-	 * string whose contents represents an SVG XML file that depicts this QR Code symbol.
-	 * Note that Unix newlines (\n) are always used, regardless of the platform.
-	 * @param border the number of border modules to add, which must be non-negative
-	 * @return a string representing this QR Code as an SVG document
-	 */
-	public String toSvgString(int border) {
-		if (border < 0)
-			throw new IllegalArgumentException("Border must be non-negative");
-		StringBuilder sb = new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
-		sb.append(String.format("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 %1$d %1$d\">\n", size + border * 2));
-		sb.append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\" stroke-width=\"0\"/>\n");
-		sb.append("\t<path d=\"");
-		boolean head = true;
-		for (int y = -border; y < size + border; y++) {
-			for (int x = -border; x < size + border; x++) {
-				if (getModule(x, y) == 1) {
-					if (head)
-						head = false;
-					else
-						sb.append(" ");
-					sb.append(String.format("M%d,%dh1v1h-1z", x + border, y + border));
-				}
-			}
-		}
-		sb.append("\" fill=\"#000000\" stroke-width=\"0\"/>\n");
-		sb.append("</svg>\n");
-		return sb.toString();
-	}
-	
-	
-	
+
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
 	private void drawFunctionPatterns() {
@@ -495,7 +435,7 @@ public final class QrCode {
 	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
 	// data area of this QR Code symbol. Function modules need to be marked off before this is called.
 	private void drawCodewords(byte[] data) {
-		Objects.requireNonNull(data);
+		requireNonNull(data);
 		if (data.length != getNumRawDataModules(version) / 8)
 			throw new IllegalArgumentException();
 		
@@ -829,7 +769,7 @@ public final class QrCode {
 		 * @throws NullPointerException if the data is {@code null}
 		 */
 		public byte[] getRemainder(byte[] data) {
-			Objects.requireNonNull(data);
+			requireNonNull(data);
 			
 			// Compute the remainder by performing polynomial division
 			byte[] result = new byte[coefficients.length];
@@ -862,6 +802,12 @@ public final class QrCode {
 			return z;
 		}
 		
+	}
+
+	private static <T> T requireNonNull(T obj) {
+		if (obj == null)
+			throw new NullPointerException();
+		return obj;
 	}
 	
 }

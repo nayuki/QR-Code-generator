@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':common')
+    compile project(':javase')
+}
