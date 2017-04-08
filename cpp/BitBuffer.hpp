@@ -37,39 +37,36 @@ namespace qrcodegen {
 class BitBuffer final {
 	
 	/*---- Fields ----*/
-private:
 	
-	std::vector<uint8_t> data;
-	int bitLength;
+	private: std::vector<uint8_t> data;
+	private: int bitLength;
 	
 	
 	
 	/*---- Constructor ----*/
-public:
 	
 	// Creates an empty bit buffer (length 0).
-	BitBuffer();
+	public: BitBuffer();
 	
 	
 	
 	/*---- Methods ----*/
-public:
 	
 	// Returns the number of bits in the buffer, which is a non-negative value.
-	int getBitLength() const;
+	public: int getBitLength() const;
 	
 	
 	// Returns a copy of all bytes, padding up to the nearest byte.
-	std::vector<uint8_t> getBytes() const;
+	public: std::vector<uint8_t> getBytes() const;
 	
 	
 	// Appends the given number of bits of the given value to this sequence.
 	// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
-	void appendBits(uint32_t val, int len);
+	public: void appendBits(uint32_t val, int len);
 	
 	
 	// Appends the data of the given segment to this bit buffer.
-	void appendData(const QrSegment &seg);
+	public: void appendData(const QrSegment &seg);
 	
 };
 
