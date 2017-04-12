@@ -1,0 +1,6 @@
+dependencies {
+    compile project(':core')
+    compile project(':javase')
+    compile project(':svg')
+    compile project(':advanced')
+}

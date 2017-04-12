@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 
@@ -138,7 +137,7 @@ public final class QrSegment {
 	/** The length of this segment's unencoded data, measured in characters. Always zero or positive. */
 	public final int numChars;
 	
-	/** The bits of this segment packed into a byte array in big endian. Accessed through {@link getByte(int)}. Not {@code null}. */
+	/** The bits of this segment packed into a byte array in big endian. Accessed through {@link #getByte(int)}. Not {@code null}. */
 	private final byte[] data;
 	
 	/** The length of this segment's encoded data, measured in bits. Satisfies 0 &le; {@code bitLength} &le; {@code data.length} &times; 8. */

@@ -1,0 +1,7 @@
+include ':core'
+include ':advanced'
+include ':javase'
+include ':android'
+include ':svg'
+include ':demo'
+

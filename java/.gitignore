@@ -1,0 +1,26 @@
+# Built application files
+/build
+/classes
+
+# Local configuration file (sdk path, etc)
+local.properties
+gradle.properties
+
+# Gradle generated files
+.gradle/
+
+# Signing files
+.signing/
+
+# User-specific configurations
+/.idea
+*.iml
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

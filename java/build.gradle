@@ -1,0 +1,28 @@
+subprojects {
+    apply plugin: 'maven'
+    apply plugin: 'java'
+
+    group 'com.github.nayuki.QR-Code-generator'
+    version '1.0'
+
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src']
+            }
+            resources {
+                srcDirs = ['resources']
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven { url 'https://jitpack.io/' }
+    }
+
+}
