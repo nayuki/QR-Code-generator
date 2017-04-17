@@ -22,6 +22,7 @@
  *   Software.
  */
 
+#include <climits>
 #include <cstddef>
 #include "BitBuffer.hpp"
 #include "QrSegment.hpp"
@@ -139,7 +140,10 @@ int qrcodegen::QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int v
 		// Fail if segment length value doesn't fit in the length field's bit-width
 		if (seg.numChars >= (1 << ccbits))
 			return -1;
-		result += 4 + ccbits + seg.bitLength;
+		long temp = (long)result + 4 + ccbits + seg.bitLength;
+		if (temp > INT_MAX)
+			return -1;
+		result = temp;
 	}
 	return result;
 }

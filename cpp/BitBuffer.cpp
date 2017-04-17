@@ -22,6 +22,7 @@
  *   Software.
  */
 
+#include <climits>
 #include <cstddef>
 #include "BitBuffer.hpp"
 
@@ -44,8 +45,10 @@ std::vector<uint8_t> qrcodegen::BitBuffer::getBytes() const {
 void qrcodegen::BitBuffer::appendBits(uint32_t val, int len) {
 	if (len < 0 || len > 32 || (len < 32 && (val >> len) != 0))
 		throw "Value out of range";
-	size_t newBitLen = bitLength + len;
-	while (data.size() * 8 < newBitLen)
+	if (INT_MAX - bitLength < len)
+		throw "Buffer too long";
+	unsigned int newByteLen = ((unsigned int)bitLength + len + 7) / 8;
+	while (data.size() < newByteLen)
 		data.push_back(0);
 	for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
 		data.at(bitLength >> 3) |= ((val >> i) & 1) << (7 - (bitLength & 7));
@@ -53,8 +56,10 @@ void qrcodegen::BitBuffer::appendBits(uint32_t val, int len) {
 
 
 void qrcodegen::BitBuffer::appendData(const QrSegment &seg) {
-	size_t newBitLen = bitLength + seg.bitLength;
-	while (data.size() * 8 < newBitLen)
+	if (INT_MAX - bitLength < seg.bitLength)
+		throw "Buffer too long";
+	unsigned int newByteLen = ((unsigned int)bitLength + seg.bitLength + 7) / 8;
+	while (data.size() < newByteLen)
 		data.push_back(0);
 	for (int i = 0; i < seg.bitLength; i++, bitLength++) {  // Append bit by bit
 		int bit = (seg.data.at(i >> 3) >> (7 - (i & 7))) & 1;
