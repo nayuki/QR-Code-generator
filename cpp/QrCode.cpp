@@ -393,11 +393,11 @@ void qrcodegen::QrCode::applyMask(int mask) {
 
 int qrcodegen::QrCode::handleConstructorMasking(int mask) {
 	if (mask == -1) {  // Automatically choose best mask
-		int32_t minPenalty = INT32_MAX;
+		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
 			drawFormatBits(i);
 			applyMask(i);
-			int penalty = getPenaltyScore();
+			long penalty = getPenaltyScore();
 			if (penalty < minPenalty) {
 				mask = i;
 				minPenalty = penalty;
@@ -413,8 +413,8 @@ int qrcodegen::QrCode::handleConstructorMasking(int mask) {
 }
 
 
-int qrcodegen::QrCode::getPenaltyScore() const {
-	int result = 0;
+long qrcodegen::QrCode::getPenaltyScore() const {
+	long result = 0;
 	
 	// Adjacent modules in row having same color
 	for (int y = 0; y < size; y++) {

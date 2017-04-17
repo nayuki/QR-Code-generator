@@ -211,7 +211,7 @@ class QrCode final {
 	
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
-	private: int getPenaltyScore() const;
+	private: long getPenaltyScore() const;
 	
 	
 	
