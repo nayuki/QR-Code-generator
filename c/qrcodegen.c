@@ -39,6 +39,9 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int size);
 static int getAlignmentPatternPositions(int version, uint8_t result[7]);
 
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int version);
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int size, int mask);
+
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
 static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
@@ -306,6 +309,64 @@ static int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 		result[i] = pos;
 	result[0] = 6;
 	return numAlign;
+}
+
+
+// Draws the raw codewords (including data and ECC) onto the given QR Code. This requires the initial state of
+// the QR Code to be black at function modules and white at codeword modules (including unused remainder bits).
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int version) {
+	int size = qrcodegen_getSize(version);
+	
+	int i = 0;  // Bit index into the data
+	// Do the funny zigzag scan
+	for (int right = size - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
+		if (right == 6)
+			right = 5;
+		for (int vert = 0; vert < size; vert++) {  // Vertical counter
+			for (int j = 0; j < 2; j++) {
+				int x = right - j;  // Actual x coordinate
+				bool upwards = ((right & 2) == 0) ^ (x < 6);
+				int y = upwards ? size - 1 - vert : vert;  // Actual y coordinate
+				if (!getModule(qrcode, size, x, y) && i < dataLen * 8) {
+					bool black = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0;
+					setModule(qrcode, size, x, y, black);
+					i++;
+				}
+				// If there are any remainder bits (0 to 7), they are already
+				// set to 0/false/white when the grid of modules was initialized
+			}
+		}
+	}
+	assert(i == dataLen * 8);
+}
+
+
+// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
+// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
+// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
+// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int size, int mask) {
+	assert(0 <= mask && mask <= 7);
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x < size; x++) {
+			if (getModule(functionModules, size, x, y))
+				continue;
+			bool invert;
+			switch (mask) {
+				case 0:  invert = (x + y) % 2 == 0;                    break;
+				case 1:  invert = y % 2 == 0;                          break;
+				case 2:  invert = x % 3 == 0;                          break;
+				case 3:  invert = (x + y) % 3 == 0;                    break;
+				case 4:  invert = (x / 3 + y / 2) % 2 == 0;            break;
+				case 5:  invert = x * y % 2 + x * y % 3 == 0;          break;
+				case 6:  invert = (x * y % 2 + x * y % 3) % 2 == 0;    break;
+				case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;  break;
+				default:  assert(false);
+			}
+			bool val = getModule(qrcode, size, x, y);
+			setModule(qrcode, size, x, y, val ^ invert);
+		}
+	}
 }
 
 
