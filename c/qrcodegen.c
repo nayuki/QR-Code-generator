@@ -30,6 +30,10 @@
 
 /*---- Forward declarations for private functions ----*/
 
+static bool getModule(const uint8_t qrcode[], int size, int x, int y);
+static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack);
+static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack);
+
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
 static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
@@ -70,6 +74,50 @@ bool qrcodegen_isNumeric(const char *text) {
 			return false;
 	}
 	return true;
+}
+
+
+// Public function - see documentation comment in header file.
+int qrcodegen_getSize(int version) {
+	assert(1 <= version && version <= 40);
+	return version * 4 + 17;
+}
+
+
+// Public function - see documentation comment in header file.
+bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y) {
+	int size = qrcodegen_getSize(version);
+	return (0 <= x && x < size && 0 <= y && y < size) && getModule(qrcode, size, x, y);
+}
+
+
+// Gets the module at the given coordinates, which must be in bounds.
+static bool getModule(const uint8_t qrcode[], int size, int x, int y) {
+	assert(21 <= size && size <= 177 && 0 <= x && x < size && 0 <= y && y < size);
+	int index = y * size + x;
+	int bitIndex = index & 7;
+	int byteIndex = index >> 3;
+	return ((qrcode[byteIndex] >> bitIndex) & 1) != 0;
+}
+
+
+// Sets the module at the given coordinates, which must be in bounds.
+static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack) {
+	assert(21 <= size && size <= 177 && 0 <= x && x < size && 0 <= y && y < size);
+	int index = y * size + x;
+	int bitIndex = index & 7;
+	int byteIndex = index >> 3;
+	if (isBlack)
+		qrcode[byteIndex] |= 1 << bitIndex;
+	else
+		qrcode[byteIndex] &= (1 << bitIndex) ^ 0xFF;
+}
+
+
+// Sets the module at the given coordinates, doing nothing if out of bounds.
+static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack) {
+	if (0 <= x && x < size && 0 <= y && y < size)
+		setModule(qrcode, size, x, y, isBlack);
 }
 
 

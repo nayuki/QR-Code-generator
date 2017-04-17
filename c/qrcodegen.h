@@ -37,3 +37,19 @@ bool qrcodegen_isAlphanumeric(const char *text);
  * Tests whether the given string can be encoded in numeric mode.
  */
 bool qrcodegen_isNumeric(const char *text);
+
+
+/* 
+ * Returns the side length of any QR Code of the given version.
+ * The version must be in the range [1, 40]. The result is in the range [21, 177].
+ * Note that the length of any QR Code byte buffer must be at least ceil(size^2 / 8).
+ */
+int qrcodegen_getSize(int version);
+
+
+/* 
+ * Returns the color of the module (pixel) at the given coordinates, which is either
+ * true for white or false for black. The top left corner has the coordinates (x=0, y=0).
+ * If the given coordinates are out of bounds, then false (white) is returned.
+ */
+bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y);
