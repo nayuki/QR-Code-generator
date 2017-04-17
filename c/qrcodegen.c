@@ -23,6 +23,7 @@
  */
 
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include "qrcodegen.h"
 
@@ -34,6 +35,8 @@ static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack);
 static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack);
 
 static void initializeFunctionalModules(int version, uint8_t qrcode[]);
+static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
+static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int size);
 static int getAlignmentPatternPositions(int version, uint8_t result[7]);
 
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
@@ -182,6 +185,108 @@ static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
 			}
 		}
 	}
+}
+
+
+// Draws white function modules and possibly some black modules onto the given QR Code, without changing
+// non-function modules. This does not draw the format bits. This requires all function modules to be previously
+// marked black (namely by initializeFunctionalModules()), because this may skip redrawing black function modules.
+static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
+	// Draw horizontal and vertical timing patterns
+	int size = qrcodegen_getSize(version);
+	for (int i = 7; i < size - 7; i += 2) {
+		setModule(qrcode, size, 6, i, false);
+		setModule(qrcode, size, i, 6, false);
+	}
+	
+	// Draw 3 finder patterns
+	for (int i = -4; i <= 4; i++) {
+		for (int j = -4; j <= 4; j++) {
+			int dist = abs(i);
+			if (abs(j) > dist)
+				dist = abs(j);
+			if (dist == 2 || dist == 4) {
+				setModuleBounded(qrcode, size, 3 + j, 3 + i, false);
+				setModuleBounded(qrcode, size, size - 4 + j, 3 + i, false);
+				setModuleBounded(qrcode, size, 3 + j, size - 4 + i, false);
+			}
+		}
+	}
+	
+	// Draw numerous alignment patterns
+	uint8_t alignPatPos[7] = {0};
+	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
+	for (int i = 0; i < numAlign; i++) {
+		for (int j = 0; j < numAlign; j++) {
+			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
+				continue;  // Skip the three finder corners
+			else {
+				for (int k = -1; k <= 1; k++) {
+					for (int l = -1; l <= 1; l++)
+						setModule(qrcode, size, alignPatPos[i] + l, alignPatPos[j] + k, k == 0 && l == 0);
+				}
+			}
+		}
+	}
+	
+	// Draw version block
+	if (version >= 7) {
+		// Calculate error correction code and pack bits
+		int rem = version;  // version is uint6, in the range [7, 40]
+		for (int i = 0; i < 12; i++)
+			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
+		long data = (long)version << 12 | rem;  // uint18
+		assert(data >> 18 == 0);
+		
+		// Draw two copies
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 6; j++) {
+				int k = size - 11 + i;
+				setModule(qrcode, size, k, j, (data & 1) != 0);
+				setModule(qrcode, size, j, k, (data & 1) != 0);
+				data >>= 1;
+			}
+		}
+	}
+}
+
+
+// Based on the given ECC level and mask, this calculates the format bits
+// and draws their black and white modules onto the given QR Code.
+static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int size) {
+	// Calculate error correction code and pack bits
+	assert(0 <= (int)mask && (int)mask <= 7);
+	int data;
+	switch (ecl) {
+		case qrcodegen_Ecc_LOW     :  data = 1;  break;
+		case qrcodegen_Ecc_MEDIUM  :  data = 0;  break;
+		case qrcodegen_Ecc_QUARTILE:  data = 3;  break;
+		case qrcodegen_Ecc_HIGH    :  data = 2;  break;
+		default:  assert(false);
+	}
+	data = data << 3 | (int)mask;  // ecl-derived value is uint2, mask is uint3
+	int rem = data;
+	for (int i = 0; i < 10; i++)
+		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
+	data = data << 10 | rem;
+	data ^= 0x5412;  // uint15
+	assert(data >> 15 == 0);
+	
+	// Draw first copy
+	for (int i = 0; i <= 5; i++)
+		setModule(qrcode, size, 8, i, ((data >> i) & 1) != 0);
+	setModule(qrcode, size, 8, 7, ((data >> 6) & 1) != 0);
+	setModule(qrcode, size, 8, 8, ((data >> 7) & 1) != 0);
+	setModule(qrcode, size, 7, 8, ((data >> 8) & 1) != 0);
+	for (int i = 9; i < 15; i++)
+		setModule(qrcode, size, 14 - i, 8, ((data >> i) & 1) != 0);
+	
+	// Draw second copy
+	for (int i = 0; i <= 7; i++)
+		setModule(qrcode, size, size - 1 - i, 8, ((data >> i) & 1) != 0);
+	for (int i = 8; i < 15; i++)
+		setModule(qrcode, size, 8, size - 15 + i, ((data >> i) & 1) != 0);
+	setModule(qrcode, size, 8, size - 8, true);
 }
 
 
