@@ -312,7 +312,7 @@ std::vector<uint8_t> qrcodegen::QrCode::appendErrorCorrection(const std::vector<
 	int shortBlockLen = getNumRawDataModules(version) / 8 / numBlocks;
 	
 	// Split data into blocks and append ECC to each block
-	std::vector<std::vector<uint8_t>> blocks;
+	std::vector<std::vector<uint8_t> > blocks;
 	const ReedSolomonGenerator rs(blockEccLen);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
 		std::vector<uint8_t> dat;
