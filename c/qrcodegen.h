@@ -29,6 +29,42 @@
 
 
 /* 
+ * Represents the error correction level used in a QR Code symbol.
+ */
+enum qrcodegen_Ecc {
+	qrcodegen_Ecc_LOW,
+	qrcodegen_Ecc_MEDIUM,
+	qrcodegen_Ecc_QUARTILE,
+	qrcodegen_Ecc_HIGH,
+};
+
+
+/* 
+ * Represents the mask pattern used in a QR Code symbol.
+ */
+enum qrcodegen_Mask {
+	qrcodegen_Mask_AUTO = -1,
+	qrcodegen_Mask_0 = 0,
+	qrcodegen_Mask_1,
+	qrcodegen_Mask_2,
+	qrcodegen_Mask_3,
+	qrcodegen_Mask_4,
+	qrcodegen_Mask_5,
+	qrcodegen_Mask_6,
+	qrcodegen_Mask_7,
+};
+
+
+// Calculates the number of bytes needed to store any QR Code up to and including the given version number,
+// as a compile-time constant. For example, 'uint8_t buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];'
+// can store any single QR Code from version 1 to 25, inclusive.
+#define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((n) * 4 + 17) * ((n) * 4 + 17) + 7) / 8)
+
+// The worst-case number of bytes needed to store one QR Code, up to and including version 40.
+#define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(40)
+
+
+/* 
  * Tests whether the given string can be encoded in alphanumeric mode.
  */
 bool qrcodegen_isAlphanumeric(const char *text);
