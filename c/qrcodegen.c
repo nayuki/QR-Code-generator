@@ -23,7 +23,6 @@
  */
 
 #include <assert.h>
-#include <stdint.h>
 #include <string.h>
 #include "qrcodegen.h"
 
@@ -45,6 +44,7 @@ static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 /*---- Function implementations ----*/
 
+// Public function - see documentation comment in header file.
 bool qrcodegen_isAlphanumeric(const char *text) {
 	for (; *text != '\0'; text++) {
 		char c = *text;
@@ -70,6 +70,7 @@ bool qrcodegen_isAlphanumeric(const char *text) {
 }
 
 
+// Public function - see documentation comment in header file.
 bool qrcodegen_isNumeric(const char *text) {
 	for (; *text != '\0'; text++) {
 		char c = *text;
@@ -147,7 +148,7 @@ static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
 	}
 	
 	// Fill numerous alignment patterns
-	uint8_t alignPatPos[7] = {};
+	uint8_t alignPatPos[7] = {0};
 	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
 	for (int i = 0; i < numAlign; i++) {
 		for (int j = 0; j < numAlign; j++) {
