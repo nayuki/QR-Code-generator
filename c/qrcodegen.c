@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include "qrcodegen.h"
 
 
 /*---- Forward declarations for private functions ----*/
@@ -36,6 +37,41 @@ static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 
 /*---- Function implementations ----*/
+
+bool qrcodegen_isAlphanumeric(const char *text) {
+	for (; *text != '\0'; text++) {
+		char c = *text;
+		if (('0' <= c && c <= '9') || ('A' <= c && c <= 'Z'))
+			continue;
+		else switch (c) {
+			case ' ':
+			case '$':
+			case '%':
+			case '*':
+			case '+':
+			case '-':
+			case '.':
+			case '/':
+			case ':':
+				continue;
+			default:
+				return false;
+		}
+		return false;
+	}
+	return true;
+}
+
+
+bool qrcodegen_isNumeric(const char *text) {
+	for (; *text != '\0'; text++) {
+		char c = *text;
+		if (c < '0' || c > '9')
+			return false;
+	}
+	return true;
+}
+
 
 // Calculates the Reed-Solomon generator polynomial of the given degree, storing in result[0 : degree].
 static void calcReedSolomonGenerator(int degree, uint8_t result[]) {
