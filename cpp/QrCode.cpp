@@ -258,7 +258,7 @@ void qrcodegen::QrCode::drawVersion() {
 	int rem = version;  // version is uint6, in the range [7, 40]
 	for (int i = 0; i < 12; i++)
 		rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
-	int data = version << 12 | rem;  // uint18
+	long data = (long)version << 12 | rem;  // uint18
 	if (data >> 18 != 0)
 		throw "Assertion error";
 	
