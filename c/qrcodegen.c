@@ -34,6 +34,9 @@ static bool getModule(const uint8_t qrcode[], int size, int x, int y);
 static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack);
 static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack);
 
+static void initializeFunctionalModules(int version, uint8_t qrcode[]);
+static int getAlignmentPatternPositions(int version, uint8_t result[7]);
+
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
 static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
@@ -118,6 +121,85 @@ static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack) {
 static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack) {
 	if (0 <= x && x < size && 0 <= y && y < size)
 		setModule(qrcode, size, x, y, isBlack);
+}
+
+
+// Fills the given QR Code grid with white modules for the given version's size,
+// then marks every function module in the QR Code as black.
+static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
+	// Initialize QR Code
+	int size = qrcodegen_getSize(version);
+	memset(qrcode, 0, (size * size + 7) / 8 * sizeof(qrcode[0]));
+	
+	// Fill horizontal and vertical timing patterns
+	for (int i = 0; i < size; i++) {
+		setModule(qrcode, size, 6, i, true);
+		setModule(qrcode, size, i, 6, true);
+	}
+	
+	// Fill 3 finder patterns (all corners except bottom right)
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			setModule(qrcode, size, j, i, true);
+			setModule(qrcode, size, size - 1 - j, i, true);
+			setModule(qrcode, size, j, size - 1 - i, true);
+		}
+	}
+	
+	// Fill numerous alignment patterns
+	uint8_t alignPatPos[7] = {};
+	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
+	for (int i = 0; i < numAlign; i++) {
+		for (int j = 0; j < numAlign; j++) {
+			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
+				continue;  // Skip the three finder corners
+			else {
+				for (int k = -2; k <= 2; k++) {
+					for (int l = -2; l <= 2; l++)
+						setModule(qrcode, size, alignPatPos[i] + l, alignPatPos[j] + k, true);
+				}
+			}
+		}
+	}
+	
+	// Fill format bits
+	for (int i = 0; i < 8; i++) {
+		setModule(qrcode, size, i, 8, true);
+		setModule(qrcode, size, 8, i, true);
+		setModule(qrcode, size, size - 1 - i, 8, true);
+		setModule(qrcode, size, 8, size - 1 - i, true);
+	}
+	setModule(qrcode, size, 8, 8, true);
+	
+	// Fill version
+	if (version >= 7) {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 6; j++) {
+				int k = size - 11 + i;
+				setModule(qrcode, size, k, j, true);
+				setModule(qrcode, size, j, k, true);
+			}
+		}
+	}
+}
+
+
+// Calculates the positions of alignment patterns in ascending order for the given version number,
+// storing them to the given array and returning an array length in the range [0, 7].
+static int getAlignmentPatternPositions(int version, uint8_t result[7]) {
+	if (version == 1)
+		return 0;
+	int size = qrcodegen_getSize(version);
+	int numAlign = version / 7 + 2;
+	int step;
+	if (version != 32)
+		step = (version * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;  // ceil((size - 13) / (2*numAlign - 2)) * 2
+	else  // C-C-C-Combo breaker!
+		step = 26;
+	for (int i = numAlign - 1, pos = size - 7; i >= 1; i--, pos -= step)
+		result[i] = pos;
+	result[0] = 6;
+	return numAlign;
 }
 
 
