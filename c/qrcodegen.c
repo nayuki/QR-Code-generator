@@ -44,6 +44,7 @@ static void initializeFunctionalModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int size);
 static int getAlignmentPatternPositions(int version, uint8_t result[7]);
+static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int size);
 
 static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 static int getNumRawDataModules(int version);
@@ -440,19 +441,13 @@ static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
 	memset(qrcode, 0, (size * size + 7) / 8 * sizeof(qrcode[0]));
 	
 	// Fill horizontal and vertical timing patterns
-	for (int i = 0; i < size; i++) {
-		setModule(qrcode, size, 6, i, true);
-		setModule(qrcode, size, i, 6, true);
-	}
+	fillRectangle(6, 0, 1, size, qrcode, size);
+	fillRectangle(0, 6, size, 1, qrcode, size);
 	
-	// Fill 3 finder patterns (all corners except bottom right)
-	for (int i = 0; i < 8; i++) {
-		for (int j = 0; j < 8; j++) {
-			setModule(qrcode, size, j, i, true);
-			setModule(qrcode, size, size - 1 - j, i, true);
-			setModule(qrcode, size, j, size - 1 - i, true);
-		}
-	}
+	// Fill 3 finder patterns (all corners except bottom right) and format bits
+	fillRectangle(0, 0, 9, 9, qrcode, size);
+	fillRectangle(size - 8, 0, 8, 9, qrcode, size);
+	fillRectangle(0, size - 8, 9, 8, qrcode, size);
 	
 	// Fill numerous alignment patterns
 	uint8_t alignPatPos[7] = {0};
@@ -461,33 +456,15 @@ static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
 		for (int j = 0; j < numAlign; j++) {
 			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
 				continue;  // Skip the three finder corners
-			else {
-				for (int k = -2; k <= 2; k++) {
-					for (int l = -2; l <= 2; l++)
-						setModule(qrcode, size, alignPatPos[i] + l, alignPatPos[j] + k, true);
-				}
-			}
+			else
+				fillRectangle(alignPatPos[i] - 2, alignPatPos[j] - 2, 5, 5, qrcode, size);
 		}
 	}
-	
-	// Fill format bits
-	for (int i = 0; i < 8; i++) {
-		setModule(qrcode, size, i, 8, true);
-		setModule(qrcode, size, 8, i, true);
-		setModule(qrcode, size, size - 1 - i, 8, true);
-		setModule(qrcode, size, 8, size - 1 - i, true);
-	}
-	setModule(qrcode, size, 8, 8, true);
 	
 	// Fill version
 	if (version >= 7) {
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 3; j++) {
-				int k = size - 11 + j;
-				setModule(qrcode, size, k, i, true);
-				setModule(qrcode, size, i, k, true);
-			}
-		}
+		fillRectangle(size - 11, 0, 3, 6, qrcode, size);
+		fillRectangle(0, size - 11, 6, 3, qrcode, size);
 	}
 }
 
@@ -610,6 +587,15 @@ static int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 		result[i] = pos;
 	result[0] = 6;
 	return numAlign;
+}
+
+
+// Sets every pixel in the range [left : left + width] * [top : top + height] to black.
+static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int size) {
+	for (int dy = 0; dy < height; dy++) {
+		for (int dx = 0; dx < width; dx++)
+			setModule(qrcode, size, left + dx, top + dy, true);
+	}
 }
 
 
