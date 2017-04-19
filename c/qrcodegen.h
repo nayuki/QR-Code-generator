@@ -77,6 +77,17 @@ bool qrcodegen_isNumeric(const char *text);
 
 
 /* 
+ * Encodes the given binary data to a QR Code symbol, return the actual version number used.
+ * If the data is too long to fit in any version in the given range at the given ECC level,
+ * then 0 is returned. dataAndTemp[0 : dataLen] represents the input data, and the function
+ * may overwrite the array's contents as a temporary work area. Both dataAndTemp and qrcode
+ * must have length at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
+ */
+int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
+	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask);
+
+
+/* 
  * Returns the side length of any QR Code of the given version.
  * The version must be in the range [1, 40]. The result is in the range [21, 177].
  * Note that the length of any QR Code byte buffer must be at least ceil(size^2 / 8).

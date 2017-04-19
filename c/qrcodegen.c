@@ -23,12 +23,16 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include "qrcodegen.h"
 
 
 /*---- Forward declarations for private functions ----*/
+
+static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int *bitLen);
+static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 
 static bool getModule(const uint8_t qrcode[], int size, int x, int y);
 static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack);
@@ -108,6 +112,73 @@ bool qrcodegen_isNumeric(const char *text) {
 			return false;
 	}
 	return true;
+}
+
+
+// Public function - see documentation comment in header file.
+int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
+		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask) {
+	assert(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40);
+	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
+	
+	int version;
+	int dataUsedBits = -1;
+	int dataCapacityBits = -1;
+	for (version = minVersion; ; version++) {
+		if ((version <= 9 && dataLen < (1U << 8)) || dataLen < (1U << 16)) {
+			dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
+			dataUsedBits = 4 + (version <= 9 ? 8 : 16);
+			if (dataLen > (unsigned int)INT_MAX / 8 || (unsigned int)(INT_MAX - dataUsedBits) < dataLen * 8)
+				continue;
+			dataUsedBits += dataLen * 8;
+			if (dataUsedBits <= dataCapacityBits)
+				break;  // This version number is found to be suitable
+		}
+		if (version >= maxVersion)  // All versions in the range could not fit the given data
+			return 0;
+	}
+	assert(dataUsedBits >= 0 && dataCapacityBits >= 0);
+	
+	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
+	int bitLen = 0;
+	appendBitsToBuffer(4, 4, qrcode, &bitLen);
+	appendBitsToBuffer((uint16_t)dataLen, (version <= 9 ? 8 : 16), qrcode, &bitLen);
+	for (size_t i = 0; i < dataLen; i++)
+		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
+	int terminatorBits = dataCapacityBits - bitLen;
+	if (terminatorBits > 4)
+		terminatorBits = 4;
+	appendBitsToBuffer(0, terminatorBits, qrcode, &bitLen);
+	appendBitsToBuffer(0, (8 - bitLen % 8) % 8, qrcode, &bitLen);
+	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
+	assert(bitLen % 8 == 0);
+	
+	appendErrorCorrection(qrcode, version, ecl, dataAndTemp);
+	initializeFunctionalModules(version, qrcode);
+	drawCodewords(dataAndTemp, getNumRawDataModules(version) / 8, qrcode, version);
+	drawWhiteFunctionModules(qrcode, version);
+	initializeFunctionalModules(version, dataAndTemp);
+	mask = qrcodegen_Mask_0;
+	applyMask(dataAndTemp, qrcode, qrcodegen_getSize(version), (int)mask);
+	drawFormatBits(ecl, (int)mask, qrcode, qrcodegen_getSize(version));
+	return version;
+}
+
+
+// Appends the given sequence of bits to the given byte-based bit buffer, increasing the bit length.
+static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int *bitLen) {
+	assert(0 <= numBits && numBits <= 16 && (long)val >> numBits == 0);
+	for (int i = numBits - 1; i >= 0; i--, (*bitLen)++)
+		buffer[*bitLen >> 3] |= ((val >> i) & 1) << (7 - (*bitLen & 7));
+}
+
+
+// Returns the number of 8-bit codewords that can be used for storing data (not ECC),
+// for the given version number and error correction level. The result is in the range [9, 2956].
+static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
+	assert(0 <= (int)ecl && (int)ecl < 4 && 1 <= version && version <= 40);
+	return getNumRawDataModules(version) / 8 - NUM_ERROR_CORRECTION_CODEWORDS[(int)ecl][version];
 }
 
 
