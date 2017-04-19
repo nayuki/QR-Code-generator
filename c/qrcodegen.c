@@ -46,7 +46,7 @@ static int getAlignmentPatternPositions(int version, uint8_t result[7]);
 
 static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 static int getNumRawDataModules(int version);
-static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int version);
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int size);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int size, int mask);
 
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
@@ -204,7 +204,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	
 	appendErrorCorrection(qrcode, version, ecl, tempBuffer);
 	initializeFunctionalModules(version, qrcode);
-	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, qrcode, version);
+	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, qrcode, qrcodegen_getSize(version));
 	drawWhiteFunctionModules(qrcode, version);
 	initializeFunctionalModules(version, tempBuffer);
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
@@ -274,7 +274,7 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	
 	appendErrorCorrection(qrcode, version, ecl, dataAndTemp);
 	initializeFunctionalModules(version, qrcode);
-	drawCodewords(dataAndTemp, getNumRawDataModules(version) / 8, qrcode, version);
+	drawCodewords(dataAndTemp, getNumRawDataModules(version) / 8, qrcode, qrcodegen_getSize(version));
 	drawWhiteFunctionModules(qrcode, version);
 	initializeFunctionalModules(version, dataAndTemp);
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
@@ -682,9 +682,7 @@ static int getNumRawDataModules(int version) {
 
 // Draws the raw codewords (including data and ECC) onto the given QR Code. This requires the initial state of
 // the QR Code to be black at function modules and white at codeword modules (including unused remainder bits).
-static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int version) {
-	int size = qrcodegen_getSize(version);
-	
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int size) {
 	int i = 0;  // Bit index into the data
 	// Do the funny zigzag scan
 	for (int right = size - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
