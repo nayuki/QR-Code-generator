@@ -71,7 +71,7 @@ enum qrcodegen_Mask {
  * qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
  */
 int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
-	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask);
+	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
 
 /* 
@@ -82,7 +82,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
  * must have length at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
  */
 int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
-	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask);
+	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
 
 /* 

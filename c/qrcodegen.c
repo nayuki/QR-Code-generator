@@ -88,7 +88,7 @@ static const int PENALTY_N4 = 10;
 
 // Public function - see documentation comment in header file.
 int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
-		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask) {
+		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
 	assert(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
@@ -126,7 +126,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 			return 0;
 		for (int i = 0; i < textLen; i++)
 			tempBuffer[i] = (uint8_t)text[i];
-		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask);
+		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask, boostEcl);
 	}
 	
 	int version;
@@ -153,6 +153,12 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 			return 0;
 	}
 	assert(dataUsedBits >= 0 && dataCapacityBits >= 0);
+	if (boostEcl) {
+		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_MEDIUM  ) * 8) ecl = qrcodegen_Ecc_MEDIUM  ;
+		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_QUARTILE) * 8) ecl = qrcodegen_Ecc_QUARTILE;
+		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_HIGH    ) * 8) ecl = qrcodegen_Ecc_HIGH    ;
+		dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
+	}
 	
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
@@ -223,7 +229,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 
 // Public function - see documentation comment in header file.
 int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
-		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask) {
+		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
 	assert(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
@@ -244,6 +250,12 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 			return 0;
 	}
 	assert(dataUsedBits >= 0 && dataCapacityBits >= 0);
+	if (boostEcl) {
+		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_MEDIUM  ) * 8) ecl = qrcodegen_Ecc_MEDIUM  ;
+		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_QUARTILE) * 8) ecl = qrcodegen_Ecc_QUARTILE;
+		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_HIGH    ) * 8) ecl = qrcodegen_Ecc_HIGH    ;
+		dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
+	}
 	
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
