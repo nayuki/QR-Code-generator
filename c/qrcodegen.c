@@ -31,6 +31,7 @@
 
 /*---- Forward declarations for private functions ----*/
 
+static long getPenaltyScore(const uint8_t qrcode[], int size);
 static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int *bitLen);
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 
@@ -73,6 +74,11 @@ const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
 	{-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8,  8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68},  // Quartile
 	{-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81},  // High
 };
+
+static const int PENALTY_N1 = 3;
+static const int PENALTY_N2 = 3;
+static const int PENALTY_N3 = 40;
+static const int PENALTY_N4 = 10;
 
 
 
@@ -159,10 +165,105 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	drawCodewords(dataAndTemp, getNumRawDataModules(version) / 8, qrcode, version);
 	drawWhiteFunctionModules(qrcode, version);
 	initializeFunctionalModules(version, dataAndTemp);
-	mask = qrcodegen_Mask_0;
+	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
+		long minPenalty = LONG_MAX;
+		for (int i = 0; i < 8; i++) {
+			drawFormatBits(ecl, i, qrcode, qrcodegen_getSize(version));
+			applyMask(dataAndTemp, qrcode, qrcodegen_getSize(version), i);
+			long penalty = getPenaltyScore(qrcode, qrcodegen_getSize(version));
+			if (penalty < minPenalty) {
+				mask = (enum qrcodegen_Mask)i;
+				minPenalty = penalty;
+			}
+			applyMask(dataAndTemp, qrcode, qrcodegen_getSize(version), i);  // Undoes the mask due to XOR
+		}
+	}
+	assert(0 <= (int)mask && (int)mask <= 7);
 	applyMask(dataAndTemp, qrcode, qrcodegen_getSize(version), (int)mask);
 	drawFormatBits(ecl, (int)mask, qrcode, qrcodegen_getSize(version));
 	return version;
+}
+
+
+// Calculates and returns the penalty score based on state of the given QR Code's current modules.
+// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+static long getPenaltyScore(const uint8_t qrcode[], int size) {
+	long result = 0;
+	
+	// Adjacent modules in row having same color
+	for (int y = 0; y < size; y++) {
+		bool colorX = getModule(qrcode, size, 0, y);
+		for (int x = 1, runX = 1; x < size; x++) {
+			if (getModule(qrcode, size, x, y) != colorX) {
+				colorX = getModule(qrcode, size, x, y);
+				runX = 1;
+			} else {
+				runX++;
+				if (runX == 5)
+					result += PENALTY_N1;
+				else if (runX > 5)
+					result++;
+			}
+		}
+	}
+	// Adjacent modules in column having same color
+	for (int x = 0; x < size; x++) {
+		bool colorY = getModule(qrcode, size, x, 0);
+		for (int y = 1, runY = 1; y < size; y++) {
+			if (getModule(qrcode, size, x, y) != colorY) {
+				colorY = getModule(qrcode, size, x, y);
+				runY = 1;
+			} else {
+				runY++;
+				if (runY == 5)
+					result += PENALTY_N1;
+				else if (runY > 5)
+					result++;
+			}
+		}
+	}
+	
+	// 2*2 blocks of modules having same color
+	for (int y = 0; y < size - 1; y++) {
+		for (int x = 0; x < size - 1; x++) {
+			bool  color = getModule(qrcode, size, x, y);
+			if (  color == getModule(qrcode, size, x + 1, y) &&
+			      color == getModule(qrcode, size, x, y + 1) &&
+			      color == getModule(qrcode, size, x + 1, y + 1))
+				result += PENALTY_N2;
+		}
+	}
+	
+	// Finder-like pattern in rows
+	for (int y = 0; y < size; y++) {
+		for (int x = 0, bits = 0; x < size; x++) {
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, size, x, y) ? 1 : 0);
+			if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+				result += PENALTY_N3;
+		}
+	}
+	// Finder-like pattern in columns
+	for (int x = 0; x < size; x++) {
+		for (int y = 0, bits = 0; y < size; y++) {
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, size, x, y) ? 1 : 0);
+			if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+				result += PENALTY_N3;
+		}
+	}
+	
+	// Balance of black and white modules
+	int black = 0;
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x < size; x++) {
+			if (getModule(qrcode, size, x, y))
+				black++;
+		}
+	}
+	int total = size * size;
+	// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
+	for (int k = 0; black*20 < (9-k)*total || black*20 > (11+k)*total; k++)
+		result += PENALTY_N4;
+	return result;
 }
 
 
