@@ -704,7 +704,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 /*---- Reed-Solomon ECC generator functions ----*/
 
 // XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
+// properties, calling applyMask(..., m) twice with the same value is equivalent to no change at all.
 // This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 // well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int size, int mask) {

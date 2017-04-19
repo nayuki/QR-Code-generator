@@ -65,7 +65,8 @@ enum qrcodegen_Mask {
 // can store any single QR Code from version 1 to 25, inclusive.
 #define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((n) * 4 + 17) * ((n) * 4 + 17) + 7) / 8)
 
-// The worst-case number of bytes needed to store one QR Code, up to and including version 40.
+// The worst-case number of bytes needed to store one QR Code, up to and including
+// version 40. This value equals 3917, which is just under 4 kilobytes.
 #define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(40)
 
 
@@ -83,7 +84,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 
 
 /* 
- * Encodes the given binary data to a QR Code symbol, return the actual version number used.
+ * Encodes the given binary data to a QR Code symbol, returning the actual version number used.
  * If the data is too long to fit in any version in the given range at the given ECC level,
  * then 0 is returned. dataAndTemp[0 : dataLen] represents the input data, and the function
  * may overwrite the array's contents as a temporary work area. Both dataAndTemp and qrcode
@@ -97,9 +98,10 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 /*---- Low-level QR Code functions ----*/
 
 /* 
- * Returns the side length of any QR Code of the given version.
+ * Returns the side length of any QR Code of the given version number.
  * The version must be in the range [1, 40]. The result is in the range [21, 177].
- * Note that the length of any QR Code byte buffer must be at least ceil(size^2 / 8).
+ * Note that every 'uint8_t qrcode[]' buffer must have a length of at least
+ * ceil(size^2 / 8), which also equals qrcodegen_BUFFER_LEN_FOR_VERSION(version).
  */
 int qrcodegen_getSize(int version);
 
