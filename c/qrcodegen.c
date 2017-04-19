@@ -57,6 +57,8 @@ static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 /*---- Private tables of constants ----*/
 
+static const char *ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
+
 static const int16_t NUM_ERROR_CORRECTION_CODEWORDS[4][41] = {
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
 	//0,  1,  2,  3,  4,  5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,   25,   26,   27,   28,   29,   30,   31,   32,   33,   34,   35,   36,   37,   38,   39,   40    Error correction level
@@ -83,6 +85,141 @@ static const int PENALTY_N4 = 10;
 
 
 /*---- Function implementations ----*/
+
+// Public function - see documentation comment in header file.
+int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
+		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask) {
+	assert(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40);
+	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
+	
+	// Get text properties
+	int textLen = 0;
+	bool isNumeric = true;
+	bool isAlphanumeric = true;
+	for (const char *p = text; *p != '\0'; p++, textLen++) {
+		if (textLen == INT16_MAX)  // Note: INT16_MAX < INT_MAX && INT16_MAX < SIZE_MAX
+			return 0;
+		char c = *p;
+		if (c < '0' || c > '9') {
+			isNumeric = false;
+			isAlphanumeric &= strchr(ALPHANUMERIC_CHARSET, c) != NULL;
+		}
+	}
+	
+	int textBits;
+	if (isNumeric) {  // textBits = textLen * 3 + ceil(textLen / 3)
+		if (textLen > INT_MAX / 3)
+			return 0;
+		textBits = textLen * 3;
+		if (textLen > INT_MAX - 2 || textLen > INT_MAX - textBits)
+			return 0;
+		textBits += (textLen + 2) / 3;
+	} else if (isAlphanumeric) {  // textBits = textLen * 5 + ceil(textLen / 2)
+		if (textLen > INT_MAX / 5)
+			return 0;
+		textBits = textLen * 5;
+		if (textLen > INT_MAX - 1 || textLen > INT_MAX - textBits)
+			return 0;
+		textBits += (textLen + 1) / 2;
+	} else {  // Use binary mode
+		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
+			return 0;
+		for (int i = 0; i < textLen; i++)
+			tempBuffer[i] = (uint8_t)text[i];
+		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask);
+	}
+	
+	int version;
+	int dataUsedBits = -1;
+	int dataCapacityBits = -1;
+	int lengthBits = -1;
+	for (version = minVersion; ; version++) {
+		if (version <= 9)
+			lengthBits = isNumeric ? 10 : 9;
+		else if (version <= 26)
+			lengthBits = isNumeric ? 12 : 11;
+		else
+			lengthBits = isNumeric ? 14 : 13;
+		if (textLen < (1 << lengthBits)) {
+			dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
+			dataUsedBits = 4 + lengthBits;
+			if (textBits > INT_MAX - dataUsedBits)
+				continue;
+			dataUsedBits += textBits;
+			if (dataUsedBits <= dataCapacityBits)
+				break;  // This version number is found to be suitable
+		}
+		if (version >= maxVersion)  // All versions in the range could not fit the given data
+			return 0;
+	}
+	assert(dataUsedBits >= 0 && dataCapacityBits >= 0);
+	
+	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
+	int bitLen = 0;
+	appendBitsToBuffer(isNumeric ? 1 : 2, 4, qrcode, &bitLen);
+	appendBitsToBuffer((uint16_t)textLen, lengthBits, qrcode, &bitLen);
+	if (isNumeric) {
+		int accumData = 0;
+		int accumCount = 0;
+		for (const char *p = text; *p != '\0'; p++) {
+			accumData = accumData * 10 + (*p - '0');
+			accumCount++;
+			if (accumCount == 3) {
+				appendBitsToBuffer(accumData, 10, qrcode, &bitLen);
+				accumData = 0;
+				accumCount = 0;
+			}
+		}
+		if (accumCount > 0)  // 1 or 2 digits remaining
+			appendBitsToBuffer(accumData, accumCount * 3 + 1, qrcode, &bitLen);
+	} else {  // isAlphanumeric
+		int accumData = 0;
+		int accumCount = 0;
+		for (const char *p = text; *p != '\0'; p++) {
+			accumData = accumData * 45 + (strchr(ALPHANUMERIC_CHARSET, *p) - ALPHANUMERIC_CHARSET);
+			accumCount++;
+			if (accumCount == 2) {
+				appendBitsToBuffer(accumData, 11, qrcode, &bitLen);
+				accumData = 0;
+				accumCount = 0;
+			}
+		}
+		if (accumCount > 0)  // 1 character remaining
+			appendBitsToBuffer(accumData, 6, qrcode, &bitLen);
+	}
+	int terminatorBits = dataCapacityBits - bitLen;
+	if (terminatorBits > 4)
+		terminatorBits = 4;
+	appendBitsToBuffer(0, terminatorBits, qrcode, &bitLen);
+	appendBitsToBuffer(0, (8 - bitLen % 8) % 8, qrcode, &bitLen);
+	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
+	assert(bitLen % 8 == 0);
+	
+	appendErrorCorrection(qrcode, version, ecl, tempBuffer);
+	initializeFunctionalModules(version, qrcode);
+	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, qrcode, version);
+	drawWhiteFunctionModules(qrcode, version);
+	initializeFunctionalModules(version, tempBuffer);
+	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
+		long minPenalty = LONG_MAX;
+		for (int i = 0; i < 8; i++) {
+			drawFormatBits(ecl, i, qrcode, qrcodegen_getSize(version));
+			applyMask(tempBuffer, qrcode, qrcodegen_getSize(version), i);
+			long penalty = getPenaltyScore(qrcode, qrcodegen_getSize(version));
+			if (penalty < minPenalty) {
+				mask = (enum qrcodegen_Mask)i;
+				minPenalty = penalty;
+			}
+			applyMask(tempBuffer, qrcode, qrcodegen_getSize(version), i);  // Undoes the mask due to XOR
+		}
+	}
+	assert(0 <= (int)mask && (int)mask <= 7);
+	applyMask(tempBuffer, qrcode, qrcodegen_getSize(version), (int)mask);
+	drawFormatBits(ecl, (int)mask, qrcode, qrcodegen_getSize(version));
+	return version;
+}
+
 
 // Public function - see documentation comment in header file.
 int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],

@@ -65,6 +65,16 @@ enum qrcodegen_Mask {
 
 
 /* 
+ * Encodes the given text data to a QR Code symbol, returning the actual version number used.
+ * If the data is too long to fit in any version in the given range at the given ECC level,
+ * then 0 is returned. Both dataAndTemp and qrcode each must have length at least
+ * qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
+ */
+int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
+	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask);
+
+
+/* 
  * Encodes the given binary data to a QR Code symbol, return the actual version number used.
  * If the data is too long to fit in any version in the given range at the given ECC level,
  * then 0 is returned. dataAndTemp[0 : dataLen] represents the input data, and the function
