@@ -60,6 +60,10 @@ enum qrcodegen_Mask {
 
 /*---- Macro constants and functions ----*/
 
+// The minimum and maximum defined QR Code version numbers.
+#define qrcodegen_VERSION_MIN  1
+#define qrcodegen_VERSION_MAX  40
+
 // Calculates the number of bytes needed to store any QR Code up to and including the given version number,
 // as a compile-time constant. For example, 'uint8_t buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];'
 // can store any single QR Code from version 1 to 25, inclusive.
@@ -67,7 +71,7 @@ enum qrcodegen_Mask {
 
 // The worst-case number of bytes needed to store one QR Code, up to and including
 // version 40. This value equals 3917, which is just under 4 kilobytes.
-#define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(40)
+#define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(qrcodegen_VERSION_MAX)
 
 
 

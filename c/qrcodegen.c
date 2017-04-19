@@ -91,7 +91,7 @@ static const int PENALTY_N4 = 10;
 // Public function - see documentation comment in header file.
 int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
-	assert(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40);
+	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
 	// Get text properties
@@ -211,7 +211,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 // Public function - see documentation comment in header file.
 int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
-	assert(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40);
+	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
 	int version;
@@ -378,7 +378,7 @@ static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int 
 // Returns the number of 8-bit codewords that can be used for storing data (not ECC),
 // for the given version number and error correction level. The result is in the range [9, 2956].
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
-	assert(0 <= (int)ecl && (int)ecl < 4 && 1 <= version && version <= 40);
+	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	return getNumRawDataModules(version) / 8 - NUM_ERROR_CORRECTION_CODEWORDS[(int)ecl][version];
 }
 
@@ -388,7 +388,7 @@ static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 
 // Public function - see documentation comment in header file.
 int qrcodegen_getSize(int version) {
-	assert(1 <= version && version <= 40);
+	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	return version * 4 + 17;
 }
 
@@ -605,7 +605,7 @@ static void fillRectangle(int left, int top, int width, int height, uint8_t qrco
 // and will be clobbered by this function. The final answer is stored in result[0 : rawCodewords].
 static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]) {
 	// Calculate parameter numbers
-	assert(0 <= (int)ecl && (int)ecl < 4 && 1 <= version && version <= 40);
+	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
 	int totalEcc = NUM_ERROR_CORRECTION_CODEWORDS[(int)ecl][version];
 	assert(totalEcc % numBlocks == 0);
@@ -647,7 +647,7 @@ static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ec
 // Returns the number of data bits that can be stored in a QR Code of the given version number, after
 // all function modules are excluded. This includes remainder bits, so it may not be a multiple of 8.
 static int getNumRawDataModules(int version) {
-	assert(1 <= version && version <= 40);
+	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = (16 * version + 128) * version + 64;
 	if (version >= 2) {
 		int numAlign = version / 7 + 2;

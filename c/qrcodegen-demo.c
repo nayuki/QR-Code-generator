@@ -51,7 +51,8 @@ static void doBasicDemo() {
 	// Make and print the QR Code symbol
 	uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 	uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-	int version = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl, 1, 40, qrcodegen_Mask_AUTO, true);
+	int version = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
+		qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 	if (version != 0)
 		printQr(qrcode, version);
 }
