@@ -28,6 +28,8 @@
 #include <stdint.h>
 
 
+/*---- Enumeration types and constants ----*/
+
 /* 
  * Represents the error correction level used in a QR Code symbol.
  */
@@ -55,6 +57,9 @@ enum qrcodegen_Mask {
 };
 
 
+
+/*---- Macro constants and functions ----*/
+
 // Calculates the number of bytes needed to store any QR Code up to and including the given version number,
 // as a compile-time constant. For example, 'uint8_t buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];'
 // can store any single QR Code from version 1 to 25, inclusive.
@@ -63,6 +68,9 @@ enum qrcodegen_Mask {
 // The worst-case number of bytes needed to store one QR Code, up to and including version 40.
 #define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(40)
 
+
+
+/*---- Top-level QR Code functions ----*/
 
 /* 
  * Encodes the given text data to a QR Code symbol, returning the actual version number used.
@@ -84,6 +92,9 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
+
+
+/*---- Low-level QR Code functions ----*/
 
 /* 
  * Returns the side length of any QR Code of the given version.

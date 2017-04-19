@@ -84,7 +84,7 @@ static const int PENALTY_N4 = 10;
 
 
 
-/*---- Function implementations ----*/
+/*---- Top-level QR Code encoding functions ----*/
 
 // Public function - see documentation comment in header file.
 int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
@@ -395,6 +395,9 @@ static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 }
 
 
+
+/*---- Basic QR Code information functions ----*/
+
 // Public function - see documentation comment in header file.
 int qrcodegen_getSize(int version) {
 	assert(1 <= version && version <= 40);
@@ -438,6 +441,9 @@ static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBl
 		setModule(qrcode, size, x, y, isBlack);
 }
 
+
+
+/*---- QR Code drawing functions ----*/
 
 // Fills the given QR Code grid with white modules for the given version's size,
 // then marks every function module in the QR Code as black.
@@ -706,6 +712,9 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 	assert(i == dataLen * 8);
 }
 
+
+
+/*---- Reed-Solomon ECC generator functions ----*/
 
 // XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
 // properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
