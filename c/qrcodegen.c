@@ -31,6 +31,7 @@
 
 /*---- Forward declarations for private functions ----*/
 
+static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask);
 static long getPenaltyScore(const uint8_t qrcode[], int size);
 static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int *bitLen);
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
@@ -201,28 +202,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
 	assert(bitLen % 8 == 0);
-	
-	appendErrorCorrection(qrcode, version, ecl, tempBuffer);
-	initializeFunctionalModules(version, qrcode);
-	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, qrcode, qrcodegen_getSize(version));
-	drawWhiteFunctionModules(qrcode, version);
-	initializeFunctionalModules(version, tempBuffer);
-	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
-		long minPenalty = LONG_MAX;
-		for (int i = 0; i < 8; i++) {
-			drawFormatBits(ecl, i, qrcode, qrcodegen_getSize(version));
-			applyMask(tempBuffer, qrcode, qrcodegen_getSize(version), i);
-			long penalty = getPenaltyScore(qrcode, qrcodegen_getSize(version));
-			if (penalty < minPenalty) {
-				mask = (enum qrcodegen_Mask)i;
-				minPenalty = penalty;
-			}
-			applyMask(tempBuffer, qrcode, qrcodegen_getSize(version), i);  // Undoes the mask due to XOR
-		}
-	}
-	assert(0 <= (int)mask && (int)mask <= 7);
-	applyMask(tempBuffer, qrcode, qrcodegen_getSize(version), (int)mask);
-	drawFormatBits(ecl, (int)mask, qrcode, qrcodegen_getSize(version));
+	encodeQrCodeTail(qrcode, tempBuffer, version, ecl, mask);
 	return version;
 }
 
@@ -271,29 +251,36 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
 	assert(bitLen % 8 == 0);
-	
-	appendErrorCorrection(qrcode, version, ecl, dataAndTemp);
-	initializeFunctionalModules(version, qrcode);
-	drawCodewords(dataAndTemp, getNumRawDataModules(version) / 8, qrcode, qrcodegen_getSize(version));
-	drawWhiteFunctionModules(qrcode, version);
-	initializeFunctionalModules(version, dataAndTemp);
+	encodeQrCodeTail(qrcode, dataAndTemp, version, ecl, mask);
+	return version;
+}
+
+
+// Given data codewords in dataAndQrcode already padded to the length specified by the
+// version and ECC level, this function adds ECC bytes, interleaves blocks, renders the
+// QR Code symbol back to the array dataAndQrcode, and handles automatic mask selection.
+static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask) {
+	appendErrorCorrection(dataAndQrcode, version, ecl, tempBuffer);
+	initializeFunctionalModules(version, dataAndQrcode);
+	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, dataAndQrcode, qrcodegen_getSize(version));
+	drawWhiteFunctionModules(dataAndQrcode, version);
+	initializeFunctionalModules(version, tempBuffer);
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
-			drawFormatBits(ecl, i, qrcode, qrcodegen_getSize(version));
-			applyMask(dataAndTemp, qrcode, qrcodegen_getSize(version), i);
-			long penalty = getPenaltyScore(qrcode, qrcodegen_getSize(version));
+			drawFormatBits(ecl, i, dataAndQrcode, qrcodegen_getSize(version));
+			applyMask(tempBuffer, dataAndQrcode, qrcodegen_getSize(version), i);
+			long penalty = getPenaltyScore(dataAndQrcode, qrcodegen_getSize(version));
 			if (penalty < minPenalty) {
 				mask = (enum qrcodegen_Mask)i;
 				minPenalty = penalty;
 			}
-			applyMask(dataAndTemp, qrcode, qrcodegen_getSize(version), i);  // Undoes the mask due to XOR
+			applyMask(tempBuffer, dataAndQrcode, qrcodegen_getSize(version), i);  // Undoes the mask due to XOR
 		}
 	}
 	assert(0 <= (int)mask && (int)mask <= 7);
-	applyMask(dataAndTemp, qrcode, qrcodegen_getSize(version), (int)mask);
-	drawFormatBits(ecl, (int)mask, qrcode, qrcodegen_getSize(version));
-	return version;
+	drawFormatBits(ecl, (int)mask, dataAndQrcode, qrcodegen_getSize(version));
+	applyMask(tempBuffer, dataAndQrcode, qrcodegen_getSize(version), (int)mask);
 }
 
 
