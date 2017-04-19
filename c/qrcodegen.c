@@ -61,13 +61,13 @@ static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 static const char *ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
-static const int16_t NUM_ERROR_CORRECTION_CODEWORDS[4][41] = {
+static const int8_t ECC_CODEWORDS_PER_BLOCK[4][41] = {
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
-	//0,  1,  2,  3,  4,  5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,   25,   26,   27,   28,   29,   30,   31,   32,   33,   34,   35,   36,   37,   38,   39,   40    Error correction level
-	{-1,  7, 10, 15, 20, 26,  36,  40,  48,  60,  72,  80,  96, 104, 120, 132, 144, 168, 180, 196, 224, 224, 252, 270, 300,  312,  336,  360,  390,  420,  450,  480,  510,  540,  570,  570,  600,  630,  660,  720,  750},  // Low
-	{-1, 10, 16, 26, 36, 48,  64,  72,  88, 110, 130, 150, 176, 198, 216, 240, 280, 308, 338, 364, 416, 442, 476, 504, 560,  588,  644,  700,  728,  784,  812,  868,  924,  980, 1036, 1064, 1120, 1204, 1260, 1316, 1372},  // Medium
-	{-1, 13, 22, 36, 52, 72,  96, 108, 132, 160, 192, 224, 260, 288, 320, 360, 408, 448, 504, 546, 600, 644, 690, 750, 810,  870,  952, 1020, 1050, 1140, 1200, 1290, 1350, 1440, 1530, 1590, 1680, 1770, 1860, 1950, 2040},  // Quartile
-	{-1, 17, 28, 44, 64, 88, 112, 130, 156, 192, 224, 264, 308, 352, 384, 432, 480, 532, 588, 650, 700, 750, 816, 900, 960, 1050, 1110, 1200, 1260, 1350, 1440, 1530, 1620, 1710, 1800, 1890, 1980, 2100, 2220, 2310, 2430},  // High
+	//0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
+	{-1,  7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // Low
+	{-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28},  // Medium
+	{-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // Quartile
+	{-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // High
 };
 
 const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
@@ -379,7 +379,7 @@ static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int 
 // for the given version number and error correction level. The result is in the range [9, 2956].
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	return getNumRawDataModules(version) / 8 - NUM_ERROR_CORRECTION_CODEWORDS[(int)ecl][version];
+	return getNumRawDataModules(version) / 8 - (ECC_CODEWORDS_PER_BLOCK[(int)ecl][version] * NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version]);
 }
 
 
@@ -607,11 +607,9 @@ static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ec
 	// Calculate parameter numbers
 	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
-	int totalEcc = NUM_ERROR_CORRECTION_CODEWORDS[(int)ecl][version];
-	assert(totalEcc % numBlocks == 0);
-	int blockEccLen = totalEcc / numBlocks;
+	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
 	int rawCodewords = getNumRawDataModules(version) / 8;
-	int dataLen = rawCodewords - totalEcc;
+	int dataLen = rawCodewords - blockEccLen * numBlocks;
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
 	
