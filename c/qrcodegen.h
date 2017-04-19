@@ -65,18 +65,6 @@ enum qrcodegen_Mask {
 
 
 /* 
- * Tests whether the given string can be encoded in alphanumeric mode.
- */
-bool qrcodegen_isAlphanumeric(const char *text);
-
-
-/* 
- * Tests whether the given string can be encoded in numeric mode.
- */
-bool qrcodegen_isNumeric(const char *text);
-
-
-/* 
  * Encodes the given binary data to a QR Code symbol, return the actual version number used.
  * If the data is too long to fit in any version in the given range at the given ECC level,
  * then 0 is returned. dataAndTemp[0 : dataLen] represents the input data, and the function

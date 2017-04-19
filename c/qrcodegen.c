@@ -85,43 +85,6 @@ static const int PENALTY_N4 = 10;
 /*---- Function implementations ----*/
 
 // Public function - see documentation comment in header file.
-bool qrcodegen_isAlphanumeric(const char *text) {
-	for (; *text != '\0'; text++) {
-		char c = *text;
-		if (('0' <= c && c <= '9') || ('A' <= c && c <= 'Z'))
-			continue;
-		else switch (c) {
-			case ' ':
-			case '$':
-			case '%':
-			case '*':
-			case '+':
-			case '-':
-			case '.':
-			case '/':
-			case ':':
-				continue;
-			default:
-				return false;
-		}
-		return false;
-	}
-	return true;
-}
-
-
-// Public function - see documentation comment in header file.
-bool qrcodegen_isNumeric(const char *text) {
-	for (; *text != '\0'; text++) {
-		char c = *text;
-		if (c < '0' || c > '9')
-			return false;
-	}
-	return true;
-}
-
-
-// Public function - see documentation comment in header file.
 int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask) {
 	assert(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40);
