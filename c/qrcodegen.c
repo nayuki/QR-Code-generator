@@ -204,11 +204,11 @@ static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
 	
 	// Fill version
 	if (version >= 7) {
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 6; j++) {
-				int k = size - 11 + i;
-				setModule(qrcode, size, k, j, true);
-				setModule(qrcode, size, j, k, true);
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 3; j++) {
+				int k = size - 11 + j;
+				setModule(qrcode, size, k, i, true);
+				setModule(qrcode, size, i, k, true);
 			}
 		}
 	}
@@ -266,11 +266,11 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 		assert(data >> 18 == 0);
 		
 		// Draw two copies
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 6; j++) {
-				int k = size - 11 + i;
-				setModule(qrcode, size, k, j, (data & 1) != 0);
-				setModule(qrcode, size, j, k, (data & 1) != 0);
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 3; j++) {
+				int k = size - 11 + j;
+				setModule(qrcode, size, k, i, (data & 1) != 0);
+				setModule(qrcode, size, i, k, (data & 1) != 0);
 				data >>= 1;
 			}
 		}
