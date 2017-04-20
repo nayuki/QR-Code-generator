@@ -504,8 +504,8 @@ public final class QrCode {
 			for (int vert = 0; vert < size; vert++) {  // Vertical counter
 				for (int j = 0; j < 2; j++) {
 					int x = right - j;  // Actual x coordinate
-					boolean upwards = ((right & 2) == 0) ^ (x < 6);
-					int y = upwards ? size - 1 - vert : vert;  // Actual y coordinate
+					boolean upward = ((right & 2) == 0) ^ (x < 6);
+					int y = upward ? size - 1 - vert : vert;  // Actual y coordinate
 					if (!isFunction[y][x] && i < data.length * 8) {
 						modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) != 0;
 						i++;

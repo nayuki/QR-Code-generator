@@ -405,8 +405,8 @@ var qrcodegen = new function() {
 				for (var vert = 0; vert < size; vert++) {  // Vertical counter
 					for (var j = 0; j < 2; j++) {
 						var x = right - j;  // Actual x coordinate
-						var upwards = ((right & 2) == 0) ^ (x < 6);
-						var y = upwards ? size - 1 - vert : vert;  // Actual y coordinate
+						var upward = ((right & 2) == 0) ^ (x < 6);
+						var y = upward ? size - 1 - vert : vert;  // Actual y coordinate
 						if (!isFunction[y][x] && i < data.length * 8) {
 							modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) != 0;
 							i++;
