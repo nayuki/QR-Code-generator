@@ -113,14 +113,14 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		if (textLen > INT_MAX / 3)
 			return 0;
 		textBits = textLen * 3;
-		if (textLen > INT_MAX - 2 || textLen > INT_MAX - textBits)
+		if (textLen > INT_MAX - 2 || (textLen + 2) / 3 > INT_MAX - textBits)
 			return 0;
 		textBits += (textLen + 2) / 3;
 	} else if (isAlphanumeric) {  // textBits = textLen * 5 + ceil(textLen / 2)
 		if (textLen > INT_MAX / 5)
 			return 0;
 		textBits = textLen * 5;
-		if (textLen > INT_MAX - 1 || textLen > INT_MAX - textBits)
+		if (textLen > INT_MAX - 1 || (textLen + 1) / 2 > INT_MAX - textBits)
 			return 0;
 		textBits += (textLen + 1) / 2;
 	} else {  // Use binary mode
