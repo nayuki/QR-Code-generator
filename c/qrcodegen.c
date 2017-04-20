@@ -31,7 +31,7 @@
 
 /*---- Forward declarations for private functions ----*/
 
-static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask);
+static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl);
 static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
 static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
@@ -155,12 +155,6 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 			return 0;
 	}
 	assert(dataUsedBits >= 0 && dataCapacityBits >= 0);
-	if (boostEcl) {
-		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_MEDIUM  ) * 8) ecl = qrcodegen_Ecc_MEDIUM  ;
-		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_QUARTILE) * 8) ecl = qrcodegen_Ecc_QUARTILE;
-		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_HIGH    ) * 8) ecl = qrcodegen_Ecc_HIGH    ;
-		dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
-	}
 	
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
@@ -195,15 +189,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		if (accumCount > 0)  // 1 character remaining
 			appendBitsToBuffer(accumData, 6, qrcode, &bitLen);
 	}
-	int terminatorBits = dataCapacityBits - bitLen;
-	if (terminatorBits > 4)
-		terminatorBits = 4;
-	appendBitsToBuffer(0, terminatorBits, qrcode, &bitLen);
-	appendBitsToBuffer(0, (8 - bitLen % 8) % 8, qrcode, &bitLen);
-	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
-	assert(bitLen % 8 == 0);
-	encodeQrCodeTail(qrcode, tempBuffer, version, ecl, mask);
+	encodeQrCodeTail(qrcode, bitLen, tempBuffer, version, ecl, mask, boostEcl);
 	return version;
 }
 
@@ -231,12 +217,6 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 			return 0;
 	}
 	assert(dataUsedBits >= 0 && dataCapacityBits >= 0);
-	if (boostEcl) {
-		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_MEDIUM  ) * 8) ecl = qrcodegen_Ecc_MEDIUM  ;
-		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_QUARTILE) * 8) ecl = qrcodegen_Ecc_QUARTILE;
-		if (dataUsedBits <= getNumDataCodewords(version, qrcodegen_Ecc_HIGH    ) * 8) ecl = qrcodegen_Ecc_HIGH    ;
-		dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
-	}
 	
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
@@ -244,15 +224,7 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	appendBitsToBuffer((unsigned int)dataLen, (version <= 9 ? 8 : 16), qrcode, &bitLen);
 	for (size_t i = 0; i < dataLen; i++)
 		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
-	int terminatorBits = dataCapacityBits - bitLen;
-	if (terminatorBits > 4)
-		terminatorBits = 4;
-	appendBitsToBuffer(0, terminatorBits, qrcode, &bitLen);
-	appendBitsToBuffer(0, (8 - bitLen % 8) % 8, qrcode, &bitLen);
-	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
-	assert(bitLen % 8 == 0);
-	encodeQrCodeTail(qrcode, dataAndTemp, version, ecl, mask);
+	encodeQrCodeTail(qrcode, bitLen, dataAndTemp, version, ecl, mask, boostEcl);
 	return version;
 }
 
@@ -260,7 +232,25 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 // Given data codewords in dataAndQrcode already padded to the length specified by the
 // version and ECC level, this function adds ECC bytes, interleaves blocks, renders the
 // QR Code symbol back to the array dataAndQrcode, and handles automatic mask selection.
-static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask) {
+static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[],
+		int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl) {
+	
+	if (boostEcl) {
+		if (bitLen <= getNumDataCodewords(version, qrcodegen_Ecc_MEDIUM  ) * 8) ecl = qrcodegen_Ecc_MEDIUM  ;
+		if (bitLen <= getNumDataCodewords(version, qrcodegen_Ecc_QUARTILE) * 8) ecl = qrcodegen_Ecc_QUARTILE;
+		if (bitLen <= getNumDataCodewords(version, qrcodegen_Ecc_HIGH    ) * 8) ecl = qrcodegen_Ecc_HIGH    ;
+	}
+	int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
+	
+	int terminatorBits = dataCapacityBits - bitLen;
+	if (terminatorBits > 4)
+		terminatorBits = 4;
+	appendBitsToBuffer(0, terminatorBits, dataAndQrcode, &bitLen);
+	appendBitsToBuffer(0, (8 - bitLen % 8) % 8, dataAndQrcode, &bitLen);
+	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+		appendBitsToBuffer(padByte, 8, dataAndQrcode, &bitLen);
+	assert(bitLen % 8 == 0);
+	
 	int qrsize = qrcodegen_getSize(version);
 	appendErrorCorrection(dataAndQrcode, version, ecl, tempBuffer);
 	initializeFunctionModules(version, dataAndQrcode);
