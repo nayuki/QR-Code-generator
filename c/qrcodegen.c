@@ -40,13 +40,15 @@
 static int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
 static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc ecl, int dataLen, int dataBitLen, int ver1To9LenBits, int ver10To26LenBits, int ver27To40LenBits);
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl);
-static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
 static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
-static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 
-static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y);
-static void setModule(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack);
-static void setModuleBounded(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack);
+static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
+static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
+static int getNumRawDataModules(int version);
+
+static void calcReedSolomonGenerator(int degree, uint8_t result[]);
+static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
+static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 static void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
@@ -54,14 +56,13 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 static int getAlignmentPatternPositions(int version, uint8_t result[7]);
 static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int qrsize);
 
-static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
-static int getNumRawDataModules(int version);
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, int mask);
+static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
 
-static void calcReedSolomonGenerator(int degree, uint8_t result[]);
-static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
-static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
+static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y);
+static void setModule(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack);
+static void setModuleBounded(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack);
 
 
 
@@ -98,7 +99,7 @@ static const int PENALTY_N4 = 10;
 
 
 
-/*---- Top-level QR Code encoding functions ----*/
+/*---- High-level QR Code encoding functions ----*/
 
 // Public function - see documentation comment in header file.
 int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
@@ -170,6 +171,32 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 }
 
 
+// Public function - see documentation comment in header file.
+int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
+		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
+	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
+	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
+	
+	// Check length and find version
+	if (dataLen > INT16_MAX / 8)
+		return 0;
+	// Now dataLen * 8 <= 32767 <= INT_MAX
+	int version = fitVersionToData(minVersion, maxVersion, ecl, (int)dataLen, (int)dataLen * 8, 8, 16, 16);
+	if (version == 0)
+		return 0;
+	
+	// Make bit sequence and QR Code
+	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
+	int bitLen = 0;
+	appendBitsToBuffer(4, 4, qrcode, &bitLen);
+	appendBitsToBuffer((unsigned int)dataLen, (version <= 9 ? 8 : 16), qrcode, &bitLen);
+	for (size_t i = 0; i < dataLen; i++)
+		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
+	encodeQrCodeTail(qrcode, bitLen, dataAndTemp, version, ecl, mask, boostEcl);
+	return version;
+}
+
+
 // Scans the given string, returns the number of characters, and sets output variables.
 // Returns a negative number if the length would exceed INT16_MAX or textBits would exceed INT_MAX.
 // Note that INT16_MAX <= 32767 <= INT_MAX and INT16_MAX < 65535 <= SIZE_MAX.
@@ -200,32 +227,6 @@ static int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanum
 		return -1;
 	*textBits = (int)tempBits;
 	return textLen;
-}
-
-
-// Public function - see documentation comment in header file.
-int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
-		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
-	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
-	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
-	
-	// Check length and find version
-	if (dataLen > INT16_MAX / 8)
-		return 0;
-	// Now dataLen * 8 <= 32767 <= INT_MAX
-	int version = fitVersionToData(minVersion, maxVersion, ecl, (int)dataLen, (int)dataLen * 8, 8, 16, 16);
-	if (version == 0)
-		return 0;
-	
-	// Make bit sequence and QR Code
-	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
-	int bitLen = 0;
-	appendBitsToBuffer(4, 4, qrcode, &bitLen);
-	appendBitsToBuffer((unsigned int)dataLen, (version <= 9 ? 8 : 16), qrcode, &bitLen);
-	for (size_t i = 0; i < dataLen; i++)
-		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
-	encodeQrCodeTail(qrcode, bitLen, dataAndTemp, version, ecl, mask, boostEcl);
-	return version;
 }
 
 
@@ -312,93 +313,57 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 }
 
 
-// Calculates and returns the penalty score based on state of the given QR Code's current modules.
-// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
-static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
-	long result = 0;
-	
-	// Adjacent modules in row having same color
-	for (int y = 0; y < qrsize; y++) {
-		bool colorX = getModule(qrcode, qrsize, 0, y);
-		for (int x = 1, runX = 1; x < qrsize; x++) {
-			if (getModule(qrcode, qrsize, x, y) != colorX) {
-				colorX = getModule(qrcode, qrsize, x, y);
-				runX = 1;
-			} else {
-				runX++;
-				if (runX == 5)
-					result += PENALTY_N1;
-				else if (runX > 5)
-					result++;
-			}
-		}
-	}
-	// Adjacent modules in column having same color
-	for (int x = 0; x < qrsize; x++) {
-		bool colorY = getModule(qrcode, qrsize, x, 0);
-		for (int y = 1, runY = 1; y < qrsize; y++) {
-			if (getModule(qrcode, qrsize, x, y) != colorY) {
-				colorY = getModule(qrcode, qrsize, x, y);
-				runY = 1;
-			} else {
-				runY++;
-				if (runY == 5)
-					result += PENALTY_N1;
-				else if (runY > 5)
-					result++;
-			}
-		}
-	}
-	
-	// 2*2 blocks of modules having same color
-	for (int y = 0; y < qrsize - 1; y++) {
-		for (int x = 0; x < qrsize - 1; x++) {
-			bool  color = getModule(qrcode, qrsize, x, y);
-			if (  color == getModule(qrcode, qrsize, x + 1, y) &&
-			      color == getModule(qrcode, qrsize, x, y + 1) &&
-			      color == getModule(qrcode, qrsize, x + 1, y + 1))
-				result += PENALTY_N2;
-		}
-	}
-	
-	// Finder-like pattern in rows
-	for (int y = 0; y < qrsize; y++) {
-		for (int x = 0, bits = 0; x < qrsize; x++) {
-			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
-			if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
-				result += PENALTY_N3;
-		}
-	}
-	// Finder-like pattern in columns
-	for (int x = 0; x < qrsize; x++) {
-		for (int y = 0, bits = 0; y < qrsize; y++) {
-			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
-			if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
-				result += PENALTY_N3;
-		}
-	}
-	
-	// Balance of black and white modules
-	int black = 0;
-	for (int y = 0; y < qrsize; y++) {
-		for (int x = 0; x < qrsize; x++) {
-			if (getModule(qrcode, qrsize, x, y))
-				black++;
-		}
-	}
-	int total = qrsize * qrsize;
-	// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
-	for (int k = 0; black*20L < (9L-k)*total || black*20L > (11L+k)*total; k++)
-		result += PENALTY_N4;
-	return result;
-}
-
-
 // Appends the given sequence of bits to the given byte-based bit buffer, increasing the bit length.
 static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen) {
 	assert(0 <= numBits && numBits <= 16 && (long)val >> numBits == 0);
 	for (int i = numBits - 1; i >= 0; i--, (*bitLen)++)
 		buffer[*bitLen >> 3] |= ((val >> i) & 1) << (7 - (*bitLen & 7));
+}
+
+
+
+/*---- Error correction code generation functions ----*/
+
+// Appends error correction bytes to each block of the given data array, then interleaves bytes
+// from the blocks and stores them in the result array. data[0 : rawCodewords - totalEcc] contains
+// the input data. data[rawCodewords - totalEcc : rawCodewords] is used as a temporary work area
+// and will be clobbered by this function. The final answer is stored in result[0 : rawCodewords].
+static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]) {
+	// Calculate parameter numbers
+	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
+	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
+	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
+	int rawCodewords = getNumRawDataModules(version) / 8;
+	int dataLen = rawCodewords - blockEccLen * numBlocks;
+	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
+	int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
+	
+	// Split data into blocks and append ECC after all data
+	uint8_t generator[30];
+	calcReedSolomonGenerator(blockEccLen, generator);
+	for (int i = 0, j = dataLen, k = 0; i < numBlocks; i++) {
+		int blockLen = shortBlockDataLen;
+		if (i >= numShortBlocks)
+			blockLen++;
+		calcReedSolomonRemainder(&data[k], blockLen, generator, blockEccLen, &data[j]);
+		j += blockEccLen;
+		k += blockLen;
+	}
+	
+	// Interleave (not concatenate) the bytes from every block into a single sequence
+	for (int i = 0, k = 0; i < numBlocks; i++) {
+		for (int j = 0, l = i; j < shortBlockDataLen; j++, k++, l += numBlocks)
+			result[l] = data[k];
+		if (i >= numShortBlocks)
+			k++;
+	}
+	for (int i = numShortBlocks, k = (numShortBlocks + 1) * shortBlockDataLen, l = numBlocks * shortBlockDataLen;
+			i < numBlocks; i++, k += shortBlockDataLen + 1, l++)
+		result[l] = data[k];
+	for (int i = 0, k = dataLen; i < numBlocks; i++) {
+		for (int j = 0, l = dataLen + i; j < blockEccLen; j++, k++, l += numBlocks)
+			result[l] = data[k];
+	}
 }
 
 
@@ -410,55 +375,78 @@ static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 }
 
 
-
-/*---- Basic QR Code information functions ----*/
-
-// Public function - see documentation comment in header file.
-int qrcodegen_getSize(int version) {
+// Returns the number of data bits that can be stored in a QR Code of the given version number, after
+// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
+// The result is in the range [208, 29648].
+static int getNumRawDataModules(int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	return version * 4 + 17;
-}
-
-
-// Public function - see documentation comment in header file.
-bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y) {
-	int qrsize = qrcodegen_getSize(version);
-	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, qrsize, x, y);
-}
-
-
-// Gets the module at the given coordinates, which must be in bounds.
-static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y) {
-	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
-	int index = y * qrsize + x;
-	int bitIndex = index & 7;
-	int byteIndex = index >> 3;
-	return ((qrcode[byteIndex] >> bitIndex) & 1) != 0;
-}
-
-
-// Sets the module at the given coordinates, which must be in bounds.
-static void setModule(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack) {
-	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
-	int index = y * qrsize + x;
-	int bitIndex = index & 7;
-	int byteIndex = index >> 3;
-	if (isBlack)
-		qrcode[byteIndex] |= 1 << bitIndex;
-	else
-		qrcode[byteIndex] &= (1 << bitIndex) ^ 0xFF;
-}
-
-
-// Sets the module at the given coordinates, doing nothing if out of bounds.
-static void setModuleBounded(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack) {
-	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)
-		setModule(qrcode, qrsize, x, y, isBlack);
+	int result = (16 * version + 128) * version + 64;
+	if (version >= 2) {
+		int numAlign = version / 7 + 2;
+		result -= (25 * numAlign - 10) * numAlign - 55;
+		if (version >= 7)
+			result -= 18 * 2;  // Subtract version information
+	}
+	return result;
 }
 
 
 
-/*---- QR Code drawing functions ----*/
+/*---- Reed-Solomon ECC generator functions ----*/
+
+// Calculates the Reed-Solomon generator polynomial of the given degree, storing in result[0 : degree].
+static void calcReedSolomonGenerator(int degree, uint8_t result[]) {
+	// Start with the monomial x^0
+	assert(1 <= degree && degree <= 30);
+	memset(result, 0, degree * sizeof(result[0]));
+	result[degree - 1] = 1;
+	
+	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
+	// drop the highest term, and store the rest of the coefficients in order of descending powers.
+	// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
+	int root = 1;
+	for (int i = 0; i < degree; i++) {
+		// Multiply the current product by (x - r^i)
+		for (int j = 0; j < degree; j++) {
+			result[j] = finiteFieldMultiply(result[j], (uint8_t)root);
+			if (j + 1 < degree)
+				result[j] ^= result[j + 1];
+		}
+		root = (root << 1) ^ ((root >> 7) * 0x11D);  // Multiply by 0x02 mod GF(2^8/0x11D)
+	}
+}
+
+
+// Calculates the remainder of the polynomial data[0 : dataLen] when divided by the generator[0 : degree], where all
+// polynomials are in big endian and the generator has an implicit leading 1 term, storing the result in result[0 : degree].
+static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]) {
+	// Perform polynomial division
+	assert(1 <= degree && degree <= 30);
+	memset(result, 0, degree * sizeof(result[0]));
+	for (int i = 0; i < dataLen; i++) {
+		uint8_t factor = data[i] ^ result[0];
+		memmove(&result[0], &result[1], (degree - 1) * sizeof(result[0]));
+		result[degree - 1] = 0;
+		for (int j = 0; j < degree; j++)
+			result[j] ^= finiteFieldMultiply(generator[j], factor);
+	}
+}
+
+
+// Returns the product of the two given field elements modulo GF(2^8/0x11D). All argument values are valid.
+static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
+	// Russian peasant multiplication
+	uint8_t z = 0;
+	for (int i = 7; i >= 0; i--) {
+		z = (z << 1) ^ ((z >> 7) * 0x11D);
+		z ^= ((y >> i) & 1) * x;
+	}
+	return z;
+}
+
+
+
+/*---- Drawing function modules ----*/
 
 // Clears the given QR Code grid with white modules for the given
 // version's size, then marks every function module as black.
@@ -627,64 +615,8 @@ static void fillRectangle(int left, int top, int width, int height, uint8_t qrco
 }
 
 
-// Appends error correction bytes to each block of the given data array, then interleaves bytes
-// from the blocks and stores them in the result array. data[0 : rawCodewords - totalEcc] contains
-// the input data. data[rawCodewords - totalEcc : rawCodewords] is used as a temporary work area
-// and will be clobbered by this function. The final answer is stored in result[0 : rawCodewords].
-static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]) {
-	// Calculate parameter numbers
-	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
-	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
-	int rawCodewords = getNumRawDataModules(version) / 8;
-	int dataLen = rawCodewords - blockEccLen * numBlocks;
-	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
-	int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
-	
-	// Split data into blocks and append ECC after all data
-	uint8_t generator[30];
-	calcReedSolomonGenerator(blockEccLen, generator);
-	for (int i = 0, j = dataLen, k = 0; i < numBlocks; i++) {
-		int blockLen = shortBlockDataLen;
-		if (i >= numShortBlocks)
-			blockLen++;
-		calcReedSolomonRemainder(&data[k], blockLen, generator, blockEccLen, &data[j]);
-		j += blockEccLen;
-		k += blockLen;
-	}
-	
-	// Interleave (not concatenate) the bytes from every block into a single sequence
-	for (int i = 0, k = 0; i < numBlocks; i++) {
-		for (int j = 0, l = i; j < shortBlockDataLen; j++, k++, l += numBlocks)
-			result[l] = data[k];
-		if (i >= numShortBlocks)
-			k++;
-	}
-	for (int i = numShortBlocks, k = (numShortBlocks + 1) * shortBlockDataLen, l = numBlocks * shortBlockDataLen;
-			i < numBlocks; i++, k += shortBlockDataLen + 1, l++)
-		result[l] = data[k];
-	for (int i = 0, k = dataLen; i < numBlocks; i++) {
-		for (int j = 0, l = dataLen + i; j < blockEccLen; j++, k++, l += numBlocks)
-			result[l] = data[k];
-	}
-}
 
-
-// Returns the number of data bits that can be stored in a QR Code of the given version number, after
-// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
-// The result is in the range [208, 29648].
-static int getNumRawDataModules(int version) {
-	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	int result = (16 * version + 128) * version + 64;
-	if (version >= 2) {
-		int numAlign = version / 7 + 2;
-		result -= (25 * numAlign - 10) * numAlign - 55;
-		if (version >= 7)
-			result -= 18 * 2;  // Subtract version information
-	}
-	return result;
-}
-
+/*---- Drawing data modules and masking ----*/
 
 // Draws the raw codewords (including data and ECC) onto the given QR Code. This requires the initial state of
 // the QR Code to be black at function modules and white at codeword modules (including unused remainder bits).
@@ -712,9 +644,6 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 	assert(i == dataLen * 8);
 }
 
-
-
-/*---- Reed-Solomon ECC generator functions ----*/
 
 // XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
 // properties, calling applyMask(..., m) twice with the same value is equivalent to no change at all.
@@ -745,52 +674,130 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrs
 }
 
 
-// Calculates the Reed-Solomon generator polynomial of the given degree, storing in result[0 : degree].
-static void calcReedSolomonGenerator(int degree, uint8_t result[]) {
-	// Start with the monomial x^0
-	assert(1 <= degree && degree <= 30);
-	memset(result, 0, degree * sizeof(result[0]));
-	result[degree - 1] = 1;
+// Calculates and returns the penalty score based on state of the given QR Code's current modules.
+// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
+	long result = 0;
 	
-	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
-	// drop the highest term, and store the rest of the coefficients in order of descending powers.
-	// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
-	int root = 1;
-	for (int i = 0; i < degree; i++) {
-		// Multiply the current product by (x - r^i)
-		for (int j = 0; j < degree; j++) {
-			result[j] = finiteFieldMultiply(result[j], (uint8_t)root);
-			if (j + 1 < degree)
-				result[j] ^= result[j + 1];
+	// Adjacent modules in row having same color
+	for (int y = 0; y < qrsize; y++) {
+		bool colorX = getModule(qrcode, qrsize, 0, y);
+		for (int x = 1, runX = 1; x < qrsize; x++) {
+			if (getModule(qrcode, qrsize, x, y) != colorX) {
+				colorX = getModule(qrcode, qrsize, x, y);
+				runX = 1;
+			} else {
+				runX++;
+				if (runX == 5)
+					result += PENALTY_N1;
+				else if (runX > 5)
+					result++;
+			}
 		}
-		root = (root << 1) ^ ((root >> 7) * 0x11D);  // Multiply by 0x02 mod GF(2^8/0x11D)
 	}
+	// Adjacent modules in column having same color
+	for (int x = 0; x < qrsize; x++) {
+		bool colorY = getModule(qrcode, qrsize, x, 0);
+		for (int y = 1, runY = 1; y < qrsize; y++) {
+			if (getModule(qrcode, qrsize, x, y) != colorY) {
+				colorY = getModule(qrcode, qrsize, x, y);
+				runY = 1;
+			} else {
+				runY++;
+				if (runY == 5)
+					result += PENALTY_N1;
+				else if (runY > 5)
+					result++;
+			}
+		}
+	}
+	
+	// 2*2 blocks of modules having same color
+	for (int y = 0; y < qrsize - 1; y++) {
+		for (int x = 0; x < qrsize - 1; x++) {
+			bool  color = getModule(qrcode, qrsize, x, y);
+			if (  color == getModule(qrcode, qrsize, x + 1, y) &&
+			      color == getModule(qrcode, qrsize, x, y + 1) &&
+			      color == getModule(qrcode, qrsize, x + 1, y + 1))
+				result += PENALTY_N2;
+		}
+	}
+	
+	// Finder-like pattern in rows
+	for (int y = 0; y < qrsize; y++) {
+		for (int x = 0, bits = 0; x < qrsize; x++) {
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
+			if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+				result += PENALTY_N3;
+		}
+	}
+	// Finder-like pattern in columns
+	for (int x = 0; x < qrsize; x++) {
+		for (int y = 0, bits = 0; y < qrsize; y++) {
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
+			if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+				result += PENALTY_N3;
+		}
+	}
+	
+	// Balance of black and white modules
+	int black = 0;
+	for (int y = 0; y < qrsize; y++) {
+		for (int x = 0; x < qrsize; x++) {
+			if (getModule(qrcode, qrsize, x, y))
+				black++;
+		}
+	}
+	int total = qrsize * qrsize;
+	// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
+	for (int k = 0; black*20L < (9L-k)*total || black*20L > (11L+k)*total; k++)
+		result += PENALTY_N4;
+	return result;
 }
 
 
-// Calculates the remainder of the polynomial data[0 : dataLen] when divided by the generator[0 : degree], where all
-// polynomials are in big endian and the generator has an implicit leading 1 term, storing the result in result[0 : degree].
-static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]) {
-	// Perform polynomial division
-	assert(1 <= degree && degree <= 30);
-	memset(result, 0, degree * sizeof(result[0]));
-	for (int i = 0; i < dataLen; i++) {
-		uint8_t factor = data[i] ^ result[0];
-		memmove(&result[0], &result[1], (degree - 1) * sizeof(result[0]));
-		result[degree - 1] = 0;
-		for (int j = 0; j < degree; j++)
-			result[j] ^= finiteFieldMultiply(generator[j], factor);
-	}
+
+/*---- Basic QR Code information ----*/
+
+// Public function - see documentation comment in header file.
+int qrcodegen_getSize(int version) {
+	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
+	return version * 4 + 17;
 }
 
 
-// Returns the product of the two given field elements modulo GF(2^8/0x11D). All argument values are valid.
-static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
-	// Russian peasant multiplication
-	uint8_t z = 0;
-	for (int i = 7; i >= 0; i--) {
-		z = (z << 1) ^ ((z >> 7) * 0x11D);
-		z ^= ((y >> i) & 1) * x;
-	}
-	return z;
+// Public function - see documentation comment in header file.
+bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y) {
+	int qrsize = qrcodegen_getSize(version);
+	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, qrsize, x, y);
+}
+
+
+// Gets the module at the given coordinates, which must be in bounds.
+static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y) {
+	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
+	int index = y * qrsize + x;
+	int bitIndex = index & 7;
+	int byteIndex = index >> 3;
+	return ((qrcode[byteIndex] >> bitIndex) & 1) != 0;
+}
+
+
+// Sets the module at the given coordinates, which must be in bounds.
+static void setModule(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack) {
+	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
+	int index = y * qrsize + x;
+	int bitIndex = index & 7;
+	int byteIndex = index >> 3;
+	if (isBlack)
+		qrcode[byteIndex] |= 1 << bitIndex;
+	else
+		qrcode[byteIndex] &= (1 << bitIndex) ^ 0xFF;
+}
+
+
+// Sets the module at the given coordinates, doing nothing if out of bounds.
+static void setModuleBounded(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack) {
+	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)
+		setModule(qrcode, qrsize, x, y, isBlack);
 }
