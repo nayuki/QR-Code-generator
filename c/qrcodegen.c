@@ -32,24 +32,24 @@
 /*---- Forward declarations for private functions ----*/
 
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask);
-static long getPenaltyScore(const uint8_t qrcode[], int size);
+static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
 static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 
-static bool getModule(const uint8_t qrcode[], int size, int x, int y);
-static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack);
-static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack);
+static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y);
+static void setModule(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack);
+static void setModuleBounded(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack);
 
 static void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
-static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int size);
+static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int qrsize);
 static int getAlignmentPatternPositions(int version, uint8_t result[7]);
-static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int size);
+static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int qrsize);
 
 static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 static int getNumRawDataModules(int version);
-static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int size);
-static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int size, int mask);
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize);
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, int mask);
 
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
 static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
@@ -287,15 +287,15 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int 
 
 // Calculates and returns the penalty score based on state of the given QR Code's current modules.
 // This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
-static long getPenaltyScore(const uint8_t qrcode[], int size) {
+static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 	long result = 0;
 	
 	// Adjacent modules in row having same color
-	for (int y = 0; y < size; y++) {
-		bool colorX = getModule(qrcode, size, 0, y);
-		for (int x = 1, runX = 1; x < size; x++) {
-			if (getModule(qrcode, size, x, y) != colorX) {
-				colorX = getModule(qrcode, size, x, y);
+	for (int y = 0; y < qrsize; y++) {
+		bool colorX = getModule(qrcode, qrsize, 0, y);
+		for (int x = 1, runX = 1; x < qrsize; x++) {
+			if (getModule(qrcode, qrsize, x, y) != colorX) {
+				colorX = getModule(qrcode, qrsize, x, y);
 				runX = 1;
 			} else {
 				runX++;
@@ -307,11 +307,11 @@ static long getPenaltyScore(const uint8_t qrcode[], int size) {
 		}
 	}
 	// Adjacent modules in column having same color
-	for (int x = 0; x < size; x++) {
-		bool colorY = getModule(qrcode, size, x, 0);
-		for (int y = 1, runY = 1; y < size; y++) {
-			if (getModule(qrcode, size, x, y) != colorY) {
-				colorY = getModule(qrcode, size, x, y);
+	for (int x = 0; x < qrsize; x++) {
+		bool colorY = getModule(qrcode, qrsize, x, 0);
+		for (int y = 1, runY = 1; y < qrsize; y++) {
+			if (getModule(qrcode, qrsize, x, y) != colorY) {
+				colorY = getModule(qrcode, qrsize, x, y);
 				runY = 1;
 			} else {
 				runY++;
@@ -324,28 +324,28 @@ static long getPenaltyScore(const uint8_t qrcode[], int size) {
 	}
 	
 	// 2*2 blocks of modules having same color
-	for (int y = 0; y < size - 1; y++) {
-		for (int x = 0; x < size - 1; x++) {
-			bool  color = getModule(qrcode, size, x, y);
-			if (  color == getModule(qrcode, size, x + 1, y) &&
-			      color == getModule(qrcode, size, x, y + 1) &&
-			      color == getModule(qrcode, size, x + 1, y + 1))
+	for (int y = 0; y < qrsize - 1; y++) {
+		for (int x = 0; x < qrsize - 1; x++) {
+			bool  color = getModule(qrcode, qrsize, x, y);
+			if (  color == getModule(qrcode, qrsize, x + 1, y) &&
+			      color == getModule(qrcode, qrsize, x, y + 1) &&
+			      color == getModule(qrcode, qrsize, x + 1, y + 1))
 				result += PENALTY_N2;
 		}
 	}
 	
 	// Finder-like pattern in rows
-	for (int y = 0; y < size; y++) {
-		for (int x = 0, bits = 0; x < size; x++) {
-			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, size, x, y) ? 1 : 0);
+	for (int y = 0; y < qrsize; y++) {
+		for (int x = 0, bits = 0; x < qrsize; x++) {
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
 			if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
 				result += PENALTY_N3;
 		}
 	}
 	// Finder-like pattern in columns
-	for (int x = 0; x < size; x++) {
-		for (int y = 0, bits = 0; y < size; y++) {
-			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, size, x, y) ? 1 : 0);
+	for (int x = 0; x < qrsize; x++) {
+		for (int y = 0, bits = 0; y < qrsize; y++) {
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
 			if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
 				result += PENALTY_N3;
 		}
@@ -353,13 +353,13 @@ static long getPenaltyScore(const uint8_t qrcode[], int size) {
 	
 	// Balance of black and white modules
 	int black = 0;
-	for (int y = 0; y < size; y++) {
-		for (int x = 0; x < size; x++) {
-			if (getModule(qrcode, size, x, y))
+	for (int y = 0; y < qrsize; y++) {
+		for (int x = 0; x < qrsize; x++) {
+			if (getModule(qrcode, qrsize, x, y))
 				black++;
 		}
 	}
-	int total = size * size;
+	int total = qrsize * qrsize;
 	// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
 	for (int k = 0; black*20L < (9L-k)*total || black*20L > (11L+k)*total; k++)
 		result += PENALTY_N4;
@@ -395,15 +395,15 @@ int qrcodegen_getSize(int version) {
 
 // Public function - see documentation comment in header file.
 bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y) {
-	int size = qrcodegen_getSize(version);
-	return (0 <= x && x < size && 0 <= y && y < size) && getModule(qrcode, size, x, y);
+	int qrsize = qrcodegen_getSize(version);
+	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, qrsize, x, y);
 }
 
 
 // Gets the module at the given coordinates, which must be in bounds.
-static bool getModule(const uint8_t qrcode[], int size, int x, int y) {
-	assert(21 <= size && size <= 177 && 0 <= x && x < size && 0 <= y && y < size);
-	int index = y * size + x;
+static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y) {
+	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
+	int index = y * qrsize + x;
 	int bitIndex = index & 7;
 	int byteIndex = index >> 3;
 	return ((qrcode[byteIndex] >> bitIndex) & 1) != 0;
@@ -411,9 +411,9 @@ static bool getModule(const uint8_t qrcode[], int size, int x, int y) {
 
 
 // Sets the module at the given coordinates, which must be in bounds.
-static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack) {
-	assert(21 <= size && size <= 177 && 0 <= x && x < size && 0 <= y && y < size);
-	int index = y * size + x;
+static void setModule(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack) {
+	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
+	int index = y * qrsize + x;
 	int bitIndex = index & 7;
 	int byteIndex = index >> 3;
 	if (isBlack)
@@ -424,9 +424,9 @@ static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack) {
 
 
 // Sets the module at the given coordinates, doing nothing if out of bounds.
-static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack) {
-	if (0 <= x && x < size && 0 <= y && y < size)
-		setModule(qrcode, size, x, y, isBlack);
+static void setModuleBounded(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack) {
+	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)
+		setModule(qrcode, qrsize, x, y, isBlack);
 }
 
 
@@ -437,17 +437,17 @@ static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBl
 // then marks every function module in the QR Code as black.
 static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
-	int size = qrcodegen_getSize(version);
-	memset(qrcode, 0, (size * size + 7) / 8 * sizeof(qrcode[0]));
+	int qrsize = qrcodegen_getSize(version);
+	memset(qrcode, 0, (qrsize * qrsize + 7) / 8 * sizeof(qrcode[0]));
 	
 	// Fill horizontal and vertical timing patterns
-	fillRectangle(6, 0, 1, size, qrcode, size);
-	fillRectangle(0, 6, size, 1, qrcode, size);
+	fillRectangle(6, 0, 1, qrsize, qrcode, qrsize);
+	fillRectangle(0, 6, qrsize, 1, qrcode, qrsize);
 	
 	// Fill 3 finder patterns (all corners except bottom right) and format bits
-	fillRectangle(0, 0, 9, 9, qrcode, size);
-	fillRectangle(size - 8, 0, 8, 9, qrcode, size);
-	fillRectangle(0, size - 8, 9, 8, qrcode, size);
+	fillRectangle(0, 0, 9, 9, qrcode, qrsize);
+	fillRectangle(qrsize - 8, 0, 8, 9, qrcode, qrsize);
+	fillRectangle(0, qrsize - 8, 9, 8, qrcode, qrsize);
 	
 	// Fill numerous alignment patterns
 	uint8_t alignPatPos[7] = {0};
@@ -457,14 +457,14 @@ static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
 				continue;  // Skip the three finder corners
 			else
-				fillRectangle(alignPatPos[i] - 2, alignPatPos[j] - 2, 5, 5, qrcode, size);
+				fillRectangle(alignPatPos[i] - 2, alignPatPos[j] - 2, 5, 5, qrcode, qrsize);
 		}
 	}
 	
 	// Fill version
 	if (version >= 7) {
-		fillRectangle(size - 11, 0, 3, 6, qrcode, size);
-		fillRectangle(0, size - 11, 6, 3, qrcode, size);
+		fillRectangle(qrsize - 11, 0, 3, 6, qrcode, qrsize);
+		fillRectangle(0, qrsize - 11, 6, 3, qrcode, qrsize);
 	}
 }
 
@@ -474,10 +474,10 @@ static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 // marked black (namely by initializeFunctionModules()), because this may skip redrawing black function modules.
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	// Draw horizontal and vertical timing patterns
-	int size = qrcodegen_getSize(version);
-	for (int i = 7; i < size - 7; i += 2) {
-		setModule(qrcode, size, 6, i, false);
-		setModule(qrcode, size, i, 6, false);
+	int qrsize = qrcodegen_getSize(version);
+	for (int i = 7; i < qrsize - 7; i += 2) {
+		setModule(qrcode, qrsize, 6, i, false);
+		setModule(qrcode, qrsize, i, 6, false);
 	}
 	
 	// Draw 3 finder patterns
@@ -487,9 +487,9 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 			if (abs(j) > dist)
 				dist = abs(j);
 			if (dist == 2 || dist == 4) {
-				setModuleBounded(qrcode, size, 3 + j, 3 + i, false);
-				setModuleBounded(qrcode, size, size - 4 + j, 3 + i, false);
-				setModuleBounded(qrcode, size, 3 + j, size - 4 + i, false);
+				setModuleBounded(qrcode, qrsize, 3 + j, 3 + i, false);
+				setModuleBounded(qrcode, qrsize, qrsize - 4 + j, 3 + i, false);
+				setModuleBounded(qrcode, qrsize, 3 + j, qrsize - 4 + i, false);
 			}
 		}
 	}
@@ -504,7 +504,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 			else {
 				for (int k = -1; k <= 1; k++) {
 					for (int l = -1; l <= 1; l++)
-						setModule(qrcode, size, alignPatPos[i] + l, alignPatPos[j] + k, k == 0 && l == 0);
+						setModule(qrcode, qrsize, alignPatPos[i] + l, alignPatPos[j] + k, k == 0 && l == 0);
 				}
 			}
 		}
@@ -522,9 +522,9 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 		// Draw two copies
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 3; j++) {
-				int k = size - 11 + j;
-				setModule(qrcode, size, k, i, (data & 1) != 0);
-				setModule(qrcode, size, i, k, (data & 1) != 0);
+				int k = qrsize - 11 + j;
+				setModule(qrcode, qrsize, k, i, (data & 1) != 0);
+				setModule(qrcode, qrsize, i, k, (data & 1) != 0);
 				data >>= 1;
 			}
 		}
@@ -534,7 +534,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 
 // Based on the given ECC level and mask, this calculates the format bits
 // and draws their black and white modules onto the given QR Code.
-static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int size) {
+static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int qrsize) {
 	// Calculate error correction code and pack bits
 	assert(0 <= (int)mask && (int)mask <= 7);
 	int data;
@@ -555,19 +555,19 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 	
 	// Draw first copy
 	for (int i = 0; i <= 5; i++)
-		setModule(qrcode, size, 8, i, ((data >> i) & 1) != 0);
-	setModule(qrcode, size, 8, 7, ((data >> 6) & 1) != 0);
-	setModule(qrcode, size, 8, 8, ((data >> 7) & 1) != 0);
-	setModule(qrcode, size, 7, 8, ((data >> 8) & 1) != 0);
+		setModule(qrcode, qrsize, 8, i, ((data >> i) & 1) != 0);
+	setModule(qrcode, qrsize, 8, 7, ((data >> 6) & 1) != 0);
+	setModule(qrcode, qrsize, 8, 8, ((data >> 7) & 1) != 0);
+	setModule(qrcode, qrsize, 7, 8, ((data >> 8) & 1) != 0);
 	for (int i = 9; i < 15; i++)
-		setModule(qrcode, size, 14 - i, 8, ((data >> i) & 1) != 0);
+		setModule(qrcode, qrsize, 14 - i, 8, ((data >> i) & 1) != 0);
 	
 	// Draw second copy
 	for (int i = 0; i <= 7; i++)
-		setModule(qrcode, size, size - 1 - i, 8, ((data >> i) & 1) != 0);
+		setModule(qrcode, qrsize, qrsize - 1 - i, 8, ((data >> i) & 1) != 0);
 	for (int i = 8; i < 15; i++)
-		setModule(qrcode, size, 8, size - 15 + i, ((data >> i) & 1) != 0);
-	setModule(qrcode, size, 8, size - 8, true);
+		setModule(qrcode, qrsize, 8, qrsize - 15 + i, ((data >> i) & 1) != 0);
+	setModule(qrcode, qrsize, 8, qrsize - 8, true);
 }
 
 
@@ -576,14 +576,14 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 static int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 	if (version == 1)
 		return 0;
-	int size = qrcodegen_getSize(version);
+	int qrsize = qrcodegen_getSize(version);
 	int numAlign = version / 7 + 2;
 	int step;
 	if (version != 32)
-		step = (version * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;  // ceil((size - 13) / (2*numAlign - 2)) * 2
+		step = (version * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;  // ceil((qrsize - 13) / (2*numAlign - 2)) * 2
 	else  // C-C-C-Combo breaker!
 		step = 26;
-	for (int i = numAlign - 1, pos = size - 7; i >= 1; i--, pos -= step)
+	for (int i = numAlign - 1, pos = qrsize - 7; i >= 1; i--, pos -= step)
 		result[i] = pos;
 	result[0] = 6;
 	return numAlign;
@@ -591,10 +591,10 @@ static int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 
 
 // Sets every pixel in the range [left : left + width] * [top : top + height] to black.
-static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int size) {
+static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int qrsize) {
 	for (int dy = 0; dy < height; dy++) {
 		for (int dx = 0; dx < width; dx++)
-			setModule(qrcode, size, left + dx, top + dy, true);
+			setModule(qrcode, qrsize, left + dx, top + dy, true);
 	}
 }
 
@@ -659,20 +659,20 @@ static int getNumRawDataModules(int version) {
 
 // Draws the raw codewords (including data and ECC) onto the given QR Code. This requires the initial state of
 // the QR Code to be black at function modules and white at codeword modules (including unused remainder bits).
-static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int size) {
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize) {
 	int i = 0;  // Bit index into the data
 	// Do the funny zigzag scan
-	for (int right = size - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
+	for (int right = qrsize - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
 		if (right == 6)
 			right = 5;
-		for (int vert = 0; vert < size; vert++) {  // Vertical counter
+		for (int vert = 0; vert < qrsize; vert++) {  // Vertical counter
 			for (int j = 0; j < 2; j++) {
 				int x = right - j;  // Actual x coordinate
 				bool upward = ((right + 1) & 2) == 0;
-				int y = upward ? size - 1 - vert : vert;  // Actual y coordinate
-				if (!getModule(qrcode, size, x, y) && i < dataLen * 8) {
+				int y = upward ? qrsize - 1 - vert : vert;  // Actual y coordinate
+				if (!getModule(qrcode, qrsize, x, y) && i < dataLen * 8) {
 					bool black = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0;
-					setModule(qrcode, size, x, y, black);
+					setModule(qrcode, qrsize, x, y, black);
 					i++;
 				}
 				// If there are any remainder bits (0 to 7), they are already
@@ -691,11 +691,11 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 // properties, calling applyMask(..., m) twice with the same value is equivalent to no change at all.
 // This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 // well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
-static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int size, int mask) {
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, int mask) {
 	assert(0 <= mask && mask <= 7);
-	for (int y = 0; y < size; y++) {
-		for (int x = 0; x < size; x++) {
-			if (getModule(functionModules, size, x, y))
+	for (int y = 0; y < qrsize; y++) {
+		for (int x = 0; x < qrsize; x++) {
+			if (getModule(functionModules, qrsize, x, y))
 				continue;
 			bool invert;
 			switch (mask) {
@@ -709,8 +709,8 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int siz
 				case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;  break;
 				default:  assert(false);
 			}
-			bool val = getModule(qrcode, size, x, y);
-			setModule(qrcode, size, x, y, val ^ invert);
+			bool val = getModule(qrcode, qrsize, x, y);
+			setModule(qrcode, qrsize, x, y, val ^ invert);
 		}
 	}
 }
