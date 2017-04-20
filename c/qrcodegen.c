@@ -130,7 +130,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		return 0;
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
-	appendBitsToBuffer(isNumeric ? 1 : 2, 4, qrcode, &bitLen);
+	appendBitsToBuffer((isNumeric ? 1 : 2), 4, qrcode, &bitLen);
 	int lengthBits = (version <= 9 ? 9 : (version <= 26 ? 11 : 13)) + (isNumeric ? 1 : 0);
 	appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
 	if (isNumeric) {
@@ -209,11 +209,8 @@ static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc e
 		if (dataLen >= (1L << lengthBits))
 			continue;
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-		int dataUsedBits = 4 + lengthBits;
-		if (dataBitLen > INT_MAX - dataUsedBits)
-			continue;
-		dataUsedBits += dataBitLen;
-		if (dataUsedBits <= dataCapacityBits)
+		int header = 4 + lengthBits;
+		if (dataBitLen <= INT_MAX - header && header + dataBitLen <= dataCapacityBits)
 			return version;  // This version number is found to be suitable
 		if (version >= maxVersion)  // All versions in the range could not fit the given data
 			return 0;
@@ -362,7 +359,7 @@ static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], 
 // for the given version number and error correction level. The result is in the range [9, 2956].
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	return getNumRawDataModules(version) / 8 - (ECC_CODEWORDS_PER_BLOCK[(int)ecl][version] * NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version]);
+	return getNumRawDataModules(version) / 8 - ECC_CODEWORDS_PER_BLOCK[(int)ecl][version] * NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
 }
 
 
@@ -615,7 +612,7 @@ static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ec
 		if (i >= numShortBlocks)
 			k++;
 	}
-	for (int i = numShortBlocks, l = numBlocks * shortBlockDataLen, k = (numShortBlocks + 1) * shortBlockDataLen;
+	for (int i = numShortBlocks, k = (numShortBlocks + 1) * shortBlockDataLen, l = numBlocks * shortBlockDataLen;
 			i < numBlocks; i++, k += shortBlockDataLen + 1, l++)
 		result[l] = data[k];
 	for (int i = 0, k = dataLen; i < numBlocks; i++) {
