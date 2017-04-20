@@ -31,6 +31,12 @@
 
 /*---- Forward declarations for private functions ----*/
 
+// Note: All public and private functions defined in this source file are "pure", in the sense that
+// they take input data only from arguments, return output data or store in pointer arguments,
+// perform no I/O (e.g. reading clock or writing to console), and don't read/write global variables.
+// Also, each of these functions allocate only a small constant amount of memory on the stack,
+// they don't allocate or free anything on the heap, and they are thread-safe.
+
 static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc ecl, int dataLen, int dataBitLen, int ver1To9LenBits, int ver10To26LenBits, int ver27To40LenBits);
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl);
 static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
@@ -99,8 +105,8 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	int textLen = 0;
 	bool isNumeric = true;
 	bool isAlphanumeric = true;
-	for (const char *p = text; *p != '\0'; p++, textLen++) {
-		if (textLen == INT16_MAX)  // Note: INT16_MAX < INT_MAX && INT16_MAX < SIZE_MAX
+	for (const char *p = text; *p != '\0'; p++, textLen++) {  // Read every character
+		if (textLen == INT16_MAX)  // Note: INT16_MAX <= INT_MAX && INT16_MAX <= SIZE_MAX
 			return 0;
 		char c = *p;
 		if (c < '0' || c > '9') {
@@ -128,12 +134,15 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		(isNumeric ? 10 : 9), (isNumeric ? 12 : 11), (isNumeric ? 14 : 13));
 	if (version == 0)
 		return 0;
+	
+	// Make header of bit sequence
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	appendBitsToBuffer((isNumeric ? 1 : 2), 4, qrcode, &bitLen);
 	int lengthBits = (version <= 9 ? 9 : (version <= 26 ? 11 : 13)) + (isNumeric ? 1 : 0);
 	appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
 	
+	// Append data segment bits
 	if (isNumeric) {
 		int accumData = 0;
 		int accumCount = 0;
@@ -164,6 +173,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 			appendBitsToBuffer(accumData, 6, qrcode, &bitLen);
 	}
 	
+	// Make QR Code
 	encodeQrCodeTail(qrcode, bitLen, tempBuffer, version, ecl, mask, boostEcl);
 	return version;
 }
@@ -175,13 +185,15 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
+	// Check length and find version
 	if (dataLen > INT16_MAX / 8)
 		return 0;
-	// Now dataLen * 8 <= 65535 <= INT_MAX
+	// Now dataLen * 8 <= 32767 <= INT_MAX
 	int version = fitVersionToData(minVersion, maxVersion, ecl, (int)dataLen, (int)dataLen * 8, 8, 16, 16);
 	if (version == 0)
 		return 0;
 	
+	// Make bit sequence and QR Code
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	appendBitsToBuffer(4, 4, qrcode, &bitLen);
@@ -221,9 +233,11 @@ static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc e
 }
 
 
-// Given data codewords in dataAndQrcode already padded to the length specified by the
-// version and ECC level, this function adds ECC bytes, interleaves blocks, renders the
-// QR Code symbol back to the array dataAndQrcode, and handles automatic mask selection.
+// Given a data bit sequence in dataAndQrcode without terminator or padding or ECC, plus the given QR Code
+// encoding parameters, this function handles ECC level boosting, bit stream termination and padding,
+// ECC computation, and block interleaving. Then the function renders the QR Code symbol back to the array
+// dataAndQrcode and handles automatic mask selection. The initial bit length must fit the given version and
+// ECC level, and each of the two arrays must have length at least qrcodegen_BUFFER_LEN_FOR_VERSION(version).
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[],
 		int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl) {
 	
@@ -234,6 +248,7 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 	}
 	int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 	
+	// Add terminator, bit padding, byte padding
 	int terminatorBits = dataCapacityBits - bitLen;
 	if (terminatorBits > 4)
 		terminatorBits = 4;
@@ -243,12 +258,15 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 		appendBitsToBuffer(padByte, 8, dataAndQrcode, &bitLen);
 	assert(bitLen % 8 == 0);
 	
+	// Draw function and data codeword modules
 	int qrsize = qrcodegen_getSize(version);
 	appendErrorCorrection(dataAndQrcode, version, ecl, tempBuffer);
 	initializeFunctionModules(version, dataAndQrcode);
 	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, dataAndQrcode, qrsize);
 	drawWhiteFunctionModules(dataAndQrcode, version);
 	initializeFunctionModules(version, tempBuffer);
+	
+	// Handle masking
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
@@ -416,8 +434,8 @@ static void setModuleBounded(uint8_t qrcode[], int qrsize, int x, int y, bool is
 
 /*---- QR Code drawing functions ----*/
 
-// Fills the given QR Code grid with white modules for the given version's size,
-// then marks every function module in the QR Code as black.
+// Clears the given QR Code grid with white modules for the given
+// version's size, then marks every function module as black.
 static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
 	int qrsize = qrcodegen_getSize(version);
@@ -444,7 +462,7 @@ static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 		}
 	}
 	
-	// Fill version
+	// Fill version blocks
 	if (version >= 7) {
 		fillRectangle(qrsize - 11, 0, 3, 6, qrcode, qrsize);
 		fillRectangle(0, qrsize - 11, 6, 3, qrcode, qrsize);
@@ -463,7 +481,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 		setModule(qrcode, qrsize, i, 6, false);
 	}
 	
-	// Draw 3 finder patterns
+	// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
 	for (int i = -4; i <= 4; i++) {
 		for (int j = -4; j <= 4; j++) {
 			int dist = abs(i);
@@ -493,7 +511,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 		}
 	}
 	
-	// Draw version block
+	// Draw version blocks
 	if (version >= 7) {
 		// Calculate error correction code and pack bits
 		int rem = version;  // version is uint6, in the range [7, 40]
@@ -515,8 +533,9 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 }
 
 
-// Based on the given ECC level and mask, this calculates the format bits
-// and draws their black and white modules onto the given QR Code.
+// Draws two copies of the format bits (with its own error correction code) based
+// on the given mask and error correction level. This always draws all modules of
+// the format bits, unlike drawWhiteFunctionModules() which might skip black modules.
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int qrsize) {
 	// Calculate error correction code and pack bits
 	assert(0 <= (int)mask && (int)mask <= 7);
@@ -626,7 +645,8 @@ static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ec
 
 
 // Returns the number of data bits that can be stored in a QR Code of the given version number, after
-// all function modules are excluded. This includes remainder bits, so it may not be a multiple of 8.
+// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
+// The result is in the range [208, 29648].
 static int getNumRawDataModules(int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = (16 * version + 128) * version + 64;
