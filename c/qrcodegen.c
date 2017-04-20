@@ -361,7 +361,7 @@ static long getPenaltyScore(const uint8_t qrcode[], int size) {
 	}
 	int total = size * size;
 	// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
-	for (int k = 0; black*20 < (9-k)*total || black*20 > (11+k)*total; k++)
+	for (int k = 0; black*20L < (9L-k)*total || black*20L > (11L+k)*total; k++)
 		result += PENALTY_N4;
 	return result;
 }
