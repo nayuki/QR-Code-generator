@@ -216,9 +216,9 @@ static int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanum
 	}
 	
 	long tempBits;
-	if (isNumeric)
+	if (*isNumeric)
 		tempBits = textLen * 3L + (textLen + 2L) / 3;
-	else if (isAlphanumeric)
+	else if (*isAlphanumeric)
 		tempBits = textLen * 5L + (textLen + 1L) / 2;
 	else  // Binary mode
 		tempBits = textLen * 8L;
