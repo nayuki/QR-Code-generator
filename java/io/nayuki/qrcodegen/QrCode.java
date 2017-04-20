@@ -334,7 +334,7 @@ public final class QrCode {
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
 	private void drawFunctionPatterns() {
-		// Draw the horizontal and vertical timing patterns
+		// Draw horizontal and vertical timing patterns
 		for (int i = 0; i < size; i++) {
 			setFunctionModule(6, i, i % 2 == 0);
 			setFunctionModule(i, 6, i % 2 == 0);
@@ -345,7 +345,7 @@ public final class QrCode {
 		drawFinderPattern(size - 4, 3);
 		drawFinderPattern(3, size - 4);
 		
-		// Draw the numerous alignment patterns
+		// Draw numerous alignment patterns
 		int[] alignPatPos = getAlignmentPatternPositions(version);
 		int numAlign = alignPatPos.length;
 		for (int i = 0; i < numAlign; i++) {

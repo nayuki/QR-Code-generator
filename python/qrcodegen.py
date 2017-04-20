@@ -253,7 +253,7 @@ class QrCode(object):
 	# ---- Private helper methods for constructor: Drawing function modules ----
 	
 	def _draw_function_patterns(self):
-		# Draw the horizontal and vertical timing patterns
+		# Draw horizontal and vertical timing patterns
 		for i in range(self._size):
 			self._set_function_module(6, i, i % 2 == 0)
 			self._set_function_module(i, 6, i % 2 == 0)
@@ -263,7 +263,7 @@ class QrCode(object):
 		self._draw_finder_pattern(self._size - 4, 3)
 		self._draw_finder_pattern(3, self._size - 4)
 		
-		# Draw the numerous alignment patterns
+		# Draw numerous alignment patterns
 		alignpatpos = QrCode._get_alignment_pattern_positions(self._version)
 		numalign = len(alignpatpos)
 		skips = ((0, 0), (0, numalign - 1), (numalign - 1, 0))  # Skip the three finder corners

@@ -191,7 +191,7 @@ std::string qrcodegen::QrCode::toSvgString(int border) const {
 
 
 void qrcodegen::QrCode::drawFunctionPatterns() {
-	// Draw the horizontal and vertical timing patterns
+	// Draw horizontal and vertical timing patterns
 	for (int i = 0; i < size; i++) {
 		setFunctionModule(6, i, i % 2 == 0);
 		setFunctionModule(i, 6, i % 2 == 0);
@@ -202,7 +202,7 @@ void qrcodegen::QrCode::drawFunctionPatterns() {
 	drawFinderPattern(size - 4, 3);
 	drawFinderPattern(3, size - 4);
 	
-	// Draw the numerous alignment patterns
+	// Draw numerous alignment patterns
 	const std::vector<int> alignPatPos(getAlignmentPatternPositions(version));
 	int numAlign = alignPatPos.size();
 	for (int i = 0; i < numAlign; i++) {
