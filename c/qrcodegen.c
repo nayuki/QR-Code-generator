@@ -52,9 +52,6 @@ static int getNumRawDataModules(int version);
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, int mask);
 
-static int checkedAdd(int x, int y);
-static int checkedMultiply(int x, int y);
-
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
 static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
@@ -112,16 +109,12 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		}
 	}
 	
-	int textBits;
-	if (isNumeric) {  // textBits = textLen * 3 + ceil(textLen / 3)
-		textBits = checkedAdd(checkedMultiply(textLen, 3), checkedAdd(textLen, 2) / 3);
-		if (textBits < 0)
-			return 0;
-	} else if (isAlphanumeric) {  // textBits = textLen * 5 + ceil(textLen / 2)
-		textBits = checkedAdd(checkedMultiply(textLen, 5), checkedAdd(textLen, 1) / 2);
-		if (textBits < 0)
-			return 0;
-	} else {  // Use binary mode
+	long textBits;
+	if (isNumeric)
+		textBits = textLen * 3L + (textLen + 2L) / 3;
+	else if (isAlphanumeric)
+		textBits = textLen * 5L + (textLen + 1L) / 2;
+	else {  // Use binary mode
 		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
 			return 0;
 		for (int i = 0; i < textLen; i++)
@@ -129,7 +122,9 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask, boostEcl);
 	}
 	
-	int version = fitVersionToData(minVersion, maxVersion, ecl, textLen, textBits,
+	if (textBits > INT_MAX)
+		return 0;
+	int version = fitVersionToData(minVersion, maxVersion, ecl, textLen, (int)textBits,
 		(isNumeric ? 10 : 9), (isNumeric ? 12 : 11), (isNumeric ? 14 : 13));
 	if (version == 0)
 		return 0;
@@ -214,8 +209,11 @@ static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc e
 		if (dataLen >= (1L << lengthBits))
 			continue;
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-		int dataUsedBits = checkedAdd(4 + lengthBits, dataBitLen);
-		if (0 <= dataUsedBits && dataUsedBits <= dataCapacityBits)
+		int dataUsedBits = 4 + lengthBits;
+		if (dataBitLen > INT_MAX - dataUsedBits)
+			continue;
+		dataUsedBits += dataBitLen;
+		if (dataUsedBits <= dataCapacityBits)
 			return version;  // This version number is found to be suitable
 		if (version >= maxVersion)  // All versions in the range could not fit the given data
 			return 0;
@@ -666,26 +664,6 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 		}
 	}
 	assert(i == dataLen * 8);
-}
-
-
-// Tries to add the given non-negative integers, with strict overflow checking.
-// Negative inputs or output indicate the computation would overflow.
-static int checkedAdd(int x, int y) {
-	if (x < 0 || y < 0 || x > INT_MAX - y)
-		return -1;
-	else
-		return x + y;
-}
-
-
-// Tries to multiply the given non-negative integers, with strict overflow checking.
-// Negative inputs or output indicate the computation would overflow.
-static int checkedMultiply(int x, int y) {
-	if (x < 0 || y < 0 || x > INT_MAX / y)
-		return -1;
-	else
-		return x * y;
 }
 
 
