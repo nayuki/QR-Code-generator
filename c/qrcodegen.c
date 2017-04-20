@@ -254,13 +254,12 @@ static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc e
 		if (version <= 9) lengthBits = ver1To9LenBits;
 		else if (version <= 26) lengthBits = ver10To26LenBits;
 		else lengthBits = ver27To40LenBits;
-		if (dataLen >= (1L << lengthBits))
-			continue;
-		
-		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-		int header = 4 + lengthBits;
-		if (dataBitLen <= INT_MAX - header && header + dataBitLen <= dataCapacityBits)
-			return version;  // This version number is found to be suitable
+		if (dataLen < (1L << lengthBits)) {
+			int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
+			int header = 4 + lengthBits;
+			if (dataBitLen <= INT_MAX - header && header + dataBitLen <= dataCapacityBits)
+				return version;  // This version number is found to be suitable
+		}
 		if (version >= maxVersion)  // All versions in the range could not fit the given data
 			return 0;
 	}
