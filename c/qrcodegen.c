@@ -133,6 +133,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	appendBitsToBuffer((isNumeric ? 1 : 2), 4, qrcode, &bitLen);
 	int lengthBits = (version <= 9 ? 9 : (version <= 26 ? 11 : 13)) + (isNumeric ? 1 : 0);
 	appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
+	
 	if (isNumeric) {
 		int accumData = 0;
 		int accumCount = 0;
@@ -162,6 +163,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		if (accumCount > 0)  // 1 character remaining
 			appendBitsToBuffer(accumData, 6, qrcode, &bitLen);
 	}
+	
 	encodeQrCodeTail(qrcode, bitLen, tempBuffer, version, ecl, mask, boostEcl);
 	return version;
 }
@@ -172,13 +174,14 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
+	
 	if (dataLen > INT16_MAX / 8)
 		return 0;
 	// Now dataLen * 8 <= 65535 <= INT_MAX
-	
 	int version = fitVersionToData(minVersion, maxVersion, ecl, (int)dataLen, (int)dataLen * 8, 8, 16, 16);
 	if (version == 0)
 		return 0;
+	
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	appendBitsToBuffer(4, 4, qrcode, &bitLen);
@@ -205,9 +208,9 @@ static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc e
 		if (version <= 9) lengthBits = ver1To9LenBits;
 		else if (version <= 26) lengthBits = ver10To26LenBits;
 		else lengthBits = ver27To40LenBits;
-		
 		if (dataLen >= (1L << lengthBits))
 			continue;
+		
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
 		int header = 4 + lengthBits;
 		if (dataBitLen <= INT_MAX - header && header + dataBitLen <= dataCapacityBits)
