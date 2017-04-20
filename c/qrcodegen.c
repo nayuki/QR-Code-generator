@@ -37,6 +37,7 @@
 // Also, each of these functions allocate only a small constant amount of memory on the stack,
 // they don't allocate or free anything on the heap, and they are thread-safe.
 
+static int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
 static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc ecl, int dataLen, int dataBitLen, int ver1To9LenBits, int ver10To26LenBits, int ver27To40LenBits);
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl);
 static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
@@ -102,34 +103,20 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
 	// Get text properties
-	int textLen = 0;
-	bool isNumeric = true;
-	bool isAlphanumeric = true;
-	for (const char *p = text; *p != '\0'; p++, textLen++) {  // Read every character
-		if (textLen == INT16_MAX)  // Note: INT16_MAX <= INT_MAX && INT16_MAX <= SIZE_MAX
-			return 0;
-		char c = *p;
-		if (c < '0' || c > '9') {
-			isNumeric = false;
-			isAlphanumeric &= strchr(ALPHANUMERIC_CHARSET, c) != NULL;
-		}
-	}
+	bool isNumeric, isAlphanumeric;
+	int textBits;
+	int textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
+	if (textLen < 0)
+		return 0;
 	
-	long textBits;
-	if (isNumeric)
-		textBits = textLen * 3L + (textLen + 2L) / 3;
-	else if (isAlphanumeric)
-		textBits = textLen * 5L + (textLen + 1L) / 2;
-	else {  // Use binary mode
+	// Use binary mode or find version
+	if (!isAlphanumeric) {
 		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
 			return 0;
 		for (int i = 0; i < textLen; i++)
 			tempBuffer[i] = (uint8_t)text[i];
 		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask, boostEcl);
 	}
-	
-	if (textBits > INT_MAX)
-		return 0;
 	int version = fitVersionToData(minVersion, maxVersion, ecl, textLen, (int)textBits,
 		(isNumeric ? 10 : 9), (isNumeric ? 12 : 11), (isNumeric ? 14 : 13));
 	if (version == 0)
@@ -176,6 +163,39 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	// Make QR Code
 	encodeQrCodeTail(qrcode, bitLen, tempBuffer, version, ecl, mask, boostEcl);
 	return version;
+}
+
+
+// Scans the given string, returns the number of characters, and sets output variables.
+// Returns a negative number if the length would exceed INT16_MAX or textBits would exceed INT_MAX.
+// Note that INT16_MAX <= 32767 <= INT_MAX and INT16_MAX < 65535 <= SIZE_MAX.
+// If the return value is negative, then the pointees of output arguments might not be set.
+static int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits) {
+	int textLen = 0;
+	*isNumeric = true;
+	*isAlphanumeric = true;
+	for (const char *p = text; *p != '\0'; p++, textLen++) {  // Read every character
+		if (textLen >= INT16_MAX)
+			return -1;
+		char c = *p;
+		if (c < '0' || c > '9') {
+			*isNumeric = false;
+			*isAlphanumeric &= strchr(ALPHANUMERIC_CHARSET, c) != NULL;
+		}
+	}
+	
+	long tempBits;
+	if (isNumeric)
+		tempBits = textLen * 3L + (textLen + 2L) / 3;
+	else if (isAlphanumeric)
+		tempBits = textLen * 5L + (textLen + 1L) / 2;
+	else  // Binary mode
+		tempBits = textLen * 8L;
+	
+	if (tempBits > INT_MAX)
+		return -1;
+	*textBits = (int)tempBits;
+	return textLen;
 }
 
 
