@@ -28,6 +28,12 @@
 #include <string.h>
 #include "qrcodegen.h"
 
+#ifdef QRCODEGEN_TEST
+	#define testable  // Expose private functions
+#else
+	#define testable static  // Keep functions private
+#endif
+
 
 /*---- Forward declarations for private functions ----*/
 
@@ -43,12 +49,12 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 
 static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
-static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
-static int getNumRawDataModules(int version);
+testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
+testable int getNumRawDataModules(int version);
 
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
 static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
-static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
+testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 static void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
@@ -369,7 +375,7 @@ static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ec
 
 // Returns the number of 8-bit codewords that can be used for storing data (not ECC),
 // for the given version number and error correction level. The result is in the range [9, 2956].
-static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
+testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	return getNumRawDataModules(version) / 8 - ECC_CODEWORDS_PER_BLOCK[(int)ecl][version] * NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
 }
@@ -378,7 +384,7 @@ static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 // Returns the number of data bits that can be stored in a QR Code of the given version number, after
 // all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 // The result is in the range [208, 29648].
-static int getNumRawDataModules(int version) {
+testable int getNumRawDataModules(int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = (16 * version + 128) * version + 64;
 	if (version >= 2) {
@@ -434,7 +440,7 @@ static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const ui
 
 
 // Returns the product of the two given field elements modulo GF(2^8/0x11D). All argument values are valid.
-static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
+testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
 	// Russian peasant multiplication
 	uint8_t z = 0;
 	for (int i = 7; i >= 0; i--) {
