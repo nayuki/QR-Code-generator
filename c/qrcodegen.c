@@ -668,7 +668,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 		for (int vert = 0; vert < size; vert++) {  // Vertical counter
 			for (int j = 0; j < 2; j++) {
 				int x = right - j;  // Actual x coordinate
-				bool upward = ((right & 2) == 0) ^ (x < 6);
+				bool upward = ((right + 1) & 2) == 0;
 				int y = upward ? size - 1 - vert : vert;  // Actual y coordinate
 				if (!getModule(qrcode, size, x, y) && i < dataLen * 8) {
 					bool black = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0;

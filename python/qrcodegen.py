@@ -404,7 +404,7 @@ class QrCode(object):
 			for vert in range(self._size):  # Vertical counter
 				for j in range(2):
 					x = right - j  # Actual x coordinate
-					upward = ((right & 2) == 0) ^ (x < 6)
+					upward = ((right + 1) & 2) == 0
 					y = (self._size - 1 - vert) if upward else vert  # Actual y coordinate
 					if not self._isfunction[y][x] and i < len(data) * 8:
 						self._modules[y][x] = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0
