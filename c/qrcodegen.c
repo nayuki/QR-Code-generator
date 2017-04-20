@@ -51,6 +51,9 @@ static int getNumRawDataModules(int version);
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, int mask);
 
+static int checkedAdd(int x, int y);
+static int checkedMultiply(int x, int y);
+
 static void calcReedSolomonGenerator(int degree, uint8_t result[]);
 static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 static uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
@@ -110,19 +113,13 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	
 	int textBits;
 	if (isNumeric) {  // textBits = textLen * 3 + ceil(textLen / 3)
-		if (textLen > INT_MAX / 3)
+		textBits = checkedAdd(checkedMultiply(textLen, 3), checkedAdd(textLen, 2) / 3);
+		if (textBits < 0)
 			return 0;
-		textBits = textLen * 3;
-		if (textLen > INT_MAX - 2 || (textLen + 2) / 3 > INT_MAX - textBits)
-			return 0;
-		textBits += (textLen + 2) / 3;
 	} else if (isAlphanumeric) {  // textBits = textLen * 5 + ceil(textLen / 2)
-		if (textLen > INT_MAX / 5)
+		textBits = checkedAdd(checkedMultiply(textLen, 5), checkedAdd(textLen, 1) / 2);
+		if (textBits < 0)
 			return 0;
-		textBits = textLen * 5;
-		if (textLen > INT_MAX - 1 || (textLen + 1) / 2 > INT_MAX - textBits)
-			return 0;
-		textBits += (textLen + 1) / 2;
 	} else {  // Use binary mode
 		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
 			return 0;
@@ -144,11 +141,8 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 			lengthBits = isNumeric ? 14 : 13;
 		if (textLen < (1 << lengthBits)) {
 			dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-			dataUsedBits = 4 + lengthBits;
-			if (textBits > INT_MAX - dataUsedBits)
-				continue;
-			dataUsedBits += textBits;
-			if (dataUsedBits <= dataCapacityBits)
+			dataUsedBits = checkedAdd(4 + lengthBits, textBits);
+			if (0 <= dataUsedBits && dataUsedBits <= dataCapacityBits)
 				break;  // This version number is found to be suitable
 		}
 		if (version >= maxVersion)  // All versions in the range could not fit the given data
@@ -199,6 +193,9 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
+	if (dataLen > INT16_MAX)
+		return 0;
+	// Now dataLen <= INT_MAX, since int has at least 16 bits
 	
 	int version;
 	int dataUsedBits = -1;
@@ -206,11 +203,8 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	for (version = minVersion; ; version++) {
 		if ((version <= 9 && dataLen < (1U << 8)) || dataLen < (1U << 16)) {
 			dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-			dataUsedBits = 4 + (version <= 9 ? 8 : 16);
-			if (dataLen > (unsigned int)INT_MAX / 8 || (unsigned int)(INT_MAX - dataUsedBits) < dataLen * 8)
-				continue;
-			dataUsedBits += dataLen * 8;
-			if (dataUsedBits <= dataCapacityBits)
+			dataUsedBits = checkedAdd(4 + (version <= 9 ? 8 : 16), checkedMultiply((int)dataLen, 8));
+			if (0 <= dataUsedBits && dataUsedBits <= dataCapacityBits)
 				break;  // This version number is found to be suitable
 		}
 		if (version >= maxVersion)  // All versions in the range could not fit the given data
@@ -672,6 +666,26 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 		}
 	}
 	assert(i == dataLen * 8);
+}
+
+
+// Tries to add the given non-negative integers, with strict overflow checking.
+// Negative inputs or output indicate the computation would overflow.
+static int checkedAdd(int x, int y) {
+	if (x < 0 || y < 0 || x > INT_MAX - y)
+		return -1;
+	else
+		return x + y;
+}
+
+
+// Tries to multiply the given non-negative integers, with strict overflow checking.
+// Negative inputs or output indicate the computation would overflow.
+static int checkedMultiply(int x, int y) {
+	if (x < 0 || y < 0 || x > INT_MAX / y)
+		return -1;
+	else
+		return x * y;
 }
 
 
