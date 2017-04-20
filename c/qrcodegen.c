@@ -43,7 +43,7 @@
 // Also, each of these functions allocate only a small constant amount of memory on the stack,
 // they don't allocate or free anything on the heap, and they are thread-safe.
 
-static int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
+testable int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
 static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc ecl, int dataLen, int dataBitLen, int ver1To9LenBits, int ver10To26LenBits, int ver27To40LenBits);
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl);
 static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
@@ -52,14 +52,14 @@ static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ec
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 testable int getNumRawDataModules(int version);
 
-static void calcReedSolomonGenerator(int degree, uint8_t result[]);
-static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
+testable void calcReedSolomonGenerator(int degree, uint8_t result[]);
+testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 static void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int qrsize);
-static int getAlignmentPatternPositions(int version, uint8_t result[7]);
+testable int getAlignmentPatternPositions(int version, uint8_t result[7]);
 static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int qrsize);
 
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize);
@@ -207,7 +207,7 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 // Returns a negative number if the length would exceed INT16_MAX or textBits would exceed INT_MAX.
 // Note that INT16_MAX <= 32767 <= INT_MAX and INT16_MAX < 65535 <= SIZE_MAX.
 // If the return value is negative, then the pointees of output arguments might not be set.
-static int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits) {
+testable int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits) {
 	int textLen = 0;
 	*isNumeric = true;
 	*isAlphanumeric = true;
@@ -401,7 +401,7 @@ testable int getNumRawDataModules(int version) {
 /*---- Reed-Solomon ECC generator functions ----*/
 
 // Calculates the Reed-Solomon generator polynomial of the given degree, storing in result[0 : degree].
-static void calcReedSolomonGenerator(int degree, uint8_t result[]) {
+testable void calcReedSolomonGenerator(int degree, uint8_t result[]) {
 	// Start with the monomial x^0
 	assert(1 <= degree && degree <= 30);
 	memset(result, 0, degree * sizeof(result[0]));
@@ -425,7 +425,7 @@ static void calcReedSolomonGenerator(int degree, uint8_t result[]) {
 
 // Calculates the remainder of the polynomial data[0 : dataLen] when divided by the generator[0 : degree], where all
 // polynomials are in big endian and the generator has an implicit leading 1 term, storing the result in result[0 : degree].
-static void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]) {
+testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]) {
 	// Perform polynomial division
 	assert(1 <= degree && degree <= 30);
 	memset(result, 0, degree * sizeof(result[0]));
@@ -595,7 +595,7 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 
 // Calculates the positions of alignment patterns in ascending order for the given version number,
 // storing them to the given array and returning an array length in the range [0, 7].
-static int getAlignmentPatternPositions(int version, uint8_t result[7]) {
+testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 	if (version == 1)
 		return 0;
 	int qrsize = qrcodegen_getSize(version);
