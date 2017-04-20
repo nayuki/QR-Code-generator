@@ -40,7 +40,7 @@ static bool getModule(const uint8_t qrcode[], int size, int x, int y);
 static void setModule(uint8_t qrcode[], int size, int x, int y, bool isBlack);
 static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBlack);
 
-static void initializeFunctionalModules(int version, uint8_t qrcode[]);
+static void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int size);
 static int getAlignmentPatternPositions(int version, uint8_t result[7]);
@@ -262,10 +262,10 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 // QR Code symbol back to the array dataAndQrcode, and handles automatic mask selection.
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask) {
 	appendErrorCorrection(dataAndQrcode, version, ecl, tempBuffer);
-	initializeFunctionalModules(version, dataAndQrcode);
+	initializeFunctionModules(version, dataAndQrcode);
 	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, dataAndQrcode, qrcodegen_getSize(version));
 	drawWhiteFunctionModules(dataAndQrcode, version);
-	initializeFunctionalModules(version, tempBuffer);
+	initializeFunctionModules(version, tempBuffer);
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
@@ -435,7 +435,7 @@ static void setModuleBounded(uint8_t qrcode[], int size, int x, int y, bool isBl
 
 // Fills the given QR Code grid with white modules for the given version's size,
 // then marks every function module in the QR Code as black.
-static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
+static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
 	int size = qrcodegen_getSize(version);
 	memset(qrcode, 0, (size * size + 7) / 8 * sizeof(qrcode[0]));
@@ -471,7 +471,7 @@ static void initializeFunctionalModules(int version, uint8_t qrcode[]) {
 
 // Draws white function modules and possibly some black modules onto the given QR Code, without changing
 // non-function modules. This does not draw the format bits. This requires all function modules to be previously
-// marked black (namely by initializeFunctionalModules()), because this may skip redrawing black function modules.
+// marked black (namely by initializeFunctionModules()), because this may skip redrawing black function modules.
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	// Draw horizontal and vertical timing patterns
 	int size = qrcodegen_getSize(version);
