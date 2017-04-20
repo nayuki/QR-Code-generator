@@ -33,7 +33,7 @@
 
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], uint8_t tempBuffer[], int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask);
 static long getPenaltyScore(const uint8_t qrcode[], int size);
-static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int *bitLen);
+static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 static int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 
 static bool getModule(const uint8_t qrcode[], int size, int x, int y);
@@ -165,7 +165,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	appendBitsToBuffer(isNumeric ? 1 : 2, 4, qrcode, &bitLen);
-	appendBitsToBuffer((uint16_t)textLen, lengthBits, qrcode, &bitLen);
+	appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
 	if (isNumeric) {
 		int accumData = 0;
 		int accumCount = 0;
@@ -241,7 +241,7 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	appendBitsToBuffer(4, 4, qrcode, &bitLen);
-	appendBitsToBuffer((uint16_t)dataLen, (version <= 9 ? 8 : 16), qrcode, &bitLen);
+	appendBitsToBuffer((unsigned int)dataLen, (version <= 9 ? 8 : 16), qrcode, &bitLen);
 	for (size_t i = 0; i < dataLen; i++)
 		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
 	int terminatorBits = dataCapacityBits - bitLen;
@@ -368,7 +368,7 @@ static long getPenaltyScore(const uint8_t qrcode[], int size) {
 
 
 // Appends the given sequence of bits to the given byte-based bit buffer, increasing the bit length.
-static void appendBitsToBuffer(uint16_t val, int numBits, uint8_t buffer[], int *bitLen) {
+static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen) {
 	assert(0 <= numBits && numBits <= 16 && (long)val >> numBits == 0);
 	for (int i = numBits - 1; i >= 0; i--, (*bitLen)++)
 		buffer[*bitLen >> 3] |= ((val >> i) & 1) << (7 - (*bitLen & 7));
