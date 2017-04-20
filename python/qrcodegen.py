@@ -709,10 +709,10 @@ class QrSegment(object):
 	# ---- Constants ----
 	
 	# (Public) Can test whether a string is encodable in numeric mode (such as by using make_numeric())
-	NUMERIC_REGEX = re.compile("[0-9]*$")
+	NUMERIC_REGEX = re.compile(r"[0-9]*\Z")
 	
 	# (Public) Can test whether a string is encodable in alphanumeric mode (such as by using make_alphanumeric())
-	ALPHANUMERIC_REGEX = re.compile("[A-Z0-9 $%*+./:-]*$")
+	ALPHANUMERIC_REGEX = re.compile(r"[A-Z0-9 $%*+./:-]*\Z")
 	
 	# (Private) Dictionary of "0"->0, "A"->10, "$"->37, etc.
 	_ALPHANUMERIC_ENCODING_TABLE = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
