@@ -40,7 +40,8 @@ int main(void) {
 		
 		// Read data length or exit
 		int length;
-		scanf("%d", &length);
+		if (scanf("%d", &length) != 1)
+			return EXIT_FAILURE;
 		if (length == -1)
 			break;
 		
@@ -53,14 +54,16 @@ int main(void) {
 		}
 		for (int i = 0; i < length; i++) {
 			int b;
-			scanf("%d", &b);
+			if (scanf("%d", &b) != 1)
+			return EXIT_FAILURE;
 			data[i] = (uint8_t)b;
 			isAscii &= 0 < b && b < 128;
 		}
 		
 		// Read encoding parameters
 		int errCorLvl, minVersion, maxVersion, mask, boostEcl;
-		scanf("%d %d %d %d %d", &errCorLvl, &minVersion, &maxVersion, &mask, &boostEcl);
+		if (scanf("%d %d %d %d %d", &errCorLvl, &minVersion, &maxVersion, &mask, &boostEcl) != 5)
+			return EXIT_FAILURE;
 		
 		// Allocate memory for QR Code
 		int bufferLen = qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion);
