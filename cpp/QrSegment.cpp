@@ -54,7 +54,9 @@ const QrSegment::Mode QrSegment::Mode::KANJI       (0x8,  8, 10, 12);
 
 
 QrSegment QrSegment::makeBytes(const std::vector<uint8_t> &data) {
-	return QrSegment(Mode::BYTE, data.size(), data, data.size() * 8);
+	if (data.size() >= (unsigned int)INT_MAX / 8)
+		throw "Buffer too long";
+	return QrSegment(Mode::BYTE, (int)data.size(), data, (int)data.size() * 8);
 }
 
 
@@ -140,7 +142,7 @@ int QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
 		const QrSegment &seg(segs.at(i));
 		int ccbits = seg.mode.numCharCountBits(version);
 		// Fail if segment length value doesn't fit in the length field's bit-width
-		if (seg.numChars >= (1 << ccbits))
+		if ((unsigned int)seg.numChars >= (1U << ccbits) || seg.bitLength > INT16_MAX)
 			return -1;
 		long temp = (long)result + 4 + ccbits + seg.bitLength;
 		if (temp > INT_MAX)
