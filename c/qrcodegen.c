@@ -121,28 +121,26 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	if (textLen < 0)
 		return 0;
 	
-	// Use binary mode or find version
-	if (!isAlphanumeric) {
+	if (!isAlphanumeric) {  // Fully handle in binary mode
 		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
 			return 0;
 		for (int i = 0; i < textLen; i++)
 			tempBuffer[i] = (uint8_t)text[i];
 		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask, boostEcl);
 	}
+	
 	int version = fitVersionToData(minVersion, maxVersion, ecl, textLen, (int)textBits,
 		(isNumeric ? 10 : 9), (isNumeric ? 12 : 11), (isNumeric ? 14 : 13));
 	if (version == 0)
 		return 0;
-	
-	// Make header of bit sequence
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
-	appendBitsToBuffer((isNumeric ? 1 : 2), 4, qrcode, &bitLen);
-	int lengthBits = (version <= 9 ? 9 : (version <= 26 ? 11 : 13)) + (isNumeric ? 1 : 0);
-	appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
 	
-	// Append data segment bits
-	if (isNumeric) {
+	// Make segment header and append data
+	if (isNumeric && textLen > 0) {
+		appendBitsToBuffer(1, 4, qrcode, &bitLen);
+		int lengthBits = version <= 9 ? 10 : (version <= 26 ? 12 : 14);
+		appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
 		int accumData = 0;
 		int accumCount = 0;
 		for (const char *p = text; *p != '\0'; p++) {
@@ -156,7 +154,11 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 		}
 		if (accumCount > 0)  // 1 or 2 digits remaining
 			appendBitsToBuffer(accumData, accumCount * 3 + 1, qrcode, &bitLen);
-	} else {  // isAlphanumeric
+		
+	} else if (isAlphanumeric && textLen > 0) {
+		appendBitsToBuffer(2, 4, qrcode, &bitLen);
+		int lengthBits = version <= 9 ? 9 : (version <= 26 ? 11 : 13);
+		appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
 		int accumData = 0;
 		int accumCount = 0;
 		for (const char *p = text; *p != '\0'; p++) {
