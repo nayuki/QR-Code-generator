@@ -189,16 +189,18 @@ public final class QrSegment {
 		if (version < 1 || version > 40)
 			throw new IllegalArgumentException("Version number out of range");
 		
-		int result = 0;
+		long result = 0;
 		for (QrSegment seg : segs) {
 			Objects.requireNonNull(seg);
 			int ccbits = seg.mode.numCharCountBits(version);
 			// Fail if segment length value doesn't fit in the length field's bit-width
 			if (seg.numChars >= (1 << ccbits))
 				return -1;
-			result += 4 + ccbits + seg.bitLength;
+			result += 4L + ccbits + seg.bitLength;
+			if (result > Integer.MAX_VALUE)
+				return -1;
 		}
-		return result;
+		return (int)result;
 	}
 	
 	
