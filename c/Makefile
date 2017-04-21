@@ -1,5 +1,5 @@
 # 
-# Makefile for QR Code generator (C++)
+# Makefile for QR Code generator (C)
 # 
 # Copyright (c) Project Nayuki
 # https://www.nayuki.io/page/qr-code-generator-library

@@ -1,7 +1,8 @@
 /* 
  * QR Code generator test suite (C)
  * 
- * Compile with QRCODEGEN_TEST defined. Run this command line program with no arguments.
+ * When compiling this program, the library qrcodegen.c needs QRCODEGEN_TEST
+ * to be defined. Run this command line program with no arguments.
  * 
  * Copyright (c) Project Nayuki
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -23,7 +24,6 @@
  *   out of or in connection with the Software or the use or other dealings in the
  *   Software.
  */
-
 
 #include <assert.h>
 #include <limits.h>
