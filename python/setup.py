@@ -28,7 +28,7 @@ import setuptools
 setuptools.setup(
 	name = "qrcodegen",
 	description = "High quality QR Code generator library for Python 2 and 3",
-	version = "1.0.0",
+	version = "1.0.1",
 	platforms = "OS Independent",
 	license = "MIT License",
 	
