@@ -35,9 +35,7 @@
 #include "qrcodegen.h"
 
 
-// The main application program.
 int main(void) {
-	// Start loop
 	while (true) {
 		
 		// Read data length or exit

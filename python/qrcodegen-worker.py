@@ -38,7 +38,6 @@ def read_int():
 
 
 def main():
-	# Start loop
 	while True:
 		
 		# Read data or exit

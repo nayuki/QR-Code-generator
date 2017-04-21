@@ -32,10 +32,10 @@ if sys.version_info.major < 3:
 
 
 CHILD_PROGRAMS = [
-	["python", "qrcodegen-worker.py"],
-	["java", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],
-	["./qrcodegen-worker"],
-	["./QrCodeGeneratorWorker"],
+	["python", "qrcodegen-worker.py"],  # Python program
+	["java", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
+	["./qrcodegen-worker"],  # C program
+	["./QrCodeGeneratorWorker"],  # C++ program
 ]
 
 
