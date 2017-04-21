@@ -303,7 +303,7 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
-			drawFormatBits(ecl, i, dataAndQrcode, qrsize);
+			drawFormatBits(ecl, (enum qrcodegen_Mask)i, dataAndQrcode, qrsize);
 			applyMask(tempBuffer, dataAndQrcode, qrsize, i);
 			long penalty = getPenaltyScore(dataAndQrcode, qrsize);
 			if (penalty < minPenalty) {
@@ -314,7 +314,7 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 		}
 	}
 	assert(0 <= (int)mask && (int)mask <= 7);
-	drawFormatBits(ecl, (int)mask, dataAndQrcode, qrsize);
+	drawFormatBits(ecl, mask, dataAndQrcode, qrsize);
 	applyMask(tempBuffer, dataAndQrcode, qrsize, (int)mask);
 }
 
