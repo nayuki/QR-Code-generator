@@ -106,6 +106,46 @@ def do_segment_demo():
 		qrcodegen.QrSegment.make_alphanumeric(golden2)]
 	qr = qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.LOW)
 	print_qr(qr)
+	
+	# Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+	madoka = u"\u300C\u9B54\u6CD5\u5C11\u5973\u307E\u3069\u304B\u2606\u30DE\u30AE\u30AB\u300D\u3063\u3066\u3001\u3000\u0418\u0410\u0418\u3000\uFF44\uFF45\uFF53\uFF55\u3000\u03BA\u03B1\uFF1F"
+	qr = qrcodegen.QrCode.encode_text(madoka, qrcodegen.QrCode.Ecc.LOW)
+	print_qr(qr)
+	
+	packedkanjidata = [  # Kanji mode encoding (13 bits per character)
+		0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+		0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1,
+		0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1,
+		0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0,
+		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1,
+		0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1,
+		0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1,
+		0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0,
+		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1,
+		0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+		0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1,
+		0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1,
+		0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+	]
+	segs = [qrcodegen.QrSegment(qrcodegen.QrSegment.Mode.KANJI, 29, packedkanjidata)]
+	qr = qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.LOW)
+	print_qr(qr)
 
 
 

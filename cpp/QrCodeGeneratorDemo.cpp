@@ -133,6 +133,23 @@ static void doSegmentDemo() {
 	segs.push_back(QrSegment::makeAlphanumeric(golden2));
 	const QrCode qr3 = QrCode::encodeSegments(segs, QrCode::Ecc::LOW);
 	printQr(qr3);
+	
+	// Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+	const char *madoka = "\xE3\x80\x8C\xE9\xAD\x94\xE6\xB3\x95\xE5\xB0\x91\xE5\xA5\xB3\xE3\x81\xBE\xE3\x81\xA9\xE3\x81\x8B\xE2\x98\x86\xE3\x83\x9E\xE3\x82\xAE\xE3\x82\xAB\xE3\x80\x8D\xE3\x81\xA3\xE3\x81\xA6\xE3\x80\x81\xE3\x80\x80\xD0\x98\xD0\x90\xD0\x98\xE3\x80\x80\xEF\xBD\x84\xEF\xBD\x85\xEF\xBD\x93\xEF\xBD\x95\xE3\x80\x80\xCE\xBA\xCE\xB1\xEF\xBC\x9F";
+	const QrCode qr4 = QrCode::encodeText(madoka, QrCode::Ecc::LOW);
+	printQr(qr4);
+	
+	const std::vector<uint8_t> packedKanjiData{  // Kanji mode encoding (13 bits per character)
+		0x01, 0xAC, 0x00, 0x9F, 0x80, 0xAE, 0xD5, 0x6B, 0x85, 0x70,
+		0x28, 0xE1, 0x29, 0x02, 0xC8, 0x6F, 0x43, 0x1A, 0x18, 0xA0,
+		0x1B, 0x05, 0x04, 0x28, 0x80, 0x01, 0x00, 0x00, 0x92, 0x44,
+		0x80, 0x24, 0x90, 0x00, 0x04, 0x10, 0x20, 0xA1, 0x13, 0x08,
+		0xA8, 0x00, 0x04, 0x10, 0x1F, 0xF0, 0x04, 0x00,
+	};
+	segs.clear();
+	segs.push_back(QrSegment(QrSegment::Mode::KANJI, 29, packedKanjiData, 377));
+	const QrCode qr5 = QrCode::encodeSegments(segs, QrCode::Ecc::LOW);
+	printQr(qr5);
 }
 
 
