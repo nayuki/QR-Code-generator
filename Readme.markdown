@@ -15,10 +15,10 @@ Features
 
 Core features:
 
-* Available in 4 programming languages, all with nearly equal functionality: Java, JavaScript, Python, C++
+* Available in 5 programming languages, all with nearly equal functionality: Java, JavaScript, Python, C++, C
 * Significantly shorter code but more documentation comments compared to competing libraries
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-* Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages), BufferedImage raster bitmap (Java only)
+* Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages except C), BufferedImage raster bitmap (Java only)
 * Encodes numeric and special-alphanumeric text in less space than general text
 * Open source code under the permissive MIT License
 
@@ -90,6 +90,26 @@ C++ language:
     std::vector<QrSegment> segs =
         QrSegment::makeSegments("3141592653589793238462643383");
     QrCode qr1 = QrCode::encodeSegments(segs, QrCode::Ecc::HIGH, 5, 5, 2, false);
+
+C language:
+
+    #include <stdbool.h>
+    #include <stdint.h>
+    #include "qrcodegen.h"
+    
+    uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
+    uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
+    int version = qrcodegen_encodeText("Hello, world!",
+        tempBuffer, qrcode, qrcodegen_Ecc_MEDIUM,
+        qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX,
+        qrcodegen_Mask_AUTO, true);
+    
+    int size = qrcodegen_getSize(version);
+    for (int y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+            (... paint qrcodegen_getModule(x, y) ...)
+        }
+    }
 
 
 License
