@@ -64,7 +64,7 @@ testable int getAlignmentPatternPositions(int version, uint8_t result[7]);
 static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[], int qrsize);
 
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize);
-static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, int mask);
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, enum qrcodegen_Mask mask);
 static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
 
 static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y);
@@ -304,18 +304,18 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
 			drawFormatBits(ecl, (enum qrcodegen_Mask)i, dataAndQrcode, qrsize);
-			applyMask(tempBuffer, dataAndQrcode, qrsize, i);
+			applyMask(tempBuffer, dataAndQrcode, qrsize, (enum qrcodegen_Mask)i);
 			long penalty = getPenaltyScore(dataAndQrcode, qrsize);
 			if (penalty < minPenalty) {
 				mask = (enum qrcodegen_Mask)i;
 				minPenalty = penalty;
 			}
-			applyMask(tempBuffer, dataAndQrcode, qrsize, i);  // Undoes the mask due to XOR
+			applyMask(tempBuffer, dataAndQrcode, qrsize, (enum qrcodegen_Mask)i);  // Undoes the mask due to XOR
 		}
 	}
 	assert(0 <= (int)mask && (int)mask <= 7);
 	drawFormatBits(ecl, mask, dataAndQrcode, qrsize);
-	applyMask(tempBuffer, dataAndQrcode, qrsize, (int)mask);
+	applyMask(tempBuffer, dataAndQrcode, qrsize, mask);
 }
 
 
@@ -655,14 +655,14 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 // properties, calling applyMask(..., m) twice with the same value is equivalent to no change at all.
 // This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 // well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
-static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, int mask) {
-	assert(0 <= mask && mask <= 7);
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, enum qrcodegen_Mask mask) {
+	assert(0 <= (int)mask && (int)mask <= 7);  // Disallows qrcodegen_Mask_AUTO
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0; x < qrsize; x++) {
 			if (getModule(functionModules, qrsize, x, y))
 				continue;
 			bool invert;
-			switch (mask) {
+			switch ((int)mask) {
 				case 0:  invert = (x + y) % 2 == 0;                    break;
 				case 1:  invert = y % 2 == 0;                          break;
 				case 2:  invert = x % 3 == 0;                          break;
