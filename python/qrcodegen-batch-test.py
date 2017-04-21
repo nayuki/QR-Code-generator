@@ -35,6 +35,7 @@ CHILD_PROGRAMS = [
 	["python", "qrcodegen-worker.py"],
 	["java", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],
 	["./qrcodegen-worker"],
+	["./QrCodeGeneratorWorker"],
 ]
 
 
