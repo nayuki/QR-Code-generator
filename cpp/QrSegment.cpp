@@ -28,7 +28,9 @@
 #include "QrSegment.hpp"
 
 
-qrcodegen::QrSegment::Mode::Mode(int mode, int cc0, int cc1, int cc2) :
+namespace qrcodegen {
+
+QrSegment::Mode::Mode(int mode, int cc0, int cc1, int cc2) :
 		modeBits(mode) {
 	numBitsCharCount[0] = cc0;
 	numBitsCharCount[1] = cc1;
@@ -36,7 +38,7 @@ qrcodegen::QrSegment::Mode::Mode(int mode, int cc0, int cc1, int cc2) :
 }
 
 
-int qrcodegen::QrSegment::Mode::numCharCountBits(int ver) const {
+int QrSegment::Mode::numCharCountBits(int ver) const {
 	if      ( 1 <= ver && ver <=  9)  return numBitsCharCount[0];
 	else if (10 <= ver && ver <= 26)  return numBitsCharCount[1];
 	else if (27 <= ver && ver <= 40)  return numBitsCharCount[2];
@@ -44,19 +46,19 @@ int qrcodegen::QrSegment::Mode::numCharCountBits(int ver) const {
 }
 
 
-const qrcodegen::QrSegment::Mode qrcodegen::QrSegment::Mode::NUMERIC     (0x1, 10, 12, 14);
-const qrcodegen::QrSegment::Mode qrcodegen::QrSegment::Mode::ALPHANUMERIC(0x2,  9, 11, 13);
-const qrcodegen::QrSegment::Mode qrcodegen::QrSegment::Mode::BYTE        (0x4,  8, 16, 16);
-const qrcodegen::QrSegment::Mode qrcodegen::QrSegment::Mode::KANJI       (0x8,  8, 10, 12);
+const QrSegment::Mode QrSegment::Mode::NUMERIC     (0x1, 10, 12, 14);
+const QrSegment::Mode QrSegment::Mode::ALPHANUMERIC(0x2,  9, 11, 13);
+const QrSegment::Mode QrSegment::Mode::BYTE        (0x4,  8, 16, 16);
+const QrSegment::Mode QrSegment::Mode::KANJI       (0x8,  8, 10, 12);
 
 
 
-qrcodegen::QrSegment qrcodegen::QrSegment::makeBytes(const std::vector<uint8_t> &data) {
+QrSegment QrSegment::makeBytes(const std::vector<uint8_t> &data) {
 	return QrSegment(Mode::BYTE, data.size(), data, data.size() * 8);
 }
 
 
-qrcodegen::QrSegment qrcodegen::QrSegment::makeNumeric(const char *digits) {
+QrSegment QrSegment::makeNumeric(const char *digits) {
 	BitBuffer bb;
 	int accumData = 0;
 	int accumCount = 0;
@@ -79,7 +81,7 @@ qrcodegen::QrSegment qrcodegen::QrSegment::makeNumeric(const char *digits) {
 }
 
 
-qrcodegen::QrSegment qrcodegen::QrSegment::makeAlphanumeric(const char *text) {
+QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	BitBuffer bb;
 	int accumData = 0;
 	int accumCount = 0;
@@ -102,7 +104,7 @@ qrcodegen::QrSegment qrcodegen::QrSegment::makeAlphanumeric(const char *text) {
 }
 
 
-std::vector<qrcodegen::QrSegment> qrcodegen::QrSegment::makeSegments(const char *text) {
+std::vector<QrSegment> QrSegment::makeSegments(const char *text) {
 	// Select the most efficient segment encoding automatically
 	std::vector<QrSegment> result;
 	if (*text == '\0');  // Leave the vector empty
@@ -120,7 +122,7 @@ std::vector<qrcodegen::QrSegment> qrcodegen::QrSegment::makeSegments(const char 
 }
 
 
-qrcodegen::QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uint8_t> &b, int bitLen) :
+QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uint8_t> &b, int bitLen) :
 		mode(md),
 		numChars(numCh),
 		data(b),
@@ -130,7 +132,7 @@ qrcodegen::QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uin
 }
 
 
-int qrcodegen::QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
+int QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
 	if (version < 1 || version > 40)
 		throw "Version number out of range";
 	int result = 0;
@@ -149,7 +151,7 @@ int qrcodegen::QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int v
 }
 
 
-bool qrcodegen::QrSegment::isAlphanumeric(const char *text) {
+bool QrSegment::isAlphanumeric(const char *text) {
 	for (; *text != '\0'; text++) {
 		char c = *text;
 		if (c < ' ' || c > 'Z' || ALPHANUMERIC_ENCODING_TABLE[c - ' '] == -1)
@@ -159,7 +161,7 @@ bool qrcodegen::QrSegment::isAlphanumeric(const char *text) {
 }
 
 
-bool qrcodegen::QrSegment::isNumeric(const char *text) {
+bool QrSegment::isNumeric(const char *text) {
 	for (; *text != '\0'; text++) {
 		char c = *text;
 		if (c < '0' || c > '9')
@@ -169,9 +171,11 @@ bool qrcodegen::QrSegment::isNumeric(const char *text) {
 }
 
 
-const int8_t qrcodegen::QrSegment::ALPHANUMERIC_ENCODING_TABLE[59] = {
+const int8_t QrSegment::ALPHANUMERIC_ENCODING_TABLE[59] = {
 	// SP,  !,  ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,,  -,  .,  /,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  :,  ;,  <,  =,  >,  ?,  @,  // ASCII codes 32 to 64
 	   36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1, -1,  // Array indices 0 to 32
 	   10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,  // Array indices 33 to 58
 	//  A,  B,  C,  D,  E,  F,  G,  H,  I,  J,  K,  L,  M,  N,  O,  P,  Q,  R,  S,  T,  U,  V,  W,  X,  Y,  Z,  // ASCII codes 65 to 90
 };
+
+}
