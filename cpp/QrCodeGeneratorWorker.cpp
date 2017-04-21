@@ -34,12 +34,15 @@
 #include <vector>
 #include "QrCode.hpp"
 
+using qrcodegen::QrCode;
+using qrcodegen::QrSegment;
 
-static const qrcodegen::QrCode::Ecc *(ECC_LEVELS[]) = {
-	&qrcodegen::QrCode::Ecc::LOW,
-	&qrcodegen::QrCode::Ecc::MEDIUM,
-	&qrcodegen::QrCode::Ecc::QUARTILE,
-	&qrcodegen::QrCode::Ecc::HIGH,
+
+static const QrCode::Ecc *(ECC_LEVELS[]) = {
+	&QrCode::Ecc::LOW,
+	&QrCode::Ecc::MEDIUM,
+	&QrCode::Ecc::QUARTILE,
+	&QrCode::Ecc::HIGH,
 };
 
 
@@ -71,19 +74,19 @@ int main() {
 		std::cin >> boostEcl;
 		
 		// Make list of segments
-		std::vector<qrcodegen::QrSegment> segs;
+		std::vector<QrSegment> segs;
 		if (isAscii) {
 			std::vector<char> text;
 			for (std::vector<uint8_t>::iterator it = data.begin(); it != data.end(); ++it)
 				text.push_back((char)*it);
 			text.push_back('\0');
-			segs = qrcodegen::QrSegment::makeSegments(text.data());
+			segs = QrSegment::makeSegments(text.data());
 		} else
-			segs.push_back(qrcodegen::QrSegment::makeBytes(data));
+			segs.push_back(QrSegment::makeBytes(data));
 		
 		// Try to make QR Code symbol
 		try {
-			const qrcodegen::QrCode qr = qrcodegen::QrCode::encodeSegments(segs,
+			const QrCode qr = QrCode::encodeSegments(segs,
 				*ECC_LEVELS[errCorLvl], minVersion, maxVersion, mask, boostEcl == 1);
 			
 			// Print grid of modules
