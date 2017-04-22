@@ -5,7 +5,7 @@ QR Code generator library
 Introduction
 ------------
 
-This project aims to be the best, clearest QR Code generator library in multiple languages. The primary goals are flexible options and absolute correctness. The secondary goals are compact implementation size and good documentation comments.
+This project aims to be the best, clearest QR Code generator library in multiple languages. The primary goals are flexible options and absolute correctness. Secondary goals are compact implementation size and good documentation comments.
 
 Home page with live JavaScript demo, extensive descriptions, and competitor comparisons: [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
@@ -49,6 +49,11 @@ Java language:
     // Manual operation
     List<QrSegment> segs = QrSegment.makeSegments("3141592653589793238462643383");
     QrCode qr1 = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 5, 5, 2, false);
+    for (int y = 0; y < qr1.size; y++) {
+        for (int x = 0; x < qr1.size; x++) {
+            (... paint qr1.getModule(x, y) ...)
+        }
+    }
 
 JavaScript language:
 
@@ -62,6 +67,11 @@ JavaScript language:
     // Manual operation
     var segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
     var qr1 = QRC.encodeSegments(segs, QRC.Ecc.HIGH, 5, 5, 2, false);
+    for (var y = 0; y < qr1.size; y++) {
+        for (var x = 0; x < qr1.size; x++) {
+            (... paint qr1.getModule(x, y) ...)
+        }
+    }
 
 Python language:
 
@@ -74,6 +84,9 @@ Python language:
     # Manual operation
     segs = QrSegment.make_segments("3141592653589793238462643383")
     qr1 = QrCode.encode_segments(segs, QrCode.Ecc.HIGH, 5, 5, 2, False)
+    for y in range(qr1.get_size()):
+        for x in range(qr1.get_size()):
+            (... paint qr1.get_module(x, y) ...)
 
 C++ language:
 
@@ -89,7 +102,13 @@ C++ language:
     // Manual operation
     std::vector<QrSegment> segs =
         QrSegment::makeSegments("3141592653589793238462643383");
-    QrCode qr1 = QrCode::encodeSegments(segs, QrCode::Ecc::HIGH, 5, 5, 2, false);
+    QrCode qr1 = QrCode::encodeSegments(
+        segs, QrCode::Ecc::HIGH, 5, 5, 2, false);
+    for (int y = 0; y < qr1.size; y++) {
+        for (int x = 0; x < qr1.size; x++) {
+            (... paint qr1.getModule(x, y) ...)
+        }
+    }
 
 C language:
 
@@ -97,19 +116,27 @@ C language:
     #include <stdint.h>
     #include "qrcodegen.h"
     
-    uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
+    uint8_t qr0[qrcodegen_BUFFER_LEN_MAX];
     uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-    int version = qrcodegen_encodeText("Hello, world!",
-        tempBuffer, qrcode, qrcodegen_Ecc_MEDIUM,
+    int version0 = qrcodegen_encodeText("Hello, world!",
+        tempBuffer, qr0, qrcodegen_Ecc_MEDIUM,
         qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX,
         qrcodegen_Mask_AUTO, true);
     
-    int size = qrcodegen_getSize(version);
-    for (int y = 0; y < size; y++) {
-        for (int x = 0; x < size; x++) {
-            (... paint qrcodegen_getModule(x, y) ...)
+    int size0 = qrcodegen_getSize(version0);
+    for (int y = 0; y < size0; y++) {
+        for (int x = 0; x < size0; x++) {
+            (... paint qrcodegen_getModule(qr0, version0, x, y) ...)
         }
     }
+    
+    uint8_t dataAndTemp[qrcodegen_BUFFER_LEN_FOR_VERSION(7)]
+        = {0xE3, 0x81, 0x82};
+    uint8_t qr1[qrcodegen_BUFFER_LEN_FOR_VERSION(7)];
+    int version1 = qrcodegen_encodeBinary(dataAndTemp, 3, qr1,
+        qrcodegen_Ecc_HIGH, 2, 7, qrcodegen_Mask_4, false);
+
+More information about QR Code technology and this library's design can be found on the project home page.
 
 
 License

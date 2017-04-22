@@ -57,7 +57,7 @@ QR Code generator library
 Introduction
 ------------
 
-This project aims to be the best, clearest QR Code generator library. The primary goals are flexible options and absolute correctness. The secondary goals are compact implementation size and good documentation comments.
+This project aims to be the best, clearest QR Code generator library. The primary goals are flexible options and absolute correctness. Secondary goals are compact implementation size and good documentation comments.
 
 Home page with live JavaScript demo, extensive descriptions, and competitor comparisons: https://www.nayuki.io/page/qr-code-generator-library
 
@@ -67,7 +67,7 @@ Features
 
 Core features:
 
-* Available in 4 programming languages, all with nearly equal functionality: Java, JavaScript, Python, C++
+* Available in 5 programming languages, all with nearly equal functionality: Java, JavaScript, Python, C++, C
 * Significantly shorter code but more documentation comments compared to competing libraries
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
 * Output formats: Raw modules/pixels of the QR symbol, SVG XML string
