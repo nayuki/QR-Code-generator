@@ -142,10 +142,8 @@ More information about QR Code technology and this library's design can be found
 License
 -------
 
-Copyright © 2017 Project Nayuki  
+Copyright © 2017 Project Nayuki. (MIT License)  
 [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
-
-(MIT License)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
