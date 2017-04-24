@@ -40,6 +40,7 @@ def do_basic_demo():
 	errcorlvl = qrcodegen.QrCode.Ecc.LOW  # Error correction level
 	qr = qrcodegen.QrCode.encode_text(text, errcorlvl)
 	print_qr(qr)
+	print(qr.to_svg_str(4))
 
 
 def do_variety_demo():
