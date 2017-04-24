@@ -27,8 +27,17 @@
 	<meta charset="UTF-8">
 	<title>QR Code generator library demo (JavaScript)</title>
 	<style type="text/css">
+	html {
+		font-family: sans-serif;
+	}
 	td {
 		vertical-align: top;
+		padding-top: 0.2em;
+		padding-bottom: 0.2em;
+	}
+	input[type=radio] + label, input[type=checkbox] + label {
+		margin-left: 0.1em;
+		margin-right: 0.7em;
 	}
 	</style>
 </head>
@@ -39,24 +48,26 @@
 	<table class="noborder" style="width:100%">
 		<tbody>
 			<tr>
-				<td>Text string:</td>
+				<td><strong>Text&#xA0;string:</strong></td>
 				<td style="width:100%"><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:100%; max-width:30em; height:5em; font-family:inherit" oninput="redrawQrCode();"></textarea></td>
 			</tr>
 			<tr>
-				<td>Error&#xA0;correction:</td>
+				<td><strong>QR&#xA0;Code:</strong></td>
+				<td>
+					<canvas id="qrcode-canvas" style="padding:1em; background-color:#E8E8E8"></canvas>
+					<svg id="qrcode-svg" style="width:30em; height:30em; padding:1em; background-color:#E8E8E8">
+						<rect width="100%" height="100%" fill="#FFFFFF" stroke-width="0"></rect>
+						<path d="" fill="#000000" stroke-width="0"></path>
+					</svg>
+				</td>
+			</tr>
+			<tr>
+				<td><strong>Error&#xA0;correction:</strong></td>
 				<td>
 					<input type="radio" name="errcorlvl" id="errcorlvl-low" onchange="redrawQrCode();" checked="checked"><label for="errcorlvl-low">Low</label>
 					<input type="radio" name="errcorlvl" id="errcorlvl-medium" onchange="redrawQrCode();"><label for="errcorlvl-medium">Medium</label>
 					<input type="radio" name="errcorlvl" id="errcorlvl-quartile" onchange="redrawQrCode();"><label for="errcorlvl-quartile">Quartile</label>
 					<input type="radio" name="errcorlvl" id="errcorlvl-high" onchange="redrawQrCode();"><label for="errcorlvl-high">High</label>
-				</td>
-			</tr>
-			<tr>
-				<td>Advanced:</td>
-				<td>
-					Version min/max: <input type="number" value="1" min="1" max="40" step="1" id="version-min-input" style="width:4em" oninput="handleVersionMinMax('min');"> to <input type="number" value="40" min="1" max="40" step="1" id="version-max-input" style="width:4em" oninput="handleVersionMinMax('max');"><br>
-					Mask pattern: <input type="number" value="-1" min="-1" max="7" step="1" id="mask-input" style="width:4em" oninput="redrawQrCode();"> (−1 for automatic)<br>
-					<input type="checkbox" checked="checked" id="boost-ecc-input" onchange="redrawQrCode();"><label for="boost-ecc-input">Boost ECC</label>
 				</td>
 			</tr>
 			<tr>
@@ -75,18 +86,20 @@
 				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
 			</tr>
 			<tr>
-				<td>Statistics:</td>
-				<td id="statistics-output" style="white-space:pre"></td>
+				<td>Version&#xA0;range:</td>
+				<td>Minimum = <input type="number" value="1" min="1" max="40" step="1" id="version-min-input" style="width:4em" oninput="handleVersionMinMax('min');">, maximum = <input type="number" value="40" min="1" max="40" step="1" id="version-max-input" style="width:4em" oninput="handleVersionMinMax('max');"></td>
 			</tr>
 			<tr>
-				<td>QR&#xA0;Code:</td>
-				<td>
-					<canvas id="qrcode-canvas" style="padding:1em; background-color:#E8E8E8"></canvas>
-					<svg id="qrcode-svg" style="width:30em; height:30em; padding:1em; background-color:#E8E8E8">
-						<rect width="100%" height="100%" fill="#FFFFFF" stroke-width="0"></rect>
-						<path d="" fill="#000000" stroke-width="0"></path>
-					</svg>
-				</td>
+				<td>Mask&#xA0;pattern:</td>
+				<td><input type="number" value="-1" min="-1" max="7" step="1" id="mask-input" style="width:4em" oninput="redrawQrCode();"> (−1 for automatic, 0 to 7 for manual)</td>
+			</tr>
+			<tr>
+				<td>Boost&#xA0;ECC:</td>
+				<td><input type="checkbox" checked="checked" id="boost-ecc-input" onchange="redrawQrCode();"><label for="boost-ecc-input">Increase <abbr title="error-correcting code">ECC</abbr> level within same version</label></td>
+			</tr>
+			<tr>
+				<td>Statistics:</td>
+				<td id="statistics-output" style="white-space:pre"></td>
 			</tr>
 			<tr id="svg-xml-row">
 				<td>SVG&#xA0;XML&#xA0;code:</td>
@@ -101,6 +114,6 @@
 <script type="application/javascript" src="qrcodegen-demo.js"></script>
 
 <hr>
-<p>Copyright © 2016 Project Nayuki – <a href="https://www.nayuki.io/page/qr-code-generator-library">https://www.nayuki.io/page/qr-code-generator-library</a></p>
+<p>Copyright © Project Nayuki – <a href="https://www.nayuki.io/page/qr-code-generator-library">https://www.nayuki.io/page/qr-code-generator-library</a></p>
 </body>
 </html>
