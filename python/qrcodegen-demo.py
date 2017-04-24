@@ -1,6 +1,9 @@
 # 
 # QR Code generator demo (Python 2, 3)
 # 
+# Run this command-line program with no arguments. The program computes a bunch of demonstration
+# QR Codes and prints them to the console. Also, the SVG code for one QR Code is printed as a sample.
+# 
 # Copyright (c) Project Nayuki. (MIT License)
 # https://www.nayuki.io/page/qr-code-generator-library
 # 

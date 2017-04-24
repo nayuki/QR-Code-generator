@@ -85,7 +85,7 @@ Usage
 
 Install this package by downloading the source code ZIP file from PyPI_, or by running ``pip install qrcodegen``.
 
-Examples::
+Examples:
 
     from qrcodegen import *
     
