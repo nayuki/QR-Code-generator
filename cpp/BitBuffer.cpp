@@ -46,7 +46,7 @@ std::vector<uint8_t> BitBuffer::getBytes() const {
 void BitBuffer::appendBits(uint32_t val, int len) {
 	if (len < 0 || len > 32 || (len < 32 && (val >> len) != 0))
 		throw "Value out of range";
-	if (INT_MAX - bitLength < len)
+	if (len > INT_MAX - bitLength)
 		throw "Buffer too long";
 	unsigned int newByteLen = ((unsigned int)bitLength + len + 7) / 8;
 	while (data.size() < newByteLen)
@@ -57,7 +57,7 @@ void BitBuffer::appendBits(uint32_t val, int len) {
 
 
 void BitBuffer::appendData(const QrSegment &seg) {
-	if (INT_MAX - bitLength < seg.bitLength)
+	if (seg.bitLength > INT_MAX - bitLength)
 		throw "Buffer too long";
 	unsigned int newByteLen = ((unsigned int)bitLength + seg.bitLength + 7) / 8;
 	while (data.size() < newByteLen)
