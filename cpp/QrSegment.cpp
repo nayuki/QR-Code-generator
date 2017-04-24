@@ -141,7 +141,7 @@ int QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
 		const QrSegment &seg(segs.at(i));
 		int ccbits = seg.mode.numCharCountBits(version);
 		// Fail if segment length value doesn't fit in the length field's bit-width
-		if ((unsigned int)seg.numChars >= (1U << ccbits) || seg.bitLength > INT16_MAX)
+		if (seg.numChars >= (1L << ccbits) || seg.bitLength > INT16_MAX)
 			return -1;
 		long temp = (long)result + 4 + ccbits + seg.bitLength;
 		if (temp > INT_MAX)
