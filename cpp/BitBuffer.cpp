@@ -22,7 +22,6 @@
  */
 
 #include <climits>
-#include <cstddef>
 #include "BitBuffer.hpp"
 
 
