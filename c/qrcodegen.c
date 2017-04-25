@@ -775,8 +775,8 @@ int qrcodegen_getSize(int version) {
 
 
 // Public function - see documentation comment in header file.
-bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y) {
-	int qrsize = qrcodegen_getSize(version);
+bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y) {
+	int qrsize = qrcode[0];
 	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, x, y);
 }
 

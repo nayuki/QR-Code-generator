@@ -141,7 +141,7 @@ static void printQr(const uint8_t qrcode[], int version) {
 	int border = 4;
 	for (int y = -border; y < size + border; y++) {
 		for (int x = -border; x < size + border; x++) {
-			fputs((qrcodegen_getModule(qrcode, version, x, y) ? "##" : "  "), stdout);
+			fputs((qrcodegen_getModule(qrcode, x, y) ? "##" : "  "), stdout);
 		}
 		fputs("\n", stdout);
 	}

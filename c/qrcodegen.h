@@ -115,4 +115,4 @@ int qrcodegen_getSize(int version);
  * true for white or false for black. The top left corner has the coordinates (x=0, y=0).
  * If the given coordinates are out of bounds, then false (white) is returned.
  */
-bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y);
+bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y);
