@@ -77,24 +77,24 @@ enum qrcodegen_Mask {
 /*---- Top-level QR Code functions ----*/
 
 /* 
- * Encodes the given text data to a QR Code symbol, returning the actual version number used.
+ * Encodes the given text data to a QR Code symbol, returning whether encoding succeeded.
  * If the data is too long to fit in any version in the given range at the given ECC level,
- * then 0 is returned. Both dataAndTemp and qrcode each must have length at least
+ * then false is returned. Both dataAndTemp and qrcode each must have length at least
  * qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion). The text must be encoded in UTF-8.
  * The resulting QR Code may use numeric, alphanumeric, or byte mode to encode the text.
  */
-int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
+bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
 	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
 
 /* 
- * Encodes the given binary data to a QR Code symbol, returning the actual version number used.
+ * Encodes the given binary data to a QR Code symbol, returning whether encoding succeeded.
  * If the data is too long to fit in any version in the given range at the given ECC level,
- * then 0 is returned. dataAndTemp[0 : dataLen] represents the input data, and the function
+ * then false is returned. dataAndTemp[0 : dataLen] represents the input data, and the function
  * may overwrite the array's contents as a temporary work area. Both dataAndTemp and qrcode
  * must have length at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
  */
-int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
+bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
 

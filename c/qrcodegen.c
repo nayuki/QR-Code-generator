@@ -108,7 +108,7 @@ static const int PENALTY_N4 = 10;
 /*---- High-level QR Code encoding functions ----*/
 
 // Public function - see documentation comment in header file.
-int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
+bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
@@ -118,11 +118,11 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	int textBits;
 	int textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
 	if (textLen < 0)
-		return 0;
+		goto fail;
 	
 	if (!isAlphanumeric) {  // Fully handle in binary mode
 		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
-			return 0;
+			goto fail;
 		for (int i = 0; i < textLen; i++)
 			tempBuffer[i] = (uint8_t)text[i];
 		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask, boostEcl);
@@ -131,7 +131,7 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	int version = fitVersionToData(minVersion, maxVersion, ecl, textLen, (int)textBits,
 		(isNumeric ? 10 : 9), (isNumeric ? 12 : 11), (isNumeric ? 14 : 13));
 	if (version == 0)
-		return 0;
+		goto fail;
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	
@@ -175,23 +175,27 @@ int qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[
 	
 	// Make QR Code
 	encodeQrCodeTail(qrcode, bitLen, tempBuffer, version, ecl, mask, boostEcl);
-	return version;
+	return true;
+	
+fail:
+	qrcode[0] = 0;  // An invalid size value for safety
+	return false;
 }
 
 
 // Public function - see documentation comment in header file.
-int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
+bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
 	// Check length and find version
 	if (dataLen > INT16_MAX / 8)
-		return 0;
+		goto fail;
 	// Now dataLen * 8 <= 32767 <= INT_MAX
 	int version = fitVersionToData(minVersion, maxVersion, ecl, (int)dataLen, (int)dataLen * 8, 8, 16, 16);
 	if (version == 0)
-		return 0;
+		goto fail;
 	
 	// Make bit sequence and QR Code
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
@@ -201,7 +205,11 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 	for (size_t i = 0; i < dataLen; i++)
 		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
 	encodeQrCodeTail(qrcode, bitLen, dataAndTemp, version, ecl, mask, boostEcl);
-	return version;
+	return true;
+	
+fail:
+	qrcode[0] = 0;  // An invalid size value for safety
+	return false;
 }
 
 

@@ -74,31 +74,31 @@ int main(void) {
 		}
 		
 		// Try to make QR Code symbol
-		int version;
+		bool ok;
 		if (isAscii) {
 			char *text = malloc((length + 1) * sizeof(char));
 			for (int i = 0; i < length; i++)
 				text[i] = (char)data[i];
 			text[length] = '\0';
-			version = qrcodegen_encodeText(text, tempBuffer, qrcode, (enum qrcodegen_Ecc)errCorLvl,
+			ok = qrcodegen_encodeText(text, tempBuffer, qrcode, (enum qrcodegen_Ecc)errCorLvl,
 				minVersion, maxVersion, (enum qrcodegen_Mask)mask, boostEcl == 1);
 			free(text);
 		} else if (length <= bufferLen) {
 			for (int i = 0; i < length; i++)
 				tempBuffer[i] = data[i];
-			version = qrcodegen_encodeBinary(tempBuffer, (size_t)length, qrcode, (enum qrcodegen_Ecc)errCorLvl,
+			ok = qrcodegen_encodeBinary(tempBuffer, (size_t)length, qrcode, (enum qrcodegen_Ecc)errCorLvl,
 				minVersion, maxVersion, (enum qrcodegen_Mask)mask, boostEcl == 1);
 		} else
-			version = 0;
+			ok = false;
 		free(data);
 		free(tempBuffer);
 		
 		// Print grid of modules
-		if (version == 0)
+		if (!ok)
 			printf("-1\n");
 		else {
-			printf("%d\n", version);
 			int size = qrcodegen_getSize(qrcode);
+			printf("%d\n", (size - 17) / 4);
 			for (int y = 0; y < size; y++) {
 				for (int x = 0; x < size; x++)
 					printf("%d\n", qrcodegen_getModule(qrcode, x, y) ? 1 : 0);

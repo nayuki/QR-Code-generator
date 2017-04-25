@@ -53,9 +53,9 @@ static void doBasicDemo() {
 	// Make and print the QR Code symbol
 	uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 	uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-	int version = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
+	bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
 		qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
-	if (version != 0)
+	if (ok)
 		printQr(qrcode);
 }
 
@@ -65,27 +65,27 @@ static void doVarietyDemo() {
 	{  // Project Nayuki URL
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-		int version = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
+		bool ok = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_3, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 	}
 	
 	{  // Numeric mode encoding (3.33 bits per digit)
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-		int version = qrcodegen_encodeText("314159265358979323846264338327950288419716939937510", tempBuffer, qrcode,
+		bool ok = qrcodegen_encodeText("314159265358979323846264338327950288419716939937510", tempBuffer, qrcode,
 			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 	}
 	
 	{  // Alphanumeric mode encoding (5.5 bits per character)
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-		int version = qrcodegen_encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", tempBuffer, qrcode,
+		bool ok = qrcodegen_encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 	}
 	
@@ -93,26 +93,26 @@ static void doVarietyDemo() {
 		const char *text = "\xE3\x81\x93\xE3\x82\x93\xE3\x81\xAB\xE3\x81\xA1wa\xE3\x80\x81\xE4\xB8\x96\xE7\x95\x8C\xEF\xBC\x81\x20\xCE\xB1\xCE\xB2\xCE\xB3\xCE\xB4";
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-		int version;
+		bool ok;
 		
-		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_0, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 		
-		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_1, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 		
-		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_5, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 		
-		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_7, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 	}
 	
@@ -127,9 +127,9 @@ static void doVarietyDemo() {
 			"a White Rabbit with pink eyes ran close by her.";
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-		int version = qrcodegen_encodeText(text, tempBuffer, qrcode,
+		bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
-		if (version != 0)
+		if (ok)
 			printQr(qrcode);
 	}
 }
