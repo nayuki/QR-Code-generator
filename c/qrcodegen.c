@@ -460,7 +460,8 @@ testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
 static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
 	int qrsize = qrcodegen_getSize(version);
-	memset(qrcode, 0, (qrsize * qrsize + 7) / 8 * sizeof(qrcode[0]));
+	memset(qrcode, 0, ((qrsize * qrsize + 7) / 8 + 1) * sizeof(qrcode[0]));
+	qrcode[0] = (uint8_t)qrsize;
 	
 	// Fill horizontal and vertical timing patterns
 	fillRectangle(6, 0, 1, qrsize, qrcode, qrsize);
@@ -785,7 +786,7 @@ static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y) {
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
 	int index = y * qrsize + x;
 	int bitIndex = index & 7;
-	int byteIndex = index >> 3;
+	int byteIndex = (index >> 3) + 1;
 	return ((qrcode[byteIndex] >> bitIndex) & 1) != 0;
 }
 
@@ -795,7 +796,7 @@ static void setModule(uint8_t qrcode[], int qrsize, int x, int y, bool isBlack) 
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
 	int index = y * qrsize + x;
 	int bitIndex = index & 7;
-	int byteIndex = index >> 3;
+	int byteIndex = (index >> 3) + 1;
 	if (isBlack)
 		qrcode[byteIndex] |= 1 << bitIndex;
 	else

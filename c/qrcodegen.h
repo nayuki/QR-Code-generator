@@ -66,7 +66,7 @@ enum qrcodegen_Mask {
 // Calculates the number of bytes needed to store any QR Code up to and including the given version number,
 // as a compile-time constant. For example, 'uint8_t buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];'
 // can store any single QR Code from version 1 to 25, inclusive.
-#define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((n) * 4 + 17) * ((n) * 4 + 17) + 7) / 8)
+#define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((n) * 4 + 17) * ((n) * 4 + 17) + 7) / 8 + 1)
 
 // The worst-case number of bytes needed to store one QR Code, up to and including
 // version 40. This value equals 3917, which is just under 4 kilobytes.
@@ -105,7 +105,7 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
  * Returns the side length of any QR Code of the given version number.
  * The version must be in the range [1, 40]. The result is in the range [21, 177].
  * Note that every 'uint8_t qrcode[]' buffer must have a length of at least
- * ceil(size^2 / 8), which also equals qrcodegen_BUFFER_LEN_FOR_VERSION(version).
+ * ceil(size^2 / 8 + 1), which also equals qrcodegen_BUFFER_LEN_FOR_VERSION(version).
  */
 int qrcodegen_getSize(int version);
 
