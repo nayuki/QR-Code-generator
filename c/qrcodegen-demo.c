@@ -33,7 +33,7 @@
 // Function prototypes
 static void doBasicDemo(void);
 static void doVarietyDemo(void);
-static void printQr(const uint8_t qrcode[], int version);
+static void printQr(const uint8_t qrcode[]);
 
 
 
@@ -56,7 +56,7 @@ static void doBasicDemo() {
 	int version = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
 		qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 	if (version != 0)
-		printQr(qrcode, version);
+		printQr(qrcode);
 }
 
 
@@ -68,7 +68,7 @@ static void doVarietyDemo() {
 		int version = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_3, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 	}
 	
 	{  // Numeric mode encoding (3.33 bits per digit)
@@ -77,7 +77,7 @@ static void doVarietyDemo() {
 		int version = qrcodegen_encodeText("314159265358979323846264338327950288419716939937510", tempBuffer, qrcode,
 			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 	}
 	
 	{  // Alphanumeric mode encoding (5.5 bits per character)
@@ -86,7 +86,7 @@ static void doVarietyDemo() {
 		int version = qrcodegen_encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 	}
 	
 	{  // Unicode text as UTF-8, and different masks
@@ -98,22 +98,22 @@ static void doVarietyDemo() {
 		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_0, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 		
 		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_1, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 		
 		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_5, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 		
 		version = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_7, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 	}
 	
 	{  // Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
@@ -130,13 +130,13 @@ static void doVarietyDemo() {
 		int version = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 		if (version != 0)
-			printQr(qrcode, version);
+			printQr(qrcode);
 	}
 }
 
 
 // Prints the given QR Code to the console.
-static void printQr(const uint8_t qrcode[], int version) {
+static void printQr(const uint8_t qrcode[]) {
 	int size = qrcodegen_getSize(qrcode);
 	int border = 4;
 	for (int y = -border; y < size + border; y++) {
