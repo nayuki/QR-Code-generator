@@ -66,7 +66,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, enum qrcodegen_Mask mask);
 static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
 
-static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y);
+static bool getModule(const uint8_t qrcode[], int x, int y);
 static void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
 static void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 
@@ -639,7 +639,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 				int x = right - j;  // Actual x coordinate
 				bool upward = ((right + 1) & 2) == 0;
 				int y = upward ? qrsize - 1 - vert : vert;  // Actual y coordinate
-				if (!getModule(qrcode, qrsize, x, y) && i < dataLen * 8) {
+				if (!getModule(qrcode, x, y) && i < dataLen * 8) {
 					bool black = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0;
 					setModule(qrcode, x, y, black);
 					i++;
@@ -661,7 +661,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrs
 	assert(0 <= (int)mask && (int)mask <= 7);  // Disallows qrcodegen_Mask_AUTO
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0; x < qrsize; x++) {
-			if (getModule(functionModules, qrsize, x, y))
+			if (getModule(functionModules, x, y))
 				continue;
 			bool invert;
 			switch ((int)mask) {
@@ -675,7 +675,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrs
 				case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;  break;
 				default:  assert(false);
 			}
-			bool val = getModule(qrcode, qrsize, x, y);
+			bool val = getModule(qrcode, x, y);
 			setModule(qrcode, x, y, val ^ invert);
 		}
 	}
@@ -689,10 +689,10 @@ static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 	
 	// Adjacent modules in row having same color
 	for (int y = 0; y < qrsize; y++) {
-		bool colorX = getModule(qrcode, qrsize, 0, y);
+		bool colorX = getModule(qrcode, 0, y);
 		for (int x = 1, runX = 1; x < qrsize; x++) {
-			if (getModule(qrcode, qrsize, x, y) != colorX) {
-				colorX = getModule(qrcode, qrsize, x, y);
+			if (getModule(qrcode, x, y) != colorX) {
+				colorX = getModule(qrcode, x, y);
 				runX = 1;
 			} else {
 				runX++;
@@ -705,10 +705,10 @@ static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 	}
 	// Adjacent modules in column having same color
 	for (int x = 0; x < qrsize; x++) {
-		bool colorY = getModule(qrcode, qrsize, x, 0);
+		bool colorY = getModule(qrcode, x, 0);
 		for (int y = 1, runY = 1; y < qrsize; y++) {
-			if (getModule(qrcode, qrsize, x, y) != colorY) {
-				colorY = getModule(qrcode, qrsize, x, y);
+			if (getModule(qrcode, x, y) != colorY) {
+				colorY = getModule(qrcode, x, y);
 				runY = 1;
 			} else {
 				runY++;
@@ -723,10 +723,10 @@ static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 	// 2*2 blocks of modules having same color
 	for (int y = 0; y < qrsize - 1; y++) {
 		for (int x = 0; x < qrsize - 1; x++) {
-			bool  color = getModule(qrcode, qrsize, x, y);
-			if (  color == getModule(qrcode, qrsize, x + 1, y) &&
-			      color == getModule(qrcode, qrsize, x, y + 1) &&
-			      color == getModule(qrcode, qrsize, x + 1, y + 1))
+			bool  color = getModule(qrcode, x, y);
+			if (  color == getModule(qrcode, x + 1, y) &&
+			      color == getModule(qrcode, x, y + 1) &&
+			      color == getModule(qrcode, x + 1, y + 1))
 				result += PENALTY_N2;
 		}
 	}
@@ -734,7 +734,7 @@ static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 	// Finder-like pattern in rows
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0, bits = 0; x < qrsize; x++) {
-			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, x, y) ? 1 : 0);
 			if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
 				result += PENALTY_N3;
 		}
@@ -742,7 +742,7 @@ static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 	// Finder-like pattern in columns
 	for (int x = 0; x < qrsize; x++) {
 		for (int y = 0, bits = 0; y < qrsize; y++) {
-			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, qrsize, x, y) ? 1 : 0);
+			bits = ((bits << 1) & 0x7FF) | (getModule(qrcode, x, y) ? 1 : 0);
 			if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
 				result += PENALTY_N3;
 		}
@@ -752,7 +752,7 @@ static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 	int black = 0;
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0; x < qrsize; x++) {
-			if (getModule(qrcode, qrsize, x, y))
+			if (getModule(qrcode, x, y))
 				black++;
 		}
 	}
@@ -777,12 +777,13 @@ int qrcodegen_getSize(int version) {
 // Public function - see documentation comment in header file.
 bool qrcodegen_getModule(const uint8_t qrcode[], int version, int x, int y) {
 	int qrsize = qrcodegen_getSize(version);
-	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, qrsize, x, y);
+	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, x, y);
 }
 
 
 // Gets the module at the given coordinates, which must be in bounds.
-static bool getModule(const uint8_t qrcode[], int qrsize, int x, int y) {
+static bool getModule(const uint8_t qrcode[], int x, int y) {
+	int qrsize = qrcode[0];
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
 	int index = y * qrsize + x;
 	int bitIndex = index & 7;
