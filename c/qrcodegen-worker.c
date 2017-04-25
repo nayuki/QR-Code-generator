@@ -98,7 +98,7 @@ int main(void) {
 			printf("-1\n");
 		else {
 			printf("%d\n", version);
-			int size = qrcodegen_getSize(version);
+			int size = qrcodegen_getSize(qrcode);
 			for (int y = 0; y < size; y++) {
 				for (int x = 0; x < size; x++)
 					printf("%d\n", qrcodegen_getModule(qrcode, x, y) ? 1 : 0);

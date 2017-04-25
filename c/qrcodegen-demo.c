@@ -137,7 +137,7 @@ static void doVarietyDemo() {
 
 // Prints the given QR Code to the console.
 static void printQr(const uint8_t qrcode[], int version) {
-	int size = qrcodegen_getSize(version);
+	int size = qrcodegen_getSize(qrcode);
 	int border = 4;
 	for (int y = -border; y < size + border; y++) {
 		for (int x = -border; x < size + border; x++) {

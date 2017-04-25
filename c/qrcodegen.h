@@ -102,12 +102,12 @@ int qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode
 /*---- Low-level QR Code functions ----*/
 
 /* 
- * Returns the side length of any QR Code of the given version number.
- * The version must be in the range [1, 40]. The result is in the range [21, 177].
- * Note that every 'uint8_t qrcode[]' buffer must have a length of at least
- * ceil(size^2 / 8 + 1), which also equals qrcodegen_BUFFER_LEN_FOR_VERSION(version).
+ * Returns the side length of the given QR Code, assuming that the buffer is valid.
+ * The result is in the range [21, 177]. Note that every 'uint8_t qrcode[]' buffer
+ * must have a length of at least ceil(size^2 / 8 + 1), which also equals
+ * qrcodegen_BUFFER_LEN_FOR_VERSION(version).
  */
-int qrcodegen_getSize(int version);
+int qrcodegen_getSize(const uint8_t qrcode[]);
 
 
 /* 

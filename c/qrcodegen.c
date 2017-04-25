@@ -293,9 +293,9 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 	assert(bitLen % 8 == 0);
 	
 	// Draw function and data codeword modules
-	int qrsize = qrcodegen_getSize(version);
 	appendErrorCorrection(dataAndQrcode, version, ecl, tempBuffer);
 	initializeFunctionModules(version, dataAndQrcode);
+	int qrsize = qrcodegen_getSize(dataAndQrcode);
 	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, dataAndQrcode, qrsize);
 	drawWhiteFunctionModules(dataAndQrcode, version);
 	initializeFunctionModules(version, tempBuffer);
@@ -459,7 +459,7 @@ testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
 // version's size, then marks every function module as black.
 static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
-	int qrsize = qrcodegen_getSize(version);
+	int qrsize = version * 4 + 17;
 	memset(qrcode, 0, ((qrsize * qrsize + 7) / 8 + 1) * sizeof(qrcode[0]));
 	qrcode[0] = (uint8_t)qrsize;
 	
@@ -497,7 +497,7 @@ static void initializeFunctionModules(int version, uint8_t qrcode[]) {
 // marked black (namely by initializeFunctionModules()), because this may skip redrawing black function modules.
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	// Draw horizontal and vertical timing patterns
-	int qrsize = qrcodegen_getSize(version);
+	int qrsize = qrcodegen_getSize(qrcode);
 	for (int i = 7; i < qrsize - 7; i += 2) {
 		setModule(qrcode, 6, i, false);
 		setModule(qrcode, i, 6, false);
@@ -600,7 +600,7 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 	if (version == 1)
 		return 0;
-	int qrsize = qrcodegen_getSize(version);
+	int qrsize = version * 4 + 17;
 	int numAlign = version / 7 + 2;
 	int step;
 	if (version != 32)
@@ -768,9 +768,11 @@ static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
 /*---- Basic QR Code information ----*/
 
 // Public function - see documentation comment in header file.
-int qrcodegen_getSize(int version) {
-	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	return version * 4 + 17;
+int qrcodegen_getSize(const uint8_t qrcode[]) {
+	int result = qrcode[0];
+	assert((qrcodegen_VERSION_MIN * 4 + 17) <= result
+		&& result <= (qrcodegen_VERSION_MAX * 4 + 17));
+	return result;
 }
 
 

@@ -53,22 +53,6 @@ int getAlignmentPatternPositions(int version, uint8_t result[7]);
 
 /*---- Test cases ----*/
 
-static void testSize(void) {
-	int cases[][2] = {
-		{ 1,  21},
-		{ 6,  41},
-		{20,  97},
-		{33, 149},
-		{40, 177},
-	};
-	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-		int *tc = cases[i];
-		assert(qrcodegen_getSize(tc[0]) == tc[1]);
-		numTestCases++;
-	}
-}
-
-
 static void testGetTextProperties(void) {
 	bool isNumeric, isAlphanumeric;
 	int textLen, textBits;
@@ -346,7 +330,6 @@ static void testGetAlignmentPatternPositions(void) {
 /*---- Main runner ----*/
 
 int main(void) {
-	testSize();
 	testGetTextProperties();
 	testGetNumDataCodewords();
 	testGetNumRawDataModules();
