@@ -58,13 +58,13 @@ testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 static void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
-static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int qrsize);
+static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]);
 testable int getAlignmentPatternPositions(int version, uint8_t result[7]);
 static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[]);
 
-static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize);
-static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, enum qrcodegen_Mask mask);
-static long getPenaltyScore(const uint8_t qrcode[], int qrsize);
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]);
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask);
+static long getPenaltyScore(const uint8_t qrcode[]);
 
 static bool getModule(const uint8_t qrcode[], int x, int y);
 static void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
@@ -295,8 +295,7 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 	// Draw function and data codeword modules
 	appendErrorCorrection(dataAndQrcode, version, ecl, tempBuffer);
 	initializeFunctionModules(version, dataAndQrcode);
-	int qrsize = qrcodegen_getSize(dataAndQrcode);
-	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, dataAndQrcode, qrsize);
+	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, dataAndQrcode);
 	drawWhiteFunctionModules(dataAndQrcode, version);
 	initializeFunctionModules(version, tempBuffer);
 	
@@ -304,19 +303,19 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
-			drawFormatBits(ecl, (enum qrcodegen_Mask)i, dataAndQrcode, qrsize);
-			applyMask(tempBuffer, dataAndQrcode, qrsize, (enum qrcodegen_Mask)i);
-			long penalty = getPenaltyScore(dataAndQrcode, qrsize);
+			drawFormatBits(ecl, (enum qrcodegen_Mask)i, dataAndQrcode);
+			applyMask(tempBuffer, dataAndQrcode, (enum qrcodegen_Mask)i);
+			long penalty = getPenaltyScore(dataAndQrcode);
 			if (penalty < minPenalty) {
 				mask = (enum qrcodegen_Mask)i;
 				minPenalty = penalty;
 			}
-			applyMask(tempBuffer, dataAndQrcode, qrsize, (enum qrcodegen_Mask)i);  // Undoes the mask due to XOR
+			applyMask(tempBuffer, dataAndQrcode, (enum qrcodegen_Mask)i);  // Undoes the mask due to XOR
 		}
 	}
 	assert(0 <= (int)mask && (int)mask <= 7);
-	drawFormatBits(ecl, mask, dataAndQrcode, qrsize);
-	applyMask(tempBuffer, dataAndQrcode, qrsize, mask);
+	drawFormatBits(ecl, mask, dataAndQrcode);
+	applyMask(tempBuffer, dataAndQrcode, mask);
 }
 
 
@@ -558,7 +557,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 // Draws two copies of the format bits (with its own error correction code) based
 // on the given mask and error correction level. This always draws all modules of
 // the format bits, unlike drawWhiteFunctionModules() which might skip black modules.
-static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[], int qrsize) {
+static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]) {
 	// Calculate error correction code and pack bits
 	assert(0 <= (int)mask && (int)mask <= 7);
 	int data;
@@ -587,6 +586,7 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 		setModule(qrcode, 14 - i, 8, ((data >> i) & 1) != 0);
 	
 	// Draw second copy
+	int qrsize = qrcodegen_getSize(qrcode);
 	for (int i = 0; i <= 7; i++)
 		setModule(qrcode, qrsize - 1 - i, 8, ((data >> i) & 1) != 0);
 	for (int i = 8; i < 15; i++)
@@ -628,7 +628,8 @@ static void fillRectangle(int left, int top, int width, int height, uint8_t qrco
 
 // Draws the raw codewords (including data and ECC) onto the given QR Code. This requires the initial state of
 // the QR Code to be black at function modules and white at codeword modules (including unused remainder bits).
-static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], int qrsize) {
+static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
+	int qrsize = qrcodegen_getSize(qrcode);
 	int i = 0;  // Bit index into the data
 	// Do the funny zigzag scan
 	for (int right = qrsize - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
@@ -657,8 +658,9 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[], i
 // properties, calling applyMask(..., m) twice with the same value is equivalent to no change at all.
 // This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 // well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
-static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrsize, enum qrcodegen_Mask mask) {
+static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask) {
 	assert(0 <= (int)mask && (int)mask <= 7);  // Disallows qrcodegen_Mask_AUTO
+	int qrsize = qrcodegen_getSize(qrcode);
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0; x < qrsize; x++) {
 			if (getModule(functionModules, x, y))
@@ -684,7 +686,8 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], int qrs
 
 // Calculates and returns the penalty score based on state of the given QR Code's current modules.
 // This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
-static long getPenaltyScore(const uint8_t qrcode[], int qrsize) {
+static long getPenaltyScore(const uint8_t qrcode[]) {
+	int qrsize = qrcodegen_getSize(qrcode);
 	long result = 0;
 	
 	// Adjacent modules in row having same color
