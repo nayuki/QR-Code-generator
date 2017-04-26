@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 
-/*---- Enumeration types and constants ----*/
+/*---- Enumeration types and values ----*/
 
 /* 
  * Represents the error correction level used in a QR Code symbol.
@@ -59,7 +59,7 @@ enum qrcodegen_Mask {
 
 /*---- Macro constants and functions ----*/
 
-// The minimum and maximum defined QR Code version numbers.
+// The minimum and maximum defined QR Code version numbers for Model 2.
 #define qrcodegen_VERSION_MIN  1
 #define qrcodegen_VERSION_MAX  40
 
@@ -69,7 +69,7 @@ enum qrcodegen_Mask {
 #define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((n) * 4 + 17) * ((n) * 4 + 17) + 7) / 8 + 1)
 
 // The worst-case number of bytes needed to store one QR Code, up to and including
-// version 40. This value equals 3917, which is just under 4 kilobytes.
+// version 40. This value equals 3918, which is just under 4 kilobytes.
 #define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(qrcodegen_VERSION_MAX)
 
 
@@ -77,22 +77,45 @@ enum qrcodegen_Mask {
 /*---- Top-level QR Code functions ----*/
 
 /* 
- * Encodes the given text data to a QR Code symbol, returning whether encoding succeeded.
- * If the data is too long to fit in any version in the given range at the given ECC level,
- * then false is returned. Both dataAndTemp and qrcode each must have length at least
- * qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion). The text must be encoded in UTF-8.
- * The resulting QR Code may use numeric, alphanumeric, or byte mode to encode the text.
+ * Encodes the given text string to a QR Code symbol, returning true if encoding succeeded.
+ * If the data is too long to fit in any version in the given range
+ * at the given ECC level, then false is returned.
+ * - The input text must be encoded in UTF-8 and contain no NULs.
+ * - The variables ecl and mask must correspond to enum constant values.
+ * - Requires 1 <= minVersion <= maxVersion <= 40.
+ * - The arrays tempBuffer and qrcode must each have a length
+ *   of at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
+ * - After the function returns, tempBuffer contains no useful data.
+ * - If successful, the resulting QR Code may use numeric,
+ *   alphanumeric, or byte mode to encode the text.
+ * - In the most optimistic case, a QR Code at version 40 with low ECC
+ *   can hold any UTF-8 string up to 2953 bytes, or any alphanumeric string
+ *   up to 4296 characters, or any digit string up to 7089 characters.
+ *   These numbers represent the hard upper limit of the QR Code standard.
+ * - Please consult the QR Code standard document for information on
+ *   data capacities per version, ECC level, and text encoding mode.
  */
 bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
 	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
 
 /* 
- * Encodes the given binary data to a QR Code symbol, returning whether encoding succeeded.
- * If the data is too long to fit in any version in the given range at the given ECC level,
- * then false is returned. dataAndTemp[0 : dataLen] represents the input data, and the function
- * may overwrite the array's contents as a temporary work area. Both dataAndTemp and qrcode
- * must have length at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
+ * Encodes the given binary data to a QR Code symbol, returning true if encoding succeeded.
+ * If the data is too long to fit in any version in the given range
+ * at the given ECC level, then false is returned.
+ * - The input array range dataAndTemp[0 : dataLen] should normally be
+ *   valid UTF-8 text, but is not required by the QR Code standard.
+ * - The variables ecl and mask must correspond to enum constant values.
+ * - Requires 1 <= minVersion <= maxVersion <= 40.
+ * - The arrays dataAndTemp and qrcode must each have a length
+ *   of at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
+ * - After the function returns, the contents of dataAndTemp may have changed,
+ *   and does not represent useful data anymore.
+ * - If successful, the resulting QR Code will use byte mode to encode the data.
+ * - In the most optimistic case, a QR Code at version 40 with low ECC can hold any byte
+ *   sequence up to length 2953. This is the hard upper limit of the QR Code standard.
+ * - Please consult the QR Code standard document for information on
+ *   data capacities per version, ECC level, and text encoding mode.
  */
 bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
@@ -102,17 +125,17 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 /*---- Low-level QR Code functions ----*/
 
 /* 
- * Returns the side length of the given QR Code, assuming that the buffer is valid.
+ * Returns the side length of the given QR Code, assuming that encoding succeeded.
  * The result is in the range [21, 177]. Note that every 'uint8_t qrcode[]' buffer
- * must have a length of at least ceil(size^2 / 8 + 1), which also equals
- * qrcodegen_BUFFER_LEN_FOR_VERSION(version).
+ * must have a length of at least qrcodegen_BUFFER_LEN_FOR_VERSION(version),
+ * which equals ceil(size^2 / 8 + 1).
  */
 int qrcodegen_getSize(const uint8_t qrcode[]);
 
 
 /* 
  * Returns the color of the module (pixel) at the given coordinates, which is either
- * true for white or false for black. The top left corner has the coordinates (x=0, y=0).
+ * false for white or true for black. The top left corner has the coordinates (x=0, y=0).
  * If the given coordinates are out of bounds, then false (white) is returned.
  */
 bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y);
