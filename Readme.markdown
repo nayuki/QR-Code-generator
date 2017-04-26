@@ -116,24 +116,28 @@ C language:
     #include <stdint.h>
     #include "qrcodegen.h"
     
+    // Text data
     uint8_t qr0[qrcodegen_BUFFER_LEN_MAX];
     uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-    int version0 = qrcodegen_encodeText("Hello, world!",
+    bool ok = qrcodegen_encodeText("Hello, world!",
         tempBuffer, qr0, qrcodegen_Ecc_MEDIUM,
         qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX,
         qrcodegen_Mask_AUTO, true);
+    if (!ok)
+        return;
     
-    int size0 = qrcodegen_getSize(version0);
-    for (int y = 0; y < size0; y++) {
-        for (int x = 0; x < size0; x++) {
-            (... paint qrcodegen_getModule(qr0, version0, x, y) ...)
+    int size = qrcodegen_getSize(qr0);
+    for (int y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+            (... paint qrcodegen_getModule(qr0, x, y) ...)
         }
     }
     
+    // Binary data
     uint8_t dataAndTemp[qrcodegen_BUFFER_LEN_FOR_VERSION(7)]
         = {0xE3, 0x81, 0x82};
     uint8_t qr1[qrcodegen_BUFFER_LEN_FOR_VERSION(7)];
-    int version1 = qrcodegen_encodeBinary(dataAndTemp, 3, qr1,
+    ok = qrcodegen_encodeBinary(dataAndTemp, 3, qr1,
         qrcodegen_Ecc_HIGH, 2, 7, qrcodegen_Mask_4, false);
 
 More information about QR Code technology and this library's design can be found on the project home page.
