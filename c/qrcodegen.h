@@ -33,7 +33,7 @@
  * Represents the error correction level used in a QR Code symbol.
  */
 enum qrcodegen_Ecc {
-	qrcodegen_Ecc_LOW,
+	qrcodegen_Ecc_LOW = 0,
 	qrcodegen_Ecc_MEDIUM,
 	qrcodegen_Ecc_QUARTILE,
 	qrcodegen_Ecc_HIGH,
