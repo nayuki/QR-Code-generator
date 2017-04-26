@@ -48,6 +48,7 @@ int getNumRawDataModules(int version);
 void calcReedSolomonGenerator(int degree, uint8_t result[]);
 void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
+void initializeFunctionModules(int version, uint8_t qrcode[]);
 int getAlignmentPatternPositions(int version, uint8_t result[7]);
 
 
@@ -300,6 +301,38 @@ static void testFiniteFieldMultiply(void) {
 }
 
 
+static void testInitializeFunctionModulesEtc(void) {
+	for (int ver = 1; ver <= 40; ver++) {
+		uint8_t *qrcode = malloc(qrcodegen_BUFFER_LEN_FOR_VERSION(ver) * sizeof(uint8_t));
+		assert(qrcode != NULL);
+		initializeFunctionModules(ver, qrcode);
+		
+		int size = qrcodegen_getSize(qrcode);
+		if (ver == 1)
+			assert(size == 21);
+		else if (ver == 40)
+			assert(size == 177);
+		else
+			assert(size == ver * 4 + 17);
+		
+		bool hasWhite = false;
+		bool hasBlack = false;
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
+				bool color = qrcodegen_getModule(qrcode, x, y);
+				if (color)
+					hasBlack = true;
+				else
+					hasWhite = true;
+			}
+		}
+		assert(hasWhite && hasBlack);
+		free(qrcode);
+		numTestCases++;
+	}
+}
+
+
 static void testGetAlignmentPatternPositions(void) {
 	int cases[][9] = {
 		{ 1, 0,  -1,  -1,  -1,  -1,  -1,  -1,  -1},
@@ -336,6 +369,7 @@ int main(void) {
 	testCalcReedSolomonGenerator();
 	testCalcReedSolomonRemainder();
 	testFiniteFieldMultiply();
+	testInitializeFunctionModulesEtc();
 	testGetAlignmentPatternPositions();
 	printf("All %d test cases passed\n", numTestCases);
 	return EXIT_SUCCESS;

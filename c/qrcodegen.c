@@ -56,7 +56,7 @@ testable void calcReedSolomonGenerator(int degree, uint8_t result[]);
 testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
 testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
-static void initializeFunctionModules(int version, uint8_t qrcode[]);
+testable void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]);
 testable int getAlignmentPatternPositions(int version, uint8_t result[7]);
@@ -464,7 +464,7 @@ testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
 
 // Clears the given QR Code grid with white modules for the given
 // version's size, then marks every function module as black.
-static void initializeFunctionModules(int version, uint8_t qrcode[]) {
+testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
 	int qrsize = version * 4 + 17;
 	memset(qrcode, 0, ((qrsize * qrsize + 7) / 8 + 1) * sizeof(qrcode[0]));
