@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "qrcodegen.h"
 
 #define ARRAY_LENGTH(name)  (sizeof(name) / sizeof(name[0]))
@@ -50,6 +51,9 @@ void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t g
 uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 void initializeFunctionModules(int version, uint8_t qrcode[]);
 int getAlignmentPatternPositions(int version, uint8_t result[7]);
+bool getModule(const uint8_t qrcode[], int x, int y);
+void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
+void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 
 
 /*---- Test cases ----*/
@@ -360,9 +364,90 @@ static void testGetAlignmentPatternPositions(void) {
 }
 
 
+static void testGetSetModule(void) {
+	uint8_t qrcode[qrcodegen_BUFFER_LEN_FOR_VERSION(23)];
+	initializeFunctionModules(23, qrcode);
+	int size = qrcodegen_getSize(qrcode);
+	
+	for (int y = 0; y < size; y++) {  // Clear all to white
+		for (int x = 0; x < size; x++)
+			setModule(qrcode, x, y, false);
+	}
+	for (int y = 0; y < size; y++) {  // Check all white
+		for (int x = 0; x < size; x++)
+			assert(qrcodegen_getModule(qrcode, x, y) == false);
+	}
+	for (int y = 0; y < size; y++) {  // Set all to black
+		for (int x = 0; x < size; x++)
+			setModule(qrcode, x, y, true);
+	}
+	for (int y = 0; y < size; y++) {  // Check all black
+		for (int x = 0; x < size; x++)
+			assert(qrcodegen_getModule(qrcode, x, y) == true);
+	}
+	
+	// Set some out of bounds modules to white
+	setModuleBounded(qrcode, -1, -1, false);
+	setModuleBounded(qrcode, -1, 0, false);
+	setModuleBounded(qrcode, 0, -1, false);
+	setModuleBounded(qrcode, size, 5, false);
+	setModuleBounded(qrcode, 72, size, false);
+	setModuleBounded(qrcode, size, size, false);
+	for (int y = 0; y < size; y++) {  // Check all black
+		for (int x = 0; x < size; x++)
+			assert(qrcodegen_getModule(qrcode, x, y) == true);
+	}
+	
+	// Set some modules to white
+	setModule(qrcode, 3, 8, false);
+	setModule(qrcode, 61, 49, false);
+	for (int y = 0; y < size; y++) {  // Check most black
+		for (int x = 0; x < size; x++) {
+			bool white = (x == 3 && y == 8) || (x == 61 && y == 49);
+			assert(qrcodegen_getModule(qrcode, x, y) != white);
+		}
+	}
+	numTestCases++;
+}
+
+
+static void testGetSetModuleRandomly(void) {
+	uint8_t qrcode[qrcodegen_BUFFER_LEN_FOR_VERSION(1)];
+	initializeFunctionModules(1, qrcode);
+	int size = qrcodegen_getSize(qrcode);
+	
+	bool modules[21][21];
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x < size; x++)
+			modules[y][x] = qrcodegen_getModule(qrcode, x, y);
+	}
+	
+	long trials = 100000;
+	for (long i = 0; i < trials; i++) {
+		int x = rand() % (size * 2) - size / 2;
+		int y = rand() % (size * 2) - size / 2;
+		bool isInBounds = 0 <= x && x < size && 0 <= y && y < size;
+		bool oldColor = isInBounds && modules[y][x];
+		if (isInBounds)
+			assert(getModule(qrcode, x, y) == oldColor);
+		assert(qrcodegen_getModule(qrcode, x, y) == oldColor);
+		
+		bool newColor = rand() % 2 == 0;
+		if (isInBounds)
+			modules[y][x] = newColor;
+		if (isInBounds && rand() % 2 == 0)
+			setModule(qrcode, x, y, newColor);
+		else
+			setModuleBounded(qrcode, x, y, newColor);
+	}
+	numTestCases++;
+}
+
+
 /*---- Main runner ----*/
 
 int main(void) {
+	srand(time(NULL));
 	testGetTextProperties();
 	testGetNumDataCodewords();
 	testGetNumRawDataModules();
@@ -371,6 +456,8 @@ int main(void) {
 	testFiniteFieldMultiply();
 	testInitializeFunctionModulesEtc();
 	testGetAlignmentPatternPositions();
+	testGetSetModule();
+	testGetSetModuleRandomly();
 	printf("All %d test cases passed\n", numTestCases);
 	return EXIT_SUCCESS;
 }

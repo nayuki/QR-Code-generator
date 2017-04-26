@@ -66,9 +66,9 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask);
 static long getPenaltyScore(const uint8_t qrcode[]);
 
-static bool getModule(const uint8_t qrcode[], int x, int y);
-static void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
-static void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
+testable bool getModule(const uint8_t qrcode[], int x, int y);
+testable void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
+testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 
 
 
@@ -795,7 +795,7 @@ bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y) {
 
 
 // Gets the module at the given coordinates, which must be in bounds.
-static bool getModule(const uint8_t qrcode[], int x, int y) {
+testable bool getModule(const uint8_t qrcode[], int x, int y) {
 	int qrsize = qrcode[0];
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
 	int index = y * qrsize + x;
@@ -806,7 +806,7 @@ static bool getModule(const uint8_t qrcode[], int x, int y) {
 
 
 // Sets the module at the given coordinates, which must be in bounds.
-static void setModule(uint8_t qrcode[], int x, int y, bool isBlack) {
+testable void setModule(uint8_t qrcode[], int x, int y, bool isBlack) {
 	int qrsize = qrcode[0];
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
 	int index = y * qrsize + x;
@@ -820,7 +820,7 @@ static void setModule(uint8_t qrcode[], int x, int y, bool isBlack) {
 
 
 // Sets the module at the given coordinates, doing nothing if out of bounds.
-static void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack) {
+testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack) {
 	int qrsize = qrcode[0];
 	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)
 		setModule(qrcode, x, y, isBlack);
