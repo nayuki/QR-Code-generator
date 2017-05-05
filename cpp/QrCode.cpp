@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
+#include <cstdlib>
 #include <sstream>
 #include "BitBuffer.hpp"
 #include "QrCode.hpp"
