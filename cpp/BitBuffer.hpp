@@ -37,7 +37,7 @@ class BitBuffer final {
 	
 	/*---- Fields ----*/
 	
-	private: std::vector<uint8_t> data;
+	private: std::vector<std::uint8_t> data;
 	private: int bitLength;
 	
 	
@@ -56,12 +56,12 @@ class BitBuffer final {
 	
 	
 	// Returns a copy of all bytes, padding up to the nearest byte.
-	public: std::vector<uint8_t> getBytes() const;
+	public: std::vector<std::uint8_t> getBytes() const;
 	
 	
 	// Appends the given number of bits of the given value to this sequence.
 	// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
-	public: void appendBits(uint32_t val, int len);
+	public: void appendBits(std::uint32_t val, int len);
 	
 	
 	// Appends the data of the given segment to this bit buffer.

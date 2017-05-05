@@ -75,7 +75,7 @@ class QrCode final {
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 */
-	public: static QrCode encodeBinary(const std::vector<uint8_t> &data, const Ecc &ecl);
+	public: static QrCode encodeBinary(const std::vector<std::uint8_t> &data, const Ecc &ecl);
 	
 	
 	/* 
@@ -122,7 +122,7 @@ class QrCode final {
 	 * and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
 	 * To go one level up, see the encodeSegments() function.
 	 */
-	public: QrCode(int ver, const Ecc &ecl, const std::vector<uint8_t> &dataCodewords, int mask);
+	public: QrCode(int ver, const Ecc &ecl, const std::vector<std::uint8_t> &dataCodewords, int mask);
 	
 	
 	/* 
@@ -187,12 +187,12 @@ class QrCode final {
 	
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
-	private: std::vector<uint8_t> appendErrorCorrection(const std::vector<uint8_t> &data) const;
+	private: std::vector<std::uint8_t> appendErrorCorrection(const std::vector<std::uint8_t> &data) const;
 	
 	
 	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
 	// data area of this QR Code symbol. Function modules need to be marked off before this is called.
-	private: void drawCodewords(const std::vector<uint8_t> &data);
+	private: void drawCodewords(const std::vector<std::uint8_t> &data);
 	
 	
 	// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
@@ -242,8 +242,8 @@ class QrCode final {
 	private: static const int PENALTY_N3;
 	private: static const int PENALTY_N4;
 	
-	private: static const int8_t ECC_CODEWORDS_PER_BLOCK[4][41];
-	private: static const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41];
+	private: static const std::int8_t ECC_CODEWORDS_PER_BLOCK[4][41];
+	private: static const std::int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41];
 	
 	
 	
@@ -260,7 +260,7 @@ class QrCode final {
 		
 		// Coefficients of the divisor polynomial, stored from highest to lowest power, excluding the leading term which
 		// is always 1. For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
-		private: std::vector<uint8_t> coefficients;
+		private: std::vector<std::uint8_t> coefficients;
 		
 		
 		/*-- Constructor --*/
@@ -278,14 +278,14 @@ class QrCode final {
 		 * Computes and returns the Reed-Solomon error correction codewords for the given sequence of data codewords.
 		 * The returned object is always a new byte array. This method does not alter this object's state (because it is immutable).
 		 */
-		public: std::vector<uint8_t> getRemainder(const std::vector<uint8_t> &data) const;
+		public: std::vector<std::uint8_t> getRemainder(const std::vector<std::uint8_t> &data) const;
 		
 		
 		/*-- Static function --*/
 		
 		// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 		// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
-		private: static uint8_t multiply(uint8_t x, uint8_t y);
+		private: static std::uint8_t multiply(std::uint8_t x, std::uint8_t y);
 		
 	};
 	
