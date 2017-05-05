@@ -31,6 +31,7 @@
 #include <vector>
 #include "QrCode.hpp"
 
+using std::uint8_t;
 using qrcodegen::QrCode;
 using qrcodegen::QrSegment;
 

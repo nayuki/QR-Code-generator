@@ -26,6 +26,8 @@
 #include "BitBuffer.hpp"
 #include "QrSegment.hpp"
 
+using std::uint8_t;
+
 
 namespace qrcodegen {
 
