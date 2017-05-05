@@ -137,7 +137,7 @@ int QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
 	if (version < 1 || version > 40)
 		throw "Version number out of range";
 	int result = 0;
-	for (size_t i = 0; i < segs.size(); i++) {
+	for (std::size_t i = 0; i < segs.size(); i++) {
 		const QrSegment &seg(segs.at(i));
 		int ccbits = seg.mode.numCharCountBits(version);
 		// Fail if segment length value doesn't fit in the length field's bit-width

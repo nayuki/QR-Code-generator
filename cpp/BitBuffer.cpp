@@ -37,12 +37,12 @@ int BitBuffer::getBitLength() const {
 }
 
 
-std::vector<uint8_t> BitBuffer::getBytes() const {
+std::vector<std::uint8_t> BitBuffer::getBytes() const {
 	return data;
 }
 
 
-void BitBuffer::appendBits(uint32_t val, int len) {
+void BitBuffer::appendBits(std::uint32_t val, int len) {
 	if (len < 0 || len > 32 || (len < 32 && (val >> len) != 0))
 		throw "Value out of range";
 	if (len > INT_MAX - bitLength)
