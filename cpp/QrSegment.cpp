@@ -27,6 +27,7 @@
 #include "QrSegment.hpp"
 
 using std::uint8_t;
+using std::vector;
 
 
 namespace qrcodegen {
@@ -54,7 +55,7 @@ const QrSegment::Mode QrSegment::Mode::KANJI       (0x8,  8, 10, 12);
 
 
 
-QrSegment QrSegment::makeBytes(const std::vector<uint8_t> &data) {
+QrSegment QrSegment::makeBytes(const vector<uint8_t> &data) {
 	if (data.size() >= (unsigned int)INT_MAX / 8)
 		throw "Buffer too long";
 	return QrSegment(Mode::BYTE, (int)data.size(), data, (int)data.size() * 8);
@@ -107,16 +108,16 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 }
 
 
-std::vector<QrSegment> QrSegment::makeSegments(const char *text) {
+vector<QrSegment> QrSegment::makeSegments(const char *text) {
 	// Select the most efficient segment encoding automatically
-	std::vector<QrSegment> result;
+	vector<QrSegment> result;
 	if (*text == '\0');  // Leave the vector empty
 	else if (QrSegment::isNumeric(text))
 		result.push_back(QrSegment::makeNumeric(text));
 	else if (QrSegment::isAlphanumeric(text))
 		result.push_back(QrSegment::makeAlphanumeric(text));
 	else {
-		std::vector<uint8_t> bytes;
+		vector<uint8_t> bytes;
 		for (; *text != '\0'; text++)
 			bytes.push_back(static_cast<uint8_t>(*text));
 		result.push_back(QrSegment::makeBytes(bytes));
@@ -125,7 +126,7 @@ std::vector<QrSegment> QrSegment::makeSegments(const char *text) {
 }
 
 
-QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uint8_t> &b, int bitLen) :
+QrSegment::QrSegment(const Mode &md, int numCh, const vector<uint8_t> &b, int bitLen) :
 		mode(md),
 		numChars(numCh),
 		data(b),
@@ -135,7 +136,7 @@ QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<uint8_t> &b, i
 }
 
 
-int QrSegment::getTotalBits(const std::vector<QrSegment> &segs, int version) {
+int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 	if (version < 1 || version > 40)
 		throw "Version number out of range";
 	int result = 0;
