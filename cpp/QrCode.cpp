@@ -311,8 +311,9 @@ vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const
 	// Calculate parameter numbers
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.ordinal][version];
 	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[errorCorrectionLevel.ordinal][version];
-	int numShortBlocks = numBlocks - getNumRawDataModules(version) / 8 % numBlocks;
-	int shortBlockLen = getNumRawDataModules(version) / 8 / numBlocks;
+	int rawCodewords = getNumRawDataModules(version) / 8;
+	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
+	int shortBlockLen = rawCodewords / numBlocks;
 	
 	// Split data into blocks and append ECC to each block
 	vector<vector<uint8_t> > blocks;
@@ -337,7 +338,7 @@ vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const
 				result.push_back(blocks.at(j).at(i));
 		}
 	}
-	if (result.size() != static_cast<unsigned int>(getNumRawDataModules(version) / 8))
+	if (result.size() != static_cast<unsigned int>(rawCodewords))
 		throw "Assertion error";
 	return result;
 }

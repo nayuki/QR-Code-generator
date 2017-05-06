@@ -362,8 +362,9 @@ class QrCode(object):
 		# Calculate parameter numbers
 		numblocks = QrCode._NUM_ERROR_CORRECTION_BLOCKS[self._errcorlvl.ordinal][version]
 		blockecclen = QrCode._ECC_CODEWORDS_PER_BLOCK[self._errcorlvl.ordinal][version]
-		numshortblocks = numblocks - QrCode._get_num_raw_data_modules(version) // 8 % numblocks
-		shortblocklen = self._get_num_raw_data_modules(version) // 8 // numblocks
+		rawcodewords = QrCode._get_num_raw_data_modules(version) // 8
+		numshortblocks = numblocks - rawcodewords % numblocks
+		shortblocklen = rawcodewords // numblocks
 		
 		# Split data into blocks and append ECC to each block
 		blocks = []
@@ -386,7 +387,7 @@ class QrCode(object):
 				# Skip the padding byte in short blocks
 				if i != shortblocklen - blockecclen or j >= numshortblocks:
 					result.append(blk[i])
-		assert len(result) == QrCode._get_num_raw_data_modules(version) // 8
+		assert len(result) == rawcodewords
 		return result
 	
 	

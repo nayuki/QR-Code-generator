@@ -358,8 +358,9 @@ var qrcodegen = new function() {
 			// Calculate parameter numbers
 			var numBlocks = QrCode.NUM_ERROR_CORRECTION_BLOCKS[errCorLvl.ordinal][version];
 			var blockEccLen = QrCode.ECC_CODEWORDS_PER_BLOCK[errCorLvl.ordinal][version];
-			var numShortBlocks = numBlocks - Math.floor(QrCode.getNumRawDataModules(version) / 8) % numBlocks;
-			var shortBlockLen = Math.floor(QrCode.getNumRawDataModules(version) / (numBlocks * 8));
+			var rawCodewords = Math.floor(QrCode.getNumRawDataModules(version) / 8);
+			var numShortBlocks = numBlocks - rawCodewords % numBlocks;
+			var shortBlockLen = Math.floor(rawCodewords / numBlocks);
 			
 			// Split data into blocks and append ECC to each block
 			var blocks = [];
@@ -385,7 +386,7 @@ var qrcodegen = new function() {
 						result.push(blocks[j][i]);
 				}
 			}
-			if (result.length != Math.floor(QrCode.getNumRawDataModules(version) / 8))
+			if (result.length != rawCodewords)
 				throw "Assertion error";
 			return result;
 		}

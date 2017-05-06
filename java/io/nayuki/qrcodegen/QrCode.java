@@ -458,8 +458,9 @@ public final class QrCode {
 		// Calculate parameter numbers
 		int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.ordinal()][version];
 		int blockEccLen = ECC_CODEWORDS_PER_BLOCK[errorCorrectionLevel.ordinal()][version];
-		int numShortBlocks = numBlocks - getNumRawDataModules(version) / 8 % numBlocks;
-		int shortBlockLen = getNumRawDataModules(version) / 8 / numBlocks;
+		int rawCodewords = getNumRawDataModules(version) / 8;
+		int numShortBlocks = numBlocks - rawCodewords % numBlocks;
+		int shortBlockLen = rawCodewords / numBlocks;
 		
 		// Split data into blocks and append ECC to each block
 		byte[][] blocks = new byte[numBlocks][];
@@ -474,7 +475,7 @@ public final class QrCode {
 		}
 		
 		// Interleave (not concatenate) the bytes from every block into a single sequence
-		byte[] result = new byte[getNumRawDataModules(version) / 8];
+		byte[] result = new byte[rawCodewords];
 		for (int i = 0, k = 0; i < blocks[0].length; i++) {
 			for (int j = 0; j < blocks.length; j++) {
 				// Skip the padding byte in short blocks
