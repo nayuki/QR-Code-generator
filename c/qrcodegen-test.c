@@ -44,6 +44,7 @@ static int numTestCases = 0;
 
 // Prototypes of private functions under test
 int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
+void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 int getNumRawDataModules(int version);
 void calcReedSolomonGenerator(int degree, uint8_t result[]);
@@ -113,6 +114,47 @@ static void testGetTextProperties(void) {
 	assert((262136L > INT_MAX && textLen < 0) ||
 		(262136L <= INT_MAX && textLen == 32767 && !isNumeric && !isAlphanumeric && textBits == 262136L));
 	numTestCases++;
+}
+
+
+static void testAppendBitsToBuffer(void) {
+	{
+		uint8_t buf[1] = {0};
+		int bitLen = 0;
+		appendBitsToBuffer(0, 0, buf, &bitLen);
+		assert(bitLen == 0);
+		assert(buf[0] == 0);
+		appendBitsToBuffer(1, 1, buf, &bitLen);
+		assert(bitLen == 1);
+		assert(buf[0] == 0x80);
+		appendBitsToBuffer(0, 1, buf, &bitLen);
+		assert(bitLen == 2);
+		assert(buf[0] == 0x80);
+		appendBitsToBuffer(5, 3, buf, &bitLen);
+		assert(bitLen == 5);
+		assert(buf[0] == 0xA8);
+		appendBitsToBuffer(6, 3, buf, &bitLen);
+		assert(bitLen == 8);
+		assert(buf[0] == 0xAE);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[6] = {0};
+		int bitLen = 0;
+		appendBitsToBuffer(16942, 16, buf, &bitLen);
+		assert(bitLen == 16);
+		assert(buf[0] == 0x42 && buf[1] == 0x2E && buf[2] == 0x00 && buf[3] == 0x00 && buf[4] == 0x00 && buf[5] == 0x00);
+		appendBitsToBuffer(10, 7, buf, &bitLen);
+		assert(bitLen == 23);
+		assert(buf[0] == 0x42 && buf[1] == 0x2E && buf[2] == 0x14 && buf[3] == 0x00 && buf[4] == 0x00 && buf[5] == 0x00);
+		appendBitsToBuffer(15, 4, buf, &bitLen);
+		assert(bitLen == 27);
+		assert(buf[0] == 0x42 && buf[1] == 0x2E && buf[2] == 0x15 && buf[3] == 0xE0 && buf[4] == 0x00 && buf[5] == 0x00);
+		appendBitsToBuffer(26664, 15, buf, &bitLen);
+		assert(bitLen == 42);
+		assert(buf[0] == 0x42 && buf[1] == 0x2E && buf[2] == 0x15 && buf[3] == 0xFA && buf[4] == 0x0A && buf[5] == 0x00);
+		numTestCases++;
+	}
 }
 
 
@@ -449,6 +491,7 @@ static void testGetSetModuleRandomly(void) {
 int main(void) {
 	srand(time(NULL));
 	testGetTextProperties();
+	testAppendBitsToBuffer();
 	testGetNumDataCodewords();
 	testGetNumRawDataModules();
 	testCalcReedSolomonGenerator();

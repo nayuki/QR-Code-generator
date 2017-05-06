@@ -58,7 +58,7 @@ static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc e
 	int dataLen, int dataBitLen, int ver1To9LenBits, int ver10To26LenBits, int ver27To40LenBits);
 static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[],
 	int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl);
-static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
+testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 
 static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
@@ -342,7 +342,7 @@ static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBu
 
 
 // Appends the given sequence of bits to the given byte-based bit buffer, increasing the bit length.
-static void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen) {
+testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen) {
 	assert(0 <= numBits && numBits <= 16 && (long)val >> numBits == 0);
 	for (int i = numBits - 1; i >= 0; i--, (*bitLen)++)
 		buffer[*bitLen >> 3] |= ((val >> i) & 1) << (7 - (*bitLen & 7));
