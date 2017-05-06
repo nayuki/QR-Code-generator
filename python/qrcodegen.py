@@ -521,9 +521,9 @@ class QrCode(object):
 	
 	@staticmethod
 	def _get_num_raw_data_modules(ver):
-		"""Returns the number of raw data modules (bits) available at the given version number.
-		These data modules are used for both user data codewords and error correction codewords.
-		This stateless pure function could be implemented as a 40-entry lookup table."""
+		"""Returns the number of data bits that can be stored in a QR Code of the given version number, after
+		all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
+		The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table."""
 		if not 1 <= ver <= 40:
 			raise ValueError("Version number out of range")
 		result = (16 * ver + 128) * ver + 64

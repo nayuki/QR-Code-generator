@@ -406,7 +406,7 @@ testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 
 // Returns the number of data bits that can be stored in a QR Code of the given version number, after
 // all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
-// The result is in the range [208, 29648].
+// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 testable int getNumRawDataModules(int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = (16 * version + 128) * version + 64;
