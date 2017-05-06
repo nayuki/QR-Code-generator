@@ -283,8 +283,8 @@ class QrCode final {
 		
 		/*-- Static function --*/
 		
-		// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
-		// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
+		// Returns the product of the two given field elements modulo GF(2^8/0x11D).
+		// All inputs are valid. This could be implemented as a 256*256 lookup table.
 		private: static std::uint8_t multiply(std::uint8_t x, std::uint8_t y);
 		
 	};

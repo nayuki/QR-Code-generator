@@ -462,7 +462,8 @@ testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const 
 }
 
 
-// Returns the product of the two given field elements modulo GF(2^8/0x11D). All argument values are valid.
+// Returns the product of the two given field elements modulo GF(2^8/0x11D).
+// All inputs are valid. This could be implemented as a 256*256 lookup table.
 testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
 	// Russian peasant multiplication
 	uint8_t z = 0;
