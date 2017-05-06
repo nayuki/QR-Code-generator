@@ -43,8 +43,11 @@ static int numTestCases = 0;
 
 
 // Prototypes of private functions under test
+extern const int8_t ECC_CODEWORDS_PER_BLOCK[4][41];
+extern const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41];
 int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
 void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
+void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 int getNumRawDataModules(int version);
 void calcReedSolomonGenerator(int degree, uint8_t result[]);
@@ -154,6 +157,73 @@ static void testAppendBitsToBuffer(void) {
 		assert(bitLen == 42);
 		assert(buf[0] == 0x42 && buf[1] == 0x2E && buf[2] == 0x15 && buf[3] == 0xFA && buf[4] == 0x0A && buf[5] == 0x00);
 		numTestCases++;
+	}
+}
+
+
+// Ported from the Java version of the code.
+static uint8_t *appendErrorCorrectionReference(const uint8_t *data, int version, enum qrcodegen_Ecc ecl) {
+	// Calculate parameter numbers
+	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
+	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
+	int rawCodewords = getNumRawDataModules(version) / 8;
+	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
+	int shortBlockLen = rawCodewords / numBlocks;
+	
+	// Split data into blocks and append ECC to each block
+	uint8_t **blocks = malloc(numBlocks * sizeof(uint8_t*));
+	uint8_t *generator = malloc(blockEccLen * sizeof(uint8_t));
+	calcReedSolomonGenerator(blockEccLen, generator);
+	for (int i = 0, k = 0; i < numBlocks; i++) {
+		uint8_t *block = malloc((shortBlockLen + 1) * sizeof(uint8_t));
+		int blockDataLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
+		memcpy(block, &data[k], blockDataLen * sizeof(uint8_t));
+		calcReedSolomonRemainder(&data[k], blockDataLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
+		k += blockDataLen;
+		blocks[i] = block;
+	}
+	free(generator);
+	
+	// Interleave (not concatenate) the bytes from every block into a single sequence
+	uint8_t *result = malloc(rawCodewords * sizeof(uint8_t));
+	for (int i = 0, k = 0; i < shortBlockLen + 1; i++) {
+		for (int j = 0; j < numBlocks; j++) {
+			// Skip the padding byte in short blocks
+			if (i != shortBlockLen - blockEccLen || j >= numShortBlocks) {
+				result[k] = blocks[j][i];
+				k++;
+			}
+		}
+	}
+	for (int i = 0; i < numBlocks; i++)
+		free(blocks[i]);
+	free(blocks);
+	return result;
+}
+
+
+static void testAppendErrorCorrection(void) {
+	for (int version = 1; version <= 40; version++) {
+		for (int ecl = 0; ecl < 4; ecl++) {
+			int dataLen = getNumDataCodewords(version, (enum qrcodegen_Ecc)ecl);
+			uint8_t *pureData = malloc(dataLen * sizeof(uint8_t));
+			for (int i = 0; i < dataLen; i++)
+				pureData[i] = rand() % 256;
+			uint8_t *expectOutput = appendErrorCorrectionReference(pureData, version, (enum qrcodegen_Ecc)ecl);
+			
+			int dataAndEccLen = getNumRawDataModules(version) / 8;
+			uint8_t *paddedData = malloc(dataAndEccLen * sizeof(uint8_t));
+			memcpy(paddedData, pureData, dataLen * sizeof(uint8_t));
+			uint8_t *actualOutput = malloc(dataAndEccLen * sizeof(uint8_t));
+			appendErrorCorrection(paddedData, version, (enum qrcodegen_Ecc)ecl, actualOutput);
+			
+			assert(memcmp(actualOutput, expectOutput, dataAndEccLen * sizeof(uint8_t)) == 0);
+			free(pureData);
+			free(expectOutput);
+			free(paddedData);
+			free(actualOutput);
+			numTestCases++;
+		}
 	}
 }
 
@@ -492,6 +562,7 @@ int main(void) {
 	srand(time(NULL));
 	testGetTextProperties();
 	testAppendBitsToBuffer();
+	testAppendErrorCorrection();
 	testGetNumDataCodewords();
 	testGetNumRawDataModules();
 	testCalcReedSolomonGenerator();
