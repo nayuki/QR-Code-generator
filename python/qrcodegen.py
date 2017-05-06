@@ -81,8 +81,8 @@ class QrCode(object):
 		This function always encodes using the binary segment mode, not any text mode. The maximum number of
 		bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 		The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version."""
-		if not isinstance(data, bytes):
-			raise TypeError("Binary array expected")
+		if not isinstance(data, (bytes, bytearray)):
+			raise TypeError("Byte string/list expected")
 		return QrCode.encode_segments([QrSegment.make_bytes(data)], ecl)
 	
 	
@@ -613,10 +613,14 @@ class QrSegment(object):
 	@staticmethod
 	def make_bytes(data):
 		"""Returns a segment representing the given binary data encoded in byte mode."""
-		bb = _BitBuffer()
 		py3 = sys.version_info.major >= 3
+		if (py3 and isinstance(data, str)) or (not py3 and isinstance(data, unicode)):
+			raise TypeError("Byte string/list expected")
+		if not py3 and isinstance(data, str):
+			data = bytearray(data)
+		bb = _BitBuffer()
 		for b in data:
-			bb.append_bits((b if py3 else ord(b)), 8)
+			bb.append_bits(b, 8)
 		return QrSegment(QrSegment.Mode.BYTE, len(data), bb.get_bits())
 	
 	
