@@ -110,6 +110,7 @@ static const int PENALTY_N4 = 10;
 // Public function - see documentation comment in header file.
 bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
+	assert(text != NULL && tempBuffer != NULL && qrcode != NULL);
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
@@ -186,6 +187,7 @@ fail:
 // Public function - see documentation comment in header file.
 bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
+	assert(dataAndTemp != NULL && qrcode != NULL);
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
@@ -780,6 +782,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 
 // Public function - see documentation comment in header file.
 int qrcodegen_getSize(const uint8_t qrcode[]) {
+	assert(qrcode != NULL);
 	int result = qrcode[0];
 	assert((qrcodegen_VERSION_MIN * 4 + 17) <= result
 		&& result <= (qrcodegen_VERSION_MAX * 4 + 17));
@@ -789,6 +792,7 @@ int qrcodegen_getSize(const uint8_t qrcode[]) {
 
 // Public function - see documentation comment in header file.
 bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y) {
+	assert(qrcode != NULL);
 	int qrsize = qrcode[0];
 	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, x, y);
 }
