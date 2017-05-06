@@ -37,11 +37,21 @@
 
 /*---- Forward declarations for private functions ----*/
 
-// Note: All public and private functions defined in this source file are "pure", in the sense that
-// they take input data only from arguments, return output data or store in pointer arguments,
-// perform no I/O (e.g. reading clock or writing to console), and don't read/write global variables.
-// Also, each of these functions allocate only a small constant amount of memory on the stack,
-// they don't allocate or free anything on the heap, and they are thread-safe.
+// Regarding all public and private functions defined in this source file:
+// - They require all pointer/array arguments to be not null.
+// - They only read input scalar/array arguments, write to output pointer/array
+//   arguments, and return scalar values; they are "pure" functions.
+// - They don't read mutable global variables or write to any global variables.
+// - They don't perform I/O, read the clock, print to console, etc.
+// - They allocate a small and constant amount of stack memory.
+// - They don't allocate or free any memory on the heap.
+// - They don't recurse or mutually recurse. All the code
+//   could be inlined into the top-level public functions.
+// - They run in at most quadratic time with respect to input arguments.
+//   Most functions run in linear time, and some in constant time.
+//   There are no unbounded loops or non-obvious termination conditions.
+// - They are completely thread-safe if the caller does not give the
+//   same writable buffer to concurrent calls to these functions.
 
 testable int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
 static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc ecl,

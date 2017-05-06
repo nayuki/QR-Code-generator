@@ -74,7 +74,7 @@ enum qrcodegen_Mask {
 
 
 
-/*---- Top-level QR Code functions ----*/
+/*---- Functions to generate QR Codes ----*/
 
 /* 
  * Encodes the given text string to a QR Code symbol, returning true if encoding succeeded.
@@ -92,7 +92,7 @@ enum qrcodegen_Mask {
  *   can hold any UTF-8 string up to 2953 bytes, or any alphanumeric string
  *   up to 4296 characters, or any digit string up to 7089 characters.
  *   These numbers represent the hard upper limit of the QR Code standard.
- * - Please consult the QR Code standard document for information on
+ * - Please consult the QR Code specification for information on
  *   data capacities per version, ECC level, and text encoding mode.
  */
 bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
@@ -114,7 +114,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
  * - If successful, the resulting QR Code will use byte mode to encode the data.
  * - In the most optimistic case, a QR Code at version 40 with low ECC can hold any byte
  *   sequence up to length 2953. This is the hard upper limit of the QR Code standard.
- * - Please consult the QR Code standard document for information on
+ * - Please consult the QR Code specification for information on
  *   data capacities per version, ECC level, and text encoding mode.
  */
 bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
@@ -122,13 +122,13 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 
 
 
-/*---- Low-level QR Code functions ----*/
+/*---- Functions to extract raw data from QR Codes ----*/
 
 /* 
  * Returns the side length of the given QR Code, assuming that encoding succeeded.
- * The result is in the range [21, 177]. Note that every 'uint8_t qrcode[]' buffer
- * must have a length of at least qrcodegen_BUFFER_LEN_FOR_VERSION(version),
- * which equals ceil(size^2 / 8 + 1).
+ * The result is in the range [21, 177]. Note that the length of the array buffer
+ * is related to the side length - every 'uint8_t qrcode[]' must have length at least
+ * qrcodegen_BUFFER_LEN_FOR_VERSION(version), which equals ceil(size^2 / 8 + 1).
  */
 int qrcodegen_getSize(const uint8_t qrcode[]);
 
