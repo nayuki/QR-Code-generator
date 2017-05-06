@@ -386,8 +386,9 @@ static void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ec
 // Returns the number of 8-bit codewords that can be used for storing data (not ECC),
 // for the given version number and error correction level. The result is in the range [9, 2956].
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
-	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	return getNumRawDataModules(version) / 8 - ECC_CODEWORDS_PER_BLOCK[(int)ecl][version] * NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
+	int v = version, e = (int)ecl;
+	assert(0 <= e && e < 4 && qrcodegen_VERSION_MIN <= v && v <= qrcodegen_VERSION_MAX);
+	return getNumRawDataModules(v) / 8 - ECC_CODEWORDS_PER_BLOCK[e][v] * NUM_ERROR_CORRECTION_BLOCKS[e][v];
 }
 
 
