@@ -76,6 +76,10 @@ enum qrcodegen_Mask {
 
 /*---- Functions to generate QR Codes ----*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* 
  * Encodes the given text string to a QR Code symbol, returning true if encoding succeeded.
  * If the data is too long to fit in any version in the given range
@@ -139,3 +143,7 @@ int qrcodegen_getSize(const uint8_t qrcode[]);
  * If the given coordinates are out of bounds, then false (white) is returned.
  */
 bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y);
+
+#ifdef __cplusplus
+}
+#endif
