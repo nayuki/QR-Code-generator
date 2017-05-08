@@ -776,10 +776,10 @@ class _ReedSolomonGenerator(object):
 		for i in range(degree):
 			# Multiply the current product by (x - r^i)
 			for j in range(degree):
-				self.coefficients[j] = _ReedSolomonGenerator.multiply(self.coefficients[j], root)
+				self.coefficients[j] = _ReedSolomonGenerator._multiply(self.coefficients[j], root)
 				if j + 1 < degree:
 					self.coefficients[j] ^= self.coefficients[j + 1]
-			root = _ReedSolomonGenerator.multiply(root, 0x02)
+			root = _ReedSolomonGenerator._multiply(root, 0x02)
 	
 	
 	def get_remainder(self, data):
@@ -792,12 +792,12 @@ class _ReedSolomonGenerator(object):
 			del result[0]
 			result.append(0)
 			for i in range(len(result)):
-				result[i] ^= _ReedSolomonGenerator.multiply(self.coefficients[i], factor)
+				result[i] ^= _ReedSolomonGenerator._multiply(self.coefficients[i], factor)
 		return result
 	
 	
 	@staticmethod
-	def multiply(x, y):
+	def _multiply(x, y):
 		"""Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 		are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8."""
 		if x >> 8 != 0 or y >> 8 != 0:
