@@ -790,12 +790,12 @@ var qrcodegen = new function() {
 		var bb = new BitBuffer();
 		var i;
 		for (i = 0; i + 2 <= text.length; i += 2) {  // Process groups of 2
-			var temp = QrSegment.ALPHANUMERIC_ENCODING_TABLE[text.charCodeAt(i) - 32] * 45;
-			temp += QrSegment.ALPHANUMERIC_ENCODING_TABLE[text.charCodeAt(i + 1) - 32];
+			var temp = QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
+			temp += QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
 			bb.appendBits(temp, 11);
 		}
 		if (i < text.length)  // 1 character remaining
-			bb.appendBits(QrSegment.ALPHANUMERIC_ENCODING_TABLE[text.charCodeAt(i) - 32], 6);
+			bb.appendBits(QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
 		return new this(this.Mode.ALPHANUMERIC, text.length, bb.getBits());
 	};
 	
@@ -844,13 +844,8 @@ var qrcodegen = new function() {
 	// (Public) Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
 	this.QrSegment.ALPHANUMERIC_REGEX = /^[A-Z0-9 $%*+.\/:-]*$/;
 	
-	// (Private) Maps shifted ASCII codes to alphanumeric mode character codes.
-	QrSegment.ALPHANUMERIC_ENCODING_TABLE = [
-		// SP,  !,  ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,,  -,  .,  /,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  :,  ;,  <,  =,  >,  ?,  @,  // ASCII codes 32 to 64
-		   36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1, -1,  // Array indices 0 to 32
-		   10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,  // Array indices 33 to 58
-		//  A,  B,  C,  D,  E,  F,  G,  H,  I,  J,  K,  L,  M,  N,  O,  P,  Q,  R,  S,  T,  U,  V,  W,  X,  Y,  Z,  // ASCII codes 65 to 90
-	];
+	// (Private) The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string.
+	QrSegment.ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 	
 	
 	/*---- Public helper enumeration ----*/
