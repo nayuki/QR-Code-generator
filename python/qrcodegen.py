@@ -779,7 +779,7 @@ class _ReedSolomonGenerator(object):
 				self.coefficients[j] = _ReedSolomonGenerator.multiply(self.coefficients[j], root)
 				if j + 1 < degree:
 					self.coefficients[j] ^= self.coefficients[j + 1]
-			root = (root << 1) ^ ((root >> 7) * 0x11D)  # Multiply by 0x02 mod GF(2^8/0x11D)
+			root = _ReedSolomonGenerator.multiply(root, 0x02)
 	
 	
 	def get_remainder(self, data):

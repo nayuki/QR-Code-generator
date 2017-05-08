@@ -932,7 +932,7 @@ var qrcodegen = new function() {
 				if (j + 1 < coefficients.length)
 					coefficients[j] ^= coefficients[j + 1];
 			}
-			root = (root << 1) ^ ((root >>> 7) * 0x11D);  // Multiply by 0x02 mod GF(2^8/0x11D)
+			root = ReedSolomonGenerator.multiply(root, 0x02);
 		}
 		
 		// Computes and returns the Reed-Solomon error correction codewords for the given sequence of data codewords.
