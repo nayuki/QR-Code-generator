@@ -53,6 +53,7 @@ const QrSegment::Mode QrSegment::Mode::NUMERIC     (0x1, 10, 12, 14);
 const QrSegment::Mode QrSegment::Mode::ALPHANUMERIC(0x2,  9, 11, 13);
 const QrSegment::Mode QrSegment::Mode::BYTE        (0x4,  8, 16, 16);
 const QrSegment::Mode QrSegment::Mode::KANJI       (0x8,  8, 10, 12);
+const QrSegment::Mode QrSegment::Mode::ECI         (0x7,  0,  0,  0);
 
 
 
@@ -124,6 +125,20 @@ vector<QrSegment> QrSegment::makeSegments(const char *text) {
 		result.push_back(QrSegment::makeBytes(bytes));
 	}
 	return result;
+}
+
+
+QrSegment QrSegment::makeEci(long assignVal) {
+	vector<uint8_t> data;
+	if (0 <= assignVal && assignVal < (1 << 7))
+		data = {static_cast<uint8_t>(assignVal)};
+	else if ((1 << 7) <= assignVal && assignVal < (1 << 14))
+		data = {static_cast<uint8_t>(0x80 | (assignVal >> 8)), static_cast<uint8_t>(assignVal)};
+	else if ((1 << 14) <= assignVal && assignVal < 999999L)
+		data = {static_cast<uint8_t>(0xC0 | (assignVal >> 16)), static_cast<uint8_t>(assignVal >> 8), static_cast<uint8_t>(assignVal)};
+	else
+		throw "ECI assignment value out of range";
+	return QrSegment(Mode::ECI, 0, data, data.size() * 8);
 }
 
 

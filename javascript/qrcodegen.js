@@ -46,13 +46,14 @@
  *   - Function makeNumeric(str data) -> QrSegment
  *   - Function makeAlphanumeric(str data) -> QrSegment
  *   - Function makeSegments(str text) -> list<QrSegment>
+ *   - Function makeEci(int assignVal) -> QrSegment
  *   - Constructor QrSegment(QrSegment.Mode mode, int numChars, list<int> bitData)
  *   - Field QrSegment.Mode mode
  *   - Field int numChars
  *   - Method getBits() -> list<int>
  *   - Constants RegExp NUMERIC_REGEX, ALPHANUMERIC_REGEX
  *   - Enum Mode:
- *     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI
+ *     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI, ECI
  */
 var qrcodegen = new function() {
 	
@@ -815,6 +816,25 @@ var qrcodegen = new function() {
 	};
 	
 	
+	/* 
+	 * Returns a segment representing an Extended Channel Interpretation (ECI) designator with the given assignment value.
+	 */
+	this.QrSegment.makeEci = function(assignVal) {
+		var bb = new BitBuffer();
+		if (0 <= assignVal && assignVal < (1 << 7))
+			bb.appendBits(assignVal, 8);
+		else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
+			bb.appendBits(2, 2);
+			bb.appendBits(assignVal, 14);
+		} else if ((1 << 14) <= assignVal && assignVal < 999999) {
+			bb.appendBits(6, 3);
+			bb.appendBits(assignVal, 21);
+		} else
+			throw "ECI assignment value out of range";
+		return new this(this.Mode.ECI, 0, bb.getBits());
+	};
+	
+	
 	// Package-private helper function.
 	this.QrSegment.getTotalBits = function(segs, version) {
 		if (version < 1 || version > 40)
@@ -856,6 +876,7 @@ var qrcodegen = new function() {
 		ALPHANUMERIC: new Mode(0x2, [ 9, 11, 13]),
 		BYTE        : new Mode(0x4, [ 8, 16, 16]),
 		KANJI       : new Mode(0x8, [ 8, 10, 12]),
+		ECI         : new Mode(0x7, [ 0,  0,  0]),
 	};
 	
 	

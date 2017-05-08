@@ -52,6 +52,7 @@ class QrSegment final {
 		public: static const Mode ALPHANUMERIC;
 		public: static const Mode BYTE;
 		public: static const Mode KANJI;
+		public: static const Mode ECI;
 		
 		
 		/*-- Fields --*/
@@ -104,6 +105,12 @@ class QrSegment final {
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
 	 */
 	public: static std::vector<QrSegment> makeSegments(const char *text);
+	
+	
+	/* 
+	 * Returns a segment representing an Extended Channel Interpretation (ECI) designator with the given assignment value.
+	 */
+	public: static QrSegment makeEci(long assignVal);
 	
 	
 	/*---- Public static helper functions ----*/

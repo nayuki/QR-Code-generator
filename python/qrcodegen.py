@@ -47,13 +47,14 @@ This module "qrcodegen", public members:
   - Function make_numeric(str digits) -> QrSegment
   - Function make_alphanumeric(str text) -> QrSegment
   - Function make_segments(str text) -> list<QrSegment>
+  - Function make_eci(int assignval) -> QrSegment
   - Constructor QrSegment(QrSegment.Mode mode, int numch, list<int> bitdata)
   - Method get_mode() -> QrSegment.Mode
   - Method get_num_chars() -> int
   - Method get_bits() -> list<int>
   - Constants regex NUMERIC_REGEX, ALPHANUMERIC_REGEX
   - Enum Mode:
-    - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI
+    - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI, ECI
 """
 
 
@@ -669,6 +670,24 @@ class QrSegment(object):
 			return [QrSegment.make_bytes(text.encode("UTF-8"))]
 	
 	
+	@staticmethod
+	def make_eci(assignval):
+		"""Returns a segment representing an Extended Channel Interpretation
+		(ECI) designator with the given assignment value."""
+		bb = _BitBuffer()
+		if 0 <= assignval < (1 << 7):
+			bb.append_bits(assignval, 8)
+		elif (1 << 7) <= assignval < (1 << 14):
+			bb.append_bits(2, 2)
+			bb.append_bits(assignval, 14)
+		elif (1 << 14) <= assignval < 999999:
+			bb.append_bits(6, 3)
+			bb.append_bits(assignval, 21)
+		else:
+			raise ValueError("ECI assignment value out of range")
+		return QrSegment(QrSegment.Mode.ECI, 0, bb.get_bits())
+	
+	
 	# ---- Constructor ----
 	
 	def __init__(self, mode, numch, bitdata):
@@ -746,6 +765,7 @@ class QrSegment(object):
 	Mode.ALPHANUMERIC = Mode(0x2, ( 9, 11, 13))
 	Mode.BYTE         = Mode(0x4, ( 8, 16, 16))
 	Mode.KANJI        = Mode(0x8, ( 8, 10, 12))
+	Mode.ECI          = Mode(0x7, ( 0,  0,  0))
 
 
 
