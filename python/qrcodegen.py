@@ -94,7 +94,7 @@ class QrCode(object):
 		between modes (such as alphanumeric and binary) to encode text more efficiently.
 		This function is considered to be lower level than simply encoding text or binary data."""
 		
-		if not 1 <= minversion <= maxversion <= 40 or not -1 <= mask <= 7:
+		if not (1 <= minversion <= maxversion <= 40) or not (-1 <= mask <= 7):
 			raise ValueError("Invalid value")
 		
 		# Find the minimal version number to use
@@ -151,10 +151,10 @@ class QrCode(object):
 		In both cases, mask = -1 is for automatic choice or 0 to 7 for fixed choice."""
 		
 		# Check arguments and handle simple scalar fields
-		if not -1 <= mask <= 7:
+		if not (-1 <= mask <= 7):
 			raise ValueError("Mask value out of range")
 		if datacodewords is not None and qrcode is None:
-			if not 1 <= version <= 40:
+			if not (1 <= version <= 40):
 				raise ValueError("Version value out of range")
 			if not isinstance(errcorlvl, QrCode.Ecc):
 				raise TypeError("QrCode.Ecc expected")
@@ -225,7 +225,7 @@ class QrCode(object):
 	def get_module(self, x, y):
 		"""Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
 		left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then 0 (white) is returned."""
-		return 1 if (0 <= x < self._size and 0 <= y < self._size and self._modules[y][x]) else 0
+		return 1 if ((0 <= x < self._size) and (0 <= y < self._size) and self._modules[y][x]) else 0
 	
 	
 	# ---- Public instance methods ----
@@ -332,7 +332,7 @@ class QrCode(object):
 			for j in range(-4, 5):
 				dist = max(abs(i), abs(j))  # Chebyshev/infinity norm
 				xx, yy = x + j, y + i
-				if 0 <= xx < self._size and 0 <= yy < self._size:
+				if (0 <= xx < self._size) and (0 <= yy < self._size):
 					self._set_function_module(xx, yy, dist not in (2, 4))
 	
 	
@@ -419,7 +419,7 @@ class QrCode(object):
 		properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
 		This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 		well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.)."""
-		if not 0 <= mask <= 7:
+		if not (0 <= mask <= 7):
 			raise ValueError("Mask value out of range")
 		masker = QrCode._MASK_PATTERNS[mask]
 		for y in range(self._size):
@@ -502,7 +502,7 @@ class QrCode(object):
 		"""Returns a sequence of positions of the alignment patterns in ascending order. These positions are
 		used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
 		This stateless pure function could be implemented as table of 40 variable-length lists of integers."""
-		if not 1 <= ver <= 40:
+		if not (1 <= ver <= 40):
 			raise ValueError("Version number out of range")
 		elif ver == 1:
 			return []
@@ -525,7 +525,7 @@ class QrCode(object):
 		"""Returns the number of data bits that can be stored in a QR Code of the given version number, after
 		all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 		The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table."""
-		if not 1 <= ver <= 40:
+		if not (1 <= ver <= 40):
 			raise ValueError("Version number out of range")
 		result = (16 * ver + 128) * ver + 64
 		if ver >= 2:
@@ -541,7 +541,7 @@ class QrCode(object):
 		"""Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 		QR Code of the given version number and error correction level, with remainder bits discarded.
 		This stateless pure function could be implemented as a (40*4)-cell lookup table."""
-		if not 1 <= ver <= 40:
+		if not (1 <= ver <= 40):
 			raise ValueError("Version number out of range")
 		return QrCode._get_num_raw_data_modules(ver) // 8 - QrCode._ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] * QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
 	
@@ -698,7 +698,7 @@ class QrSegment(object):
 	# Package-private helper function.
 	@staticmethod
 	def get_total_bits(segs, version):
-		if not 1 <= version <= 40:
+		if not (1 <= version <= 40):
 			raise ValueError("Version number out of range")
 		result = 0
 		for seg in segs:
