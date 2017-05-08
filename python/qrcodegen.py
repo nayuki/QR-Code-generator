@@ -123,7 +123,7 @@ class QrCode(object):
 		
 		# Add terminator and pad up to a byte if applicable
 		bb.append_bits(0, min(4, datacapacitybits - bb.bit_length()))
-		bb.append_bits(0, -bb.bit_length() % 8)
+		bb.append_bits(0, -bb.bit_length() % 8)  # Note: Python's modulo on negative numbers behaves better than C family languages
 		
 		# Pad with alternate bytes until data capacity is reached
 		for padbyte in itertools.cycle((0xEC, 0x11)):
@@ -817,7 +817,7 @@ class _BitBuffer(object):
 	
 	def __init__(self):
 		"""Creates an empty bit buffer (length 0)."""
-		self.data = []
+		self.data = []  # Only contains 0s and 1s
 	
 	def bit_length(self):
 		"""Returns the number of bits in the buffer, which is a non-negative value."""
