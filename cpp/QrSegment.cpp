@@ -23,6 +23,7 @@
 
 #include <climits>
 #include <cstddef>
+#include <cstring>
 #include "BitBuffer.hpp"
 #include "QrSegment.hpp"
 
@@ -91,10 +92,10 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	int accumCount = 0;
 	int charCount = 0;
 	for (; *text != '\0'; text++, charCount++) {
-		char c = *text;
-		if (c < ' ' || c > 'Z')
+		const char *temp = std::strchr(ALPHANUMERIC_CHARSET, *text);
+		if (temp == nullptr)
 			throw "String contains unencodable characters in alphanumeric mode";
-		accumData = accumData * 45 + ALPHANUMERIC_ENCODING_TABLE[c - ' '];
+		accumData = accumData * 45 + (temp - ALPHANUMERIC_CHARSET);
 		accumCount++;
 		if (accumCount == 2) {
 			bb.appendBits(accumData, 11);
@@ -157,8 +158,7 @@ int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 
 bool QrSegment::isAlphanumeric(const char *text) {
 	for (; *text != '\0'; text++) {
-		char c = *text;
-		if (c < ' ' || c > 'Z' || ALPHANUMERIC_ENCODING_TABLE[c - ' '] == -1)
+		if (std::strchr(ALPHANUMERIC_CHARSET, *text) == nullptr)
 			return false;
 	}
 	return true;
@@ -175,11 +175,6 @@ bool QrSegment::isNumeric(const char *text) {
 }
 
 
-const int8_t QrSegment::ALPHANUMERIC_ENCODING_TABLE[59] = {
-	// SP,  !,  ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,,  -,  .,  /,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  :,  ;,  <,  =,  >,  ?,  @,  // ASCII codes 32 to 64
-	   36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1, -1,  // Array indices 0 to 32
-	   10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,  // Array indices 33 to 58
-	//  A,  B,  C,  D,  E,  F,  G,  H,  I,  J,  K,  L,  M,  N,  O,  P,  Q,  R,  S,  T,  U,  V,  W,  X,  Y,  Z,  // ASCII codes 65 to 90
-};
+const char *QrSegment::ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
 }

@@ -150,8 +150,8 @@ class QrSegment final {
 	
 	/*---- Private constant ----*/
 	
-	/* Maps shifted ASCII codes to alphanumeric mode character codes. */
-	private: static const int8_t ALPHANUMERIC_ENCODING_TABLE[59];
+	/* The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string. */
+	private: static const char *ALPHANUMERIC_CHARSET;
 	
 };
 
