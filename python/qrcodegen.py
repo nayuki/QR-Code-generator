@@ -485,7 +485,7 @@ class QrCode(object):
 					result += QrCode._PENALTY_N3
 		
 		# Balance of black and white modules
-		black = sum(1 for x in range(size) for y in range(size) if modules[y][x])
+		black = sum((1 if cell else 0) for row in modules for cell in row)
 		total = size**2
 		# Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
 		for k in itertools.count():
@@ -836,10 +836,9 @@ class _BitBuffer(object):
 	
 	def append_bits(self, val, n):
 		"""Appends the given number of bits of the given value to this sequence. This requires 0 <= val < 2^n."""
-		if n < 0 or not 0 <= val < (1 << n):
+		if n < 0 or val >> n != 0:
 			raise ValueError("Value out of range")
-		for i in reversed(range(n)):  # Append bit by bit
-			self.data.append((val >> i) & 1)
+		self.data.extend(((val >> i) & 1) for i in reversed(range(n)))
 	
 	def append_all(self, seg):
 		"""Appends the data of the given segment to this bit buffer."""
