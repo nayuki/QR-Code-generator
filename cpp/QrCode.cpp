@@ -422,9 +422,9 @@ long QrCode::getPenaltyScore() const {
 	
 	// Adjacent modules in row having same color
 	for (int y = 0; y < size; y++) {
-		bool colorX = modules.at(y).at(0);
-		for (int x = 1, runX = 1; x < size; x++) {
-			if (modules.at(y).at(x) != colorX) {
+		bool colorX;
+		for (int x = 0, runX; x < size; x++) {
+			if (x == 0 || modules.at(y).at(x) != colorX) {
 				colorX = modules.at(y).at(x);
 				runX = 1;
 			} else {
@@ -438,9 +438,9 @@ long QrCode::getPenaltyScore() const {
 	}
 	// Adjacent modules in column having same color
 	for (int x = 0; x < size; x++) {
-		bool colorY = modules.at(0).at(x);
-		for (int y = 1, runY = 1; y < size; y++) {
-			if (modules.at(y).at(x) != colorY) {
+		bool colorY;
+		for (int y = 0, runY; y < size; y++) {
+			if (y == 0 || modules.at(y).at(x) != colorY) {
 				colorY = modules.at(y).at(x);
 				runY = 1;
 			} else {

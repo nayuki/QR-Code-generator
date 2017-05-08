@@ -436,10 +436,8 @@ class QrCode(object):
 		
 		# Adjacent modules in row having same color
 		for y in range(size):
-			colorx = modules[y][0]
-			runx = 1
-			for x in range(1, size):
-				if modules[y][x] != colorx:
+			for x in range(size):
+				if x == 0 or modules[y][x] != colorx:
 					colorx = modules[y][x]
 					runx = 1
 				else:
@@ -450,10 +448,8 @@ class QrCode(object):
 						result += 1
 		# Adjacent modules in column having same color
 		for x in range(size):
-			colory = modules[0][x]
-			runy = 1
-			for y in range(1, size):
-				if modules[y][x] != colory:
+			for y in range(size):
+				if y == 0 or modules[y][x] != colory:
 					colory = modules[y][x]
 					runy = 1
 				else:
