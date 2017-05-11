@@ -18,7 +18,7 @@ Core features:
 * Available in 5 programming languages, all with nearly equal functionality: Java, JavaScript, Python, C++, C
 * Significantly shorter code but more documentation comments compared to competing libraries
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-* Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages except C), BufferedImage raster bitmap (Java only)
+* Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages except C), `BufferedImage` raster bitmap (Java only), HTML5 canvas (JavaScript only)
 * Encodes numeric and special-alphanumeric text in less space than general text
 * Open source code under the permissive MIT License
 
@@ -27,6 +27,7 @@ Manual parameters:
 * User can specify minimum and maximum version numbers allowed, then library will automatically choose smallest version in the range that fits the data
 * User can specify mask pattern manually, otherwise library will automatically evaluate all 8 masks and select the optimal one
 * User can specify absolute error correction level, or allow the library to boost it if it doesn't increase the version number
+* User can create a list of data segments manually and add ECI segments (all languages except C)
 
 Optional advanced features (Java only):
 
@@ -39,6 +40,9 @@ Examples
 
 Java language:
 
+    import java.awt.image.BufferedImage;
+    import java.io.File;
+    import javax.imageio.ImageIO;
     import io.nayuki.qrcodegen.*;
     
     // Simple operation

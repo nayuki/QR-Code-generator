@@ -78,6 +78,7 @@ Manual parameters:
 * User can specify minimum and maximum version numbers allowed, then library will automatically choose smallest version in the range that fits the data
 * User can specify mask pattern manually, otherwise library will automatically evaluate all 8 masks and select the optimal one
 * User can specify absolute error correction level, or allow the library to boost it if it doesn't increase the version number
+* User can create a list of data segments manually and add ECI segments
 
 
 Usage
