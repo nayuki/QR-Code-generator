@@ -46,7 +46,7 @@ int main(void) {
 
 
 // Creates a single QR Code, then prints it to the console.
-static void doBasicDemo() {
+static void doBasicDemo(void) {
 	const char *text = "Hello, world!";  // User-supplied text
 	enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;  // Error correction level
 	
@@ -61,7 +61,7 @@ static void doBasicDemo() {
 
 
 // Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console.
-static void doVarietyDemo() {
+static void doVarietyDemo(void) {
 	{  // Project Nayuki URL
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
