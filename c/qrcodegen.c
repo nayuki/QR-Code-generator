@@ -125,16 +125,19 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
+	// Set size to invalid value for safety
+	qrcode[0] = 0;
+	
 	// Get text properties
 	bool isNumeric, isAlphanumeric;
 	int textBits;
 	int textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
 	if (textLen < 0)
-		goto fail;
+		return false;
 	
 	if (!isAlphanumeric) {  // Fully handle in binary mode
 		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
-			goto fail;
+			return false;
 		for (int i = 0; i < textLen; i++)
 			tempBuffer[i] = (uint8_t)text[i];
 		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask, boostEcl);
@@ -143,7 +146,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 	int version = fitVersionToData(minVersion, maxVersion, ecl, textLen, (int)textBits,
 		(isNumeric ? 10 : 9), (isNumeric ? 12 : 11), (isNumeric ? 14 : 13));
 	if (version == 0)
-		goto fail;
+		return false;
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	
@@ -188,10 +191,6 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 	// Make QR Code
 	encodeQrCodeTail(qrcode, bitLen, tempBuffer, version, ecl, mask, boostEcl);
 	return true;
-	
-fail:
-	qrcode[0] = 0;  // An invalid size value for safety
-	return false;
 }
 
 
@@ -202,13 +201,16 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
 	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
+	// Set size to invalid value for safety
+	qrcode[0] = 0;
+	
 	// Check length and find version
 	if (dataLen > INT16_MAX / 8)
-		goto fail;
+		return false;
 	// Now dataLen * 8 <= 32767 <= INT_MAX
 	int version = fitVersionToData(minVersion, maxVersion, ecl, (int)dataLen, (int)dataLen * 8, 8, 16, 16);
 	if (version == 0)
-		goto fail;
+		return false;
 	
 	// Make bit sequence and QR Code
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
@@ -219,10 +221,6 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
 	encodeQrCodeTail(qrcode, bitLen, dataAndTemp, version, ecl, mask, boostEcl);
 	return true;
-	
-fail:
-	qrcode[0] = 0;  // An invalid size value for safety
-	return false;
 }
 
 
