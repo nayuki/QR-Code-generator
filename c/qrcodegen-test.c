@@ -229,7 +229,7 @@ static void testAppendErrorCorrection(void) {
 
 
 static void testGetNumDataCodewords(void) {
-	int cases[][3] = {
+	const int cases[][3] = {
 		{ 3, 1,   44},
 		{ 3, 2,   34},
 		{ 3, 3,   26},
@@ -261,7 +261,7 @@ static void testGetNumDataCodewords(void) {
 		{40, 1, 2334},
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-		int *tc = cases[i];
+		const int *tc = cases[i];
 		assert(getNumDataCodewords(tc[0], (enum qrcodegen_Ecc)tc[1]) == tc[2]);
 		numTestCases++;
 	}
@@ -269,7 +269,7 @@ static void testGetNumDataCodewords(void) {
 
 
 static void testGetNumRawDataModules(void) {
-	int cases[][2] = {
+	const int cases[][2] = {
 		{ 1,   208},
 		{ 2,   359},
 		{ 3,   567},
@@ -285,7 +285,7 @@ static void testGetNumRawDataModules(void) {
 		{40, 29648},
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-		int *tc = cases[i];
+		const int *tc = cases[i];
 		assert(getNumRawDataModules(tc[0]) == tc[1]);
 		numTestCases++;
 	}
@@ -391,7 +391,7 @@ static void testCalcReedSolomonRemainder(void) {
 
 
 static void testFiniteFieldMultiply(void) {
-	uint8_t cases[][3] = {
+	const uint8_t cases[][3] = {
 		{0x00, 0x00, 0x00},
 		{0x01, 0x01, 0x01},
 		{0x02, 0x02, 0x04},
@@ -410,7 +410,7 @@ static void testFiniteFieldMultiply(void) {
 		{0xFF, 0xFF, 0xE2},
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-		uint8_t *tc = cases[i];
+		const uint8_t *tc = cases[i];
 		assert(finiteFieldMultiply(tc[0], tc[1]) == tc[2]);
 		numTestCases++;
 	}
@@ -450,7 +450,7 @@ static void testInitializeFunctionModulesEtc(void) {
 
 
 static void testGetAlignmentPatternPositions(void) {
-	int cases[][9] = {
+	const int cases[][9] = {
 		{ 1, 0,  -1,  -1,  -1,  -1,  -1,  -1,  -1},
 		{ 2, 2,   6,  18,  -1,  -1,  -1,  -1,  -1},
 		{ 3, 2,   6,  22,  -1,  -1,  -1,  -1,  -1},
@@ -465,7 +465,7 @@ static void testGetAlignmentPatternPositions(void) {
 		{40, 7,   6,  30,  58,  86, 114, 142, 170},
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-		int *tc = cases[i];
+		const int *tc = cases[i];
 		uint8_t pos[7];
 		int num = getAlignmentPatternPositions(tc[0], pos);
 		assert(num == tc[1]);
