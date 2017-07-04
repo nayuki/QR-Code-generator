@@ -27,10 +27,16 @@
 #include <string.h>
 #include "qrcodegen.h"
 
-#ifdef QRCODEGEN_TEST
-	#define testable  // Expose private functions
-#else
+#ifndef QRCODEGEN_TEST
 	#define testable static  // Keep functions private
+#else
+	// Expose private functions
+	#ifndef __cplusplus
+		#define testable
+	#else
+		// Needed for const variables because they are treated as implicitly 'static' in C++
+		#define testable extern
+	#endif
 #endif
 
 
