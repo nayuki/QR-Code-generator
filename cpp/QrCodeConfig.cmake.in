@@ -1,0 +1,14 @@
+# - Config file for the @PROJECT_NAME@ package
+# It defines the following variables
+#  @PROJECT_NAME@_INCLUDE_DIRS - include directories for @PROJECT_NAME@
+#  @PROJECT_NAME@_LIBRARIES    - libraries to link against
+
+# Compute paths
+get_filename_component(@PROJECT_NAME@_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(@PROJECT_NAME@_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+include("${@PROJECT_NAME@_CMAKE_DIR}/@PROJECT_NAME@Targets.cmake")
+
+# These are IMPORTED targets created by @PROJECT_NAME@Targets.cmake
+set(@PROJECT_NAME@_LIBRARIES "@PROJECT_NAME@")
