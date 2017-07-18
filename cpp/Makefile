@@ -32,6 +32,7 @@
 CXXFLAGS += -std=c++11
 # Diagnostics. Adding '-fsanitize=address' is helpful for most versions of Clang and newer versions of GCC.
 CXXFLAGS += -Wall -fsanitize=undefined
+CXXFLAGS += -IQrCode
 # Optimization level
 CXXFLAGS += -O1
 
@@ -62,5 +63,5 @@ clean:
 	rm -f -- $(MAINS)
 
 # Executable files
-%: %.cpp $(LIBSRC:=.cpp) $(LIBSRC:=.hpp)
-	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBSRC:=.cpp)
+%: examples/%.cpp $(addprefix src/,$(LIBSRC:=.cpp)) $(addprefix QrCode/,$(LIBSRC:=.hpp))
+	$(CXX) $(CXXFLAGS) -o $@ $< $(addprefix src/,$(LIBSRC:=.cpp))
