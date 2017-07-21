@@ -59,11 +59,14 @@ all: $(MAINS)
 
 # Delete build output
 clean:
-	rm -f -- $(MAINS)
+	rm -f -- $(MAINS) libqrcodegen.so
 
 # Executable files
 %: %.c $(LIBSRC:=.c) $(LIBSRC:=.h)
 	$(CC) $(CFLAGS) -o $@ $< $(LIBSRC:=.c)
+
+libqrcodegen.so: $(LIBSRC:=.c) $(LIBSRC:=.h)
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
 
 # Special executable
 qrcodegen-test: qrcodegen-test.c $(LIBSRC:=.c) $(LIBSRC:=.h)
