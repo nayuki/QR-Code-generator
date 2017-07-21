@@ -64,11 +64,11 @@ clean:
 
 # Shared library
 $(LIBFILE): $(LIBSRC:=.c) $(LIBSRC:=.h)
-	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $(LIBSRC:=.c)
 
 # Executable files
-%: %.c $(LIBSRC:=.c) $(LIBSRC:=.h)
-	$(CC) $(CFLAGS) -o $@ $< $(LIBSRC:=.c)
+%: %.c $(LIBFILE)
+	$(CC) $(CFLAGS) -o $@ $^
 
 # Special executable
 qrcodegen-test: qrcodegen-test.c $(LIBSRC:=.c) $(LIBSRC:=.h)
