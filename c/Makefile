@@ -61,12 +61,13 @@ all: $(MAINS)
 clean:
 	rm -f -- $(MAINS) libqrcodegen.so
 
+# Shared library
+libqrcodegen.so: $(LIBSRC:=.c) $(LIBSRC:=.h)
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
+
 # Executable files
 %: %.c $(LIBSRC:=.c) $(LIBSRC:=.h)
 	$(CC) $(CFLAGS) -o $@ $< $(LIBSRC:=.c)
-
-libqrcodegen.so: $(LIBSRC:=.c) $(LIBSRC:=.h)
-	$(CC) $(CFLAGS) -fPIC -shared -o $@ $<
 
 # Special executable
 qrcodegen-test: qrcodegen-test.c $(LIBSRC:=.c) $(LIBSRC:=.h)
