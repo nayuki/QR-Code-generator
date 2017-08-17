@@ -146,16 +146,11 @@ QrSegment QrSegment::makeEci(long assignVal) {
 }
 
 
-QrSegment::QrSegment(const Mode &md, int numCh, const BitBuffer &data)
-	: QrSegment(md, numCh, data.getBytes(), data.size()) {}
-
-
-QrSegment::QrSegment(const Mode &md, int numCh, const vector<uint8_t> &b, int bitLen) :
+QrSegment::QrSegment(const Mode &md, int numCh, const BitBuffer &dt) :
 		mode(md),
 		numChars(numCh),
-		data(b),
-		bitLength(bitLen) {
-	if (numCh < 0 || bitLen < 0 || b.size() != static_cast<unsigned int>((bitLen + 7) / 8))
+		data(dt) {
+	if (numCh < 0)
 		throw "Invalid value";
 }
 
@@ -167,9 +162,9 @@ int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 	for (const QrSegment &seg : segs) {
 		int ccbits = seg.mode.numCharCountBits(version);
 		// Fail if segment length value doesn't fit in the length field's bit-width
-		if (seg.numChars >= (1L << ccbits) || seg.bitLength > INT16_MAX)
+		if (seg.numChars >= (1L << ccbits) || seg.data.size() > INT16_MAX)
 			return -1;
-		long temp = (long)result + 4 + ccbits + seg.bitLength;
+		long temp = (long)result + 4 + ccbits + seg.data.size();
 		if (temp > INT_MAX)
 			return -1;
 		result = temp;

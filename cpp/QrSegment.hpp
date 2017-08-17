@@ -137,11 +137,8 @@ class QrSegment final {
 	/* The length of this segment's unencoded data, measured in characters. Always zero or positive. */
 	public: const int numChars;
 	
-	/* The bits of this segment packed into a byte array in big endian. */
-	public: const std::vector<std::uint8_t> data;
-	
-	/* The length of this segment's encoded data, measured in bits. Satisfies ceil(bitLength / 8) = data.size(). */
-	public: const int bitLength;
+	/* The data bits of this segment. */
+	public: const BitBuffer data;
 	
 	
 	/*---- Constructor ----*/
@@ -149,10 +146,7 @@ class QrSegment final {
 	/* 
 	 * Creates a new QR Code data segment with the given parameters and data.
 	 */
-	public: QrSegment(const Mode &md, int numCh, const BitBuffer &data);
-	
-	
-	public: QrSegment(const Mode &md, int numCh, const std::vector<std::uint8_t> &b, int bitLen);
+	public: QrSegment(const Mode &md, int numCh, const BitBuffer &dt);
 	
 	
 	// Package-private helper function.
