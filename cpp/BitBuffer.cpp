@@ -27,44 +27,23 @@
 
 namespace qrcodegen {
 
-BitBuffer::BitBuffer() :
-	data(),
-	bitLength(0) {}
-
-
-int BitBuffer::getBitLength() const {
-	return bitLength;
-}
+BitBuffer::BitBuffer()
+	: std::vector<bool>() {}
 
 
 std::vector<std::uint8_t> BitBuffer::getBytes() const {
-	return data;
+	std::vector<std::uint8_t> result((size() + 7) / 8);
+	for (std::size_t i = 0; i < size(); i++)
+		result[i >> 3] |= (*this)[i] ? 1 << (7 - (i & 7)) : 0;
+	return result;
 }
 
 
 void BitBuffer::appendBits(std::uint32_t val, int len) {
 	if (len < 0 || len > 32 || (len < 32 && (val >> len) != 0))
 		throw "Value out of range";
-	if (len > INT_MAX - bitLength)
-		throw "Buffer too long";
-	unsigned int newByteLen = ((unsigned int)bitLength + len + 7) / 8;
-	while (data.size() < newByteLen)
-		data.push_back(0);
-	for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
-		data.at(bitLength >> 3) |= ((val >> i) & 1) << (7 - (bitLength & 7));
-}
-
-
-void BitBuffer::appendData(const QrSegment &seg) {
-	if (seg.bitLength > INT_MAX - bitLength)
-		throw "Buffer too long";
-	unsigned int newByteLen = ((unsigned int)bitLength + seg.bitLength + 7) / 8;
-	while (data.size() < newByteLen)
-		data.push_back(0);
-	for (int i = 0; i < seg.bitLength; i++, bitLength++) {  // Append bit by bit
-		int bit = (seg.data.at(i >> 3) >> (7 - (i & 7))) & 1;
-		data.at(bitLength >> 3) |= bit << (7 - (bitLength & 7));
-	}
+	for (int i = len - 1; i >= 0; i--)  // Append bit by bit
+		this->push_back(((val >> i) & 1) != 0);
 }
 
 }

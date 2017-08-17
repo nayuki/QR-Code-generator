@@ -83,7 +83,7 @@ QrSegment QrSegment::makeNumeric(const char *digits) {
 	}
 	if (accumCount > 0)  // 1 or 2 digits remaining
 		bb.appendBits(accumData, accumCount * 3 + 1);
-	return QrSegment(Mode::NUMERIC, charCount, bb.getBytes(), bb.getBitLength());
+	return QrSegment(Mode::NUMERIC, charCount, bb.getBytes(), bb.size());
 }
 
 
@@ -106,7 +106,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	}
 	if (accumCount > 0)  // 1 character remaining
 		bb.appendBits(accumData, 6);
-	return QrSegment(Mode::ALPHANUMERIC, charCount, bb.getBytes(), bb.getBitLength());
+	return QrSegment(Mode::ALPHANUMERIC, charCount, bb.getBytes(), bb.size());
 }
 
 
