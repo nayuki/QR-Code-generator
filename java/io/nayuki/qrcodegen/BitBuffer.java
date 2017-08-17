@@ -30,7 +30,7 @@ import java.util.Objects;
 /**
  * An appendable sequence of bits. Bits are packed in big endian within a byte.
  */
-final class BitBuffer {
+public final class BitBuffer implements Cloneable {
 	
 	/*---- Fields ----*/
 	
@@ -54,6 +54,14 @@ final class BitBuffer {
 	// Returns the number of bits in the buffer, which is a non-negative value.
 	public int bitLength() {
 		return bitLength;
+	}
+	
+	
+	// Returns the bit at the given index, yielding 0 or 1, or throwing IndexOutOfBoundsException.
+	public int getBit(int index) {
+		if (index < 0 || index > bitLength)
+			throw new IndexOutOfBoundsException();
+		return data.get(index) ? 1 : 0;
 	}
 	
 	
@@ -82,6 +90,18 @@ final class BitBuffer {
 		for (int i = 0; i < seg.bitLength; i++, bitLength++) {  // Append bit by bit
 			int bit = (seg.getByte(i >>> 3) >>> (7 - (i & 7))) & 1;
 			data.set(bitLength, bit != 0);
+		}
+	}
+	
+	
+	// Returns a copy of this bit buffer object.
+	public BitBuffer clone() {
+		try {
+			BitBuffer result = (BitBuffer)super.clone();
+			result.data = (BitSet)result.data.clone();
+			return result;
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError(e);
 		}
 	}
 	
