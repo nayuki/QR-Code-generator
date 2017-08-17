@@ -90,8 +90,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
 	// Create the data bit string by concatenating all segments
 	int dataCapacityBits = getNumDataCodewords(version, *newEcl) * 8;
 	BitBuffer bb;
-	for (size_t i = 0; i < segs.size(); i++) {
-		const QrSegment &seg(segs.at(i));
+	for (const QrSegment &seg : segs) {
 		bb.appendBits(seg.mode.modeBits, 4);
 		bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
 		bb.appendData(seg);
@@ -596,8 +595,8 @@ QrCode::ReedSolomonGenerator::ReedSolomonGenerator(int degree) :
 vector<uint8_t> QrCode::ReedSolomonGenerator::getRemainder(const vector<uint8_t> &data) const {
 	// Compute the remainder by performing polynomial division
 	vector<uint8_t> result(coefficients.size());
-	for (size_t i = 0; i < data.size(); i++) {
-		uint8_t factor = data.at(i) ^ result.at(0);
+	for (uint8_t b : data) {
+		uint8_t factor = b ^ result.at(0);
 		result.erase(result.begin());
 		result.push_back(0);
 		for (size_t j = 0; j < result.size(); j++)
