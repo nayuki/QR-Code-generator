@@ -183,6 +183,10 @@ class QrCode final {
 	private: void setFunctionModule(int x, int y, bool isBlack);
 	
 	
+	// Returns the color of the module at the given coordinates, which must be in range.
+	private: bool module(int x, int y) const;
+	
+	
 	/*---- Private helper methods for constructor: Codewords and masking ----*/
 	
 	// Returns a new byte string representing the given data with the appropriate error correction

@@ -162,7 +162,7 @@ int QrCode::getMask() const {
 
 int QrCode::getModule(int x, int y) const {
 	if (0 <= x && x < size && 0 <= y && y < size)
-		return modules.at(y).at(x) ? 1 : 0;
+		return module(x, y) ? 1 : 0;
 	else
 		return 0;  // Infinite white border
 }
@@ -303,6 +303,11 @@ void QrCode::setFunctionModule(int x, int y, bool isBlack) {
 }
 
 
+bool QrCode::module(int x, int y) const {
+	return modules.at(y).at(x);
+}
+
+
 vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const {
 	if (data.size() != static_cast<unsigned int>(getNumDataCodewords(version, errorCorrectionLevel)))
 		throw "Invalid argument";
@@ -423,8 +428,8 @@ long QrCode::getPenaltyScore() const {
 	for (int y = 0; y < size; y++) {
 		bool colorX;
 		for (int x = 0, runX; x < size; x++) {
-			if (x == 0 || modules.at(y).at(x) != colorX) {
-				colorX = modules.at(y).at(x);
+			if (x == 0 || module(x, y) != colorX) {
+				colorX = module(x, y);
 				runX = 1;
 			} else {
 				runX++;
@@ -439,8 +444,8 @@ long QrCode::getPenaltyScore() const {
 	for (int x = 0; x < size; x++) {
 		bool colorY;
 		for (int y = 0, runY; y < size; y++) {
-			if (y == 0 || modules.at(y).at(x) != colorY) {
-				colorY = modules.at(y).at(x);
+			if (y == 0 || module(x, y) != colorY) {
+				colorY = module(x, y);
 				runY = 1;
 			} else {
 				runY++;
@@ -455,10 +460,10 @@ long QrCode::getPenaltyScore() const {
 	// 2*2 blocks of modules having same color
 	for (int y = 0; y < size - 1; y++) {
 		for (int x = 0; x < size - 1; x++) {
-			bool  color = modules.at(y).at(x);
-			if (  color == modules.at(y).at(x + 1) &&
-			      color == modules.at(y + 1).at(x) &&
-			      color == modules.at(y + 1).at(x + 1))
+			bool  color = module(x, y);
+			if (  color == module(x + 1, y) &&
+			      color == module(x, y + 1) &&
+			      color == module(x + 1, y + 1))
 				result += PENALTY_N2;
 		}
 	}
@@ -466,7 +471,7 @@ long QrCode::getPenaltyScore() const {
 	// Finder-like pattern in rows
 	for (int y = 0; y < size; y++) {
 		for (int x = 0, bits = 0; x < size; x++) {
-			bits = ((bits << 1) & 0x7FF) | (modules.at(y).at(x) ? 1 : 0);
+			bits = ((bits << 1) & 0x7FF) | (module(x, y) ? 1 : 0);
 			if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
 				result += PENALTY_N3;
 		}
@@ -474,7 +479,7 @@ long QrCode::getPenaltyScore() const {
 	// Finder-like pattern in columns
 	for (int x = 0; x < size; x++) {
 		for (int y = 0, bits = 0; y < size; y++) {
-			bits = ((bits << 1) & 0x7FF) | (modules.at(y).at(x) ? 1 : 0);
+			bits = ((bits << 1) & 0x7FF) | (module(x, y) ? 1 : 0);
 			if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
 				result += PENALTY_N3;
 		}
@@ -484,7 +489,7 @@ long QrCode::getPenaltyScore() const {
 	int black = 0;
 	for (int y = 0; y < size; y++) {
 		for (int x = 0; x < size; x++) {
-			if (modules.at(y).at(x))
+			if (module(x, y))
 				black++;
 		}
 	}
