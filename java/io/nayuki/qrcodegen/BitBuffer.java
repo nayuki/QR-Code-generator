@@ -23,7 +23,7 @@
 
 package io.nayuki.qrcodegen;
 
-import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Objects;
 
 
@@ -34,7 +34,7 @@ final class BitBuffer {
 	
 	/*---- Fields ----*/
 	
-	private byte[] data;
+	private BitSet data;
 	private int bitLength;
 	
 	
@@ -43,7 +43,7 @@ final class BitBuffer {
 	
 	// Creates an empty bit buffer (length 0).
 	public BitBuffer() {
-		data = new byte[16];
+		data = new BitSet();
 		bitLength = 0;
 	}
 	
@@ -57,9 +57,12 @@ final class BitBuffer {
 	}
 	
 	
-	// Returns a copy of all bytes, padding up to the nearest byte.
+	// Returns a copy of all bytes, padding up to the nearest byte. Bits are packed in big endian within a byte.
 	public byte[] getBytes() {
-		return Arrays.copyOf(data, (bitLength + 7) / 8);
+		byte[] result = new byte[(bitLength + 7) / 8];
+		for (int i = 0; i < bitLength; i++)
+			result[i >>> 3] |= data.get(i) ? 1 << (7 - (i & 7)) : 0;
+		return result;
 	}
 	
 	
@@ -68,27 +71,18 @@ final class BitBuffer {
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 32 || len < 32 && (val >>> len) != 0)
 			throw new IllegalArgumentException("Value out of range");
-		ensureCapacity(bitLength + len);
 		for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
-			data[bitLength >>> 3] |= ((val >>> i) & 1) << (7 - (bitLength & 7));
+			data.set(bitLength, ((val >>> i) & 1) != 0);
 	}
 	
 	
 	// Appends the data of the given segment to this bit buffer.
 	public void appendData(QrSegment seg) {
 		Objects.requireNonNull(seg);
-		ensureCapacity(bitLength + seg.bitLength);
 		for (int i = 0; i < seg.bitLength; i++, bitLength++) {  // Append bit by bit
 			int bit = (seg.getByte(i >>> 3) >>> (7 - (i & 7))) & 1;
-			data[bitLength >>> 3] |= bit << (7 - (bitLength & 7));
+			data.set(bitLength, bit != 0);
 		}
-	}
-	
-	
-	// Expands the buffer if necessary, so that it can hold at least the given bit length.
-	private void ensureCapacity(int newBitLen) {
-		while (data.length * 8 < newBitLen)
-			data = Arrays.copyOf(data, data.length * 2);
 	}
 	
 }
