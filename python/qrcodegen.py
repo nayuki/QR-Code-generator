@@ -120,18 +120,18 @@ class QrCode(object):
 		for seg in segs:
 			bb.append_bits(seg.get_mode().get_mode_bits(), 4)
 			bb.append_bits(seg.get_num_chars(), seg.get_mode().num_char_count_bits(version))
-			bb.append_all(seg)
+			bb.extend(seg._bitdata)
 		
 		# Add terminator and pad up to a byte if applicable
-		bb.append_bits(0, min(4, datacapacitybits - bb.bit_length()))
-		bb.append_bits(0, -bb.bit_length() % 8)  # Note: Python's modulo on negative numbers behaves better than C family languages
+		bb.append_bits(0, min(4, datacapacitybits - len(bb)))
+		bb.append_bits(0, -len(bb) % 8)  # Note: Python's modulo on negative numbers behaves better than C family languages
 		
 		# Pad with alternate bytes until data capacity is reached
 		for padbyte in itertools.cycle((0xEC, 0x11)):
-			if bb.bit_length() >= datacapacitybits:
+			if len(bb) >= datacapacitybits:
 				break
 			bb.append_bits(padbyte, 8)
-		assert bb.bit_length() % 8 == 0
+		assert len(bb) % 8 == 0
 		
 		# Create the QR Code symbol
 		return QrCode(None, bb.get_bytes(), mask, version, ecl)
@@ -619,7 +619,7 @@ class QrSegment(object):
 		bb = _BitBuffer()
 		for b in data:
 			bb.append_bits(b, 8)
-		return QrSegment(QrSegment.Mode.BYTE, len(data), bb.get_bits())
+		return QrSegment(QrSegment.Mode.BYTE, len(data), bb)
 	
 	
 	@staticmethod
@@ -633,7 +633,7 @@ class QrSegment(object):
 		rem = len(digits) % 3
 		if rem > 0:  # 1 or 2 digits remaining
 			bb.append_bits(int(digits[-rem : ]), rem * 3 + 1)
-		return QrSegment(QrSegment.Mode.NUMERIC, len(digits), bb.get_bits())
+		return QrSegment(QrSegment.Mode.NUMERIC, len(digits), bb)
 	
 	
 	@staticmethod
@@ -649,7 +649,7 @@ class QrSegment(object):
 			bb.append_bits(temp, 11)
 		if len(text) % 2 > 0:  # 1 character remaining
 			bb.append_bits(QrSegment._ALPHANUMERIC_ENCODING_TABLE[text[-1]], 6)
-		return QrSegment(QrSegment.Mode.ALPHANUMERIC, len(text), bb.get_bits())
+		return QrSegment(QrSegment.Mode.ALPHANUMERIC, len(text), bb)
 	
 	
 	@staticmethod
@@ -685,7 +685,7 @@ class QrSegment(object):
 			bb.append_bits(assignval, 21)
 		else:
 			raise ValueError("ECI assignment value out of range")
-		return QrSegment(QrSegment.Mode.ECI, 0, bb.get_bits())
+		return QrSegment(QrSegment.Mode.ECI, 0, bb)
 	
 	
 	# ---- Constructor ----
@@ -721,7 +721,7 @@ class QrSegment(object):
 			# Fail if segment length value doesn't fit in the length field's bit-width
 			if seg.get_num_chars() >= (1 << ccbits):
 				return None
-			result += 4 + ccbits + len(seg.get_bits())
+			result += 4 + ccbits + len(seg._bitdata)
 		return result
 	
 	
@@ -828,25 +828,13 @@ class _ReedSolomonGenerator(object):
 
 
 
-class _BitBuffer(object):
-	"""An appendable sequence of bits. Bits are packed in big endian within a byte."""
-	
-	def __init__(self):
-		"""Creates an empty bit buffer (length 0)."""
-		self.data = []  # Only contains 0s and 1s
-	
-	def bit_length(self):
-		"""Returns the number of bits in the buffer, which is a non-negative value."""
-		return len(self.data)
-	
-	def get_bits(self):
-		"""Returns a copy of all bits."""
-		return list(self.data)
+class _BitBuffer(list):
+	"""An appendable sequence of bits (0's and 1's)."""
 	
 	def get_bytes(self):
-		"""Returns a copy of all bytes, padding up to the nearest byte."""
-		result = [0] * ((len(self.data) + 7) // 8)
-		for (i, bit) in enumerate(self.data):
+		"""Returns a copy of all bytes, padding up to the nearest byte. Bits are packed in big endian within a byte."""
+		result = [0] * ((len(self) + 7) // 8)
+		for (i, bit) in enumerate(self):
 			result[i >> 3] |= bit << (7 - (i & 7))
 		return result
 	
@@ -854,10 +842,4 @@ class _BitBuffer(object):
 		"""Appends the given number of bits of the given value to this sequence. This requires 0 <= val < 2^n."""
 		if n < 0 or val >> n != 0:
 			raise ValueError("Value out of range")
-		self.data.extend(((val >> i) & 1) for i in reversed(range(n)))
-	
-	def append_all(self, seg):
-		"""Appends the data of the given segment to this bit buffer."""
-		if not isinstance(seg, QrSegment):
-			raise TypeError("QrSegment expected")
-		self.data.extend(seg.get_bits())
+		self.extend(((val >> i) & 1) for i in reversed(range(n)))
