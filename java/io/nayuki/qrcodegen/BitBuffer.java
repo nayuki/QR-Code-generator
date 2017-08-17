@@ -87,10 +87,9 @@ public final class BitBuffer implements Cloneable {
 	// Appends the data of the given segment to this bit buffer.
 	public void appendData(QrSegment seg) {
 		Objects.requireNonNull(seg);
-		for (int i = 0; i < seg.bitLength; i++, bitLength++) {  // Append bit by bit
-			int bit = (seg.getByte(i >>> 3) >>> (7 - (i & 7))) & 1;
-			data.set(bitLength, bit != 0);
-		}
+		BitBuffer bb = seg.data;
+		for (int i = 0; i < bb.bitLength; i++, bitLength++)  // Append bit by bit
+			data.set(bitLength, bb.data.get(i));
 	}
 	
 	

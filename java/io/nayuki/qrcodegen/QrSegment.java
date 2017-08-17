@@ -25,7 +25,6 @@ package io.nayuki.qrcodegen;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -162,11 +161,8 @@ public final class QrSegment {
 	/** The length of this segment's unencoded data, measured in characters. Always zero or positive. */
 	public final int numChars;
 	
-	/** The bits of this segment packed into a byte array in big endian. Accessed through {@link getByte(int)}. Not {@code null}. */
-	private final byte[] data;
-	
-	/** The length of this segment's encoded data, measured in bits. Satisfies 0 &le; {@code bitLength} &le; {@code data.length} &times; 8. */
-	public final int bitLength;
+	/** The data bits of this segment. Accessed through {@link getBits()}. Not {@code null}. */
+	final BitBuffer data;
 	
 	
 	/*---- Constructor ----*/
@@ -180,43 +176,24 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the character count is negative
 	 */
 	public QrSegment(Mode md, int numCh, BitBuffer data) {
-		this(md, numCh, data.getBytes(), data.bitLength());
-	}
-	
-	
-	/**
-	 * Creates a new QR Code data segment with the specified parameters and data.
-	 * @param md the mode, which is not {@code null}
-	 * @param numCh the data length in characters, which is non-negative
-	 * @param bitLen the data length in bits, which is non-negative
-	 * @param b the bits packed into bytes, which is not {@code null}
-	 * @throws NullPointerException if the mode or array is {@code null}
-	 * @throws IllegalArgumentException if the character count or bit length are negative or invalid
-	 */
-	public QrSegment(Mode md, int numCh, byte[] b, int bitLen) {
 		Objects.requireNonNull(md);
-		Objects.requireNonNull(b);
-		if (numCh < 0 || bitLen < 0 || bitLen > b.length * 8L)
+		Objects.requireNonNull(data);
+		if (numCh < 0)
 			throw new IllegalArgumentException("Invalid value");
 		mode = md;
 		numChars = numCh;
-		data = Arrays.copyOf(b, (bitLen + 7) / 8);  // Trim to precise length and also make defensive copy
-		bitLength = bitLen;
+		this.data = data.clone();  // Make defensive copy
 	}
 	
 	
-	/*---- Method ----*/
+	/*---- Methods ----*/
 	
 	/**
-	 * Returns the data byte at the specified index.
-	 * @param index the index to retrieve from, satisfying 0 &le; {@code index} &lt; ceil({@code bitLength} &divide; 8)
-	 * @return the data byte at the specified index
-	 * @throws IndexOutOfBoundsException if the index is out of bounds
+	 * Returns the data bits of this segment.
+	 * @return the data bits of this segment (not {@code null})
 	 */
-	public byte getByte(int index) {
-		if (index < 0 || index > data.length)
-			throw new IndexOutOfBoundsException();
-		return data[index];
+	public BitBuffer getBits() {
+		return data.clone();  // Make defensive copy
 	}
 	
 	
@@ -233,7 +210,7 @@ public final class QrSegment {
 			// Fail if segment length value doesn't fit in the length field's bit-width
 			if (seg.numChars >= (1 << ccbits))
 				return -1;
-			result += 4L + ccbits + seg.bitLength;
+			result += 4L + ccbits + seg.data.bitLength();
 			if (result > Integer.MAX_VALUE)
 				return -1;
 		}
