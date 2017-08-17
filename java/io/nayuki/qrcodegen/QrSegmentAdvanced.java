@@ -246,7 +246,7 @@ public final class QrSegmentAdvanced {
 				throw new IllegalArgumentException("String contains non-kanji-mode characters");
 			bb.appendBits(val, 13);
 		}
-		return new QrSegment(QrSegment.Mode.KANJI, text.length(), bb.getBytes(), bb.bitLength());
+		return new QrSegment(QrSegment.Mode.KANJI, text.length(), bb);
 	}
 	
 	

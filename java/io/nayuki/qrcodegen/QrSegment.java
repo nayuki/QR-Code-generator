@@ -51,7 +51,10 @@ public final class QrSegment {
 	 */
 	public static QrSegment makeBytes(byte[] data) {
 		Objects.requireNonNull(data);
-		return new QrSegment(Mode.BYTE, data.length, data, data.length * 8);
+		BitBuffer bb = new BitBuffer();
+		for (byte b : data)
+			bb.appendBits(b & 0xFF, 8);
+		return new QrSegment(Mode.BYTE, data.length, bb);
 	}
 	
 	
@@ -74,7 +77,7 @@ public final class QrSegment {
 		int rem = digits.length() - i;
 		if (rem > 0)  // 1 or 2 digits remaining
 			bb.appendBits(Integer.parseInt(digits.substring(i)), rem * 3 + 1);
-		return new QrSegment(Mode.NUMERIC, digits.length(), bb.getBytes(), bb.bitLength());
+		return new QrSegment(Mode.NUMERIC, digits.length(), bb);
 	}
 	
 	
@@ -100,7 +103,7 @@ public final class QrSegment {
 		}
 		if (i < text.length())  // 1 character remaining
 			bb.appendBits(ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
-		return new QrSegment(Mode.ALPHANUMERIC, text.length(), bb.getBytes(), bb.bitLength());
+		return new QrSegment(Mode.ALPHANUMERIC, text.length(), bb);
 	}
 	
 	
@@ -135,16 +138,18 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)
 	 */
 	public static QrSegment makeEci(int assignVal) {
-		byte[] data;
+		BitBuffer bb = new BitBuffer();
 		if (0 <= assignVal && assignVal < (1 << 7))
-			data = new byte[]{(byte)assignVal};
-		else if ((1 << 7) <= assignVal && assignVal < (1 << 14))
-			data = new byte[]{(byte)(0x80 | (assignVal >>> 8)), (byte)assignVal};
-		else if ((1 << 14) <= assignVal && assignVal < 999999)
-			data = new byte[]{(byte)(0xC0 | (assignVal >>> 16)), (byte)(assignVal >>> 8), (byte)assignVal};
-		else
+			bb.appendBits(assignVal, 8);
+		else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
+			bb.appendBits(2, 2);
+			bb.appendBits(assignVal, 14);
+		} else if ((1 << 14) <= assignVal && assignVal < 999999) {
+			bb.appendBits(6, 3);
+			bb.appendBits(assignVal, 21);
+		} else
 			throw new IllegalArgumentException("ECI assignment value out of range");
-		return new QrSegment(Mode.ECI, 0, data, data.length * 8);
+		return new QrSegment(Mode.ECI, 0, bb);
 	}
 	
 	
@@ -165,6 +170,19 @@ public final class QrSegment {
 	
 	
 	/*---- Constructor ----*/
+	
+	/**
+	 * Creates a new QR Code data segment with the specified parameters and data.
+	 * @param md the mode, which is not {@code null}
+	 * @param numCh the data length in characters, which is non-negative
+	 * @param data the data bits of this segment, which is not {@code null}
+	 * @throws NullPointerException if the mode or bit buffer is {@code null}
+	 * @throws IllegalArgumentException if the character count is negative
+	 */
+	public QrSegment(Mode md, int numCh, BitBuffer data) {
+		this(md, numCh, data.getBytes(), data.bitLength());
+	}
+	
 	
 	/**
 	 * Creates a new QR Code data segment with the specified parameters and data.

@@ -141,14 +141,18 @@ public final class QrCodeGeneratorDemo {
 		qr = QrCode.encodeText(madoka, QrCode.Ecc.LOW);
 		writePng(qr.toImage(9, 4), "madoka-utf8-QR.png");
 		
-		byte[] packedKanjiData = {  // Kanji mode encoding (13 bits per character)
-			(byte)0x01, (byte)0xAC, (byte)0x00, (byte)0x9F, (byte)0x80, (byte)0xAE, (byte)0xD5, (byte)0x6B, (byte)0x85, (byte)0x70,
-			(byte)0x28, (byte)0xE1, (byte)0x29, (byte)0x02, (byte)0xC8, (byte)0x6F, (byte)0x43, (byte)0x1A, (byte)0x18, (byte)0xA0,
-			(byte)0x1B, (byte)0x05, (byte)0x04, (byte)0x28, (byte)0x80, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x92, (byte)0x44,
-			(byte)0x80, (byte)0x24, (byte)0x90, (byte)0x00, (byte)0x04, (byte)0x10, (byte)0x20, (byte)0xA1, (byte)0x13, (byte)0x08,
-			(byte)0xA8, (byte)0x00, (byte)0x04, (byte)0x10, (byte)0x1F, (byte)0xF0, (byte)0x04, (byte)0x00,
+		int[] packedKanjiData = {  // Kanji mode encoding (13 bits per character)
+			0x0035, 0x1002, 0x0FC0, 0x0AED, 0x0AD7,
+			0x015C, 0x0147, 0x0129, 0x0059, 0x01BD,
+			0x018D, 0x018A, 0x0036, 0x0141, 0x0144,
+			0x0001, 0x0000, 0x0249, 0x0240, 0x0249,
+			0x0000, 0x0104, 0x0105, 0x0113, 0x0115,
+			0x0000, 0x0208, 0x01FF, 0x0008,
 		};
-		segs = Arrays.asList(new QrSegment(QrSegment.Mode.KANJI, madoka.length(), packedKanjiData, madoka.length() * 13));
+		BitBuffer bb = new BitBuffer();
+		for (int c : packedKanjiData)
+			bb.appendBits(c, 13);
+		segs = Arrays.asList(new QrSegment(QrSegment.Mode.KANJI, madoka.length(), bb));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
 		writePng(qr.toImage(9, 4), "madoka-kanji-QR.png");
 	}
