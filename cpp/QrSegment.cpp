@@ -24,7 +24,6 @@
 #include <climits>
 #include <cstddef>
 #include <cstring>
-#include "BitBuffer.hpp"
 #include "QrSegment.hpp"
 
 using std::uint8_t;
@@ -60,7 +59,10 @@ const QrSegment::Mode QrSegment::Mode::ECI         (0x7,  0,  0,  0);
 QrSegment QrSegment::makeBytes(const vector<uint8_t> &data) {
 	if (data.size() >= (unsigned int)INT_MAX / 8)
 		throw "Buffer too long";
-	return QrSegment(Mode::BYTE, (int)data.size(), data, (int)data.size() * 8);
+	BitBuffer bb;
+	for (uint8_t b : data)
+		bb.appendBits(b, 8);
+	return QrSegment(Mode::BYTE, (int)data.size(), bb);
 }
 
 
@@ -83,7 +85,7 @@ QrSegment QrSegment::makeNumeric(const char *digits) {
 	}
 	if (accumCount > 0)  // 1 or 2 digits remaining
 		bb.appendBits(accumData, accumCount * 3 + 1);
-	return QrSegment(Mode::NUMERIC, charCount, bb.getBytes(), bb.size());
+	return QrSegment(Mode::NUMERIC, charCount, bb);
 }
 
 
@@ -106,7 +108,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	}
 	if (accumCount > 0)  // 1 character remaining
 		bb.appendBits(accumData, 6);
-	return QrSegment(Mode::ALPHANUMERIC, charCount, bb.getBytes(), bb.size());
+	return QrSegment(Mode::ALPHANUMERIC, charCount, bb);
 }
 
 
@@ -129,17 +131,23 @@ vector<QrSegment> QrSegment::makeSegments(const char *text) {
 
 
 QrSegment QrSegment::makeEci(long assignVal) {
-	vector<uint8_t> data;
+	BitBuffer bb;
 	if (0 <= assignVal && assignVal < (1 << 7))
-		data = {static_cast<uint8_t>(assignVal)};
-	else if ((1 << 7) <= assignVal && assignVal < (1 << 14))
-		data = {static_cast<uint8_t>(0x80 | (assignVal >> 8)), static_cast<uint8_t>(assignVal)};
-	else if ((1 << 14) <= assignVal && assignVal < 999999L)
-		data = {static_cast<uint8_t>(0xC0 | (assignVal >> 16)), static_cast<uint8_t>(assignVal >> 8), static_cast<uint8_t>(assignVal)};
-	else
+		bb.appendBits(assignVal, 8);
+	else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
+		bb.appendBits(2, 2);
+		bb.appendBits(assignVal, 14);
+	} else if ((1 << 14) <= assignVal && assignVal < 999999L) {
+		bb.appendBits(6, 3);
+		bb.appendBits(assignVal, 21);
+	} else
 		throw "ECI assignment value out of range";
-	return QrSegment(Mode::ECI, 0, data, data.size() * 8);
+	return QrSegment(Mode::ECI, 0, bb);
 }
+
+
+QrSegment::QrSegment(const Mode &md, int numCh, const BitBuffer &data)
+	: QrSegment(md, numCh, data.getBytes(), data.size()) {}
 
 
 QrSegment::QrSegment(const Mode &md, int numCh, const vector<uint8_t> &b, int bitLen) :

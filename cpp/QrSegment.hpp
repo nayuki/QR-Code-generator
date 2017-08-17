@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <vector>
+#include "BitBuffer.hpp"
 
 
 namespace qrcodegen {
@@ -148,6 +149,9 @@ class QrSegment final {
 	/* 
 	 * Creates a new QR Code data segment with the given parameters and data.
 	 */
+	public: QrSegment(const Mode &md, int numCh, const BitBuffer &data);
+	
+	
 	public: QrSegment(const Mode &md, int numCh, const std::vector<std::uint8_t> &b, int bitLen);
 	
 	
