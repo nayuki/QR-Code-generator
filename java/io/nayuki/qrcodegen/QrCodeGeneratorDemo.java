@@ -141,7 +141,7 @@ public final class QrCodeGeneratorDemo {
 		qr = QrCode.encodeText(madoka, QrCode.Ecc.LOW);
 		writePng(qr.toImage(9, 4), "madoka-utf8-QR.png");
 		
-		int[] packedKanjiData = {  // Kanji mode encoding (13 bits per character)
+		int[] kanjiChars = {  // Kanji mode encoding (13 bits per character)
 			0x0035, 0x1002, 0x0FC0, 0x0AED, 0x0AD7,
 			0x015C, 0x0147, 0x0129, 0x0059, 0x01BD,
 			0x018D, 0x018A, 0x0036, 0x0141, 0x0144,
@@ -150,9 +150,9 @@ public final class QrCodeGeneratorDemo {
 			0x0000, 0x0208, 0x01FF, 0x0008,
 		};
 		BitBuffer bb = new BitBuffer();
-		for (int c : packedKanjiData)
+		for (int c : kanjiChars)
 			bb.appendBits(c, 13);
-		segs = Arrays.asList(new QrSegment(QrSegment.Mode.KANJI, packedKanjiData.length, bb));
+		segs = Arrays.asList(new QrSegment(QrSegment.Mode.KANJI, kanjiChars.length, bb));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
 		writePng(qr.toImage(9, 4), "madoka-kanji-QR.png");
 	}

@@ -146,7 +146,7 @@ static void doSegmentDemo() {
 	const QrCode qr4 = QrCode::encodeText(madoka, QrCode::Ecc::LOW);
 	printQr(qr4);
 	
-	const std::vector<int> packedKanjiData{  // Kanji mode encoding (13 bits per character)
+	const std::vector<int> kanjiChars{  // Kanji mode encoding (13 bits per character)
 		0x0035, 0x1002, 0x0FC0, 0x0AED, 0x0AD7,
 		0x015C, 0x0147, 0x0129, 0x0059, 0x01BD,
 		0x018D, 0x018A, 0x0036, 0x0141, 0x0144,
@@ -155,10 +155,10 @@ static void doSegmentDemo() {
 		0x0000, 0x0208, 0x01FF, 0x0008,
 	};
 	qrcodegen::BitBuffer bb;
-	for (int c : packedKanjiData)
+	for (int c : kanjiChars)
 		bb.appendBits(c, 13);
 	const QrCode qr5 = QrCode::encodeSegments(
-		{QrSegment(QrSegment::Mode::KANJI, packedKanjiData.size(), bb)},
+		{QrSegment(QrSegment::Mode::KANJI, kanjiChars.size(), bb)},
 		QrCode::Ecc::LOW);
 	printQr(qr5);
 }
