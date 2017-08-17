@@ -110,10 +110,9 @@ static void doSegmentDemo() {
 		QrCode::Ecc::LOW);
 	printQr(qr0);
 	
-	std::vector<QrSegment> segs;
-	segs.push_back(QrSegment::makeAlphanumeric(silver0));
-	segs.push_back(QrSegment::makeNumeric(silver1));
-	const QrCode qr1 = QrCode::encodeSegments(segs, QrCode::Ecc::LOW);
+	const QrCode qr1 = QrCode::encodeSegments(
+		{QrSegment::makeAlphanumeric(silver0), QrSegment::makeNumeric(silver1)},
+		QrCode::Ecc::LOW);
 	printQr(qr1);
 	
 	// Illustration "golden"
@@ -125,18 +124,25 @@ static void doSegmentDemo() {
 		QrCode::Ecc::LOW);
 	printQr(qr2);
 	
-	segs.clear();
 	std::vector<uint8_t> bytes;
 	for (const char *temp = golden0; *temp != '\0'; temp++)
 		bytes.push_back(static_cast<uint8_t>(*temp));
-	segs.push_back(QrSegment::makeBytes(bytes));
-	segs.push_back(QrSegment::makeNumeric(golden1));
-	segs.push_back(QrSegment::makeAlphanumeric(golden2));
-	const QrCode qr3 = QrCode::encodeSegments(segs, QrCode::Ecc::LOW);
+	const QrCode qr3 = QrCode::encodeSegments(
+		{QrSegment::makeBytes(bytes), QrSegment::makeNumeric(golden1), QrSegment::makeAlphanumeric(golden2)},
+		QrCode::Ecc::LOW);
 	printQr(qr3);
 	
 	// Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
-	const char *madoka = "\xE3\x80\x8C\xE9\xAD\x94\xE6\xB3\x95\xE5\xB0\x91\xE5\xA5\xB3\xE3\x81\xBE\xE3\x81\xA9\xE3\x81\x8B\xE2\x98\x86\xE3\x83\x9E\xE3\x82\xAE\xE3\x82\xAB\xE3\x80\x8D\xE3\x81\xA3\xE3\x81\xA6\xE3\x80\x81\xE3\x80\x80\xD0\x98\xD0\x90\xD0\x98\xE3\x80\x80\xEF\xBD\x84\xEF\xBD\x85\xEF\xBD\x93\xEF\xBD\x95\xE3\x80\x80\xCE\xBA\xCE\xB1\xEF\xBC\x9F";
+	const char *madoka =  // Encoded in UTF-8
+		"\xE3\x80\x8C\xE9\xAD\x94\xE6\xB3\x95\xE5"
+		"\xB0\x91\xE5\xA5\xB3\xE3\x81\xBE\xE3\x81"
+		"\xA9\xE3\x81\x8B\xE2\x98\x86\xE3\x83\x9E"
+		"\xE3\x82\xAE\xE3\x82\xAB\xE3\x80\x8D\xE3"
+		"\x81\xA3\xE3\x81\xA6\xE3\x80\x81\xE3\x80"
+		"\x80\xD0\x98\xD0\x90\xD0\x98\xE3\x80\x80"
+		"\xEF\xBD\x84\xEF\xBD\x85\xEF\xBD\x93\xEF"
+		"\xBD\x95\xE3\x80\x80\xCE\xBA\xCE\xB1\xEF"
+		"\xBC\x9F";
 	const QrCode qr4 = QrCode::encodeText(madoka, QrCode::Ecc::LOW);
 	printQr(qr4);
 	
@@ -151,9 +157,9 @@ static void doSegmentDemo() {
 	qrcodegen::BitBuffer bb;
 	for (int c : packedKanjiData)
 		bb.appendBits(c, 13);
-	segs.clear();
-	segs.push_back(QrSegment(QrSegment::Mode::KANJI, packedKanjiData.size(), bb));
-	const QrCode qr5 = QrCode::encodeSegments(segs, QrCode::Ecc::LOW);
+	const QrCode qr5 = QrCode::encodeSegments(
+		{QrSegment(QrSegment::Mode::KANJI, packedKanjiData.size(), bb)},
+		QrCode::Ecc::LOW);
 	printQr(qr5);
 }
 
