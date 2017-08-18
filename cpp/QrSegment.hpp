@@ -138,7 +138,7 @@ class QrSegment final {
 	public: const int numChars;
 	
 	/* The data bits of this segment. */
-	public: const BitBuffer data;
+	public: const std::vector<bool> data;
 	
 	
 	/*---- Constructor ----*/
@@ -146,7 +146,7 @@ class QrSegment final {
 	/* 
 	 * Creates a new QR Code data segment with the given parameters and data.
 	 */
-	public: QrSegment(const Mode &md, int numCh, const BitBuffer &dt);
+	public: QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt);
 	
 	
 	// Package-private helper function.

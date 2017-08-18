@@ -144,7 +144,7 @@ QrSegment QrSegment::makeEci(long assignVal) {
 }
 
 
-QrSegment::QrSegment(const Mode &md, int numCh, const BitBuffer &dt) :
+QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt) :
 		mode(md),
 		numChars(numCh),
 		data(dt) {
