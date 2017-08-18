@@ -77,7 +77,7 @@ public final class BitBuffer implements Cloneable {
 	// Appends the given number of bits of the given value to this sequence.
 	// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
 	public void appendBits(int val, int len) {
-		if (len < 0 || len > 32 || len < 32 && (val >>> len) != 0)
+		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
 		for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
 			data.set(bitLength, ((val >>> i) & 1) != 0);
