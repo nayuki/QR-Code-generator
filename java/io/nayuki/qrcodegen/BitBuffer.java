@@ -59,7 +59,7 @@ public final class BitBuffer implements Cloneable {
 	
 	// Returns the bit at the given index, yielding 0 or 1, or throwing IndexOutOfBoundsException.
 	public int getBit(int index) {
-		if (index < 0 || index > bitLength)
+		if (index < 0 || index >= bitLength)
 			throw new IndexOutOfBoundsException();
 		return data.get(index) ? 1 : 0;
 	}
