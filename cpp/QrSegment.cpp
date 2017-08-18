@@ -22,7 +22,6 @@
  */
 
 #include <climits>
-#include <cstddef>
 #include <cstring>
 #include "QrSegment.hpp"
 

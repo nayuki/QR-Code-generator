@@ -21,7 +21,6 @@
  *   Software.
  */
 
-#include <climits>
 #include "BitBuffer.hpp"
 
 

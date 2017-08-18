@@ -110,8 +110,8 @@ class QrCode final {
 	private: int mask;
 	
 	// Private grids of modules/pixels (conceptually immutable)
-	private: std::vector<std::vector<bool>> modules;     // The modules of this QR Code symbol (false = white, true = black)
-	private: std::vector<std::vector<bool>> isFunction;  // Indicates function modules that are not subjected to masking
+	private: std::vector<std::vector<bool> > modules;     // The modules of this QR Code symbol (false = white, true = black)
+	private: std::vector<std::vector<bool> > isFunction;  // Indicates function modules that are not subjected to masking
 	
 	
 	

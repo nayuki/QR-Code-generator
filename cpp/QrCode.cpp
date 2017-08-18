@@ -55,8 +55,7 @@ QrCode QrCode::encodeText(const char *text, const Ecc &ecl) {
 
 
 QrCode QrCode::encodeBinary(const vector<uint8_t> &data, const Ecc &ecl) {
-	vector<QrSegment> segs;
-	segs.push_back(QrSegment::makeBytes(data));
+	vector<QrSegment> segs{QrSegment::makeBytes(data)};
 	return encodeSegments(segs, ecl);
 }
 
@@ -97,7 +96,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
 	}
 	
 	// Add terminator and pad up to a byte if applicable
-	bb.appendBits(0, std::min(static_cast<size_t>(4), dataCapacityBits - bb.size()));
+	bb.appendBits(0, std::min<size_t>(4, dataCapacityBits - bb.size()));
 	bb.appendBits(0, (8 - bb.size() % 8) % 8);
 	
 	// Pad with alternate bytes until data capacity is reached
@@ -323,14 +322,13 @@ vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const
 	vector<vector<uint8_t> > blocks;
 	const ReedSolomonGenerator rs(blockEccLen);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
-		vector<uint8_t> dat;
-		dat.insert(dat.begin(), data.begin() + k, data.begin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
+		vector<uint8_t> dat(data.cbegin() + k, data.cbegin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
 		k += dat.size();
 		const vector<uint8_t> ecc(rs.getRemainder(dat));
 		if (i < numShortBlocks)
 			dat.push_back(0);
-		dat.insert(dat.end(), ecc.begin(), ecc.end());
-		blocks.push_back(dat);
+		dat.insert(dat.end(), ecc.cbegin(), ecc.cend());
+		blocks.push_back(std::move(dat));
 	}
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
@@ -487,9 +485,9 @@ long QrCode::getPenaltyScore() const {
 	
 	// Balance of black and white modules
 	int black = 0;
-	for (int y = 0; y < size; y++) {
-		for (int x = 0; x < size; x++) {
-			if (module(x, y))
+	for (const vector<bool> &row : modules) {
+		for (bool color : row) {
+			if (color)
 				black++;
 		}
 	}
