@@ -514,8 +514,7 @@ vector<int> QrCode::getAlignmentPatternPositions(int ver) {
 			step = 26;
 		
 		vector<int> result;
-		int size = ver * 4 + 17;
-		for (int i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
+		for (int i = 0, pos = ver * 4 + 10; i < numAlign - 1; i++, pos -= step)
 			result.insert(result.begin(), pos);
 		result.insert(result.begin(), 6);
 		return result;

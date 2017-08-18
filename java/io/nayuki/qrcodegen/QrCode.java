@@ -675,9 +675,8 @@ public final class QrCode {
 				step = 26;
 			
 			int[] result = new int[numAlign];
-			int size = ver * 4 + 17;
 			result[0] = 6;
-			for (int i = result.length - 1, pos = size - 7; i >= 1; i--, pos -= step)
+			for (int i = result.length - 1, pos = ver * 4 + 10; i >= 1; i--, pos -= step)
 				result[i] = pos;
 			return result;
 		}
