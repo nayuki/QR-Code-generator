@@ -1004,8 +1004,7 @@ var qrcodegen = new function() {
 		// Returns a copy of all bytes, padding up to the nearest byte.
 		this.getBytes = function() {
 			var result = [];
-			var numBytes = Math.ceil(bitData.length / 8);
-			for (var i = 0; i < numBytes; i++)
+			while (result.length * 8 < bitData.length)
 				result.push(0);
 			bitData.forEach(function(bit, i) {
 				result[i >>> 3] |= bit << (7 - (i & 7));
