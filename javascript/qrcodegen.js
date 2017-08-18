@@ -736,7 +736,7 @@ var qrcodegen = new function() {
 	this.QrSegment = function(mode, numChars, bitData) {
 		if (numChars < 0 || !(mode instanceof Mode))
 			throw "Invalid argument";
-		bitData = bitData.slice();
+		bitData = bitData.slice();  // Make defensive copy
 		
 		// The mode indicator for this segment.
 		Object.defineProperty(this, "mode", {value:mode});
@@ -746,7 +746,7 @@ var qrcodegen = new function() {
 		
 		// Returns a copy of all bits, which is an array of 0s and 1s.
 		this.getBits = function() {
-			return bitData.slice();
+			return bitData.slice();  // Make defensive copy
 		};
 	};
 	
@@ -992,7 +992,8 @@ var qrcodegen = new function() {
 	 */
 	function BitBuffer() {
 		
-		// Returns a copy of all bytes, padding up to the nearest byte.
+		// Packs this buffer's bits into bytes in big endian,
+		// padding with '0' bit values, and returns the new array.
 		this.getBytes = function() {
 			var result = [];
 			while (result.length * 8 < this.length)
@@ -1003,8 +1004,8 @@ var qrcodegen = new function() {
 			return result;
 		};
 		
-		// Appends the given number of bits of the given value to this sequence.
-		// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
+		// Appends the given number of low bits of the given value
+		// to this sequence. Requires 0 <= val < 2^len.
 		this.appendBits = function(val, len) {
 			if (len < 0 || len > 31 || val >>> len != 0)
 				throw "Value out of range";

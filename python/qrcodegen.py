@@ -696,7 +696,7 @@ class QrSegment(object):
 			raise ValueError()
 		self._mode = mode
 		self._numchars = numch
-		self._bitdata = list(bitdata)  # Defensive copy
+		self._bitdata = list(bitdata)  # Make defensive copy
 	
 	
 	# ---- Accessor methods ----
@@ -708,7 +708,7 @@ class QrSegment(object):
 		return self._numchars
 	
 	def get_bits(self):
-		return list(self._bitdata)  # Defensive copy
+		return list(self._bitdata)  # Make defensive copy
 	
 	
 	# Package-private helper function.
@@ -833,14 +833,16 @@ class _BitBuffer(list):
 	"""An appendable sequence of bits (0's and 1's)."""
 	
 	def get_bytes(self):
-		"""Returns a copy of all bytes, padding up to the nearest byte. Bits are packed in big endian within a byte."""
+		"""Packs this buffer's bits into bytes in big endian,
+		padding with '0' bit values, and returns the new list."""
 		result = [0] * ((len(self) + 7) // 8)
 		for (i, bit) in enumerate(self):
 			result[i >> 3] |= bit << (7 - (i & 7))
 		return result
 	
 	def append_bits(self, val, n):
-		"""Appends the given number of bits of the given value to this sequence. This requires 0 <= val < 2^n."""
+		"""Appends the given number of low bits of the given value
+		to this sequence. Requires 0 <= val < 2^n."""
 		if n < 0 or val >> n != 0:
 			raise ValueError("Value out of range")
 		self.extend(((val >> i) & 1) for i in reversed(range(n)))

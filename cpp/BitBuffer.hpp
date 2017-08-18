@@ -30,7 +30,7 @@
 namespace qrcodegen {
 
 /* 
- * An appendable sequence of bits. Bits are packed in big endian within a byte.
+ * An appendable sequence of bits (0's and 1's).
  */
 class BitBuffer final : public std::vector<bool> {
 	
@@ -43,12 +43,13 @@ class BitBuffer final : public std::vector<bool> {
 	
 	/*---- Methods ----*/
 	
-	// Returns a copy of all bytes, padding up to the nearest byte. Bits are packed in big endian within a byte.
+	// Packs this buffer's bits into bytes in big endian,
+	// padding with '0' bit values, and returns the new vector.
 	public: std::vector<std::uint8_t> getBytes() const;
 	
 	
-	// Appends the given number of bits of the given value to this sequence.
-	// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
+	// Appends the given number of low bits of the given value
+	// to this sequence. Requires 0 <= val < 2^len.
 	public: void appendBits(std::uint32_t val, int len);
 	
 };

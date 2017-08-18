@@ -28,20 +28,23 @@ import java.util.Objects;
 
 
 /**
- * An appendable sequence of bits. Bits are packed in big endian within a byte.
+ * An appendable sequence of bits (0's and 1's).
  */
 public final class BitBuffer implements Cloneable {
 	
 	/*---- Fields ----*/
 	
 	private BitSet data;
+	
 	private int bitLength;
 	
 	
 	
 	/*---- Constructor ----*/
 	
-	// Creates an empty bit buffer (length 0).
+	/**
+	 * Constructs an empty bit buffer (length 0).
+	 */
 	public BitBuffer() {
 		data = new BitSet();
 		bitLength = 0;
@@ -51,13 +54,21 @@ public final class BitBuffer implements Cloneable {
 	
 	/*---- Methods ----*/
 	
-	// Returns the number of bits in the buffer, which is a non-negative value.
+	/**
+	 * Returns the length of this sequence, which is a non-negative value.
+	 * @return the length of this sequence
+	 */
 	public int bitLength() {
 		return bitLength;
 	}
 	
 	
-	// Returns the bit at the given index, yielding 0 or 1, or throwing IndexOutOfBoundsException.
+	/**
+	 * Returns the bit at the specified index, yielding 0 or 1.
+	 * @param index the index to get the bit at
+	 * @return the bit at the specified index
+	 * @throws IndexOutOfBoundsException if index &lt; 0 or index &ge; bitLength
+	 */
 	public int getBit(int index) {
 		if (index < 0 || index >= bitLength)
 			throw new IndexOutOfBoundsException();
@@ -65,7 +76,11 @@ public final class BitBuffer implements Cloneable {
 	}
 	
 	
-	// Returns a copy of all bytes, padding up to the nearest byte. Bits are packed in big endian within a byte.
+	/**
+	 * Packs this buffer's bits into bytes in big endian,
+	 * padding with '0' bit values, and returns the new array.
+	 * @return this sequence as a new array of bytes (not {@code null})
+	 */
 	public byte[] getBytes() {
 		byte[] result = new byte[(bitLength + 7) / 8];
 		for (int i = 0; i < bitLength; i++)
@@ -74,8 +89,12 @@ public final class BitBuffer implements Cloneable {
 	}
 	
 	
-	// Appends the given number of bits of the given value to this sequence.
-	// If 0 <= len <= 31, then this requires 0 <= val < 2^len.
+	/**
+	 * Appends the specified number of low bits of the specified value
+	 * to this sequence. Requires 0 &le; val &lt; 2<sup>len</sup>.
+	 * @param val the value to append
+	 * @param len the number of low bits in the value to take
+	 */
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
@@ -84,7 +103,11 @@ public final class BitBuffer implements Cloneable {
 	}
 	
 	
-	// Appends the data of the given segment to this bit buffer.
+	/**
+	 * Appends the bit data of the specified segment to this bit buffer.
+	 * @param seg the segment whose data to append (not {@code null})
+	 * @throws NullPointerException if the segment is {@code null}
+	 */
 	public void appendData(QrSegment seg) {
 		Objects.requireNonNull(seg);
 		BitBuffer bb = seg.data;
@@ -93,7 +116,10 @@ public final class BitBuffer implements Cloneable {
 	}
 	
 	
-	// Returns a copy of this bit buffer object.
+	/**
+	 * Returns a copy of this bit buffer object.
+	 * @return a copy of this bit buffer object
+	 */
 	public BitBuffer clone() {
 		try {
 			BitBuffer result = (BitBuffer)super.clone();
