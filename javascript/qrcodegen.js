@@ -594,17 +594,19 @@ var qrcodegen = new function() {
 		segs.forEach(function(seg) {
 			bb.appendBits(seg.mode.modeBits, 4);
 			bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-			bb.appendData(seg);
+			seg.getBits().forEach(function(bit) {
+				bb.push(bit);
+			});
 		});
 		
 		// Add terminator and pad up to a byte if applicable
-		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength()));
-		bb.appendBits(0, (8 - bb.bitLength() % 8) % 8);
+		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.length));
+		bb.appendBits(0, (8 - bb.length % 8) % 8);
 		
 		// Pad with alternate bytes until data capacity is reached
-		for (var padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+		for (var padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bb.appendBits(padByte, 8);
-		if (bb.bitLength() % 8 != 0)
+		if (bb.length % 8 != 0)
 			throw "Assertion error";
 		
 		// Create the QR Code symbol
@@ -734,6 +736,7 @@ var qrcodegen = new function() {
 	this.QrSegment = function(mode, numChars, bitData) {
 		if (numChars < 0 || !(mode instanceof Mode))
 			throw "Invalid argument";
+		bitData = bitData.slice();
 		
 		// The mode indicator for this segment.
 		Object.defineProperty(this, "mode", {value:mode});
@@ -758,7 +761,7 @@ var qrcodegen = new function() {
 		data.forEach(function(b) {
 			bb.appendBits(b, 8);
 		});
-		return new this(this.Mode.BYTE, data.length, bb.getBits());
+		return new this(this.Mode.BYTE, data.length, bb);
 	};
 	
 	
@@ -775,7 +778,7 @@ var qrcodegen = new function() {
 		var rem = digits.length - i;
 		if (rem > 0)  // 1 or 2 digits remaining
 			bb.appendBits(parseInt(digits.substring(i), 10), rem * 3 + 1);
-		return new this(this.Mode.NUMERIC, digits.length, bb.getBits());
+		return new this(this.Mode.NUMERIC, digits.length, bb);
 	};
 	
 	
@@ -795,7 +798,7 @@ var qrcodegen = new function() {
 		}
 		if (i < text.length)  // 1 character remaining
 			bb.appendBits(QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
-		return new this(this.Mode.ALPHANUMERIC, text.length, bb.getBits());
+		return new this(this.Mode.ALPHANUMERIC, text.length, bb);
 	};
 	
 	
@@ -831,7 +834,7 @@ var qrcodegen = new function() {
 			bb.appendBits(assignVal, 21);
 		} else
 			throw "ECI assignment value out of range";
-		return new this(this.Mode.ECI, 0, bb.getBits());
+		return new this(this.Mode.ECI, 0, bb);
 	};
 	
 	
@@ -988,25 +991,13 @@ var qrcodegen = new function() {
 	 * This constructor creates an empty bit buffer (length 0).
 	 */
 	function BitBuffer() {
-		// Array of bits; each item is the integer 0 or 1
-		var bitData = [];
-		
-		// Returns the number of bits in the buffer, which is a non-negative value.
-		this.bitLength = function() {
-			return bitData.length;
-		};
-		
-		// Returns a copy of all bits.
-		this.getBits = function() {
-			return bitData.slice();
-		};
 		
 		// Returns a copy of all bytes, padding up to the nearest byte.
 		this.getBytes = function() {
 			var result = [];
-			while (result.length * 8 < bitData.length)
+			while (result.length * 8 < this.length)
 				result.push(0);
-			bitData.forEach(function(bit, i) {
+			this.forEach(function(bit, i) {
 				result[i >>> 3] |= bit << (7 - (i & 7));
 			});
 			return result;
@@ -1018,15 +1009,10 @@ var qrcodegen = new function() {
 			if (len < 0 || len > 32 || len < 32 && (val >>> len) != 0)
 				throw "Value out of range";
 			for (var i = len - 1; i >= 0; i--)  // Append bit by bit
-				bitData.push((val >>> i) & 1);
-		};
-		
-		// Appends the bit data of the given segment to this bit buffer.
-		this.appendData = function(seg) {
-			seg.getBits().forEach(function(b) {  // Append bit by bit
-				bitData.push(b);
-			});
+				this.push((val >>> i) & 1);
 		};
 	}
+	
+	BitBuffer.prototype = Object.create(Array.prototype);
 	
 };
