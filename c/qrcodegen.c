@@ -630,9 +630,10 @@ testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 	int qrsize = version * 4 + 17;
 	int numAlign = version / 7 + 2;
 	int step;
-	if (version != 32)
-		step = (version * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;  // ceil((qrsize - 13) / (2*numAlign - 2)) * 2
-	else  // C-C-C-Combo breaker!
+	if (version != 32) {
+		// ceil((qrsize - 13) / (2*numAlign - 2)) * 2
+		step = (version * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;
+	} else  // C-C-C-Combo breaker!
 		step = 26;
 	for (int i = numAlign - 1, pos = qrsize - 7; i >= 1; i--, pos -= step)
 		result[i] = pos;

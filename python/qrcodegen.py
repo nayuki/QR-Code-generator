@@ -506,7 +506,8 @@ class QrCode(object):
 		else:
 			numalign = ver // 7 + 2
 			if ver != 32:
-				step = (ver * 4 + numalign * 2 + 1) // (2 * numalign - 2) * 2  # ceil((size - 13) / (2*numalign - 2)) * 2
+				# ceil((size - 13) / (2*numalign - 2)) * 2
+				step = (ver * 4 + numalign * 2 + 1) // (2 * numalign - 2) * 2
 			else:  # C-C-C-Combo breaker!
 				step = 26
 			result = [6]

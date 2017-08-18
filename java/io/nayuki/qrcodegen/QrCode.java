@@ -668,9 +668,10 @@ public final class QrCode {
 		else {
 			int numAlign = ver / 7 + 2;
 			int step;
-			if (ver != 32)
-				step = (ver * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;  // ceil((size - 13) / (2*numAlign - 2)) * 2
-			else  // C-C-C-Combo breaker!
+			if (ver != 32) {
+				// ceil((size - 13) / (2*numAlign - 2)) * 2
+				step = (ver * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;
+			} else  // C-C-C-Combo breaker!
 				step = 26;
 			
 			int[] result = new int[numAlign];
