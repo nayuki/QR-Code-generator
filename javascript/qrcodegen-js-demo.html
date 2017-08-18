@@ -34,6 +34,9 @@
 		padding-top: 0.2em;
 		padding-bottom: 0.2em;
 	}
+	td:first-child {
+		white-space: pre;
+	}
 	input[type=radio] + label, input[type=checkbox] + label {
 		margin-left: 0.1em;
 		margin-right: 0.7em;
@@ -47,11 +50,11 @@
 	<table class="noborder" style="width:100%">
 		<tbody>
 			<tr>
-				<td><strong>Text&#xA0;string:</strong></td>
+				<td><strong>Text string:</strong></td>
 				<td style="width:100%"><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:100%; max-width:30em; height:5em; font-family:inherit" oninput="redrawQrCode();"></textarea></td>
 			</tr>
 			<tr>
-				<td><strong>QR&#xA0;Code:</strong></td>
+				<td><strong>QR Code:</strong></td>
 				<td>
 					<canvas id="qrcode-canvas" style="padding:1em; background-color:#E8E8E8"></canvas>
 					<svg id="qrcode-svg" style="width:30em; height:30em; padding:1em; background-color:#E8E8E8">
@@ -61,7 +64,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td><strong>Error&#xA0;correction:</strong></td>
+				<td><strong>Error correction:</strong></td>
 				<td>
 					<input type="radio" name="errcorlvl" id="errcorlvl-low" onchange="redrawQrCode();" checked="checked"><label for="errcorlvl-low">Low</label>
 					<input type="radio" name="errcorlvl" id="errcorlvl-medium" onchange="redrawQrCode();"><label for="errcorlvl-medium">Medium</label>
@@ -70,7 +73,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td>Output&#xA0;format:</td>
+				<td>Output format:</td>
 				<td>
 					<input type="radio" name="output-format" id="output-format-bitmap" onchange="redrawQrCode();" checked="checked"><label for="output-format-bitmap">Bitmap</label>
 					<input type="radio" name="output-format" id="output-format-vector" onchange="redrawQrCode();"><label for="output-format-vector">Vector</label>
@@ -85,15 +88,15 @@
 				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
 			</tr>
 			<tr>
-				<td>Version&#xA0;range:</td>
+				<td>Version range:</td>
 				<td>Minimum = <input type="number" value="1" min="1" max="40" step="1" id="version-min-input" style="width:4em" oninput="handleVersionMinMax('min');">, maximum = <input type="number" value="40" min="1" max="40" step="1" id="version-max-input" style="width:4em" oninput="handleVersionMinMax('max');"></td>
 			</tr>
 			<tr>
-				<td>Mask&#xA0;pattern:</td>
+				<td>Mask pattern:</td>
 				<td><input type="number" value="-1" min="-1" max="7" step="1" id="mask-input" style="width:4em" oninput="redrawQrCode();"> (−1 for automatic, 0 to 7 for manual)</td>
 			</tr>
 			<tr>
-				<td>Boost&#xA0;ECC:</td>
+				<td>Boost ECC:</td>
 				<td><input type="checkbox" checked="checked" id="boost-ecc-input" onchange="redrawQrCode();"><label for="boost-ecc-input">Increase <abbr title="error-correcting code">ECC</abbr> level within same version</label></td>
 			</tr>
 			<tr>
@@ -101,7 +104,7 @@
 				<td id="statistics-output" style="white-space:pre"></td>
 			</tr>
 			<tr id="svg-xml-row">
-				<td>SVG&#xA0;XML&#xA0;code:</td>
+				<td>SVG XML code:</td>
 				<td>
 					<textarea id="svg-xml-output" readonly="readonly" style="width:100%; max-width:50em; height:15em; font-family:monospace"></textarea>
 				</td>
