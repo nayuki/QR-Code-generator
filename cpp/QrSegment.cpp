@@ -57,8 +57,6 @@ const QrSegment::Mode QrSegment::Mode::ECI         (0x7,  0,  0,  0);
 
 
 QrSegment QrSegment::makeBytes(const vector<uint8_t> &data) {
-	if (data.size() >= (unsigned int)INT_MAX / 8)
-		throw "Buffer too long";
 	BitBuffer bb;
 	for (uint8_t b : data)
 		bb.appendBits(b, 8);
@@ -162,12 +160,14 @@ int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 	for (const QrSegment &seg : segs) {
 		int ccbits = seg.mode.numCharCountBits(version);
 		// Fail if segment length value doesn't fit in the length field's bit-width
-		if (seg.numChars >= (1L << ccbits) || seg.data.size() > INT16_MAX)
+		if (seg.numChars >= (1L << ccbits))
 			return -1;
-		long temp = (long)result + 4 + ccbits + seg.data.size();
-		if (temp > INT_MAX)
+		if (4 + ccbits > INT_MAX - result)
 			return -1;
-		result = temp;
+		result += 4 + ccbits;
+		if (seg.data.size() > static_cast<unsigned int>(INT_MAX - result))
+			return -1;
+		result += static_cast<int>(seg.data.size());
 	}
 	return result;
 }

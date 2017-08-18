@@ -32,7 +32,7 @@ BitBuffer::BitBuffer()
 
 
 std::vector<std::uint8_t> BitBuffer::getBytes() const {
-	std::vector<std::uint8_t> result((size() + 7) / 8);
+	std::vector<std::uint8_t> result(size() / 8 + (size() % 8 == 0 ? 0 : 1));
 	for (std::size_t i = 0; i < size(); i++)
 		result[i >> 3] |= (*this)[i] ? 1 << (7 - (i & 7)) : 0;
 	return result;
