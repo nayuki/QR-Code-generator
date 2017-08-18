@@ -149,6 +149,12 @@ class QrSegment final {
 	public: QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt);
 	
 	
+	/* 
+	 * Creates a new QR Code data segment with the given parameters and data.
+	 */
+	public: QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt);
+	
+	
 	// Package-private helper function.
 	public: static int getTotalBits(const std::vector<QrSegment> &segs, int version);
 	

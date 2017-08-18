@@ -23,6 +23,7 @@
 
 #include <climits>
 #include <cstring>
+#include <utility>
 #include "QrSegment.hpp"
 
 using std::uint8_t;
@@ -59,7 +60,7 @@ QrSegment QrSegment::makeBytes(const vector<uint8_t> &data) {
 	BitBuffer bb;
 	for (uint8_t b : data)
 		bb.appendBits(b, 8);
-	return QrSegment(Mode::BYTE, (int)data.size(), bb);
+	return QrSegment(Mode::BYTE, (int)data.size(), std::move(bb));
 }
 
 
@@ -82,7 +83,7 @@ QrSegment QrSegment::makeNumeric(const char *digits) {
 	}
 	if (accumCount > 0)  // 1 or 2 digits remaining
 		bb.appendBits(accumData, accumCount * 3 + 1);
-	return QrSegment(Mode::NUMERIC, charCount, bb);
+	return QrSegment(Mode::NUMERIC, charCount, std::move(bb));
 }
 
 
@@ -105,7 +106,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	}
 	if (accumCount > 0)  // 1 character remaining
 		bb.appendBits(accumData, 6);
-	return QrSegment(Mode::ALPHANUMERIC, charCount, bb);
+	return QrSegment(Mode::ALPHANUMERIC, charCount, std::move(bb));
 }
 
 
@@ -139,7 +140,7 @@ QrSegment QrSegment::makeEci(long assignVal) {
 		bb.appendBits(assignVal, 21);
 	} else
 		throw "ECI assignment value out of range";
-	return QrSegment(Mode::ECI, 0, bb);
+	return QrSegment(Mode::ECI, 0, std::move(bb));
 }
 
 
@@ -147,6 +148,15 @@ QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt) :
 		mode(md),
 		numChars(numCh),
 		data(dt) {
+	if (numCh < 0)
+		throw "Invalid value";
+}
+
+
+QrSegment::QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt) :
+		mode(md),
+		numChars(numCh),
+		data(std::move(dt)) {
 	if (numCh < 0)
 		throw "Invalid value";
 }
