@@ -114,15 +114,15 @@ vector<QrSegment> QrSegment::makeSegments(const char *text) {
 	// Select the most efficient segment encoding automatically
 	vector<QrSegment> result;
 	if (*text == '\0');  // Leave the vector empty
-	else if (QrSegment::isNumeric(text))
-		result.push_back(QrSegment::makeNumeric(text));
-	else if (QrSegment::isAlphanumeric(text))
-		result.push_back(QrSegment::makeAlphanumeric(text));
+	else if (isNumeric(text))
+		result.push_back(makeNumeric(text));
+	else if (isAlphanumeric(text))
+		result.push_back(makeAlphanumeric(text));
 	else {
 		vector<uint8_t> bytes;
 		for (; *text != '\0'; text++)
 			bytes.push_back(static_cast<uint8_t>(*text));
-		result.push_back(QrSegment::makeBytes(bytes));
+		result.push_back(makeBytes(bytes));
 	}
 	return result;
 }
