@@ -57,10 +57,12 @@ const QrSegment::Mode QrSegment::Mode::ECI         (0x7,  0,  0,  0);
 
 
 QrSegment QrSegment::makeBytes(const vector<uint8_t> &data) {
+	if (data.size() > INT_MAX)
+		throw "Data too long";
 	BitBuffer bb;
 	for (uint8_t b : data)
 		bb.appendBits(b, 8);
-	return QrSegment(Mode::BYTE, (int)data.size(), std::move(bb));
+	return QrSegment(Mode::BYTE, static_cast<int>(data.size()), std::move(bb));
 }
 
 
