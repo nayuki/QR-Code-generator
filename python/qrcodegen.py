@@ -291,18 +291,18 @@ class QrCode(object):
 		
 		# Draw first copy
 		for i in range(0, 6):
-			self._set_function_module(8, i, ((data >> i) & 1) != 0)
-		self._set_function_module(8, 7, ((data >> 6) & 1) != 0)
-		self._set_function_module(8, 8, ((data >> 7) & 1) != 0)
-		self._set_function_module(7, 8, ((data >> 8) & 1) != 0)
+			self._set_function_module(8, i, (data >> i) & 1 != 0)
+		self._set_function_module(8, 7, (data >> 6) & 1 != 0)
+		self._set_function_module(8, 8, (data >> 7) & 1 != 0)
+		self._set_function_module(7, 8, (data >> 8) & 1 != 0)
 		for i in range(9, 15):
-			self._set_function_module(14 - i, 8, ((data >> i) & 1) != 0)
+			self._set_function_module(14 - i, 8, (data >> i) & 1 != 0)
 		
 		# Draw second copy
 		for i in range(0, 8):
-			self._set_function_module(self._size - 1 - i, 8, ((data >> i) & 1) != 0)
+			self._set_function_module(self._size - 1 - i, 8, (data >> i) & 1 != 0)
 		for i in range(8, 15):
-			self._set_function_module(8, self._size - 15 + i, ((data >> i) & 1) != 0)
+			self._set_function_module(8, self._size - 15 + i, (data >> i) & 1 != 0)
 		self._set_function_module(8, self._size - 8, True)
 	
 	
@@ -321,7 +321,7 @@ class QrCode(object):
 		
 		# Draw two copies
 		for i in range(18):
-			bit = ((data >> i) & 1) != 0
+			bit = (data >> i) & 1 != 0
 			a, b = self._size - 11 + i % 3, i // 3
 			self._set_function_module(a, b, bit)
 			self._set_function_module(b, a, bit)
@@ -405,10 +405,10 @@ class QrCode(object):
 			for vert in range(self._size):  # Vertical counter
 				for j in range(2):
 					x = right - j  # Actual x coordinate
-					upward = ((right + 1) & 2) == 0
+					upward = (right + 1) & 2 == 0
 					y = (self._size - 1 - vert) if upward else vert  # Actual y coordinate
 					if not self._isfunction[y][x] and i < len(data) * 8:
-						self._modules[y][x] = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0
+						self._modules[y][x] = (data[i >> 3] >> (7 - (i & 7))) & 1 != 0
 						i += 1
 					# If there are any remainder bits (0 to 7), they are already
 					# set to 0/false/white when the grid of modules was initialized
