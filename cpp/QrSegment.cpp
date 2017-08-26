@@ -115,7 +115,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 vector<QrSegment> QrSegment::makeSegments(const char *text) {
 	// Select the most efficient segment encoding automatically
 	vector<QrSegment> result;
-	if (*text == '\0');  // Leave the vector empty
+	if (*text == '\0');  // Leave result empty
 	else if (isNumeric(text))
 		result.push_back(makeNumeric(text));
 	else if (isAlphanumeric(text))
