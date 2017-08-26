@@ -681,7 +681,7 @@ class QrSegment(object):
 		elif (1 << 7) <= assignval < (1 << 14):
 			bb.append_bits(2, 2)
 			bb.append_bits(assignval, 14)
-		elif (1 << 14) <= assignval < 999999:
+		elif (1 << 14) <= assignval < 1000000:
 			bb.append_bits(6, 3)
 			bb.append_bits(assignval, 21)
 		else:

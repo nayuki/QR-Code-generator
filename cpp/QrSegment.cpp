@@ -137,7 +137,7 @@ QrSegment QrSegment::makeEci(long assignVal) {
 	else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
 		bb.appendBits(2, 2);
 		bb.appendBits(assignVal, 14);
-	} else if ((1 << 14) <= assignVal && assignVal < 999999L) {
+	} else if ((1 << 14) <= assignVal && assignVal < 1000000L) {
 		bb.appendBits(6, 3);
 		bb.appendBits(assignVal, 21);
 	} else
