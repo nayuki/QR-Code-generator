@@ -1,0 +1,4 @@
+[package]
+name = "qrcodegen"
+version = "0.0.0"
+authors = ["Project Nayuki"]
