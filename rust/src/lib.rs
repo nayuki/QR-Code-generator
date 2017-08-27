@@ -54,9 +54,7 @@ impl QrCode {
 	
 	pub fn encode_codewords(ver: u8, ecl: &'static QrCodeEcc, datacodewords: &[u8], mask: i8) -> QrCode {
 		// Check arguments
-		if ver < 1 || ver > 40 || mask < -1 || mask > 7 {
-			panic!("Value out of range");
-		}
+		assert!(1 <= ver && ver <= 40 && -1 <= mask && mask <= 7, "Value out of range");
 		
 		// Initialize fields
 		let size: usize = (ver as usize) * 4 + 17;
@@ -80,9 +78,7 @@ impl QrCode {
 	
 	pub fn remask(qr: &QrCode, mask: i8) -> QrCode {
 		// Check arguments
-		if mask < -1 || mask > 7 {
-			panic!("Mask value out of range");
-		}
+		assert!(-1 <= mask && mask <= 7, "Mask out of range");
 		
 		// Copy fields
 		let mut result = QrCode {
@@ -188,9 +184,7 @@ impl QrCode {
 		}
 		data = data << 10 | rem;
 		data ^= 0x5412;  // uint15
-		if data >> 15 != 0 {
-			panic!("Assertion error");
-		}
+		assert_eq!(data >> 15, 0, "Assertion error");
 		
 		// Draw first copy
 		for i in 0 .. 6 {
@@ -227,9 +221,7 @@ impl QrCode {
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
 		}
 		let data: u32 = (self.version as u32) << 12 | rem;  // uint18
-		if data >> 18 != 0 {
-			panic!("Assertion error");
-		}
+		assert!(data >> 18 == 0, "Assertion error");
 		
 		// Draw two copies
 		for i in 0 .. 18 {
@@ -280,9 +272,7 @@ impl QrCode {
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
 	fn append_error_correction(&self, data: &[u8]) -> Vec<u8> {
-		if data.len() != QrCode::get_num_data_codewords(self.version, self.errorcorrectionlevel) {
-			panic!("Illegal argument");
-		}
+		assert_eq!(data.len(), QrCode::get_num_data_codewords(self.version, self.errorcorrectionlevel), "Illegal argument");
 		
 		// Calculate parameter numbers
 		let numblocks: usize = QrCode::table_get(&QrCode_NUM_ERROR_CORRECTION_BLOCKS, self.version, self.errorcorrectionlevel);
@@ -324,9 +314,7 @@ impl QrCode {
 	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
 	// data area of this QR Code symbol. Function modules need to be marked off before this is called.
 	fn draw_codewords(&mut self, data: &[u8]) {
-		if data.len() != QrCode::get_num_raw_data_modules(self.version) / 8 {
-			panic!("Illegal argument");
-		}
+		assert_eq!(data.len(), QrCode::get_num_raw_data_modules(self.version) / 8, "Illegal argument");
 		
 		let mut i: usize = 0;  // Bit index into the data
 		// Do the funny zigzag scan
@@ -350,9 +338,7 @@ impl QrCode {
 			}
 			right -= 2;
 		}
-		if i != data.len() * 8 {
-			panic!("Assertion error");
-		}
+		assert_eq!(i, data.len() * 8, "Assertion error");
 	}
 	
 	
@@ -361,9 +347,7 @@ impl QrCode {
 	// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 	// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
 	fn apply_mask(&mut self, mask: u8) {
-		if mask > 7 {
-			panic!("Mask value out of range");
-		}
+		assert!(mask <= 7, "Mask value out of range");
 		for y in 0 .. self.size {
 			for x in 0 .. self.size {
 				let invert: bool = match mask {
@@ -400,9 +384,7 @@ impl QrCode {
 				self.apply_mask(i);  // Undoes the mask due to XOR
 			}
 		}
-		if mask < 0 || mask > 7 {
-			panic!("Assertion error");
-		}
+		assert!(0 <= mask && mask <= 7, "Assertion error");
 		self.draw_format_bits(mask as u8);  // Overwrite old format bits
 		self.apply_mask(mask as u8);  // Apply the final choice of mask
 		self.mask = mask as u8;
@@ -507,9 +489,8 @@ impl QrCode {
 	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
 	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
 	fn get_alignment_pattern_positions(ver: u8) -> Vec<i32> {
-		if ver < 1 || ver > 40 {
-			panic!("Version number out of range");
-		} else if ver == 1 {
+		assert!(1 <= ver && ver <= 40, "Version number out of range");
+		if ver == 1 {
 			vec![]
 		} else {
 			let numalign: i32 = (ver as i32) / 7 + 2;
@@ -534,9 +515,7 @@ impl QrCode {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	fn get_num_raw_data_modules(ver: u8) -> usize {
-		if ver < 1 || ver > 40 {
-			panic!("Version number out of range");
-		}
+		assert!(1 <= ver && ver <= 40, "Version number out of range");
 		let mut result: usize = (16 * (ver as usize) + 128) * (ver as usize) + 64;
 		if ver >= 2 {
 			let numalign: usize = (ver as usize) / 7 + 2;
@@ -553,9 +532,7 @@ impl QrCode {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	fn get_num_data_codewords(ver: u8, ecl: &QrCodeEcc) -> usize {
-		if ver < 1 || ver > 40 {
-			panic!("Version number out of range");
-		}
+		assert!(1 <= ver && ver <= 40, "Version number out of range");
 		QrCode::get_num_raw_data_modules(ver) / 8
 			- QrCode::table_get(&QrCode_ECC_CODEWORDS_PER_BLOCK, ver, ecl)
 			* QrCode::table_get(&QrCode_NUM_ERROR_CORRECTION_BLOCKS, ver, ecl)
@@ -632,9 +609,7 @@ struct ReedSolomonGenerator {
 impl ReedSolomonGenerator {
 	
 	fn new(degree: usize) -> ReedSolomonGenerator {
-		if degree < 1 || degree > 255 {
-			panic!("Degree out of range");
-		}
+		assert!(1 <= degree && degree <= 255, "Degree out of range");
 		// Start with the monomial x^0
 		let mut coefs = vec![0; degree - 1];
 		coefs.push(1);
@@ -767,9 +742,7 @@ pub static QrSegmentMode_ECI         : QrSegmentMode = QrSegmentMode { modebits:
 
 // Appends the given number of bits of the given value to this sequence.
 fn append_bits(bb: &mut Vec<bool>, val: u32, len: u8) {
-	if len < 32 && (val >> len) != 0 || len > 32 {
-		panic!("Value out of range");
-	}
+	assert!(len < 32 && (val >> len) == 0 || len == 32, "Value out of range");
 	for i in (0 .. len).rev() {  // Append bit by bit
 		bb.push((val >> i) & 1 != 0);
 	}
