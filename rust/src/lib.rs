@@ -52,6 +52,82 @@ pub struct QrCode {
 
 impl QrCode {
 	
+	pub fn encode_text(text: &[char], ecl: &'static QrCodeEcc) -> QrCode {
+		let segs: Vec<QrSegment> = QrSegment::make_segments(text);
+		QrCode::encode_segments(&segs, ecl)
+	}
+	
+	
+	pub fn encode_binary(data: &[u8], ecl: &'static QrCodeEcc) -> QrCode {
+		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
+		QrCode::encode_segments(&segs, ecl)
+	}
+	
+	
+	pub fn encode_segments(segs: &[QrSegment], ecl: &'static QrCodeEcc) -> QrCode {
+		QrCode::encode_segments_advanced(segs, ecl, 1, 40, -1, true)
+	}
+	
+	
+	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: &'static QrCodeEcc,
+			minversion: u8, maxversion: u8, mask: i8, boostecl: bool) -> QrCode {
+		assert!(1 <= minversion && minversion <= maxversion && maxversion <= 40 && -1 <= mask && mask <= 7, "Invalid value");
+		
+		// Find the minimal version number to use
+		let mut version: u8 = minversion;
+		let mut datausedbits: usize;
+		loop {
+			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;  // Number of data bits available
+			if let Some(n) = QrSegment::get_total_bits(segs, version) {
+				if n <= datacapacitybits {
+					datausedbits = n;
+					break;  // This version number is found to be suitable
+				}
+			}
+			if version >= maxversion {  // All versions in the range could not fit the given data
+				panic!("Data too long");
+			}
+			version += 1;
+		}
+		
+		// Increase the error correction level while the data still fits in the current version number
+		if boostecl {
+			if datausedbits <= QrCode::get_num_data_codewords(version, &QrCodeEcc_MEDIUM  ) * 8 { ecl = &QrCodeEcc_MEDIUM  ; }
+			if datausedbits <= QrCode::get_num_data_codewords(version, &QrCodeEcc_QUARTILE) * 8 { ecl = &QrCodeEcc_QUARTILE; }
+			if datausedbits <= QrCode::get_num_data_codewords(version, &QrCodeEcc_HIGH    ) * 8 { ecl = &QrCodeEcc_HIGH    ; }
+		}
+		
+		// Create the data bit string by concatenating all segments
+		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
+		let mut bb: Vec<bool> = Vec::new();
+		for seg in segs {
+			append_bits(&mut bb, seg.mode.modebits as u32, 4);
+			append_bits(&mut bb, seg.numchars as u32, seg.mode.num_char_count_bits(version));
+			bb.extend_from_slice(&seg.data);
+		}
+		
+		// Add terminator and pad up to a byte if applicable
+		let numzerobits = std::cmp::min(4, datacapacitybits - bb.len()) + (bb.len().wrapping_neg() & 7);
+		append_bits(&mut bb, 0, numzerobits as u8);
+		
+		// Pad with alternate bytes until data capacity is reached
+		let mut padbyte: u32 = 0xEC;
+		while bb.len() < datacapacitybits {
+			append_bits(&mut bb, padbyte, 8);
+			padbyte ^= 0xEC ^ 0x11;
+		}
+		assert_eq!(bb.len() % 8, 0, "Assertion error");
+		
+		let mut bytes: Vec<u8> = vec![0; (bb.len() + 7) / 8];
+		for (i, bit) in bb.iter().enumerate() {
+			bytes[i >> 3] |= (*bit as u8) << (7 - (i & 7));
+		}
+		
+		// Create the QR Code symbol
+		QrCode::encode_codewords(version, ecl, &bytes, mask)
+	}
+	
+	
 	pub fn encode_codewords(ver: u8, ecl: &'static QrCodeEcc, datacodewords: &[u8], mask: i8) -> QrCode {
 		// Check arguments
 		assert!(1 <= ver && ver <= 40 && -1 <= mask && mask <= 7, "Value out of range");
@@ -682,6 +758,8 @@ pub struct QrSegment {
 
 impl QrSegment {
 	
+	/*---- Static factory functions ----*/
+	
 	pub fn make_bytes(data: &[u8]) -> QrSegment {
 		let mut bb: Vec<bool> = Vec::with_capacity(data.len() * 8);
 		for b in data {
@@ -696,7 +774,127 @@ impl QrSegment {
 		}
 	}
 	
+	
+	pub fn make_numeric(text: &[char]) -> QrSegment {
+		let mut bb: Vec<bool> = Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3);
+		let mut accumdata: u32 = 0;
+		let mut accumcount: u32 = 0;
+		for c in text {
+			assert!('0' <= *c && *c <= '9', "String contains non-numeric characters");
+			accumdata = accumdata * 10 + ((*c as u32) - ('0' as u32));
+			accumcount += 1;
+			if accumcount == 3 {
+				append_bits(&mut bb, accumdata, 10);
+				accumdata = 0;
+				accumcount = 0;
+			}
+		}
+		if accumcount > 0 {  // 1 or 2 digits remaining
+			append_bits(&mut bb, accumdata, (accumcount as u8) * 3 + 1);
+		}
+		QrSegment {
+			mode: &QrSegmentMode_NUMERIC,
+			numchars: text.len(),
+			data: bb,
+		}
+	}
+	
+	
+	pub fn make_alphanumeric(text: &[char]) -> QrSegment {
+		let mut bb: Vec<bool> = Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2);
+		let mut accumdata: u32 = 0;
+		let mut accumcount: u32 = 0;
+		for c in text {
+			let i = match QrSegment_ALPHANUMERIC_CHARSET.iter().position(|x| *x == *c) {
+				None => panic!("String contains unencodable characters in alphanumeric mode"),
+				Some(j) => j,
+			};
+			accumdata = accumdata * 45 + (i as u32);
+			accumcount += 1;
+			if accumcount == 2 {
+				append_bits(&mut bb, accumdata, 11);
+				accumdata = 0;
+				accumcount = 0;
+			}
+		}
+		if accumcount > 0 {  // 1 character remaining
+			append_bits(&mut bb, accumdata, 6);
+		}
+		QrSegment {
+			mode: &QrSegmentMode_ALPHANUMERIC,
+			numchars: text.len(),
+			data: bb,
+		}
+	}
+	
+	
+	pub fn make_segments(text: &[char]) -> Vec<QrSegment> {
+		if text.is_empty() {
+			vec![]
+		} else if QrSegment::is_numeric(text) {
+			vec![QrSegment::make_numeric(text)]
+		} else if QrSegment::is_alphanumeric(text) {
+			vec![QrSegment::make_alphanumeric(text)]
+		} else {
+			let s: String = text.iter().cloned().collect();
+			vec![QrSegment::make_bytes(s.as_bytes())]
+		}
+	}
+	
+	
+	pub fn make_eci(assignval: u32) -> QrSegment {
+		let mut bb: Vec<bool> = Vec::with_capacity(24);
+		if assignval < (1 << 7) {
+			append_bits(&mut bb, assignval, 8);
+		} else if assignval < (1 << 14) {
+			append_bits(&mut bb, 2, 2);
+			append_bits(&mut bb, assignval, 14);
+		} else if assignval < 1_000_000 {
+			append_bits(&mut bb, 6, 3);
+			append_bits(&mut bb, assignval, 21);
+		} else {
+			panic!("ECI assignment value out of range");
+		}
+		QrSegment {
+			mode: &QrSegmentMode_ECI,
+			numchars: 0,
+			data: bb,
+		}
+	}
+	
+	
+	fn get_total_bits(segs: &[QrSegment], version: u8) -> Option<usize> {
+		assert!(1 <= version && version <= 40, "Version number out of range");
+		let mut result: usize = 0;
+		for seg in segs {
+			let ccbits = seg.mode.num_char_count_bits(version);
+			if seg.numchars >= 1 << ccbits {
+				return None;
+			}
+			match result.checked_add(4 + (ccbits as usize) + seg.data.len()) {
+				None => return None,
+				Some(val) => result = val,
+			}
+		}
+		Some(result)
+	}
+	
+	
+	fn is_alphanumeric(text: &[char]) -> bool {
+		text.iter().all(|c| QrSegment_ALPHANUMERIC_CHARSET.contains(c))
+	}
+	
+	
+	fn is_numeric(text: &[char]) -> bool {
+		text.iter().all(|c| '0' <= *c && *c <= '9')
+	}
+	
 }
+
+
+static QrSegment_ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6','7','8','9',
+	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+	' ','$','%','*','+','-','.','/',':'];
 
 
 
