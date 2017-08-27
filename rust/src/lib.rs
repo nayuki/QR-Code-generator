@@ -217,6 +217,33 @@ impl QrCode {
 	}
 	
 	
+	pub fn to_svg_string(&self, border: i32) -> String {
+		assert!(border >= 0, "Border must be non-negative");
+		let mut result: String = String::new();
+		result.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		result.push_str("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
+		result.push_str(&format!("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {0} {0}\" stroke=\"none\">\n", self.size + border * 2));
+		result.push_str("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n");
+		result.push_str("\t<path d=\"");
+		let mut head: bool = true;
+		for y in -border .. self.size + border {
+			for x in -border .. self.size + border {
+				if self.get_module(x, y) {
+					if head {
+						head = false;
+					} else {
+						result.push_str(" ");
+					}
+					result.push_str(&format!("M{},{}h1v1h-1z", x + border, y + border));
+				}
+			}
+		}
+		result.push_str("\" fill=\"#000000\"/>\n");
+		result.push_str("</svg>\n");
+		result
+	}
+	
+	
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
 	fn draw_function_patterns(&mut self) {
