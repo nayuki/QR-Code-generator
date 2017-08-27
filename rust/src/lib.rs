@@ -52,8 +52,9 @@ pub struct QrCode {
 
 impl QrCode {
 	
-	pub fn encode_text(text: &[char], ecl: &'static QrCodeEcc) -> QrCode {
-		let segs: Vec<QrSegment> = QrSegment::make_segments(text);
+	pub fn encode_text(text: &str, ecl: &'static QrCodeEcc) -> QrCode {
+		let chrs: Vec<char> = text.chars().collect();
+		let segs: Vec<QrSegment> = QrSegment::make_segments(&chrs);
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
