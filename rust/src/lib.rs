@@ -107,7 +107,9 @@ impl QrCode {
 		}
 		
 		// Add terminator and pad up to a byte if applicable
-		let numzerobits = std::cmp::min(4, datacapacitybits - bb.len()) + (bb.len().wrapping_neg() & 7);
+		let numzerobits = std::cmp::min(4, datacapacitybits - bb.len());
+		append_bits(&mut bb, 0, numzerobits as u8);
+		let numzerobits = bb.len().wrapping_neg() & 7;
 		append_bits(&mut bb, 0, numzerobits as u8);
 		
 		// Pad with alternate bytes until data capacity is reached
@@ -363,7 +365,7 @@ impl QrCode {
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
 			let mut dat: Vec<u8> = Vec::with_capacity(shortblocklen + 1);
-			dat.copy_from_slice(&data[k .. k + shortblocklen - blockecclen + ((i < numshortblocks) as usize)]);
+			dat.extend_from_slice(&data[k .. k + shortblocklen - blockecclen + ((i >= numshortblocks) as usize)]);
 			k += dat.len();
 			let ecc: Vec<u8> = rs.get_remainder(&dat);
 			if i < numshortblocks {
