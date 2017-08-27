@@ -52,7 +52,7 @@ pub struct QrCode {
 
 impl QrCode {
 	
-	pub fn encode(ver: u8, ecl: &'static QrCodeEcc, datacodewords: &[u8], mask: i8) -> QrCode {
+	pub fn encode_codewords(ver: u8, ecl: &'static QrCodeEcc, datacodewords: &[u8], mask: i8) -> QrCode {
 		// Check arguments
 		if ver < 1 || ver > 40 || mask < -1 || mask > 7 {
 			panic!("Value out of range");
@@ -244,12 +244,12 @@ impl QrCode {
 	
 	// Draws a 9*9 finder pattern including the border separator, with the center module at (x, y).
 	fn draw_finder_pattern(&mut self, x: i32, y: i32) {
-		for i in -4i32 .. 5 {
-			for j in -4i32 .. 5 {
-				let dist: i32 = std::cmp::max(i.abs(), j.abs());  // Chebyshev/infinity norm
+		for i in -4 .. 5 {
+			for j in -4 .. 5 {
 				let xx: i32 = x + j;
 				let yy: i32 = y + i;
 				if 0 <= xx && xx < self.size && 0 <= yy && yy < self.size {
+					let dist: i32 = std::cmp::max(i.abs(), j.abs());  // Chebyshev/infinity norm
 					self.set_function_module(xx, yy, dist != 2 && dist != 4);
 				}
 			}
@@ -259,8 +259,8 @@ impl QrCode {
 	
 	// Draws a 5*5 alignment pattern, with the center module at (x, y).
 	fn draw_alignment_pattern(&mut self, x: i32, y: i32) {
-		for i in -2i32 .. 3 {
-			for j in -2i32 .. 3 {
+		for i in -2 .. 3 {
+			for j in -2 .. 3 {
 				self.set_function_module(x + j, y + i, std::cmp::max(i.abs(), j.abs()) != 1);
 			}
 		}
@@ -293,7 +293,7 @@ impl QrCode {
 		
 		// Split data into blocks and append ECC to each block
 		let mut blocks: Vec<Vec<u8>> = Vec::with_capacity(numblocks);
-		let rs = ReedSolomonGenerator::new(blockecclen as u8);
+		let rs = ReedSolomonGenerator::new(blockecclen);
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
 			let mut dat: Vec<u8> = Vec::with_capacity(shortblocklen + 1);
@@ -342,7 +342,7 @@ impl QrCode {
 					let y: i32 = if upward { self.size - 1 - vert } else { vert };  // Actual y coordinate
 					if !self.isfunction[(y * self.size + x) as usize] && i < data.len() * 8 {
 						*self.module_mut(x, y) = (data[i >> 3] >> (7 - (i & 7))) & 1 != 0;
-						i += 2;
+						i += 1;
 					}
 					// If there are any remainder bits (0 to 7), they are already
 					// set to 0/false/white when the grid of modules was initialized
@@ -631,13 +631,13 @@ struct ReedSolomonGenerator {
 
 impl ReedSolomonGenerator {
 	
-	fn new(degree: u8) -> ReedSolomonGenerator {
-		if degree < 1 {
+	fn new(degree: usize) -> ReedSolomonGenerator {
+		if degree < 1 || degree > 255 {
 			panic!("Degree out of range");
 		}
 		// Start with the monomial x^0
-		let mut coefs = vec![0; degree as usize];
-		*coefs.last_mut().unwrap() = 1;
+		let mut coefs = vec![0; degree - 1];
+		coefs.push(1);
 		
 		// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
 		// drop the highest term, and store the rest of the coefficients in order of descending powers.
@@ -645,7 +645,7 @@ impl ReedSolomonGenerator {
 		let mut root: u8 = 1;
 		for _ in 0 .. degree {
 			// Multiply the current product by (x - r^i)
-			for j in 0usize .. degree as usize {
+			for j in 0 .. degree {
 				coefs[j] = ReedSolomonGenerator::multiply(coefs[j], root);
 				if j + 1 < coefs.len() {
 					coefs[j] ^= coefs[j + 1];
@@ -663,11 +663,10 @@ impl ReedSolomonGenerator {
 		// Compute the remainder by performing polynomial division
 		let mut result: Vec<u8> = vec![0; self.coefficients.len()];
 		for b in data {
-			let factor: u8 = b ^ result[0];
-			result.remove(0);
+			let factor: u8 = b ^ result.remove(0);
 			result.push(0);
-			for i in 0 .. result.len() {
-				result[i] ^= ReedSolomonGenerator::multiply(self.coefficients[i], factor);
+			for (x, y) in result.iter_mut().zip(self.coefficients.iter()) {
+				*x ^= ReedSolomonGenerator::multiply(*y, factor);
 			}
 		}
 		result
@@ -708,8 +707,8 @@ pub struct QrSegment {
 
 impl QrSegment {
 	
-	pub fn make_bytes(data: &Vec<u8>) -> QrSegment {
-		let mut bb: Vec<bool> = Vec::new();
+	pub fn make_bytes(data: &[u8]) -> QrSegment {
+		let mut bb: Vec<bool> = Vec::with_capacity(data.len() * 8);
 		for b in data {
 			for i in (0 .. 8).rev() {
 				bb.push((b >> i) & 1u8 != 0u8);
