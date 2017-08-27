@@ -958,8 +958,7 @@ var qrcodegen = new function() {
 			// Compute the remainder by performing polynomial division
 			var result = coefficients.map(function() { return 0; });
 			data.forEach(function(b) {
-				var factor = b ^ result[0];
-				result.shift();
+				var factor = b ^ result.shift();
 				result.push(0);
 				for (var i = 0; i < result.length; i++)
 					result[i] ^= ReedSolomonGenerator.multiply(coefficients[i], factor);

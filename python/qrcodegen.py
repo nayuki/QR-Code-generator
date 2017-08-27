@@ -331,10 +331,10 @@ class QrCode(object):
 		"""Draws a 9*9 finder pattern including the border separator, with the center module at (x, y)."""
 		for i in range(-4, 5):
 			for j in range(-4, 5):
-				dist = max(abs(i), abs(j))  # Chebyshev/infinity norm
 				xx, yy = x + j, y + i
 				if (0 <= xx < self._size) and (0 <= yy < self._size):
-					self._set_function_module(xx, yy, dist not in (2, 4))
+					# Chebyshev/infinity norm
+					self._set_function_module(xx, yy, max(abs(i), abs(j)) not in (2, 4))
 	
 	
 	def _draw_alignment_pattern(self, x, y):
@@ -805,8 +805,7 @@ class _ReedSolomonGenerator(object):
 		# Compute the remainder by performing polynomial division
 		result = [0] * len(self.coefficients)
 		for b in data:
-			factor = (b ^ result[0])
-			del result[0]
+			factor = b ^ result.pop(0)
 			result.append(0)
 			for i in range(len(result)):
 				result[i] ^= _ReedSolomonGenerator._multiply(self.coefficients[i], factor)
