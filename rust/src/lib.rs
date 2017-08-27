@@ -886,6 +886,21 @@ impl QrSegment {
 	}
 	
 	
+	pub fn mode(&self) -> &QrSegmentMode {
+		self.mode
+	}
+	
+	
+	pub fn num_chars(&self) -> usize {
+		self.numchars
+	}
+	
+	
+	pub fn data(&self) -> &Vec<bool> {
+		&self.data
+	}
+	
+	
 	fn get_total_bits(segs: &[QrSegment], version: u8) -> Option<usize> {
 		assert!(1 <= version && version <= 40, "Version number out of range");
 		let mut result: usize = 0;
@@ -962,7 +977,7 @@ pub static QrSegmentMode_ECI         : QrSegmentMode = QrSegmentMode { modebits:
 /*---- Bit buffer functionality ----*/
 
 // Appends the given number of bits of the given value to this sequence.
-fn append_bits(bb: &mut Vec<bool>, val: u32, len: u8) {
+pub fn append_bits(bb: &mut Vec<bool>, val: u32, len: u8) {
 	assert!(len < 32 && (val >> len) == 0 || len == 32, "Value out of range");
 	for i in (0 .. len).rev() {  // Append bit by bit
 		bb.push((val >> i) & 1 != 0);
