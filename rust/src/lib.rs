@@ -797,11 +797,7 @@ impl QrSegment {
 				bb.push((b >> i) & 1u8 != 0u8);
 			}
 		}
-		QrSegment {
-			mode: &QrSegmentMode_BYTE,
-			numchars: data.len(),
-			data: bb,
-		}
+		QrSegment::new(&QrSegmentMode_BYTE, data.len(), bb)
 	}
 	
 	
@@ -822,11 +818,7 @@ impl QrSegment {
 		if accumcount > 0 {  // 1 or 2 digits remaining
 			append_bits(&mut bb, accumdata, (accumcount as u8) * 3 + 1);
 		}
-		QrSegment {
-			mode: &QrSegmentMode_NUMERIC,
-			numchars: text.len(),
-			data: bb,
-		}
+		QrSegment::new(&QrSegmentMode_NUMERIC, text.len(), bb)
 	}
 	
 	
@@ -850,11 +842,7 @@ impl QrSegment {
 		if accumcount > 0 {  // 1 character remaining
 			append_bits(&mut bb, accumdata, 6);
 		}
-		QrSegment {
-			mode: &QrSegmentMode_ALPHANUMERIC,
-			numchars: text.len(),
-			data: bb,
-		}
+		QrSegment::new(&QrSegmentMode_ALPHANUMERIC, text.len(), bb)
 	}
 	
 	
@@ -885,10 +873,15 @@ impl QrSegment {
 		} else {
 			panic!("ECI assignment value out of range");
 		}
+		QrSegment::new(&QrSegmentMode_ECI, 0, bb)
+	}
+	
+	
+	pub fn new(mode: &'static QrSegmentMode, numchars: usize, data: Vec<bool>) -> QrSegment {
 		QrSegment {
-			mode: &QrSegmentMode_ECI,
-			numchars: 0,
-			data: bb,
+			mode: mode,
+			numchars: numchars,
+			data: data,
 		}
 	}
 	
