@@ -31,10 +31,11 @@ if sys.version_info.major < 3:
 
 
 CHILD_PROGRAMS = [
-	["python", "qrcodegen-worker.py"],  # Python program
-	["java", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
-	["./qrcodegen-worker"],  # C program
-	["./QrCodeGeneratorWorker"],  # C++ program
+	["python2", "../python/qrcodegen-worker.py"],  # Python 2 program
+	["python3", "../python/qrcodegen-worker.py"],  # Python 3 program
+	["java", "-cp", "../java", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
+	["../c/qrcodegen-worker"],  # C program
+	["../cpp/QrCodeGeneratorWorker"],  # C++ program
 	["../rust/target/debug/examples/qrcodegen-worker"],  # Rust program
 ]
 
