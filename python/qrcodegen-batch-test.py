@@ -25,7 +25,7 @@
 # 
 
 from __future__ import print_function
-import itertools, random, subprocess, sys
+import itertools, random, subprocess, sys, time
 if sys.version_info.major < 3:
 	raise RuntimeError("Requires Python 3+")
 
@@ -39,9 +39,29 @@ CHILD_PROGRAMS = [
 ]
 
 
+subprocs = []
+
 def main():
+	# Launch workers
 	global subprocs
-	subprocs = [subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True) for args in CHILD_PROGRAMS]
+	try:
+		for args in CHILD_PROGRAMS:
+			subprocs.append(subprocess.Popen(args, universal_newlines=True,
+				stdin=subprocess.PIPE, stdout=subprocess.PIPE))
+	except FileNotFoundError:
+		write_all(-1)
+		raise
+	
+	# Check if any died
+	time.sleep(0.3)
+	if any(proc.poll() is not None for proc in subprocs):
+		for proc in subprocs:
+			if proc.poll() is None:
+				print(-1, file=proc.stdin)
+				proc.stdin.flush()
+		sys.exit("Error: One or more workers failed to start")
+	
+	# Do tests
 	for i in itertools.count():
 		print("Trial {}: ".format(i), end="")
 		do_trial()
