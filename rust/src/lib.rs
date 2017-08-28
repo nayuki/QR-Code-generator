@@ -845,7 +845,7 @@ impl QrSegment {
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text {
-			let i = match QrSegment_ALPHANUMERIC_CHARSET.iter().position(|x| *x == *c) {
+			let i = match ALPHANUMERIC_CHARSET.iter().position(|x| *x == *c) {
 				None => panic!("String contains unencodable characters in alphanumeric mode"),
 				Some(j) => j,
 			};
@@ -937,7 +937,7 @@ impl QrSegment {
 	
 	
 	fn is_alphanumeric(text: &[char]) -> bool {
-		text.iter().all(|c| QrSegment_ALPHANUMERIC_CHARSET.contains(c))
+		text.iter().all(|c| ALPHANUMERIC_CHARSET.contains(c))
 	}
 	
 	
@@ -948,7 +948,7 @@ impl QrSegment {
 }
 
 
-static QrSegment_ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6','7','8','9',
+static ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6','7','8','9',
 	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
 	' ','$','%','*','+','-','.','/',':'];
 
