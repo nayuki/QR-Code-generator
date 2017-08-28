@@ -381,8 +381,8 @@ impl QrCode {
 		assert_eq!(data.len(), QrCode::get_num_data_codewords(self.version, self.errorcorrectionlevel), "Illegal argument");
 		
 		// Calculate parameter numbers
-		let numblocks: usize = QrCode::table_get(&QrCode_NUM_ERROR_CORRECTION_BLOCKS, self.version, self.errorcorrectionlevel);
-		let blockecclen: usize = QrCode::table_get(&QrCode_ECC_CODEWORDS_PER_BLOCK, self.version, self.errorcorrectionlevel);
+		let numblocks: usize = QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, self.version, self.errorcorrectionlevel);
+		let blockecclen: usize = QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, self.version, self.errorcorrectionlevel);
 		let rawcodewords: usize = QrCode::get_num_raw_data_modules(self.version) / 8;
 		let numshortblocks: usize = numblocks - rawcodewords % numblocks;
 		let shortblocklen: usize = rawcodewords / numblocks;
@@ -514,7 +514,7 @@ impl QrCode {
 				} else {
 					runx += 1;
 					if runx == 5 {
-						result += QrCode_PENALTY_N1;
+						result += PENALTY_N1;
 					} else if runx > 5 {
 						result += 1;
 					}
@@ -532,7 +532,7 @@ impl QrCode {
 				} else {
 					runy += 1;
 					if runy == 5 {
-						result += QrCode_PENALTY_N1;
+						result += PENALTY_N1;
 					} else if runy > 5 {
 						result += 1;
 					}
@@ -547,7 +547,7 @@ impl QrCode {
 				if color == self.module(x + 1, y) &&
 				   color == self.module(x, y + 1) &&
 				   color == self.module(x + 1, y + 1) {
-					result += QrCode_PENALTY_N2;
+					result += PENALTY_N2;
 				}
 			}
 		}
@@ -558,7 +558,7 @@ impl QrCode {
 			for x in 0 .. size {
 				bits = ((bits << 1) & 0x7FF) | (self.module(x, y) as u32);
 				if x >= 10 && (bits == 0x05D || bits == 0x5D0) {  // Needs 11 bits accumulated
-					result += QrCode_PENALTY_N3;
+					result += PENALTY_N3;
 				}
 			}
 		}
@@ -568,7 +568,7 @@ impl QrCode {
 			for y in 0 .. size {
 				bits = ((bits << 1) & 0x7FF) | (self.module(x, y) as u32);
 				if y >= 10 && (bits == 0x05D || bits == 0x5D0) {  // Needs 11 bits accumulated
-					result += QrCode_PENALTY_N3;
+					result += PENALTY_N3;
 				}
 			}
 		}
@@ -582,7 +582,7 @@ impl QrCode {
 		// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
 		let mut k: i32 = 0;
 		while black*20 < (9-k)*total || black*20 > (11+k)*total {
-			result += QrCode_PENALTY_N4;
+			result += PENALTY_N4;
 			k += 1;
 		}
 		result
@@ -640,8 +640,8 @@ impl QrCode {
 	fn get_num_data_codewords(ver: u8, ecl: &QrCodeEcc) -> usize {
 		assert!(1 <= ver && ver <= 40, "Version number out of range");
 		QrCode::get_num_raw_data_modules(ver) / 8
-			- QrCode::table_get(&QrCode_ECC_CODEWORDS_PER_BLOCK, ver, ecl)
-			* QrCode::table_get(&QrCode_NUM_ERROR_CORRECTION_BLOCKS, ver, ecl)
+			- QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, ver, ecl)
+			* QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, ver, ecl)
 	}
 	
 	
@@ -655,13 +655,13 @@ impl QrCode {
 /*---- Private tables of constants ----*/
 
 // For use in get_penalty_score(), when evaluating which mask is best.
-const QrCode_PENALTY_N1: i32 = 3;
-const QrCode_PENALTY_N2: i32 = 3;
-const QrCode_PENALTY_N3: i32 = 40;
-const QrCode_PENALTY_N4: i32 = 10;
+const PENALTY_N1: i32 = 3;
+const PENALTY_N2: i32 = 3;
+const PENALTY_N3: i32 = 40;
+const PENALTY_N4: i32 = 10;
 
 
-static QrCode_ECC_CODEWORDS_PER_BLOCK: [[i8; 41]; 4] = [
+static ECC_CODEWORDS_PER_BLOCK: [[i8; 41]; 4] = [
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
 	//0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
 	[-1,  7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],  // Low
@@ -670,7 +670,7 @@ static QrCode_ECC_CODEWORDS_PER_BLOCK: [[i8; 41]; 4] = [
 	[-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],  // High
 ];
 
-static QrCode_NUM_ERROR_CORRECTION_BLOCKS: [[i8; 41]; 4] = [
+static NUM_ERROR_CORRECTION_BLOCKS: [[i8; 41]; 4] = [
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
 	//0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
 	[-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4,  4,  4,  4,  4,  6,  6,  6,  6,  7,  8,  8,  9,  9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],  // Low
