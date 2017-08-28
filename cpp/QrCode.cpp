@@ -81,10 +81,9 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
 	
 	// Increase the error correction level while the data still fits in the current version number
 	const Ecc *newEcl = &ecl;
-	if (boostEcl) {
-		if (dataUsedBits <= getNumDataCodewords(version, Ecc::MEDIUM  ) * 8)  newEcl = &Ecc::MEDIUM  ;
-		if (dataUsedBits <= getNumDataCodewords(version, Ecc::QUARTILE) * 8)  newEcl = &Ecc::QUARTILE;
-		if (dataUsedBits <= getNumDataCodewords(version, Ecc::HIGH    ) * 8)  newEcl = &Ecc::HIGH    ;
+	for (const Ecc *anEcl : vector<const Ecc*>{&Ecc::MEDIUM, &Ecc::QUARTILE, &Ecc::HIGH}) {
+		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, *anEcl) * 8)
+			newEcl = anEcl;
 	}
 	
 	// Create the data bit string by concatenating all segments

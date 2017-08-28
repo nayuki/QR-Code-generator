@@ -92,10 +92,10 @@ impl QrCode {
 		}
 		
 		// Increase the error correction level while the data still fits in the current version number
-		if boostecl {
-			if datausedbits <= QrCode::get_num_data_codewords(version, &QrCodeEcc_MEDIUM  ) * 8 { ecl = &QrCodeEcc_MEDIUM  ; }
-			if datausedbits <= QrCode::get_num_data_codewords(version, &QrCodeEcc_QUARTILE) * 8 { ecl = &QrCodeEcc_QUARTILE; }
-			if datausedbits <= QrCode::get_num_data_codewords(version, &QrCodeEcc_HIGH    ) * 8 { ecl = &QrCodeEcc_HIGH    ; }
+		for newecl in &[&QrCodeEcc_MEDIUM, &QrCodeEcc_QUARTILE, &QrCodeEcc_HIGH] {
+			if boostecl && datausedbits <= QrCode::get_num_data_codewords(version, newecl) * 8 {
+				ecl = newecl;
+			}
 		}
 		
 		// Create the data bit string by concatenating all segments
