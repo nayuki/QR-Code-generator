@@ -99,17 +99,16 @@ int main(void) {
 		free(data);
 		free(tempBuffer);
 		
-		// Print grid of modules
-		if (!ok)
-			printf("-1\n");
-		else {
+		if (ok) {
+			// Print grid of modules
 			int size = qrcodegen_getSize(qrcode);
 			printf("%d\n", (size - 17) / 4);
 			for (int y = 0; y < size; y++) {
 				for (int x = 0; x < size; x++)
 					printf("%d\n", qrcodegen_getModule(qrcode, x, y) ? 1 : 0);
 			}
-		}
+		} else
+			printf("-1\n");
 		free(qrcode);
 		fflush(stdout);
 	}

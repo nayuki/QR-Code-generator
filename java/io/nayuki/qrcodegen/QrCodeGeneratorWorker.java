@@ -77,24 +77,20 @@ public final class QrCodeGeneratorWorker {
 			else
 				segs = Arrays.asList(QrSegment.makeBytes(data));
 			
-			// Try to make QR Code symbol
-			QrCode qr;
-			try {
-				qr = QrCode.encodeSegments(segs, QrCode.Ecc.values()[errCorLvl], minVersion, maxVersion, mask, boostEcl != 0);
-			} catch (IllegalArgumentException e) {
-				if (e.getMessage().equals("Data too long")) {
-					System.out.println(-1);
-					System.out.flush();
-					continue;
-				} else
-					throw e;
-			}
 			
-			// Print grid of modules
-			System.out.println(qr.version);
-			for (int y = 0; y < qr.size; y++) {
-				for (int x = 0; x < qr.size; x++)
-					System.out.println(qr.getModule(x, y));
+			try {  // Try to make QR Code symbol
+				QrCode qr = QrCode.encodeSegments(segs, QrCode.Ecc.values()[errCorLvl], minVersion, maxVersion, mask, boostEcl != 0);
+				// Print grid of modules
+				System.out.println(qr.version);
+				for (int y = 0; y < qr.size; y++) {
+					for (int x = 0; x < qr.size; x++)
+						System.out.println(qr.getModule(x, y));
+				}
+				
+			} catch (IllegalArgumentException e) {
+				if (!e.getMessage().equals("Data too long"))
+					throw e;
+				System.out.println(-1);
 			}
 			System.out.flush();
 		}

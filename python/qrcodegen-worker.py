@@ -60,22 +60,18 @@ def main():
 		else:
 			segs = [qrcodegen.QrSegment.make_bytes("".join(chr(b) for b in data))]
 		
-		# Try to make QR Code symbol
-		try:
+		try:  # Try to make QR Code symbol
 			qr = qrcodegen.QrCode.encode_segments(segs, ECC_LEVELS[errcorlvl], minversion, maxversion, mask, boostecl != 0)
+			# Print grid of modules
+			print(qr.get_version())
+			for y in range(qr.get_size()):
+				for x in range(qr.get_size()):
+					print(qr.get_module(x, y))
+			
 		except ValueError as e:
-			if e.args[0] == "Data too long":
-				print(-1)
-				sys.stdout.flush()
-				continue
-			else:
+			if e.args[0] != "Data too long":
 				raise
-		
-		# Print grid of modules
-		print(qr.get_version())
-		for y in range(qr.get_size()):
-			for x in range(qr.get_size()):
-				print(qr.get_module(x, y))
+			print(-1)
 		sys.stdout.flush()
 
 

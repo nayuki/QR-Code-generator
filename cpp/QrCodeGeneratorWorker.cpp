@@ -83,11 +83,9 @@ int main() {
 		} else
 			segs.push_back(QrSegment::makeBytes(data));
 		
-		// Try to make QR Code symbol
-		try {
+		try {  // Try to make QR Code symbol
 			const QrCode qr = QrCode::encodeSegments(segs,
 				*ECC_LEVELS[errCorLvl], minVersion, maxVersion, mask, boostEcl == 1);
-			
 			// Print grid of modules
 			std::cout << qr.version << std::endl;
 			for (int y = 0; y < qr.size; y++) {
@@ -96,12 +94,11 @@ int main() {
 			}
 			
 		} catch (const char *msg) {
-			if (strcmp(msg, "Data too long") == 0)
-				std::cout << -1 << std::endl;
-			else {
+			if (strcmp(msg, "Data too long") != 0) {
 				std::cerr << msg << std::endl;
 				return EXIT_FAILURE;
 			}
+			std::cout << -1 << std::endl;
 		}
 		std::cout << std::flush;
 	}
