@@ -133,7 +133,7 @@ fn do_segment_demo() {
 		qrcodegen::append_bits(&mut bb, *c, 13);
 	}
 	let segs = vec![
-		QrSegment::new(&qrcodegen::QrSegmentMode_KANJI, kanjichars.len(), bb),
+		QrSegment::new(qrcodegen::QrSegmentMode::Kanji, kanjichars.len(), bb),
 	];
 	let qr = QrCode::encode_segments(&segs, QrCodeEcc::Low).unwrap();
 	print_qr(&qr);

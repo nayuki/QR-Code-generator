@@ -102,7 +102,7 @@ impl QrCode {
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 		let mut bb: Vec<bool> = Vec::new();
 		for seg in segs {
-			append_bits(&mut bb, seg.mode.modebits as u32, 4);
+			append_bits(&mut bb, seg.mode.mode_bits(), 4);
 			append_bits(&mut bb, seg.numchars as u32, seg.mode.num_char_count_bits(version));
 			bb.extend_from_slice(&seg.data);
 		}
@@ -793,7 +793,7 @@ impl ReedSolomonGenerator {
 pub struct QrSegment {
 	
 	// The mode indicator for this segment.
-	mode: &'static QrSegmentMode,
+	mode: QrSegmentMode,
 	
 	// The length of this segment's unencoded data, measured in characters.
 	numchars: usize,
@@ -815,7 +815,7 @@ impl QrSegment {
 				bb.push((b >> i) & 1u8 != 0u8);
 			}
 		}
-		QrSegment::new(&QrSegmentMode_BYTE, data.len(), bb)
+		QrSegment::new(QrSegmentMode::Byte, data.len(), bb)
 	}
 	
 	
@@ -836,7 +836,7 @@ impl QrSegment {
 		if accumcount > 0 {  // 1 or 2 digits remaining
 			append_bits(&mut bb, accumdata, (accumcount as u8) * 3 + 1);
 		}
-		QrSegment::new(&QrSegmentMode_NUMERIC, text.len(), bb)
+		QrSegment::new(QrSegmentMode::Numeric, text.len(), bb)
 	}
 	
 	
@@ -860,7 +860,7 @@ impl QrSegment {
 		if accumcount > 0 {  // 1 character remaining
 			append_bits(&mut bb, accumdata, 6);
 		}
-		QrSegment::new(&QrSegmentMode_ALPHANUMERIC, text.len(), bb)
+		QrSegment::new(QrSegmentMode::Alphanumeric, text.len(), bb)
 	}
 	
 	
@@ -891,11 +891,11 @@ impl QrSegment {
 		} else {
 			panic!("ECI assignment value out of range");
 		}
-		QrSegment::new(&QrSegmentMode_ECI, 0, bb)
+		QrSegment::new(QrSegmentMode::Eci, 0, bb)
 	}
 	
 	
-	pub fn new(mode: &'static QrSegmentMode, numchars: usize, data: Vec<bool>) -> QrSegment {
+	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> QrSegment {
 		QrSegment {
 			mode: mode,
 			numchars: numchars,
@@ -904,7 +904,7 @@ impl QrSegment {
 	}
 	
 	
-	pub fn mode(&self) -> &QrSegmentMode {
+	pub fn mode(&self) -> QrSegmentMode {
 		self.mode
 	}
 	
@@ -956,39 +956,52 @@ static QrSegment_ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6'
 
 /*---- QrSegmentMode functionality ----*/
 
-pub struct QrSegmentMode {
-	
-	// An unsigned 4-bit integer value (range 0 to 15)
-	// representing the mode indicator bits for this mode object.
-	modebits: u8,
-	
-	numbitscharcount: [u8; 3],
-	
+#[derive(Clone, Copy)]
+pub enum QrSegmentMode {
+	Numeric,
+	Alphanumeric,
+	Byte,
+	Kanji,
+	Eci,
 }
 
 
 impl QrSegmentMode {
 	
+	// Returns an unsigned 4-bit integer value (range 0 to 15)
+	// representing the mode indicator bits for this mode object.
+	fn mode_bits(&self) -> u32 {
+		match *self {
+			QrSegmentMode::Numeric      => 0x1,
+			QrSegmentMode::Alphanumeric => 0x2,
+			QrSegmentMode::Byte         => 0x4,
+			QrSegmentMode::Kanji        => 0x8,
+			QrSegmentMode::Eci          => 0x7,
+		}
+	}
+	
+	
 	pub fn num_char_count_bits(&self, ver: u8) -> u8 {
+		let array: [u8; 3] = match *self {
+			QrSegmentMode::Numeric      => [10, 12, 14],
+			QrSegmentMode::Alphanumeric => [ 9, 11, 13],
+			QrSegmentMode::Byte         => [ 8, 16, 16],
+			QrSegmentMode::Kanji        => [ 8, 10, 12],
+			QrSegmentMode::Eci          => [ 0,  0,  0],
+		};
+		
 		if 1 <= ver && ver <= 9 {
-			self.numbitscharcount[0]
+			array[0]
 		} else if 10 <= ver && ver <= 26 {
-			self.numbitscharcount[1]
+			array[1]
 		} else if 27 <= ver && ver <= 40 {
-			self.numbitscharcount[2]
+			array[2]
 		} else {
 			panic!("Version number out of range");
 		}
 	}
 	
 }
-
-
-pub static QrSegmentMode_NUMERIC     : QrSegmentMode = QrSegmentMode { modebits: 0x1, numbitscharcount: [10, 12, 14] };
-pub static QrSegmentMode_ALPHANUMERIC: QrSegmentMode = QrSegmentMode { modebits: 0x2, numbitscharcount: [ 9, 11, 13] };
-pub static QrSegmentMode_BYTE        : QrSegmentMode = QrSegmentMode { modebits: 0x4, numbitscharcount: [ 8, 16, 16] };
-pub static QrSegmentMode_KANJI       : QrSegmentMode = QrSegmentMode { modebits: 0x8, numbitscharcount: [ 8, 10, 12] };
-pub static QrSegmentMode_ECI         : QrSegmentMode = QrSegmentMode { modebits: 0x7, numbitscharcount: [ 0,  0,  0] };
 
 
 
