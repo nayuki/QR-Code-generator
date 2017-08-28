@@ -512,7 +512,7 @@ class QrCode(object):
 				step = 26
 			result = [6]
 			pos = ver * 4 + 10
-			for i in range(numalign - 1):
+			for _ in range(numalign - 1):
 				result.insert(1, pos)
 				pos -= step
 			return result
@@ -790,7 +790,7 @@ class _ReedSolomonGenerator(object):
 		# drop the highest term, and store the rest of the coefficients in order of descending powers.
 		# Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
 		root = 1
-		for i in range(degree):
+		for _ in range(degree):
 			# Multiply the current product by (x - r^i)
 			for j in range(degree):
 				self.coefficients[j] = _ReedSolomonGenerator._multiply(self.coefficients[j], root)
