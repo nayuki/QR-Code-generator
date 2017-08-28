@@ -28,6 +28,7 @@
 
 extern crate qrcodegen;
 use qrcodegen::QrCode;
+use qrcodegen::QrCodeEcc;
 use qrcodegen::QrSegment;
 
 
@@ -70,7 +71,7 @@ fn main() {
 		}
 		
 		// Try to make QR Code symbol
-		match QrCode::encode_segments_advanced(&segs, &ECC_LEVELS[errcorlvl as usize],
+		match QrCode::encode_segments_advanced(&segs, ECC_LEVELS[errcorlvl as usize],
 				minversion as u8, maxversion as u8, mask as i8, boostecl != 0) {
 		
 			Some(qr) => {
@@ -103,9 +104,9 @@ fn read_int() -> i16 {
 }
 
 
-static ECC_LEVELS: [&'static qrcodegen::QrCodeEcc; 4] = [
-	&qrcodegen::QrCodeEcc_LOW,
-	&qrcodegen::QrCodeEcc_MEDIUM,
-	&qrcodegen::QrCodeEcc_QUARTILE,
-	&qrcodegen::QrCodeEcc_HIGH,
+static ECC_LEVELS: [QrCodeEcc; 4] = [
+	QrCodeEcc::Low,
+	QrCodeEcc::Medium,
+	QrCodeEcc::Quartile,
+	QrCodeEcc::High,
 ];

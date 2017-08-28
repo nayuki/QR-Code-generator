@@ -34,7 +34,7 @@ pub struct QrCode {
 	size: i32,
 	
 	// The error correction level used in this QR Code symbol.
-	errorcorrectionlevel: &'static QrCodeEcc,
+	errorcorrectionlevel: QrCodeEcc,
 	
 	// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 	// Note that even if a constructor was called with automatic masking requested
@@ -52,25 +52,25 @@ pub struct QrCode {
 
 impl QrCode {
 	
-	pub fn encode_text(text: &str, ecl: &'static QrCodeEcc) -> Option<QrCode> {
+	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Option<QrCode> {
 		let chrs: Vec<char> = text.chars().collect();
 		let segs: Vec<QrSegment> = QrSegment::make_segments(&chrs);
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
 	
-	pub fn encode_binary(data: &[u8], ecl: &'static QrCodeEcc) -> Option<QrCode> {
+	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Option<QrCode> {
 		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
 	
-	pub fn encode_segments(segs: &[QrSegment], ecl: &'static QrCodeEcc) -> Option<QrCode> {
+	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<QrCode> {
 		QrCode::encode_segments_advanced(segs, ecl, 1, 40, -1, true)
 	}
 	
 	
-	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: &'static QrCodeEcc,
+	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
 			minversion: u8, maxversion: u8, mask: i8, boostecl: bool) -> Option<QrCode> {
 		assert!(1 <= minversion && minversion <= maxversion && maxversion <= 40 && -1 <= mask && mask <= 7, "Invalid value");
 		
@@ -92,9 +92,9 @@ impl QrCode {
 		}
 		
 		// Increase the error correction level while the data still fits in the current version number
-		for newecl in &[&QrCodeEcc_MEDIUM, &QrCodeEcc_QUARTILE, &QrCodeEcc_HIGH] {
-			if boostecl && datausedbits <= QrCode::get_num_data_codewords(version, newecl) * 8 {
-				ecl = newecl;
+		for newecl in &[QrCodeEcc::Medium, QrCodeEcc::Quartile, QrCodeEcc::High] {
+			if boostecl && datausedbits <= QrCode::get_num_data_codewords(version, *newecl) * 8 {
+				ecl = *newecl;
 			}
 		}
 		
@@ -131,7 +131,7 @@ impl QrCode {
 	}
 	
 	
-	pub fn encode_codewords(ver: u8, ecl: &'static QrCodeEcc, datacodewords: &[u8], mask: i8) -> QrCode {
+	pub fn encode_codewords(ver: u8, ecl: QrCodeEcc, datacodewords: &[u8], mask: i8) -> QrCode {
 		// Check arguments
 		assert!(1 <= ver && ver <= 40 && -1 <= mask && mask <= 7, "Value out of range");
 		
@@ -189,7 +189,7 @@ impl QrCode {
 	
 	
 	// Returns this QR Code's error correction level.
-	pub fn error_correction_level(&self) -> &'static QrCodeEcc {
+	pub fn error_correction_level(&self) -> QrCodeEcc {
 		self.errorcorrectionlevel
 	}
 	
@@ -283,7 +283,7 @@ impl QrCode {
 	fn draw_format_bits(&mut self, mask: u8) {
 		// Calculate error correction code and pack bits
 		let size: i32 = self.size;
-		let mut data: u32 = (self.errorcorrectionlevel.formatbits << 3 | mask) as u32;  // errcorrlvl is uint2, mask is uint3
+		let mut data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask as u32);  // errcorrlvl is uint2, mask is uint3
 		let mut rem: u32 = data;
 		for _ in 0 .. 10 {
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -637,7 +637,7 @@ impl QrCode {
 	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
-	fn get_num_data_codewords(ver: u8, ecl: &QrCodeEcc) -> usize {
+	fn get_num_data_codewords(ver: u8, ecl: QrCodeEcc) -> usize {
 		assert!(1 <= ver && ver <= 40, "Version number out of range");
 		QrCode::get_num_raw_data_modules(ver) / 8
 			- QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, ver, ecl)
@@ -645,8 +645,8 @@ impl QrCode {
 	}
 	
 	
-	fn table_get(table: &'static [[i8; 41]; 4], ver: u8, ecl: &QrCodeEcc) -> usize {
-		table[ecl.ordinal as usize][ver as usize] as usize
+	fn table_get(table: &'static [[i8; 41]; 4], ver: u8, ecl: QrCodeEcc) -> usize {
+		table[ecl.ordinal()][ver as usize] as usize
 	}
 	
 }
@@ -683,21 +683,39 @@ static NUM_ERROR_CORRECTION_BLOCKS: [[i8; 41]; 4] = [
 
 /*---- QrCodeEcc functionality ----*/
 
-pub struct QrCodeEcc {
-	
-	// In the range 0 to 3 (unsigned 2-bit integer).
-	pub ordinal: u8,
-	
-	// In the range 0 to 3 (unsigned 2-bit integer).
-	formatbits: u8,
-	
+#[derive(Clone, Copy)]
+pub enum QrCodeEcc {
+	Low,
+	Medium,
+	Quartile,
+	High,
 }
 
 
-pub static QrCodeEcc_LOW     : QrCodeEcc = QrCodeEcc { ordinal: 0, formatbits: 1 };
-pub static QrCodeEcc_MEDIUM  : QrCodeEcc = QrCodeEcc { ordinal: 1, formatbits: 0 };
-pub static QrCodeEcc_QUARTILE: QrCodeEcc = QrCodeEcc { ordinal: 2, formatbits: 3 };
-pub static QrCodeEcc_HIGH    : QrCodeEcc = QrCodeEcc { ordinal: 3, formatbits: 2 };
+impl QrCodeEcc {
+	
+	// Returns an unsigned 2-bit integer (in the range 0 to 3).
+	fn ordinal(&self) -> usize {
+		match *self {
+			QrCodeEcc::Low      => 0,
+			QrCodeEcc::Medium   => 1,
+			QrCodeEcc::Quartile => 2,
+			QrCodeEcc::High     => 3,
+		}
+	}
+	
+	
+	// Returns an unsigned 2-bit integer (in the range 0 to 3).
+	fn format_bits(&self) -> u32 {
+		match *self {
+			QrCodeEcc::Low      => 1,
+			QrCodeEcc::Medium   => 0,
+			QrCodeEcc::Quartile => 3,
+			QrCodeEcc::High     => 2,
+		}
+	}
+	
+}
 
 
 
