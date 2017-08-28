@@ -76,7 +76,7 @@ impl QrCode {
 		
 		// Find the minimal version number to use
 		let mut version: u8 = minversion;
-		let mut datausedbits: usize;
+		let datausedbits: usize;
 		loop {
 			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;  // Number of data bits available
 			if let Some(n) = QrSegment::get_total_bits(segs, version) {
@@ -121,7 +121,7 @@ impl QrCode {
 		}
 		assert_eq!(bb.len() % 8, 0, "Assertion error");
 		
-		let mut bytes: Vec<u8> = vec![0; (bb.len() + 7) / 8];
+		let mut bytes: Vec<u8> = vec![0; bb.len() / 8];
 		for (i, bit) in bb.iter().enumerate() {
 			bytes[i >> 3] |= (*bit as u8) << (7 - (i & 7));
 		}
@@ -982,10 +982,4 @@ pub fn append_bits(bb: &mut Vec<bool>, val: u32, len: u8) {
 	for i in (0 .. len).rev() {  // Append bit by bit
 		bb.push((val >> i) & 1 != 0);
 	}
-}
-
-
-// Appends the data of the given segment to this bit buffer.
-fn append_data(bb: &mut Vec<bool>, seg: &QrSegment) {
-	bb.extend_from_slice(&seg.data);
 }
