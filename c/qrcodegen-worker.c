@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "qrcodegen.h"
 
 #ifndef __cplusplus
@@ -90,8 +91,7 @@ int main(void) {
 				minVersion, maxVersion, (enum qrcodegen_Mask)mask, boostEcl == 1);
 			free(text);
 		} else if (length <= bufferLen) {
-			for (int i = 0; i < length; i++)
-				tempBuffer[i] = data[i];
+			memcpy(tempBuffer, data, length * sizeof(data[0]));
 			ok = qrcodegen_encodeBinary(tempBuffer, (size_t)length, qrcode, (enum qrcodegen_Ecc)errCorLvl,
 				minVersion, maxVersion, (enum qrcodegen_Mask)mask, boostEcl == 1);
 		} else
