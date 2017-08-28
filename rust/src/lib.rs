@@ -52,26 +52,26 @@ pub struct QrCode {
 
 impl QrCode {
 	
-	pub fn encode_text(text: &str, ecl: &'static QrCodeEcc) -> QrCode {
+	pub fn encode_text(text: &str, ecl: &'static QrCodeEcc) -> Option<QrCode> {
 		let chrs: Vec<char> = text.chars().collect();
 		let segs: Vec<QrSegment> = QrSegment::make_segments(&chrs);
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
 	
-	pub fn encode_binary(data: &[u8], ecl: &'static QrCodeEcc) -> QrCode {
+	pub fn encode_binary(data: &[u8], ecl: &'static QrCodeEcc) -> Option<QrCode> {
 		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
 	
-	pub fn encode_segments(segs: &[QrSegment], ecl: &'static QrCodeEcc) -> QrCode {
+	pub fn encode_segments(segs: &[QrSegment], ecl: &'static QrCodeEcc) -> Option<QrCode> {
 		QrCode::encode_segments_advanced(segs, ecl, 1, 40, -1, true)
 	}
 	
 	
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: &'static QrCodeEcc,
-			minversion: u8, maxversion: u8, mask: i8, boostecl: bool) -> QrCode {
+			minversion: u8, maxversion: u8, mask: i8, boostecl: bool) -> Option<QrCode> {
 		assert!(1 <= minversion && minversion <= maxversion && maxversion <= 40 && -1 <= mask && mask <= 7, "Invalid value");
 		
 		// Find the minimal version number to use
@@ -86,7 +86,7 @@ impl QrCode {
 				}
 			}
 			if version >= maxversion {  // All versions in the range could not fit the given data
-				panic!("Data too long");
+				return None;
 			}
 			version += 1;
 		}
@@ -127,7 +127,7 @@ impl QrCode {
 		}
 		
 		// Create the QR Code symbol
-		QrCode::encode_codewords(version, ecl, &bytes, mask)
+		Some(QrCode::encode_codewords(version, ecl, &bytes, mask))
 	}
 	
 	

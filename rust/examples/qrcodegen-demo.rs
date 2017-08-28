@@ -48,7 +48,7 @@ fn do_basic_demo() {
 	let errcorlvl: &'static QrCodeEcc = &QrCodeEcc_LOW;  // Error correction level
 	
 	// Make and print the QR Code symbol
-	let qr: QrCode = QrCode::encode_text(text, errcorlvl);
+	let qr: QrCode = QrCode::encode_text(text, errcorlvl).unwrap();
 	print_qr(&qr);
 	println!("{}", qr.to_svg_string(4));
 }
@@ -57,20 +57,20 @@ fn do_basic_demo() {
 // Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console.
 fn do_variety_demo() {
 	// Project Nayuki URL
-	let qr = QrCode::encode_text("https://www.nayuki.io/", &QrCodeEcc_HIGH);
+	let qr = QrCode::encode_text("https://www.nayuki.io/", &QrCodeEcc_HIGH).unwrap();
 	let qr = QrCode::remask(&qr, 3);  // Change mask, forcing to mask #3
 	print_qr(&qr);
 	
 	// Numeric mode encoding (3.33 bits per digit)
-	let qr = QrCode::encode_text("314159265358979323846264338327950288419716939937510", &QrCodeEcc_MEDIUM);
+	let qr = QrCode::encode_text("314159265358979323846264338327950288419716939937510", &QrCodeEcc_MEDIUM).unwrap();
 	print_qr(&qr);
 	
 	// Alphanumeric mode encoding (5.5 bits per character)
-	let qr = QrCode::encode_text("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", &QrCodeEcc_HIGH);
+	let qr = QrCode::encode_text("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", &QrCodeEcc_HIGH).unwrap();
 	print_qr(&qr);
 	
 	// Unicode text as UTF-8, and different masks
-	let qr = QrCode::encode_text("こんにちwa、世界！ αβγδ", &QrCodeEcc_QUARTILE);
+	let qr = QrCode::encode_text("こんにちwa、世界！ αβγδ", &QrCodeEcc_QUARTILE).unwrap();
 	print_qr(&QrCode::remask(&qr, 0));
 	print_qr(&QrCode::remask(&qr, 1));
 	print_qr(&QrCode::remask(&qr, 5));
@@ -84,7 +84,7 @@ fn do_variety_demo() {
 		"'without pictures or conversations?' So she was considering in her own mind (as well as she could, ",
 		"for the hot day made her feel very sleepy and stupid), whether the pleasure of making a ",
 		"daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly ",
-		"a White Rabbit with pink eyes ran close by her."), &QrCodeEcc_HIGH);
+		"a White Rabbit with pink eyes ran close by her."), &QrCodeEcc_HIGH).unwrap();
 	print_qr(&qr);
 }
 
@@ -94,21 +94,21 @@ fn do_segment_demo() {
 	// Illustration "silver"
 	let silver0 = "THE SQUARE ROOT OF 2 IS 1.";
 	let silver1 = "41421356237309504880168872420969807856967187537694807317667973799";
-	let qr = QrCode::encode_text(&[silver0, silver1].concat(), &QrCodeEcc_LOW);
+	let qr = QrCode::encode_text(&[silver0, silver1].concat(), &QrCodeEcc_LOW).unwrap();
 	print_qr(&qr);
 	
 	let segs = vec![
 		QrSegment::make_alphanumeric(&to_chars(silver0)),
 		QrSegment::make_numeric(&to_chars(silver1)),
 	];
-	let qr = QrCode::encode_segments(&segs, &QrCodeEcc_LOW);
+	let qr = QrCode::encode_segments(&segs, &QrCodeEcc_LOW).unwrap();
 	print_qr(&qr);
 	
 	// Illustration "golden"
 	let golden0 = "Golden ratio φ = 1.";
 	let golden1 = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374";
 	let golden2 = "......";
-	let qr = QrCode::encode_text(&[golden0, golden1, golden2].concat(), &QrCodeEcc_LOW);
+	let qr = QrCode::encode_text(&[golden0, golden1, golden2].concat(), &QrCodeEcc_LOW).unwrap();
 	print_qr(&qr);
 	
 	let segs = vec![
@@ -116,12 +116,12 @@ fn do_segment_demo() {
 		QrSegment::make_numeric(&to_chars(golden1)),
 		QrSegment::make_alphanumeric(&to_chars(golden2)),
 	];
-	let qr = QrCode::encode_segments(&segs, &QrCodeEcc_LOW);
+	let qr = QrCode::encode_segments(&segs, &QrCodeEcc_LOW).unwrap();
 	print_qr(&qr);
 	
 	// Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
 	let madoka = "「魔法少女まどか☆マギカ」って、　ИАИ　ｄｅｓｕ　κα？";
-	let qr = QrCode::encode_text(madoka, &QrCodeEcc_LOW);
+	let qr = QrCode::encode_text(madoka, &QrCodeEcc_LOW).unwrap();
 	print_qr(&qr);
 	
 	let kanjichars: Vec<u32> = vec![  // Kanji mode encoding (13 bits per character)
@@ -139,7 +139,7 @@ fn do_segment_demo() {
 	let segs = vec![
 		QrSegment::new(&qrcodegen::QrSegmentMode_KANJI, kanjichars.len(), bb),
 	];
-	let qr = QrCode::encode_segments(&segs, &QrCodeEcc_LOW);
+	let qr = QrCode::encode_segments(&segs, &QrCodeEcc_LOW).unwrap();
 	print_qr(&qr);
 }
 
