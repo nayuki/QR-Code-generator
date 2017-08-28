@@ -41,6 +41,8 @@ def do_basic_demo():
 	"""Creates a single QR Code, then prints it to the console."""
 	text = u"Hello, world!"               # User-supplied Unicode text
 	errcorlvl = qrcodegen.QrCode.Ecc.LOW  # Error correction level
+	
+	# Make and print the QR Code symbol
 	qr = qrcodegen.QrCode.encode_text(text, errcorlvl)
 	print_qr(qr)
 	print(qr.to_svg_str(4))

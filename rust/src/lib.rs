@@ -724,7 +724,7 @@ impl ReedSolomonGenerator {
 		// drop the highest term, and store the rest of the coefficients in order of descending powers.
 		// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
 		let mut root: u8 = 1;
-		for _ in 0 .. degree {
+		for _ in 0 .. degree {  // Unused variable i
 			// Multiply the current product by (x - r^i)
 			for j in 0 .. degree {
 				coefs[j] = ReedSolomonGenerator::multiply(coefs[j], root);
