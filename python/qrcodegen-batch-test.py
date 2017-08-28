@@ -35,6 +35,7 @@ CHILD_PROGRAMS = [
 	["java", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
 	["./qrcodegen-worker"],  # C program
 	["./QrCodeGeneratorWorker"],  # C++ program
+	["../rust/target/debug/examples/qrcodegen-worker"],  # Rust program
 ]
 
 
