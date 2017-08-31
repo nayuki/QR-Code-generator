@@ -206,6 +206,7 @@ var qrcodegen = new function() {
 		
 		// Based on the given number of border modules to add as padding, this returns a
 		// string whose contents represents an SVG XML file that depicts this QR Code symbol.
+		// Note that Unix newlines (\n) are always used, regardless of the platform.
 		this.toSvgString = function(border) {
 			if (border < 0)
 				throw "Border must be non-negative";

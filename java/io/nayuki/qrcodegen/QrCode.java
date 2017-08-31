@@ -82,8 +82,8 @@ public final class QrCode {
 	 * Returns a QR Code symbol representing the specified data segments at the specified error correction
 	 * level or higher. The smallest possible QR Code version is automatically chosen for the output.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
-	 * between modes (such as alphanumeric and binary) to encode text more efficiently. This
-	 * function is considered to be lower level than simply encoding text or binary data.</p>
+	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
+	 * This function is considered to be lower level than simply encoding text or binary data.</p>
 	 * @param segs the segments to encode
 	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the segments

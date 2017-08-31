@@ -598,7 +598,7 @@ impl QrCode {
 	/*---- Private static helper functions ----*/
 	
 	// Returns a set of positions of the alignment patterns in ascending order. These positions are
-	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
+	// used on both the x and y axes. Each value in the resulting list is in the range [0, 177).
 	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
 	fn get_alignment_pattern_positions(ver: u8) -> Vec<i32> {
 		assert!(1 <= ver && ver <= 40, "Version number out of range");
@@ -1013,7 +1013,8 @@ impl QrSegmentMode {
 
 /*---- Bit buffer functionality ----*/
 
-// Appends the given number of bits of the given value to this sequence.
+// Appends the given number of low bits of the given value
+// to this sequence. Requires 0 <= val < 2^len.
 pub fn append_bits(bb: &mut Vec<bool>, val: u32, len: u8) {
 	assert!(len < 32 && (val >> len) == 0 || len == 32, "Value out of range");
 	for i in (0 .. len).rev() {  // Append bit by bit
