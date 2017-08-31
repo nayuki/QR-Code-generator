@@ -141,8 +141,9 @@ class QrCode final {
 	
 	
 	/* 
-	 * Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
-	 * left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then 0 (white) is returned.
+	 * Returns the color of the module (pixel) at the given coordinates, which is either
+	 * 0 for white or 1 for black. The top left corner has the coordinates (x=0, y=0).
+	 * If the given coordinates are out of bounds, then 0 (white) is returned.
 	 */
 	public: int getModule(int x, int y) const;
 	

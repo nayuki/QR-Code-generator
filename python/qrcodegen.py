@@ -225,8 +225,9 @@ class QrCode(object):
 		return self._mask
 	
 	def get_module(self, x, y):
-		"""Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
-		left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then 0 (white) is returned."""
+		"""Returns the color of the module (pixel) at the given coordinates, which is either
+		0 for white or 1 for black. The top left corner has the coordinates (x=0, y=0).
+		If the given coordinates are out of bounds, then 0 (white) is returned."""
 		return 1 if ((0 <= x < self._size) and (0 <= y < self._size) and self._modules[y][x]) else 0
 	
 	

@@ -258,8 +258,9 @@ public final class QrCode {
 	/*---- Public instance methods ----*/
 	
 	/**
-	 * Returns the color of the module (pixel) at the specified coordinates, which is either 0 for white or 1 for black. The top
-	 * left corner has the coordinates (x=0, y=0). If the specified coordinates are out of bounds, then 0 (white) is returned.
+	 * Returns the color of the module (pixel) at the specified coordinates, which is either
+	 * 0 for white or 1 for black. The top left corner has the coordinates (x=0, y=0).
+	 * If the specified coordinates are out of bounds, then 0 (white) is returned.
 	 * @param x the x coordinate, where 0 is the left edge and size&minus;1 is the right edge
 	 * @param y the y coordinate, where 0 is the top edge and size&minus;1 is the bottom edge
 	 * @return the module's color, which is either 0 (white) or 1 (black)

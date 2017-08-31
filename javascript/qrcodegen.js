@@ -163,8 +163,9 @@ var qrcodegen = new function() {
 		
 		/*---- Accessor methods ----*/
 		
-		// (Public) Returns the color of the module (pixel) at the given coordinates, which is either 0 for white or 1 for black. The top
-		// left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then 0 (white) is returned.
+		// (Public) Returns the color of the module (pixel) at the given coordinates, which is either
+		// 0 for white or 1 for black. The top left corner has the coordinates (x=0, y=0).
+		// If the given coordinates are out of bounds, then 0 (white) is returned.
 		this.getModule = function(x, y) {
 			if (0 <= x && x < size && 0 <= y && y < size)
 				return modules[y][x] ? 1 : 0;
