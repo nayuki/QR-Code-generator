@@ -95,8 +95,9 @@ class QrSegment final {
 	
 	
 	/* 
-	 * Returns a segment representing the given text string encoded in alphanumeric mode. The characters allowed are:
-	 * 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 * Returns a segment representing the given text string encoded in alphanumeric mode.
+	 * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
+	 * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 */
 	public: static QrSegment makeAlphanumeric(const char *text);
 	

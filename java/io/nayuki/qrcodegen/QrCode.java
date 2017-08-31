@@ -820,8 +820,9 @@ public final class QrCode {
 		/*-- Method --*/
 		
 		/**
-		 * Computes and returns the Reed-Solomon error correction codewords for the specified sequence of data codewords.
-		 * The returned object is always a new byte array. This method does not alter this object's state (because it is immutable).
+		 * Computes and returns the Reed-Solomon error correction codewords for the specified
+		 * sequence of data codewords. The returned object is always a new byte array.
+		 * This method does not alter this object's state (because it is immutable).
 		 * @param data the sequence of data codewords
 		 * @return the Reed-Solomon error correction codewords
 		 * @throws NullPointerException if the data is {@code null}

@@ -784,8 +784,9 @@ var qrcodegen = new function() {
 	
 	
 	/* 
-	 * Returns a segment representing the given text string encoded in alphanumeric mode. The characters allowed are:
-	 * 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 * Returns a segment representing the given text string encoded in alphanumeric mode.
+	 * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
+	 * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 */
 	this.QrSegment.makeAlphanumeric = function(text) {
 		if (!this.ALPHANUMERIC_REGEX.test(text))
@@ -953,8 +954,9 @@ var qrcodegen = new function() {
 			root = ReedSolomonGenerator.multiply(root, 0x02);
 		}
 		
-		// Computes and returns the Reed-Solomon error correction codewords for the given sequence of data codewords.
-		// The returned object is always a new byte array. This method does not alter this object's state (because it is immutable).
+		// Computes and returns the Reed-Solomon error correction codewords for the given
+		// sequence of data codewords. The returned object is always a new byte array.
+		// This method does not alter this object's state (because it is immutable).
 		this.getRemainder = function(data) {
 			// Compute the remainder by performing polynomial division
 			var result = coefficients.map(function() { return 0; });

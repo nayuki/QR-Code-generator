@@ -81,8 +81,9 @@ public final class QrSegment {
 	
 	
 	/**
-	 * Returns a segment representing the specified text string encoded in alphanumeric mode. The characters allowed are:
-	 * 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 * Returns a segment representing the specified text string encoded in alphanumeric mode.
+	 * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
+	 * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 * @param text a string of text, with only certain characters allowed
 	 * @return a segment containing the data
 	 * @throws NullPointerException if the string is {@code null}

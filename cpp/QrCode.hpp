@@ -280,8 +280,9 @@ class QrCode final {
 		/*-- Method --*/
 		
 		/* 
-		 * Computes and returns the Reed-Solomon error correction codewords for the given sequence of data codewords.
-		 * The returned object is always a new byte array. This method does not alter this object's state (because it is immutable).
+		 * Computes and returns the Reed-Solomon error correction codewords for the given
+		 * sequence of data codewords. The returned object is always a new byte array.
+		 * This method does not alter this object's state (because it is immutable).
 		 */
 		public: std::vector<std::uint8_t> getRemainder(const std::vector<std::uint8_t> &data) const;
 		

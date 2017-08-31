@@ -640,8 +640,9 @@ class QrSegment(object):
 	
 	@staticmethod
 	def make_alphanumeric(text):
-		"""Returns a segment representing the given text string encoded in alphanumeric mode. The characters allowed are:
-		0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon."""
+		"""Returns a segment representing the given text string encoded in alphanumeric mode.
+		The characters allowed are: 0 to 9, A to Z (uppercase only), space,
+		dollar, percent, asterisk, plus, hyphen, period, slash, colon."""
 		if QrSegment.ALPHANUMERIC_REGEX.match(text) is None:
 			raise ValueError("String contains unencodable characters in alphanumeric mode")
 		bb = _BitBuffer()
@@ -801,8 +802,9 @@ class _ReedSolomonGenerator(object):
 	
 	
 	def get_remainder(self, data):
-		"""Computes and returns the Reed-Solomon error correction codewords for the given sequence of data codewords.
-		The returned object is always a new byte list. This method does not alter this object's state (because it is immutable)."""
+		"""Computes and returns the Reed-Solomon error correction codewords for the given
+		sequence of data codewords. The returned object is always a new byte list.
+		This method does not alter this object's state (because it is immutable)."""
 		# Compute the remainder by performing polynomial division
 		result = [0] * len(self.coefficients)
 		for b in data:
