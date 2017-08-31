@@ -84,7 +84,7 @@ public final class QrCodeGeneratorWorker {
 				System.out.println(qr.version);
 				for (int y = 0; y < qr.size; y++) {
 					for (int x = 0; x < qr.size; x++)
-						System.out.println(qr.getModule(x, y));
+						System.out.println(qr.getModule(x, y) ? 1 : 0);
 				}
 				
 			} catch (IllegalArgumentException e) {

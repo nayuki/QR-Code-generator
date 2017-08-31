@@ -159,11 +159,8 @@ int QrCode::getMask() const {
 }
 
 
-int QrCode::getModule(int x, int y) const {
-	if (0 <= x && x < size && 0 <= y && y < size)
-		return module(x, y) ? 1 : 0;
-	else
-		return 0;  // Infinite white border
+bool QrCode::getModule(int x, int y) const {
+	return 0 <= x && x < size && 0 <= y && y < size && module(x, y);
 }
 
 
@@ -180,7 +177,7 @@ std::string QrCode::toSvgString(int border) const {
 	bool head = true;
 	for (int y = -border; y < size + border; y++) {
 		for (int x = -border; x < size + border; x++) {
-			if (getModule(x, y) == 1) {
+			if (getModule(x, y)) {
 				if (head)
 					head = false;
 				else

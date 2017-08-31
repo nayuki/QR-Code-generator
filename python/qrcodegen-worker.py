@@ -66,7 +66,7 @@ def main():
 			print(qr.get_version())
 			for y in range(qr.get_size()):
 				for x in range(qr.get_size()):
-					print(qr.get_module(x, y))
+					print(1 if qr.get_module(x, y) else 0)
 			
 		except ValueError as e:
 			if e.args[0] != "Data too long":

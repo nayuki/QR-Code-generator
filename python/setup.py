@@ -100,7 +100,7 @@ Examples:
     border = 4
     for y in range(-border, qr1.get_size() + border):
         for x in range(-border, qr1.get_size() + border):
-            color = qr1.get_module(x, y)  # 0 for white, 1 for black
+            color = qr1.get_module(x, y)  # False for white, True for black
             # (... paint the module onto pixels ...)
 
 More complete set of examples: https://github.com/nayuki/QR-Code-generator/blob/master/python/qrcodegen-demo.py .

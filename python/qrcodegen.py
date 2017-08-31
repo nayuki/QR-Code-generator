@@ -37,7 +37,7 @@ This module "qrcodegen", public members:
   - Method get_size() -> int
   - Method get_error_correction_level() -> QrCode.Ecc
   - Method get_mask() -> int
-  - Method get_module(int x, int y) -> int
+  - Method get_module(int x, int y) -> bool
   - Method to_svg_str(int border) -> str
   - Enum Ecc:
     - Constants LOW, MEDIUM, QUARTILE, HIGH
@@ -226,9 +226,9 @@ class QrCode(object):
 	
 	def get_module(self, x, y):
 		"""Returns the color of the module (pixel) at the given coordinates, which is either
-		0 for white or 1 for black. The top left corner has the coordinates (x=0, y=0).
-		If the given coordinates are out of bounds, then 0 (white) is returned."""
-		return 1 if ((0 <= x < self._size) and (0 <= y < self._size) and self._modules[y][x]) else 0
+		False for white or True for black. The top left corner has the coordinates (x=0, y=0).
+		If the given coordinates are out of bounds, then False (white) is returned."""
+		return (0 <= x < self._size) and (0 <= y < self._size) and self._modules[y][x]
 	
 	
 	# ---- Public instance methods ----
@@ -241,7 +241,7 @@ class QrCode(object):
 		parts = []
 		for y in range(-border, self._size + border):
 			for x in range(-border, self._size + border):
-				if self.get_module(x, y) == 1:
+				if self.get_module(x, y):
 					parts.append("M{},{}h1v1h-1z".format(x + border, y + border))
 		return """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">

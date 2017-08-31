@@ -168,7 +168,7 @@ static void printQr(const QrCode &qr) {
 	int border = 4;
 	for (int y = -border; y < qr.size + border; y++) {
 		for (int x = -border; x < qr.size + border; x++) {
-			std::cout << (qr.getModule(x, y) == 1 ? "##" : "  ");
+			std::cout << (qr.getModule(x, y) ? "##" : "  ");
 		}
 		std::cout << std::endl;
 	}

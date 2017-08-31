@@ -35,7 +35,7 @@
  *   - Constructor QrCode(list<int> datacodewords, int mask, int version, QrCode.Ecc ecl)
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
- *   - Method getModule(int x, int y) -> int
+ *   - Method getModule(int x, int y) -> bool
  *   - Method drawCanvas(int scale, int border, HTMLCanvasElement canvas) -> void
  *   - Method toSvgString(int border) -> str
  *   - Enum Ecc:
@@ -115,7 +115,7 @@ var qrcodegen = new function() {
 		} else if (initData instanceof qrcodegen.QrCode) {
 			for (var y = 0; y < size; y++) {
 				for (var x = 0; x < size; x++) {
-					modules[y][x] = initData.getModule(x, y) == 1;
+					modules[y][x] = initData.getModule(x, y);
 					isFunction[y][x] = initData.isFunctionModule(x, y);
 				}
 			}
@@ -164,13 +164,10 @@ var qrcodegen = new function() {
 		/*---- Accessor methods ----*/
 		
 		// (Public) Returns the color of the module (pixel) at the given coordinates, which is either
-		// 0 for white or 1 for black. The top left corner has the coordinates (x=0, y=0).
-		// If the given coordinates are out of bounds, then 0 (white) is returned.
+		// false for white or true for black. The top left corner has the coordinates (x=0, y=0).
+		// If the given coordinates are out of bounds, then false (white) is returned.
 		this.getModule = function(x, y) {
-			if (0 <= x && x < size && 0 <= y && y < size)
-				return modules[y][x] ? 1 : 0;
-			else
-				return 0;  // Infinite white border
+			return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
 		};
 		
 		// (Package-private) Tests whether the module at the given coordinates is a function module (true) or not (false).
@@ -198,7 +195,7 @@ var qrcodegen = new function() {
 			var ctx = canvas.getContext("2d");
 			for (var y = -border; y < size + border; y++) {
 				for (var x = -border; x < size + border; x++) {
-					ctx.fillStyle = this.getModule(x, y) == 1 ? "#000000" : "#FFFFFF";
+					ctx.fillStyle = this.getModule(x, y) ? "#000000" : "#FFFFFF";
 					ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
 				}
 			}
@@ -219,7 +216,7 @@ var qrcodegen = new function() {
 			var head = true;
 			for (var y = -border; y < size + border; y++) {
 				for (var x = -border; x < size + border; x++) {
-					if (this.getModule(x, y) == 1) {
+					if (this.getModule(x, y)) {
 						if (head)
 							head = false;
 						else

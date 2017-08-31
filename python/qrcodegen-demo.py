@@ -161,7 +161,7 @@ def print_qr(qrcode):
 	border = 4
 	for y in range(-border, qrcode.get_size() + border):
 		for x in range(-border, qrcode.get_size() + border):
-			print(u"\u2588 "[qrcode.get_module(x,y)] * 2, end="")
+			print(u"\u2588 "[1 if qrcode.get_module(x,y) else 0] * 2, end="")
 		print()
 	print()
 

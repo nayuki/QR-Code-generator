@@ -259,17 +259,14 @@ public final class QrCode {
 	
 	/**
 	 * Returns the color of the module (pixel) at the specified coordinates, which is either
-	 * 0 for white or 1 for black. The top left corner has the coordinates (x=0, y=0).
-	 * If the specified coordinates are out of bounds, then 0 (white) is returned.
+	 * false for white or true for black. The top left corner has the coordinates (x=0, y=0).
+	 * If the specified coordinates are out of bounds, then false (white) is returned.
 	 * @param x the x coordinate, where 0 is the left edge and size&minus;1 is the right edge
 	 * @param y the y coordinate, where 0 is the top edge and size&minus;1 is the bottom edge
-	 * @return the module's color, which is either 0 (white) or 1 (black)
+	 * @return the module's color, which is either false (white) or true (black)
 	 */
-	public int getModule(int x, int y) {
-		if (0 <= x && x < size && 0 <= y && y < size)
-			return modules[y][x] ? 1 : 0;
-		else
-			return 0;  // Infinite white border
+	public boolean getModule(int x, int y) {
+		return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
 	}
 	
 	
@@ -289,8 +286,8 @@ public final class QrCode {
 		BufferedImage result = new BufferedImage((size + border * 2) * scale, (size + border * 2) * scale, BufferedImage.TYPE_INT_RGB);
 		for (int y = 0; y < result.getHeight(); y++) {
 			for (int x = 0; x < result.getWidth(); x++) {
-				int val = getModule(x / scale - border, y / scale - border);  // 0 or 1
-				result.setRGB(x, y, val == 1 ? 0x000000 : 0xFFFFFF);
+				boolean val = getModule(x / scale - border, y / scale - border);
+				result.setRGB(x, y, val ? 0x000000 : 0xFFFFFF);
 			}
 		}
 		return result;
@@ -318,7 +315,7 @@ public final class QrCode {
 		boolean head = true;
 		for (int y = -border; y < size + border; y++) {
 			for (int x = -border; x < size + border; x++) {
-				if (getModule(x, y) == 1) {
+				if (getModule(x, y)) {
 					if (head)
 						head = false;
 					else

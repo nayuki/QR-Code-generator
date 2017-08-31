@@ -88,7 +88,7 @@ int main() {
 			std::cout << qr.version << std::endl;
 			for (int y = 0; y < qr.size; y++) {
 				for (int x = 0; x < qr.size; x++)
-					std::cout << qr.getModule(x, y) << std::endl;
+					std::cout << (qr.getModule(x, y) ? 1 : 0) << std::endl;
 			}
 			
 		} catch (const char *msg) {
