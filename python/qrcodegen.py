@@ -68,10 +68,11 @@ class QrCode(object):
 	
 	@staticmethod
 	def encode_text(text, ecl):
-		"""Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
-		As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
-		code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
-		The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version."""
+		"""Returns a QR Code symbol representing the specified Unicode text string at the specified error correction level.
+		As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
+		Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
+		QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
+		ecl argument if it can be done without increasing the version."""
 		segs = QrSegment.make_segments(text)
 		return QrCode.encode_segments(segs, ecl)
 	
@@ -775,7 +776,7 @@ class QrSegment(object):
 class _ReedSolomonGenerator(object):
 	"""Computes the Reed-Solomon error correction codewords for a sequence of data codewords
 	at a given degree. Objects are immutable, and the state only depends on the degree.
-	This class exists because the divisor polynomial does not need to be recalculated for every input."""
+	This class exists because each data block in a QR Code shares the same the divisor polynomial."""
 	
 	def __init__(self, degree):
 		"""Creates a Reed-Solomon ECC generator for the given degree. This could be implemented

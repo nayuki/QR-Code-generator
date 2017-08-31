@@ -41,9 +41,10 @@ public final class QrCode {
 	
 	/**
 	 * Returns a QR Code symbol representing the specified Unicode text string at the specified error correction level.
-	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
-	 * code points (not UTF-16 code units). The smallest possible QR Code version is automatically chosen for the output.
-	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
+	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
+	 * Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
+	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
+	 * ecl argument if it can be done without increasing the version.
 	 * @param text the text to be encoded, which can be any Unicode string
 	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the text
@@ -773,7 +774,7 @@ public final class QrCode {
 	/**
 	 * Computes the Reed-Solomon error correction codewords for a sequence of data codewords
 	 * at a given degree. Objects are immutable, and the state only depends on the degree.
-	 * This class exists because the divisor polynomial does not need to be recalculated for every input.
+	 * This class exists because each data block in a QR Code shares the same the divisor polynomial.
 	 */
 	private static final class ReedSolomonGenerator {
 		
