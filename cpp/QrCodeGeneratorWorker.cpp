@@ -75,9 +75,7 @@ int main() {
 		// Make list of segments
 		std::vector<QrSegment> segs;
 		if (isAscii) {
-			std::vector<char> text;
-			for (std::vector<uint8_t>::iterator it = data.begin(); it != data.end(); ++it)
-				text.push_back((char)*it);
+			std::vector<char> text(data.cbegin(), data.cend());
 			text.push_back('\0');
 			segs = QrSegment::makeSegments(text.data());
 		} else

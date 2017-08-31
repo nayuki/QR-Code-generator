@@ -26,6 +26,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -124,9 +125,7 @@ static void doSegmentDemo() {
 		QrCode::Ecc::LOW);
 	printQr(qr2);
 	
-	std::vector<uint8_t> bytes;
-	for (const char *temp = golden0; *temp != '\0'; temp++)
-		bytes.push_back(static_cast<uint8_t>(*temp));
+	std::vector<uint8_t> bytes(golden0, golden0 + std::strlen(golden0));
 	const QrCode qr3 = QrCode::encodeSegments(
 		{QrSegment::makeBytes(bytes), QrSegment::makeNumeric(golden1), QrSegment::makeAlphanumeric(golden2)},
 		QrCode::Ecc::LOW);
