@@ -131,7 +131,8 @@ public final class QrSegment {
 	
 	
 	/**
-	 * Returns a segment representing an Extended Channel Interpretation (ECI) designator with the specified assignment value.
+	 * Returns a segment representing an Extended Channel Interpretation
+	 * (ECI) designator with the specified assignment value.
 	 * @param assignVal the ECI assignment number (see the AIM ECI specification)
 	 * @return a segment containing the data
 	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)

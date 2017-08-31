@@ -823,7 +823,8 @@ var qrcodegen = new function() {
 	
 	
 	/* 
-	 * Returns a segment representing an Extended Channel Interpretation (ECI) designator with the given assignment value.
+	 * Returns a segment representing an Extended Channel Interpretation
+	 * (ECI) designator with the given assignment value.
 	 */
 	this.QrSegment.makeEci = function(assignVal) {
 		var bb = new BitBuffer();

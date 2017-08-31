@@ -110,7 +110,8 @@ class QrSegment final {
 	
 	
 	/* 
-	 * Returns a segment representing an Extended Channel Interpretation (ECI) designator with the given assignment value.
+	 * Returns a segment representing an Extended Channel Interpretation
+	 * (ECI) designator with the given assignment value.
 	 */
 	public: static QrSegment makeEci(long assignVal);
 	
