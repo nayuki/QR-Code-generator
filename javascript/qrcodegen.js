@@ -211,7 +211,8 @@ var qrcodegen = new function() {
 				throw "Border must be non-negative";
 			var result = '<?xml version="1.0" encoding="UTF-8"?>\n';
 			result += '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n';
-			result += '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' + (size + border * 2) + ' ' + (size + border * 2) + '" stroke="none">\n';
+			result += '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ' +
+				(size + border * 2) + ' ' + (size + border * 2) + '" stroke="none">\n';
 			result += '\t<rect width="100%" height="100%" fill="#FFFFFF"/>\n';
 			result += '\t<path d="';
 			var head = true;
@@ -669,7 +670,9 @@ var qrcodegen = new function() {
 	QrCode.getNumDataCodewords = function(ver, ecl) {
 		if (ver < 1 || ver > 40)
 			throw "Version number out of range";
-		return Math.floor(QrCode.getNumRawDataModules(ver) / 8) - QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] * QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+		return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
+			QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] *
+			QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
 	};
 	
 	

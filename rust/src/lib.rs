@@ -72,13 +72,15 @@ impl QrCode {
 	
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
 			minversion: u8, maxversion: u8, mask: i8, boostecl: bool) -> Option<QrCode> {
-		assert!(1 <= minversion && minversion <= maxversion && maxversion <= 40 && -1 <= mask && mask <= 7, "Invalid value");
+		assert!(1 <= minversion && minversion <= maxversion && maxversion <= 40
+			&& -1 <= mask && mask <= 7, "Invalid value");
 		
 		// Find the minimal version number to use
 		let mut version: u8 = minversion;
 		let datausedbits: usize;
 		loop {
-			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;  // Number of data bits available
+			// Number of data bits available
+			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 			if let Some(n) = QrSegment::get_total_bits(segs, version) {
 				if n <= datacapacitybits {
 					datausedbits = n;
@@ -223,7 +225,9 @@ impl QrCode {
 		let mut result: String = String::new();
 		result.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		result.push_str("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
-		result.push_str(&format!("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {0} {0}\" stroke=\"none\">\n", self.size + border * 2));
+		result.push_str(&format!(
+			"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {0} {0}\" stroke=\"none\">\n",
+			self.size + border * 2));
 		result.push_str("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n");
 		result.push_str("\t<path d=\"");
 		let mut head: bool = true;
@@ -284,7 +288,8 @@ impl QrCode {
 	fn draw_format_bits(&mut self, mask: u8) {
 		// Calculate error correction code and pack bits
 		let size: i32 = self.size;
-		let mut data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask as u32);  // errcorrlvl is uint2, mask is uint3
+		// errcorrlvl is uint2, mask is uint3
+		let mut data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask as u32);
 		let mut rem: u32 = data;
 		for _ in 0 .. 10 {
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537);

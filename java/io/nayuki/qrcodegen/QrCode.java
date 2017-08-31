@@ -310,7 +310,9 @@ public final class QrCode {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		sb.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
-		sb.append(String.format("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 %1$d %1$d\" stroke=\"none\">\n", size + border * 2));
+		sb.append(String.format(
+			"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 %1$d %1$d\" stroke=\"none\">\n",
+			size + border * 2));
 		sb.append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n");
 		sb.append("\t<path d=\"");
 		boolean head = true;
@@ -716,7 +718,9 @@ public final class QrCode {
 	static int getNumDataCodewords(int ver, Ecc ecl) {
 		if (ver < 1 || ver > 40)
 			throw new IllegalArgumentException("Version number out of range");
-		return getNumRawDataModules(ver) / 8 - ECC_CODEWORDS_PER_BLOCK[ecl.ordinal()][ver] * NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
+		return getNumRawDataModules(ver) / 8
+			- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal()][ver]
+			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
 	}
 	
 	

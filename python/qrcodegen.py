@@ -543,7 +543,9 @@ class QrCode(object):
 		This stateless pure function could be implemented as a (40*4)-cell lookup table."""
 		if not (1 <= ver <= 40):
 			raise ValueError("Version number out of range")
-		return QrCode._get_num_raw_data_modules(ver) // 8 - QrCode._ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] * QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
+		return QrCode._get_num_raw_data_modules(ver) // 8 \
+			- QrCode._ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] \
+			* QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
 	
 	
 	# ---- Private tables of constants ----

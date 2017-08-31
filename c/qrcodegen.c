@@ -70,7 +70,8 @@ testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 testable int getNumRawDataModules(int version);
 
 testable void calcReedSolomonGenerator(int degree, uint8_t result[]);
-testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
+testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
+	const uint8_t generator[], int degree, uint8_t result[]);
 testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
 
 testable void initializeFunctionModules(int version, uint8_t qrcode[]);
@@ -451,7 +452,9 @@ testable void calcReedSolomonGenerator(int degree, uint8_t result[]) {
 
 // Calculates the remainder of the polynomial data[0 : dataLen] when divided by the generator[0 : degree], where all
 // polynomials are in big endian and the generator has an implicit leading 1 term, storing the result in result[0 : degree].
-testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]) {
+testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
+		const uint8_t generator[], int degree, uint8_t result[]) {
+	
 	// Perform polynomial division
 	assert(1 <= degree && degree <= 30);
 	memset(result, 0, degree * sizeof(result[0]));

@@ -539,7 +539,9 @@ int QrCode::getNumRawDataModules(int ver) {
 int QrCode::getNumDataCodewords(int ver, const Ecc &ecl) {
 	if (ver < 1 || ver > 40)
 		throw "Version number out of range";
-	return getNumRawDataModules(ver) / 8 - ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] * NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+	return getNumRawDataModules(ver) / 8
+		- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver]
+		* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
 }
 
 
