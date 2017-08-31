@@ -15,7 +15,7 @@ Features
 
 Core features:
 
-* Available in 5 programming languages, all with nearly equal functionality: Java, JavaScript, Python, C++, C
+* Available in 6 programming languages, all with nearly equal functionality: Java, JavaScript, Python, C++, C, Rust
 * Significantly shorter code but more documentation comments compared to competing libraries
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
 * Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages except C), `BufferedImage` raster bitmap (Java only), HTML5 canvas (JavaScript only)
@@ -143,6 +143,29 @@ C language:
     uint8_t qr1[qrcodegen_BUFFER_LEN_FOR_VERSION(7)];
     ok = qrcodegen_encodeBinary(dataAndTemp, 3, qr1,
         qrcodegen_Ecc_HIGH, 2, 7, qrcodegen_Mask_4, false);
+
+Rust language:
+
+    extern crate qrcodegen;
+    use qrcodegen::QrCode;
+    use qrcodegen::QrCodeEcc;
+    use qrcodegen::QrSegment;
+    
+    // Simple operation
+    let qr0 = QrCode::encode_text("Hello, world!",
+        QrCodeEcc::Medium).unwrap();
+    let svg = qr0.to_svg_string(4);
+    
+    // Manual operation
+    let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
+    let segs = QrSegment::make_segments(&chrs);
+    let qr1 = QrCode::encode_segments_advanced(
+        &segs, QrCodeEcc::High, 5, 5, 2, false).unwrap();
+    for y in 0 .. qr1.size() {
+        for x in 0 .. qr1.size() {
+            (... paint qr1.get_module(x, y) ...)
+        }
+    }
 
 More information about QR Code technology and this library's design can be found on the project home page.
 
