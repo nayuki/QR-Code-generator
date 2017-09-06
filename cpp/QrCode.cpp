@@ -120,20 +120,16 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 
 
 QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask) :
-		// Initialize scalar fields
+		// Initialize fields
 		version(ver),
 		size(1 <= ver && ver <= 40 ? ver * 4 + 17 : -1),  // Avoid signed overflow undefined behavior
-		errorCorrectionLevel(ecl) {
+		errorCorrectionLevel(ecl),
+		modules(size, vector<bool>(size)),  // Entirely white grid
+		isFunction(size, vector<bool>(size)) {
 	
 	// Check arguments
 	if (ver < 1 || ver > 40 || mask < -1 || mask > 7)
 		throw "Value out of range";
-	
-	vector<bool> row(size);
-	for (int i = 0; i < size; i++) {
-		modules.push_back(row);
-		isFunction.push_back(row);
-	}
 	
 	// Draw function patterns, draw all codewords, do masking
 	drawFunctionPatterns();
@@ -147,15 +143,14 @@ QrCode::QrCode(const QrCode &qr, int mask) :
 		// Copy scalar fields
 		version(qr.version),
 		size(qr.size),
-		errorCorrectionLevel(qr.errorCorrectionLevel) {
+		errorCorrectionLevel(qr.errorCorrectionLevel),
+		// Handle grid fields
+		modules(qr.modules),
+		isFunction(qr.isFunction) {
 	
 	// Check arguments
 	if (mask < -1 || mask > 7)
 		throw "Mask value out of range";
-	
-	// Handle grid fields
-	modules = qr.modules;
-	isFunction = qr.isFunction;
 	
 	// Handle masking
 	applyMask(qr.mask);  // Undo old mask
