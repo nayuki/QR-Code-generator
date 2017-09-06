@@ -100,9 +100,9 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
 	size_t dataCapacityBits = getNumDataCodewords(version, *newEcl) * 8;
 	BitBuffer bb;
 	for (const QrSegment &seg : segs) {
-		bb.appendBits(seg.mode.getModeBits(), 4);
-		bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-		bb.insert(bb.end(), seg.data.begin(), seg.data.end());
+		bb.appendBits(seg.getMode().getModeBits(), 4);
+		bb.appendBits(seg.getNumChars(), seg.getMode().numCharCountBits(version));
+		bb.insert(bb.end(), seg.getData().begin(), seg.getData().end());
 	}
 	
 	// Add terminator and pad up to a byte if applicable

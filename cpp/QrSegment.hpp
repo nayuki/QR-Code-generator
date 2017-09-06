@@ -138,13 +138,13 @@ class QrSegment final {
 	/*---- Instance fields ----*/
 	
 	/* The mode indicator for this segment. */
-	public: const Mode mode;
+	private: Mode mode;
 	
 	/* The length of this segment's unencoded data, measured in characters. Always zero or positive. */
-	public: const int numChars;
+	private: int numChars;
 	
 	/* The data bits of this segment. */
-	public: const std::vector<bool> data;
+	private: std::vector<bool> data;
 	
 	
 	/*---- Constructor ----*/
@@ -159,6 +159,17 @@ class QrSegment final {
 	 * Creates a new QR Code data segment with the given parameters and data.
 	 */
 	public: QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt);
+	
+	
+	/*---- Methods ----*/
+	
+	public: Mode getMode() const;
+	
+	
+	public: int getNumChars() const;
+	
+	
+	public: const std::vector<bool> &getData() const;
 	
 	
 	// Package-private helper function.

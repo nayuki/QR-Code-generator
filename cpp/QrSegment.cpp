@@ -208,6 +208,21 @@ bool QrSegment::isNumeric(const char *text) {
 }
 
 
+QrSegment::Mode QrSegment::getMode() const {
+	return mode;
+}
+
+
+int QrSegment::getNumChars() const {
+	return numChars;
+}
+
+
+const std::vector<bool> &QrSegment::getData() const {
+	return data;
+}
+
+
 const char *QrSegment::ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
 }
