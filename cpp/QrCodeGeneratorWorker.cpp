@@ -1,14 +1,14 @@
-/* 
+/*
  * QR Code generator test worker (C++)
- * 
+ *
  * This program reads data and encoding parameters from standard input and writes
  * QR Code bitmaps to standard output. The I/O format is one integer per line.
  * Run with no command line arguments. The program is intended for automated
  * batch testing of end-to-end functionality of this QR Code generator library.
- * 
+ *
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -47,13 +47,13 @@ static const QrCode::Ecc *(ECC_LEVELS[]) = {
 
 int main() {
 	while (true) {
-		
+
 		// Read data length or exit
 		int length;
 		std::cin >> length;
 		if (length == -1)
 			break;
-		
+
 		// Read data bytes
 		bool isAscii = true;
 		std::vector<uint8_t> data;
@@ -63,7 +63,7 @@ int main() {
 			data.push_back((uint8_t)b);
 			isAscii &= 0 < b && b < 128;
 		}
-		
+
 		// Read encoding parameters
 		int errCorLvl, minVersion, maxVersion, mask, boostEcl;
 		std::cin >> errCorLvl;
@@ -71,7 +71,7 @@ int main() {
 		std::cin >> maxVersion;
 		std::cin >> mask;
 		std::cin >> boostEcl;
-		
+
 		// Make list of segments
 		std::vector<QrSegment> segs;
 		if (isAscii) {
@@ -80,7 +80,7 @@ int main() {
 			segs = QrSegment::makeSegments(text.data());
 		} else
 			segs.push_back(QrSegment::makeBytes(data));
-		
+
 		try {  // Try to make QR Code symbol
 			const QrCode qr = QrCode::encodeSegments(segs,
 				*ECC_LEVELS[errCorLvl], minVersion, maxVersion, mask, boostEcl == 1);
@@ -90,7 +90,7 @@ int main() {
 				for (int x = 0; x < qr.getSize(); x++)
 					std::cout << (qr.getModule(x, y) ? 1 : 0) << std::endl;
 			}
-			
+
 		} catch (const char *msg) {
 			if (strcmp(msg, "Data too long") != 0) {
 				std::cerr << msg << std::endl;

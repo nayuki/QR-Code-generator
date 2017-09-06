@@ -1,9 +1,9 @@
-/* 
+/*
  * QR Code generator library (C++)
- * 
+ *
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -29,29 +29,29 @@
 
 namespace qrcodegen {
 
-/* 
+/*
  * An appendable sequence of bits (0's and 1's).
  */
 class BitBuffer final : public std::vector<bool> {
-	
+
 	/*---- Constructor ----*/
-	
+
 	// Creates an empty bit buffer (length 0).
 	public: BitBuffer();
-	
-	
-	
+
+
+
 	/*---- Methods ----*/
-	
+
 	// Packs this buffer's bits into bytes in big endian,
 	// padding with '0' bit values, and returns the new vector.
 	public: std::vector<std::uint8_t> getBytes() const;
-	
-	
+
+
 	// Appends the given number of low bits of the given value
 	// to this sequence. Requires 0 <= val < 2^len.
 	public: void appendBits(std::uint32_t val, int len);
-	
+
 };
 
 }
