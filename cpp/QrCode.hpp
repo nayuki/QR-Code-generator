@@ -49,11 +49,17 @@ class QrCode final {
 		public: const static Ecc LOW, MEDIUM, QUARTILE, HIGH;
 		
 		// Fields.
-		public: const int ordinal;  // (Public) In the range 0 to 3 (unsigned 2-bit integer).
-		public: const int formatBits;  // (Package-private) In the range 0 to 3 (unsigned 2-bit integer).
+		private: int ordinal;
+		private: int formatBits;
 		
 		// Constructor.
 		private: Ecc(int ord, int fb);
+		
+		// (Public) Returns a value in the range 0 to 3 (unsigned 2-bit integer).
+		public: int getOrdinal() const;
+		
+		// (Package-private) Returns a value in the range 0 to 3 (unsigned 2-bit integer).
+		public: int getFormatBits() const;
 	};
 	
 	

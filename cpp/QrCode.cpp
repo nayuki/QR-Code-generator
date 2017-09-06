@@ -43,6 +43,16 @@ QrCode::Ecc::Ecc(int ord, int fb) :
 	formatBits(fb) {}
 
 
+int QrCode::Ecc::getOrdinal() const {
+	return ordinal;
+}
+
+
+int QrCode::Ecc::getFormatBits() const {
+	return formatBits;
+}
+
+
 const QrCode::Ecc QrCode::Ecc::LOW     (0, 1);
 const QrCode::Ecc QrCode::Ecc::MEDIUM  (1, 0);
 const QrCode::Ecc QrCode::Ecc::QUARTILE(2, 3);
@@ -224,7 +234,7 @@ void QrCode::drawFunctionPatterns() {
 
 void QrCode::drawFormatBits(int mask) {
 	// Calculate error correction code and pack bits
-	int data = errorCorrectionLevel.formatBits << 3 | mask;  // errCorrLvl is uint2, mask is uint3
+	int data = errorCorrectionLevel.getFormatBits() << 3 | mask;  // errCorrLvl is uint2, mask is uint3
 	int rem = data;
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -309,8 +319,8 @@ vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const
 		throw "Invalid argument";
 	
 	// Calculate parameter numbers
-	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.ordinal][version];
-	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[errorCorrectionLevel.ordinal][version];
+	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.getOrdinal()][version];
+	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[errorCorrectionLevel.getOrdinal()][version];
 	int rawCodewords = getNumRawDataModules(version) / 8;
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockLen = rawCodewords / numBlocks;
@@ -537,8 +547,8 @@ int QrCode::getNumDataCodewords(int ver, const Ecc &ecl) {
 	if (ver < 1 || ver > 40)
 		throw "Version number out of range";
 	return getNumRawDataModules(ver) / 8
-		- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver]
-		* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+		- ECC_CODEWORDS_PER_BLOCK[ecl.getOrdinal()][ver]
+		* NUM_ERROR_CORRECTION_BLOCKS[ecl.getOrdinal()][ver];
 }
 
 
