@@ -90,7 +90,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
 	size_t dataCapacityBits = getNumDataCodewords(version, *newEcl) * 8;
 	BitBuffer bb;
 	for (const QrSegment &seg : segs) {
-		bb.appendBits(seg.mode.modeBits, 4);
+		bb.appendBits(seg.mode.getModeBits(), 4);
 		bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
 		bb.insert(bb.end(), seg.data.begin(), seg.data.end());
 	}

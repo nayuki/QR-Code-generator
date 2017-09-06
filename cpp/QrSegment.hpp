@@ -58,8 +58,7 @@ class QrSegment final {
 		
 		/*-- Fields --*/
 		
-		/* (Package-private) An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object. */
-		public: const int modeBits;
+		private: int modeBits;
 		
 		private: int numBitsCharCount[3];
 		
@@ -69,7 +68,12 @@ class QrSegment final {
 		private: Mode(int mode, int cc0, int cc1, int cc2);
 		
 		
-		/*-- Method --*/
+		/*-- Methods --*/
+		
+		/* 
+		 * (Package-private) Returns the mode indicator bits, which is an unsigned 4-bit value (range 0 to 15).
+		 */
+		public: int getModeBits() const;
 		
 		/* 
 		 * (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.

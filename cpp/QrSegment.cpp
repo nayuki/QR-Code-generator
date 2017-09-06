@@ -40,6 +40,11 @@ QrSegment::Mode::Mode(int mode, int cc0, int cc1, int cc2) :
 }
 
 
+int QrSegment::Mode::getModeBits() const {
+	return modeBits;
+}
+
+
 int QrSegment::Mode::numCharCountBits(int ver) const {
 	if      ( 1 <= ver && ver <=  9)  return numBitsCharCount[0];
 	else if (10 <= ver && ver <= 26)  return numBitsCharCount[1];
