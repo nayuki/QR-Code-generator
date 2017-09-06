@@ -151,7 +151,7 @@ QrSegment QrSegment::makeEci(long assignVal) {
 }
 
 
-QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt) :
+QrSegment::QrSegment(Mode md, int numCh, const std::vector<bool> &dt) :
 		mode(md),
 		numChars(numCh),
 		data(dt) {
@@ -160,7 +160,7 @@ QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt) :
 }
 
 
-QrSegment::QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt) :
+QrSegment::QrSegment(Mode md, int numCh, std::vector<bool> &&dt) :
 		mode(md),
 		numChars(numCh),
 		data(std::move(dt)) {

@@ -152,13 +152,13 @@ class QrSegment final {
 	/* 
 	 * Creates a new QR Code data segment with the given parameters and data.
 	 */
-	public: QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt);
+	public: QrSegment(Mode md, int numCh, const std::vector<bool> &dt);
 	
 	
 	/* 
 	 * Creates a new QR Code data segment with the given parameters and data.
 	 */
-	public: QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt);
+	public: QrSegment(Mode md, int numCh, std::vector<bool> &&dt);
 	
 	
 	/*---- Methods ----*/
