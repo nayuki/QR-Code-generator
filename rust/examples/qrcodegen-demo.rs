@@ -54,7 +54,7 @@ fn do_basic_demo() {
 fn do_variety_demo() {
 	// Project Nayuki URL
 	let qr = QrCode::encode_text("https://www.nayuki.io/", QrCodeEcc::High).unwrap();
-	let qr = QrCode::remask(&qr, 3);  // Change mask, forcing to mask #3
+	let qr = QrCode::remask(&qr, Some(3));  // Change mask, forcing to mask #3
 	print_qr(&qr);
 	
 	// Numeric mode encoding (3.33 bits per digit)
@@ -67,10 +67,10 @@ fn do_variety_demo() {
 	
 	// Unicode text as UTF-8, and different masks
 	let qr = QrCode::encode_text("こんにちwa、世界！ αβγδ", QrCodeEcc::Quartile).unwrap();
-	print_qr(&QrCode::remask(&qr, 0));
-	print_qr(&QrCode::remask(&qr, 1));
-	print_qr(&QrCode::remask(&qr, 5));
-	print_qr(&QrCode::remask(&qr, 7));
+	print_qr(&QrCode::remask(&qr, Some(0)));
+	print_qr(&QrCode::remask(&qr, Some(1)));
+	print_qr(&QrCode::remask(&qr, Some(5)));
+	print_qr(&QrCode::remask(&qr, Some(7)));
 	
 	// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 	let qr = QrCode::encode_text(concat!(

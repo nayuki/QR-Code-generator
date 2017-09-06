@@ -160,7 +160,7 @@ Rust language:
     let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
     let segs = QrSegment::make_segments(&chrs);
     let qr1 = QrCode::encode_segments_advanced(
-        &segs, QrCodeEcc::High, 5, 5, 2, false).unwrap();
+        &segs, QrCodeEcc::High, 5, 5, Some(2), false).unwrap();
     for y in 0 .. qr1.size() {
         for x in 0 .. qr1.size() {
             (... paint qr1.get_module(x, y) ...)

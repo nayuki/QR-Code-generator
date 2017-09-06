@@ -71,8 +71,9 @@ fn main() {
 		}
 		
 		// Try to make QR Code symbol
+		let msk: Option<u8> = if mask == -1 { None } else { Some(mask as u8) };
 		match QrCode::encode_segments_advanced(&segs, ECC_LEVELS[errcorlvl as usize],
-				minversion as u8, maxversion as u8, mask as i8, boostecl != 0) {
+				minversion as u8, maxversion as u8, msk, boostecl != 0) {
 		
 			Some(qr) => {
 				// Print grid of modules
