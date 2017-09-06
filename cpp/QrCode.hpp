@@ -73,7 +73,7 @@ class QrCode final {
 	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
 	 * the ecl argument if it can be done without increasing the version.
 	 */
-	public: static QrCode encodeText(const char *text, const Ecc &ecl);
+	public: static QrCode encodeText(const char *text, Ecc ecl);
 	
 	
 	/* 
@@ -82,7 +82,7 @@ class QrCode final {
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 */
-	public: static QrCode encodeBinary(const std::vector<std::uint8_t> &data, const Ecc &ecl);
+	public: static QrCode encodeBinary(const std::vector<std::uint8_t> &data, Ecc ecl);
 	
 	
 	/* 
@@ -92,7 +92,7 @@ class QrCode final {
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
 	 * This function is considered to be lower level than simply encoding text or binary data.
 	 */
-	public: static QrCode encodeSegments(const std::vector<QrSegment> &segs, const Ecc &ecl,
+	public: static QrCode encodeSegments(const std::vector<QrSegment> &segs, Ecc ecl,
 		int minVersion=1, int maxVersion=40, int mask=-1, bool boostEcl=true);  // All optional parameters
 	
 	
@@ -129,7 +129,7 @@ class QrCode final {
 	 * and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
 	 * To go one level up, see the encodeSegments() function.
 	 */
-	public: QrCode(int ver, const Ecc &ecl, const std::vector<std::uint8_t> &dataCodewords, int mask);
+	public: QrCode(int ver, Ecc ecl, const std::vector<std::uint8_t> &dataCodewords, int mask);
 	
 	
 	/* 
@@ -252,7 +252,7 @@ class QrCode final {
 	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
-	private: static int getNumDataCodewords(int ver, const Ecc &ecl);
+	private: static int getNumDataCodewords(int ver, Ecc ecl);
 	
 	
 	/*---- Private tables of constants ----*/

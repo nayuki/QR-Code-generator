@@ -59,19 +59,19 @@ const QrCode::Ecc QrCode::Ecc::QUARTILE(2, 3);
 const QrCode::Ecc QrCode::Ecc::HIGH    (3, 2);
 
 
-QrCode QrCode::encodeText(const char *text, const Ecc &ecl) {
+QrCode QrCode::encodeText(const char *text, Ecc ecl) {
 	vector<QrSegment> segs(QrSegment::makeSegments(text));
 	return encodeSegments(segs, ecl);
 }
 
 
-QrCode QrCode::encodeBinary(const vector<uint8_t> &data, const Ecc &ecl) {
+QrCode QrCode::encodeBinary(const vector<uint8_t> &data, Ecc ecl) {
 	vector<QrSegment> segs{QrSegment::makeBytes(data)};
 	return encodeSegments(segs, ecl);
 }
 
 
-QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
+QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		int minVersion, int maxVersion, int mask, bool boostEcl) {
 	if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
 		throw "Invalid value";
@@ -90,14 +90,13 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
 		throw "Assertion error";
 	
 	// Increase the error correction level while the data still fits in the current version number
-	const Ecc *newEcl = &ecl;
-	for (const Ecc *anEcl : vector<const Ecc*>{&Ecc::MEDIUM, &Ecc::QUARTILE, &Ecc::HIGH}) {
-		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, *anEcl) * 8)
-			newEcl = anEcl;
+	for (Ecc newEcl : vector<Ecc>{Ecc::MEDIUM, Ecc::QUARTILE, Ecc::HIGH}) {
+		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
+			ecl = newEcl;
 	}
 	
 	// Create the data bit string by concatenating all segments
-	size_t dataCapacityBits = getNumDataCodewords(version, *newEcl) * 8;
+	size_t dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 	BitBuffer bb;
 	for (const QrSegment &seg : segs) {
 		bb.appendBits(seg.getMode().getModeBits(), 4);
@@ -116,11 +115,11 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, const Ecc &ecl,
 		throw "Assertion error";
 	
 	// Create the QR Code symbol
-	return QrCode(version, *newEcl, bb.getBytes(), mask);
+	return QrCode(version, ecl, bb.getBytes(), mask);
 }
 
 
-QrCode::QrCode(int ver, const Ecc &ecl, const vector<uint8_t> &dataCodewords, int mask) :
+QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask) :
 		// Initialize scalar fields
 		version(ver),
 		size(1 <= ver && ver <= 40 ? ver * 4 + 17 : -1),  // Avoid signed overflow undefined behavior
@@ -558,7 +557,7 @@ int QrCode::getNumRawDataModules(int ver) {
 }
 
 
-int QrCode::getNumDataCodewords(int ver, const Ecc &ecl) {
+int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 	if (ver < 1 || ver > 40)
 		throw "Version number out of range";
 	return getNumRawDataModules(ver) / 8
