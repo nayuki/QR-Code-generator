@@ -99,17 +99,17 @@ class QrCode final {
 	
 	/*---- Instance fields ----*/
 	
-	// Public immutable scalar parameters
+	// Immutable scalar parameters
 	
 	/* This QR Code symbol's version number, which is always between 1 and 40 (inclusive). */
-	public: const int version;
+	private: int version;
 	
 	/* The width and height of this QR Code symbol, measured in modules.
 	 * Always equal to version &times; 4 + 17, in the range 21 to 177. */
-	public: const int size;
+	private: int size;
 	
 	/* The error correction level used in this QR Code symbol. */
-	public: const Ecc &errorCorrectionLevel;
+	private: Ecc errorCorrectionLevel;
 	
 	/* The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 	 * Note that even if a constructor was called with automatic masking requested
@@ -142,6 +142,15 @@ class QrCode final {
 	
 	
 	/*---- Public instance methods ----*/
+	
+	public: int getVersion() const;
+	
+	
+	public: int getSize() const;
+	
+	
+	public: Ecc getErrorCorrectionLevel() const;
+	
 	
 	public: int getMask() const;
 	

@@ -85,9 +85,9 @@ int main() {
 			const QrCode qr = QrCode::encodeSegments(segs,
 				*ECC_LEVELS[errCorLvl], minVersion, maxVersion, mask, boostEcl == 1);
 			// Print grid of modules
-			std::cout << qr.version << std::endl;
-			for (int y = 0; y < qr.size; y++) {
-				for (int x = 0; x < qr.size; x++)
+			std::cout << qr.getVersion() << std::endl;
+			for (int y = 0; y < qr.getSize(); y++) {
+				for (int x = 0; x < qr.getSize(); x++)
 					std::cout << (qr.getModule(x, y) ? 1 : 0) << std::endl;
 			}
 			

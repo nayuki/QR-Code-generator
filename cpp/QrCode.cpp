@@ -164,6 +164,21 @@ QrCode::QrCode(const QrCode &qr, int mask) :
 }
 
 
+int QrCode::getVersion() const {
+	return version;
+}
+
+
+int QrCode::getSize() const {
+	return size;
+}
+
+
+QrCode::Ecc QrCode::getErrorCorrectionLevel() const {
+	return errorCorrectionLevel;
+}
+
+
 int QrCode::getMask() const {
 	return mask;
 }
