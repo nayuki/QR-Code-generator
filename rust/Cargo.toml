@@ -2,3 +2,10 @@
 name = "qrcodegen"
 version = "1.2.1"
 authors = ["Project Nayuki"]
+description = "High-quality QR Code generator library"
+homepage = "https://www.nayuki.io/page/qr-code-generator-library"
+repository = "https://github.com/nayuki/QR-Code-generator"
+readme = "Readme.markdown"
+keywords = ["qr-code", "barcode", "encoder", "image"]
+categories = ["encoding", "multimedia::images"]
+license = "MIT"
