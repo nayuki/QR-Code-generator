@@ -563,6 +563,72 @@ static void testGetSetModuleRandomly(void) {
 }
 
 
+static void testIsAlphanumeric(void) {
+	struct TestCase {
+		bool answer;
+		const char *text;
+	};
+	const struct TestCase cases[] = {
+		{true, ""},
+		{true, "0"},
+		{true, "A"},
+		{false, "a"},
+		{true, " "},
+		{true, "."},
+		{true, "*"},
+		{false, ","},
+		{false, "|"},
+		{false, "@"},
+		{true, "XYZ"},
+		{false, "XYZ!"},
+		{true, "79068"},
+		{true, "+123 ABC$"},
+		{false, "\x01"},
+		{false, "\x7F"},
+		{false, "\x80"},
+		{false, "\xC0"},
+		{false, "\xFF"},
+	};
+	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+		assert(qrcodegen_isAlphanumeric(cases[i].text) == cases[i].answer);
+		numTestCases++;
+	}
+}
+
+
+static void testIsNumeric(void) {
+	struct TestCase {
+		bool answer;
+		const char *text;
+	};
+	const struct TestCase cases[] = {
+		{true, ""},
+		{true, "0"},
+		{false, "A"},
+		{false, "a"},
+		{false, " "},
+		{false, "."},
+		{false, "*"},
+		{false, ","},
+		{false, "|"},
+		{false, "@"},
+		{false, "XYZ"},
+		{false, "XYZ!"},
+		{true, "79068"},
+		{false, "+123 ABC$"},
+		{false, "\x01"},
+		{false, "\x7F"},
+		{false, "\x80"},
+		{false, "\xC0"},
+		{false, "\xFF"},
+	};
+	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+		assert(qrcodegen_isNumeric(cases[i].text) == cases[i].answer);
+		numTestCases++;
+	}
+}
+
+
 static void testCalcSegmentBufferSize(void) {
 	{
 		const size_t cases[][2] = {
@@ -830,6 +896,8 @@ int main(void) {
 	testGetAlignmentPatternPositions();
 	testGetSetModule();
 	testGetSetModuleRandomly();
+	testIsAlphanumeric();
+	testIsNumeric();
 	testCalcSegmentBufferSize();
 	testCalcSegmentBitLength();
 	printf("All %d test cases passed\n", numTestCases);

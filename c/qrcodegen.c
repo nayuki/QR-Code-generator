@@ -856,6 +856,26 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack) {
 
 /*---- Segment handling ----*/
 
+bool qrcodegen_isAlphanumeric(const char *text) {
+	assert(text != NULL);
+	for (; *text != '\0'; text++) {
+		if (strchr(ALPHANUMERIC_CHARSET, *text) == NULL)
+			return false;
+	}
+	return true;
+}
+
+
+bool qrcodegen_isNumeric(const char *text) {
+	assert(text != NULL);
+	for (; *text != '\0'; text++) {
+		if (*text < '0' || *text > '9')
+			return false;
+	}
+	return true;
+}
+
+
 size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars) {
 	int temp = calcSegmentBitLength(mode, numChars);
 	if (temp == -1)

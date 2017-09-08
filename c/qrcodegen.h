@@ -154,6 +154,18 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 
 
 /* 
+ * Tests whether the given string can be encoded as a segment in alphanumeric mode.
+ */
+bool qrcodegen_isAlphanumeric(const char *text);
+
+
+/* 
+ * Tests whether the given string can be encoded as a segment in numeric mode.
+ */
+bool qrcodegen_isNumeric(const char *text);
+
+
+/* 
  * Returns the number of bytes (uint8_t) needed for the data buffer of a segment
  * containing the given number of characters using the given mode. Notes:
  * - Returns SIZE_MAX on failure, i.e. numChars > INT16_MAX or
