@@ -64,6 +64,7 @@ int getAlignmentPatternPositions(int version, uint8_t result[7]);
 bool getModule(const uint8_t qrcode[], int x, int y);
 void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
 void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
+int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
 
 
 /*---- Test cases ----*/
@@ -562,6 +563,257 @@ static void testGetSetModuleRandomly(void) {
 }
 
 
+static void testCalcSegmentBufferSize(void) {
+	{
+		const size_t cases[][2] = {
+			{0, 0},
+			{1, 1},
+			{2, 1},
+			{3, 2},
+			{4, 2},
+			{5, 3},
+			{6, 3},
+			{1472, 614},
+			{2097, 874},
+			{5326, 2220},
+			{9828, 4095},
+			{9829, 4096},
+			{9830, 4096},
+			{9831, SIZE_MAX},
+			{9832, SIZE_MAX},
+			{12000, SIZE_MAX},
+			{28453, SIZE_MAX},
+			{55555, SIZE_MAX},
+			{SIZE_MAX / 6, SIZE_MAX},
+			{SIZE_MAX / 4, SIZE_MAX},
+			{SIZE_MAX / 2, SIZE_MAX},
+			{SIZE_MAX / 1, SIZE_MAX},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_NUMERIC, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		const size_t cases[][2] = {
+			{0, 0},
+			{1, 1},
+			{2, 2},
+			{3, 3},
+			{4, 3},
+			{5, 4},
+			{6, 5},
+			{1472, 1012},
+			{2097, 1442},
+			{5326, 3662},
+			{5955, 4095},
+			{5956, 4095},
+			{5957, 4096},
+			{5958, SIZE_MAX},
+			{5959, SIZE_MAX},
+			{12000, SIZE_MAX},
+			{28453, SIZE_MAX},
+			{55555, SIZE_MAX},
+			{SIZE_MAX / 10, SIZE_MAX},
+			{SIZE_MAX / 8, SIZE_MAX},
+			{SIZE_MAX / 5, SIZE_MAX},
+			{SIZE_MAX / 2, SIZE_MAX},
+			{SIZE_MAX / 1, SIZE_MAX},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_ALPHANUMERIC, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		const size_t cases[][2] = {
+			{0, 0},
+			{1, 1},
+			{2, 2},
+			{3, 3},
+			{1472, 1472},
+			{2097, 2097},
+			{4094, 4094},
+			{4095, 4095},
+			{4096, SIZE_MAX},
+			{4097, SIZE_MAX},
+			{5957, SIZE_MAX},
+			{12000, SIZE_MAX},
+			{28453, SIZE_MAX},
+			{55555, SIZE_MAX},
+			{SIZE_MAX / 16 + 1, SIZE_MAX},
+			{SIZE_MAX / 14, SIZE_MAX},
+			{SIZE_MAX / 9, SIZE_MAX},
+			{SIZE_MAX / 7, SIZE_MAX},
+			{SIZE_MAX / 4, SIZE_MAX},
+			{SIZE_MAX / 3, SIZE_MAX},
+			{SIZE_MAX / 2, SIZE_MAX},
+			{SIZE_MAX / 1, SIZE_MAX},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_BYTE, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		const size_t cases[][2] = {
+			{0, 0},
+			{1, 2},
+			{2, 4},
+			{3, 5},
+			{1472, 2392},
+			{2097, 3408},
+			{2519, 4094},
+			{2520, 4095},
+			{2521, SIZE_MAX},
+			{5957, SIZE_MAX},
+			{2522, SIZE_MAX},
+			{12000, SIZE_MAX},
+			{28453, SIZE_MAX},
+			{55555, SIZE_MAX},
+			{SIZE_MAX / 13 + 1, SIZE_MAX},
+			{SIZE_MAX / 12, SIZE_MAX},
+			{SIZE_MAX / 9, SIZE_MAX},
+			{SIZE_MAX / 4, SIZE_MAX},
+			{SIZE_MAX / 3, SIZE_MAX},
+			{SIZE_MAX / 2, SIZE_MAX},
+			{SIZE_MAX / 1, SIZE_MAX},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_KANJI, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		assert(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_ECI, 0) == 3);
+		numTestCases++;
+	}
+}
+
+
+static void testCalcSegmentBitLength(void) {
+	{
+		const int cases[][2] = {
+			{0, 0},
+			{1, 4},
+			{2, 7},
+			{3, 10},
+			{4, 14},
+			{5, 17},
+			{6, 20},
+			{1472, 4907},
+			{2097, 6990},
+			{5326, 17754},
+			{9828, 32760},
+			{9829, 32764},
+			{9830, 32767},
+			{9831, -1},
+			{9832, -1},
+			{12000, -1},
+			{28453, -1},
+			{INT_MAX / 3, -1},
+			{INT_MAX / 2, -1},
+			{INT_MAX / 1, -1},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_NUMERIC, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		const int cases[][2] = {
+			{0, 0},
+			{1, 6},
+			{2, 11},
+			{3, 17},
+			{4, 22},
+			{5, 28},
+			{6, 33},
+			{1472, 8096},
+			{2097, 11534},
+			{5326, 29293},
+			{5955, 32753},
+			{5956, 32758},
+			{5957, 32764},
+			{5958, -1},
+			{5959, -1},
+			{12000, -1},
+			{28453, -1},
+			{INT_MAX / 5, -1},
+			{INT_MAX / 4, -1},
+			{INT_MAX / 3, -1},
+			{INT_MAX / 2, -1},
+			{INT_MAX / 1, -1},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_ALPHANUMERIC, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		const int cases[][2] = {
+			{0, 0},
+			{1, 8},
+			{2, 16},
+			{3, 24},
+			{1472, 11776},
+			{2097, 16776},
+			{4094, 32752},
+			{4095, 32760},
+			{4096, -1},
+			{4097, -1},
+			{5957, -1},
+			{12000, -1},
+			{28453, -1},
+			{INT_MAX / 8 + 1, -1},
+			{INT_MAX / 7, -1},
+			{INT_MAX / 6, -1},
+			{INT_MAX / 5, -1},
+			{INT_MAX / 4, -1},
+			{INT_MAX / 3, -1},
+			{INT_MAX / 2, -1},
+			{INT_MAX / 1, -1},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_BYTE, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		const int cases[][2] = {
+			{0, 0},
+			{1, 13},
+			{2, 26},
+			{3, 39},
+			{1472, 19136},
+			{2097, 27261},
+			{2519, 32747},
+			{2520, 32760},
+			{2521, -1},
+			{5957, -1},
+			{2522, -1},
+			{12000, -1},
+			{28453, -1},
+			{INT_MAX / 13 + 1, -1},
+			{INT_MAX / 12, -1},
+			{INT_MAX / 9, -1},
+			{INT_MAX / 4, -1},
+			{INT_MAX / 3, -1},
+			{INT_MAX / 2, -1},
+			{INT_MAX / 1, -1},
+		};
+		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_KANJI, cases[i][0]) == cases[i][1]);
+			numTestCases++;
+		}
+	}
+	{
+		assert(calcSegmentBitLength(qrcodegen_Mode_ECI, 0) == 24);
+		numTestCases++;
+	}
+}
+
+
 /*---- Main runner ----*/
 
 int main(void) {
@@ -578,6 +830,8 @@ int main(void) {
 	testGetAlignmentPatternPositions();
 	testGetSetModule();
 	testGetSetModuleRandomly();
+	testCalcSegmentBufferSize();
+	testCalcSegmentBitLength();
 	printf("All %d test cases passed\n", numTestCases);
 	return EXIT_SUCCESS;
 }

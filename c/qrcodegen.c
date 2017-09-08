@@ -88,6 +88,8 @@ testable bool getModule(const uint8_t qrcode[], int x, int y);
 testable void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
 testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 
+testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
+
 
 
 /*---- Private tables of constants ----*/
@@ -848,4 +850,66 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack) {
 	int qrsize = qrcode[0];
 	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)
 		setModule(qrcode, x, y, isBlack);
+}
+
+
+
+/*---- Segment handling ----*/
+
+size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars) {
+	int temp = calcSegmentBitLength(mode, numChars);
+	if (temp == -1)
+		return SIZE_MAX;
+	assert(0 <= temp && temp <= INT16_MAX);
+	return ((size_t)temp + 7) / 8;
+}
+
+
+// Returns the number of data bits needed to represent a segment
+// containing the given number of characters using the given mode. Notes:
+// - Returns -1 on failure, i.e. numChars > INT16_MAX or
+//   the number of needed bits exceeds INT16_MAX (i.e. 32767).
+// - Otherwise, all valid results are in the range [0, INT16_MAX].
+// - For byte mode, numChars measures the number of bytes, not Unicode code points.
+// - For ECI mode, numChars must be 0, and the worst-case number of bits is returned.
+//   An actual ECI segment can have shorter data. For non-ECI modes, the result is exact.
+testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars) {
+	const int LIMIT = INT16_MAX;  // Can be configured as high as INT_MAX
+	if (numChars > (unsigned int)LIMIT)
+		return -1;
+	int n = (int)numChars;
+	
+	int result = -2;
+	if (mode == qrcodegen_Mode_NUMERIC) {
+		// n * 3 + ceil(n / 3)
+		if (n > LIMIT / 3)
+			goto overflow;
+		result = n * 3;
+		int temp = n / 3 + (n % 3 == 0 ? 0 : 1);
+		if (temp > LIMIT - result)
+			goto overflow;
+		result += temp;
+	} else if (mode == qrcodegen_Mode_ALPHANUMERIC) {
+		// n * 5 + ceil(n / 2)
+		if (n > LIMIT / 5)
+			goto overflow;
+		result = n * 5;
+		int temp = n / 2 + n % 2;
+		if (temp > LIMIT - result)
+			goto overflow;
+		result += temp;
+	} else if (mode == qrcodegen_Mode_BYTE) {
+		if (n > LIMIT / 8)
+			goto overflow;
+		result = n * 8;
+	} else if (mode == qrcodegen_Mode_KANJI) {
+		if (n > LIMIT / 13)
+			goto overflow;
+		result = n * 13;
+	} else if (mode == qrcodegen_Mode_ECI && numChars == 0)
+		result = 3 * 8;
+	assert(0 <= result && result <= LIMIT);
+	return result;
+overflow:
+	return -1;
 }
