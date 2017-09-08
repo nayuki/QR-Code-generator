@@ -948,6 +948,70 @@ struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, u
 }
 
 
+struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]) {
+	struct qrcodegen_Segment result;
+	size_t len = strlen(digits);
+	result.mode = qrcodegen_Mode_NUMERIC;
+	int bitLen = calcSegmentBitLength(result.mode, len);
+	assert(bitLen != -1);
+	result.numChars = (int)len;
+	if (bitLen > 0)
+		memset(buf, 0, ((size_t)bitLen + 7) / 8 * sizeof(buf[0]));
+	result.bitLength = 0;
+	
+	unsigned int accumData = 0;
+	int accumCount = 0;
+	for (; *digits != '\0'; digits++) {
+		char c = *digits;
+		assert('0' <= c && c <= '9');
+		accumData = accumData * 10 + (c - '0');
+		accumCount++;
+		if (accumCount == 3) {
+			appendBitsToBuffer(accumData, 10, buf, &result.bitLength);
+			accumData = 0;
+			accumCount = 0;
+		}
+	}
+	if (accumCount > 0)  // 1 or 2 digits remaining
+		appendBitsToBuffer(accumData, accumCount * 3 + 1, buf, &result.bitLength);
+	assert(result.bitLength == bitLen);
+	result.data = buf;
+	return result;
+}
+
+
+struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t buf[]) {
+	struct qrcodegen_Segment result;
+	size_t len = strlen(text);
+	result.mode = qrcodegen_Mode_ALPHANUMERIC;
+	int bitLen = calcSegmentBitLength(result.mode, len);
+	assert(bitLen != -1);
+	result.numChars = (int)len;
+	if (bitLen > 0)
+		memset(buf, 0, ((size_t)bitLen + 7) / 8 * sizeof(buf[0]));
+	result.bitLength = 0;
+	
+	unsigned int accumData = 0;
+	int accumCount = 0;
+	for (; *text != '\0'; text++) {
+		const char *temp = strchr(ALPHANUMERIC_CHARSET, *text);
+		assert(temp != NULL);
+		accumData = accumData * 45 + (temp - ALPHANUMERIC_CHARSET);
+		accumCount++;
+		if (accumCount == 2) {
+			appendBitsToBuffer(accumData, 11, buf, &result.bitLength);
+			accumData = 0;
+			accumCount = 0;
+		}
+	}
+	if (accumCount > 0)  // 1 character remaining
+		appendBitsToBuffer(accumData, 6, buf, &result.bitLength);
+	assert(result.bitLength == bitLen);
+	result.data = buf;
+	return result;
+}
+
+
 struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
 	struct qrcodegen_Segment result;
 	result.mode = qrcodegen_Mode_ECI;

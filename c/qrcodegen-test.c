@@ -911,6 +911,92 @@ static void testMakeBytes(void) {
 }
 
 
+static void testMakeNumeric(void) {
+	{
+		struct qrcodegen_Segment seg = qrcodegen_makeNumeric("", NULL);
+		assert(seg.mode == qrcodegen_Mode_NUMERIC);
+		assert(seg.numChars == 0);
+		assert(seg.bitLength == 0);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[1];
+		struct qrcodegen_Segment seg = qrcodegen_makeNumeric("9", buf);
+		assert(seg.numChars == 1);
+		assert(seg.bitLength == 4);
+		assert(seg.data[0] == 0x90);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[1];
+		struct qrcodegen_Segment seg = qrcodegen_makeNumeric("81", buf);
+		assert(seg.numChars == 2);
+		assert(seg.bitLength == 7);
+		assert(seg.data[0] == 0xA2);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[2];
+		struct qrcodegen_Segment seg = qrcodegen_makeNumeric("673", buf);
+		assert(seg.numChars == 3);
+		assert(seg.bitLength == 10);
+		assert(seg.data[0] == 0xA8);
+		assert(seg.data[1] == 0x40);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[5];
+		struct qrcodegen_Segment seg = qrcodegen_makeNumeric("3141592653", buf);
+		assert(seg.numChars == 10);
+		assert(seg.bitLength == 34);
+		assert(seg.data[0] == 0x4E);
+		assert(seg.data[1] == 0x89);
+		assert(seg.data[2] == 0xF4);
+		assert(seg.data[3] == 0x24);
+		assert(seg.data[4] == 0xC0);
+		numTestCases++;
+	}
+}
+
+
+static void testMakeAlphanumeric(void) {
+	{
+		struct qrcodegen_Segment seg = qrcodegen_makeAlphanumeric("", NULL);
+		assert(seg.mode == qrcodegen_Mode_ALPHANUMERIC);
+		assert(seg.numChars == 0);
+		assert(seg.bitLength == 0);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[1];
+		struct qrcodegen_Segment seg = qrcodegen_makeAlphanumeric("A", buf);
+		assert(seg.numChars == 1);
+		assert(seg.bitLength == 6);
+		assert(seg.data[0] == 0x28);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[2];
+		struct qrcodegen_Segment seg = qrcodegen_makeAlphanumeric("%:", buf);
+		assert(seg.numChars == 2);
+		assert(seg.bitLength == 11);
+		assert(seg.data[0] == 0xDB);
+		assert(seg.data[1] == 0x40);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[3];
+		struct qrcodegen_Segment seg = qrcodegen_makeAlphanumeric("Q R", buf);
+		assert(seg.numChars == 3);
+		assert(seg.bitLength == 17);
+		assert(seg.data[0] == 0x96);
+		assert(seg.data[1] == 0xCD);
+		assert(seg.data[2] == 0x80);
+		numTestCases++;
+	}
+}
+
+
 static void testMakeEci(void) {
 	{
 		uint8_t buf[1];
@@ -964,6 +1050,8 @@ int main(void) {
 	testCalcSegmentBufferSize();
 	testCalcSegmentBitLength();
 	testMakeBytes();
+	testMakeNumeric();
+	testMakeAlphanumeric();
 	testMakeEci();
 	printf("All %d test cases passed\n", numTestCases);
 	return EXIT_SUCCESS;

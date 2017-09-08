@@ -186,6 +186,20 @@ struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, u
 
 
 /* 
+ * Returns a segment representing the given string of decimal digits encoded in numeric mode.
+ */
+struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]);
+
+
+/* 
+ * Returns a segment representing the given text string encoded in alphanumeric mode.
+ * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
+ * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+ */
+struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t buf[]);
+
+
+/* 
  * Returns a segment representing an Extended Channel Interpretation
  * (ECI) designator with the given assignment value.
  */
