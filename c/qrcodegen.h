@@ -57,6 +57,37 @@ enum qrcodegen_Mask {
 };
 
 
+/* 
+ * The mode field of a segment.
+ */
+enum qrcodegen_Mode {
+	qrcodegen_Mode_NUMERIC,
+	qrcodegen_Mode_ALPHANUMERIC,
+	qrcodegen_Mode_BYTE,
+	qrcodegen_Mode_KANJI,
+	qrcodegen_Mode_ECI,
+};
+
+
+/**
+ * Represents a character string to be encoded in a QR Code symbol. Each segment has
+ * a mode, and a sequence of characters that is already encoded as a sequence of bits.
+ */
+struct qrcodegen_Segment {
+	// The mode indicator for this segment.
+	enum qrcodegen_Mode mode;
+	
+	// The length of this segment's unencoded data, measured in characters. Always zero or positive.
+	int numChars;
+	
+	// The data bits of this segment, packed in bitwise big endian. Can be null.
+	uint8_t *data;
+	
+	// The number of valid data bits used in the buffer. Requires 0 <= bitLength <= (capacity of data array * 8).
+	int bitLength;
+};
+
+
 
 /*---- Macro constants and functions ----*/
 
