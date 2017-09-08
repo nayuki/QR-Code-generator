@@ -179,6 +179,19 @@ bool qrcodegen_isNumeric(const char *text);
 size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars);
 
 
+/* 
+ * Returns a segment representing the given binary data encoded in byte mode.
+ */
+struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, uint8_t buf[]);
+
+
+/* 
+ * Returns a segment representing an Extended Channel Interpretation
+ * (ECI) designator with the given assignment value.
+ */
+struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]);
+
+
 
 /*---- Functions to extract raw data from QR Codes ----*/
 

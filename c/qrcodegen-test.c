@@ -880,6 +880,69 @@ static void testCalcSegmentBitLength(void) {
 }
 
 
+static void testMakeBytes(void) {
+	{
+		struct qrcodegen_Segment seg = qrcodegen_makeBytes(NULL, 0, NULL);
+		assert(seg.mode == qrcodegen_Mode_BYTE);
+		assert(seg.numChars == 0);
+		assert(seg.bitLength == 0);
+		numTestCases++;
+	}
+	{
+		const uint8_t data[] = {0x00};
+		uint8_t buf[1];
+		struct qrcodegen_Segment seg = qrcodegen_makeBytes(data, 1, buf);
+		assert(seg.numChars == 1);
+		assert(seg.bitLength == 8);
+		assert(seg.data[0] == 0x00);
+		numTestCases++;
+	}
+	{
+		const uint8_t data[] = {0xEF, 0xBB, 0xBF};
+		uint8_t buf[3];
+		struct qrcodegen_Segment seg = qrcodegen_makeBytes(data, 3, buf);
+		assert(seg.numChars == 3);
+		assert(seg.bitLength == 24);
+		assert(seg.data[0] == 0xEF);
+		assert(seg.data[1] == 0xBB);
+		assert(seg.data[2] == 0xBF);
+		numTestCases++;
+	}
+}
+
+
+static void testMakeEci(void) {
+	{
+		uint8_t buf[1];
+		struct qrcodegen_Segment seg = qrcodegen_makeEci(127, buf);
+		assert(seg.mode == qrcodegen_Mode_ECI);
+		assert(seg.numChars == 0);
+		assert(seg.bitLength == 8);
+		assert(seg.data[0] == 0x7F);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[2];
+		struct qrcodegen_Segment seg = qrcodegen_makeEci(10345, buf);
+		assert(seg.numChars == 0);
+		assert(seg.bitLength == 16);
+		assert(seg.data[0] == 0xA8);
+		assert(seg.data[1] == 0x69);
+		numTestCases++;
+	}
+	{
+		uint8_t buf[3];
+		struct qrcodegen_Segment seg = qrcodegen_makeEci(999999, buf);
+		assert(seg.numChars == 0);
+		assert(seg.bitLength == 24);
+		assert(seg.data[0] == 0xCF);
+		assert(seg.data[1] == 0x42);
+		assert(seg.data[2] == 0x3F);
+		numTestCases++;
+	}
+}
+
+
 /*---- Main runner ----*/
 
 int main(void) {
@@ -900,6 +963,8 @@ int main(void) {
 	testIsNumeric();
 	testCalcSegmentBufferSize();
 	testCalcSegmentBitLength();
+	testMakeBytes();
+	testMakeEci();
 	printf("All %d test cases passed\n", numTestCases);
 	return EXIT_SUCCESS;
 }

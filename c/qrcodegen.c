@@ -933,3 +933,40 @@ testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars) {
 overflow:
 	return -1;
 }
+
+
+struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, uint8_t buf[]) {
+	struct qrcodegen_Segment result;
+	result.mode = qrcodegen_Mode_BYTE;
+	result.bitLength = calcSegmentBitLength(result.mode, len);
+	assert(result.bitLength != -1);
+	result.numChars = (int)len;
+	if (len > 0)
+		memcpy(buf, data, len * sizeof(buf[0]));
+	result.data = buf;
+	return result;
+}
+
+
+struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
+	struct qrcodegen_Segment result;
+	result.mode = qrcodegen_Mode_ECI;
+	result.numChars = 0;
+	result.bitLength = 0;
+	if (0 <= assignVal && assignVal < (1 << 7)) {
+		memset(buf, 0, 1 * sizeof(buf[0]));
+		appendBitsToBuffer(assignVal, 8, buf, &result.bitLength);
+	} else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
+		memset(buf, 0, 2 * sizeof(buf[0]));
+		appendBitsToBuffer(2, 2, buf, &result.bitLength);
+		appendBitsToBuffer(assignVal, 14, buf, &result.bitLength);
+	} else if ((1 << 14) <= assignVal && assignVal < 1000000L) {
+		memset(buf, 0, 3 * sizeof(buf[0]));
+		appendBitsToBuffer(6, 3, buf, &result.bitLength);
+		appendBitsToBuffer(assignVal >> 10, 11, buf, &result.bitLength);
+		appendBitsToBuffer(assignVal & 0x3FF, 10, buf, &result.bitLength);
+	} else
+		assert(false);
+	result.data = buf;
+	return result;
+}
