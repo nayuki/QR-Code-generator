@@ -85,7 +85,7 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 
 testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
 static int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
-static int numCharCountBits(const struct qrcodegen_Segment *seg, int version);
+static int numCharCountBits(enum qrcodegen_Mode mode, int version);
 
 
 
@@ -920,7 +920,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 			default:  assert(false);
 		}
 		appendBitsToBuffer(modeBits, 4, qrcode, &bitLen);
-		appendBitsToBuffer(seg->numChars, numCharCountBits(seg, version), qrcode, &bitLen);
+		appendBitsToBuffer(seg->numChars, numCharCountBits(seg->mode, version), qrcode, &bitLen);
 		for (int j = 0; j < seg->bitLength; j++)
 			appendBitsToBuffer((seg->data[j >> 3] >> (7 - (j & 7))) & 1, 1, qrcode, &bitLen);
 	}
@@ -970,7 +970,7 @@ static int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int v
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = 0;
 	for (size_t i = 0; i < len; i++) {
-		int ccbits = numCharCountBits(&segs[i], version);
+		int ccbits = numCharCountBits(segs[i].mode, version);
 		// Fail if segment length value doesn't fit in the length field's bit-width
 		if (segs[i].numChars >= (1L << ccbits))
 			return -1;
@@ -983,14 +983,14 @@ static int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int v
 }
 
 
-static int numCharCountBits(const struct qrcodegen_Segment *seg, int version) {
+static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 	int i;
 	if      ( 1 <= version && version <=  9)  i = 0;
 	else if (10 <= version && version <= 26)  i = 1;
 	else if (27 <= version && version <= 40)  i = 2;
 	else  assert(false);
 	
-	switch (seg->mode) {
+	switch (mode) {
 		case qrcodegen_Mode_NUMERIC     : { const int temp[] = {10, 12, 14}; return temp[i]; }
 		case qrcodegen_Mode_ALPHANUMERIC: { const int temp[] = { 9, 11, 13}; return temp[i]; }
 		case qrcodegen_Mode_BYTE        : { const int temp[] = { 8, 16, 16}; return temp[i]; }
