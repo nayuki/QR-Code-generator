@@ -990,9 +990,9 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 		int ccbits = numCharCountBits(segs[i].mode, version);
 		assert(0 <= ccbits && ccbits <= 16);
 		// Fail if segment length value doesn't fit in the length field's bit-width
-		if (segs[i].numChars >= (1L << ccbits))
+		if (numChars >= (1L << ccbits))
 			return -1;
-		long temp = 4L + ccbits + segs[i].bitLength;
+		long temp = 4L + ccbits + bitLength;
 		if (temp > INT16_MAX - result)
 			return -1;
 		result += temp;
