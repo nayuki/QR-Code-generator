@@ -25,14 +25,17 @@
  */
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "qrcodegen.h"
 
 
 // Function prototypes
 static void doBasicDemo(void);
 static void doVarietyDemo(void);
+static void doSegmentDemo(void);
 static void printQr(const uint8_t qrcode[]);
 
 
@@ -41,6 +44,7 @@ static void printQr(const uint8_t qrcode[]);
 int main(void) {
 	doBasicDemo();
 	doVarietyDemo();
+	doSegmentDemo();
 	return EXIT_SUCCESS;
 }
 
@@ -131,6 +135,127 @@ static void doVarietyDemo(void) {
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 		if (ok)
 			printQr(qrcode);
+	}
+}
+
+
+static void doSegmentDemo(void) {
+	{  // Illustration "silver"
+		const char *silver0 = "THE SQUARE ROOT OF 2 IS 1.";
+		const char *silver1 = "41421356237309504880168872420969807856967187537694807317667973799";
+		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
+		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
+		bool ok;
+		{
+			char *concat = calloc(strlen(silver0) + strlen(silver1) + 1, sizeof(char));
+			strcat(concat, silver0);
+			strcat(concat, silver1);
+			ok = qrcodegen_encodeText(concat, tempBuffer, qrcode, qrcodegen_Ecc_LOW,
+				qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
+			if (ok)
+				printQr(qrcode);
+			free(concat);
+		}
+		{
+			uint8_t *segBuf0 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_ALPHANUMERIC, strlen(silver0)) * sizeof(uint8_t));
+			uint8_t *segBuf1 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_NUMERIC, strlen(silver1)) * sizeof(uint8_t));
+			struct qrcodegen_Segment segs[] = {
+				qrcodegen_makeAlphanumeric(silver0, segBuf0),
+				qrcodegen_makeNumeric(silver1, segBuf1),
+			};
+			ok = qrcodegen_encodeSegments(segs, sizeof(segs) / sizeof(segs[0]), qrcodegen_Ecc_LOW, tempBuffer, qrcode);
+			free(segBuf0);
+			free(segBuf1);
+			if (ok)
+				printQr(qrcode);
+		}
+	}
+	
+	{  // Illustration "golden"
+		const char *golden0 = "Golden ratio \xCF\x86 = 1.";
+		const char *golden1 = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374";
+		const char *golden2 = "......";
+		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
+		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
+		bool ok;
+		{
+			char *concat = calloc(strlen(golden0) + strlen(golden1) + strlen(golden2) + 1, sizeof(char));
+			strcat(concat, golden0);
+			strcat(concat, golden1);
+			strcat(concat, golden2);
+			ok = qrcodegen_encodeText(concat, tempBuffer, qrcode, qrcodegen_Ecc_LOW,
+				qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
+			if (ok)
+				printQr(qrcode);
+			free(concat);
+		}
+		{
+			uint8_t *bytes = malloc(strlen(golden0) * sizeof(uint8_t));
+			for (size_t i = 0, len = strlen(golden0); i < len; i++)
+				bytes[i] = (uint8_t)golden0[i];
+			uint8_t *segBuf0 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_BYTE, strlen(golden0)) * sizeof(uint8_t));
+			uint8_t *segBuf1 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_NUMERIC, strlen(golden1)) * sizeof(uint8_t));
+			uint8_t *segBuf2 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_ALPHANUMERIC, strlen(golden2)) * sizeof(uint8_t));
+			struct qrcodegen_Segment segs[] = {
+				qrcodegen_makeBytes(bytes, strlen(golden0), segBuf0),
+				qrcodegen_makeNumeric(golden1, segBuf1),
+				qrcodegen_makeAlphanumeric(golden2, segBuf2),
+			};
+			free(bytes);
+			ok = qrcodegen_encodeSegments(segs, sizeof(segs) / sizeof(segs[0]), qrcodegen_Ecc_LOW, tempBuffer, qrcode);
+			free(segBuf0);
+			free(segBuf1);
+			free(segBuf2);
+			if (ok)
+				printQr(qrcode);
+		}
+	}
+	
+	{  // Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
+		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
+		bool ok;
+		{
+			const char *madoka =  // Encoded in UTF-8
+				"\xE3\x80\x8C\xE9\xAD\x94\xE6\xB3\x95\xE5"
+				"\xB0\x91\xE5\xA5\xB3\xE3\x81\xBE\xE3\x81"
+				"\xA9\xE3\x81\x8B\xE2\x98\x86\xE3\x83\x9E"
+				"\xE3\x82\xAE\xE3\x82\xAB\xE3\x80\x8D\xE3"
+				"\x81\xA3\xE3\x81\xA6\xE3\x80\x81\xE3\x80"
+				"\x80\xD0\x98\xD0\x90\xD0\x98\xE3\x80\x80"
+				"\xEF\xBD\x84\xEF\xBD\x85\xEF\xBD\x93\xEF"
+				"\xBD\x95\xE3\x80\x80\xCE\xBA\xCE\xB1\xEF"
+				"\xBC\x9F";
+			ok = qrcodegen_encodeText(madoka, tempBuffer, qrcode, qrcodegen_Ecc_LOW,
+				qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
+			if (ok)
+				printQr(qrcode);
+		}
+		{
+			const int kanjiChars[] = {  // Kanji mode encoding (13 bits per character)
+				0x0035, 0x1002, 0x0FC0, 0x0AED, 0x0AD7,
+				0x015C, 0x0147, 0x0129, 0x0059, 0x01BD,
+				0x018D, 0x018A, 0x0036, 0x0141, 0x0144,
+				0x0001, 0x0000, 0x0249, 0x0240, 0x0249,
+				0x0000, 0x0104, 0x0105, 0x0113, 0x0115,
+				0x0000, 0x0208, 0x01FF, 0x0008,
+			};
+			size_t len = sizeof(kanjiChars) / sizeof(kanjiChars[0]);
+			uint8_t *segBuf = calloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_KANJI, len), sizeof(uint8_t));
+			struct qrcodegen_Segment seg;
+			seg.mode = qrcodegen_Mode_KANJI;
+			seg.numChars = len;
+			seg.bitLength = 0;
+			for (size_t i = 0; i < len; i++) {
+				for (int j = 12; j >= 0; j--, seg.bitLength++)
+					segBuf[seg.bitLength >> 3] |= ((kanjiChars[i] >> j) & 1) << (7 - (seg.bitLength & 7));
+			}
+			seg.data = segBuf;
+			ok = qrcodegen_encodeSegments(&seg, 1, qrcodegen_Ecc_LOW, tempBuffer, qrcode);
+			free(segBuf);
+			if (ok)
+				printQr(qrcode);
+		}
 	}
 }
 
