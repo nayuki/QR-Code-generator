@@ -688,6 +688,7 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack) {
 
 /*---- Segment handling ----*/
 
+// Public function - see documentation comment in header file.
 bool qrcodegen_isAlphanumeric(const char *text) {
 	assert(text != NULL);
 	for (; *text != '\0'; text++) {
@@ -698,6 +699,7 @@ bool qrcodegen_isAlphanumeric(const char *text) {
 }
 
 
+// Public function - see documentation comment in header file.
 bool qrcodegen_isNumeric(const char *text) {
 	assert(text != NULL);
 	for (; *text != '\0'; text++) {
@@ -708,6 +710,7 @@ bool qrcodegen_isNumeric(const char *text) {
 }
 
 
+// Public function - see documentation comment in header file.
 size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars) {
 	int temp = calcSegmentBitLength(mode, numChars);
 	if (temp == -1)
@@ -767,6 +770,7 @@ overflow:
 }
 
 
+// Public function - see documentation comment in header file.
 struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, uint8_t buf[]) {
 	assert(data != NULL || len == 0);
 	struct qrcodegen_Segment result;
@@ -781,6 +785,7 @@ struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, u
 }
 
 
+// Public function - see documentation comment in header file.
 struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]) {
 	assert(digits != NULL);
 	struct qrcodegen_Segment result;
@@ -814,6 +819,7 @@ struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]
 }
 
 
+// Public function - see documentation comment in header file.
 struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t buf[]) {
 	assert(text != NULL);
 	struct qrcodegen_Segment result;
@@ -847,6 +853,7 @@ struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t bu
 }
 
 
+// Public function - see documentation comment in header file.
 struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
 	struct qrcodegen_Segment result;
 	result.mode = qrcodegen_Mode_ECI;
@@ -871,6 +878,7 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
 }
 
 
+// Public function - see documentation comment in header file.
 bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
 		enum qrcodegen_Ecc ecl, uint8_t tempBuffer[], uint8_t qrcode[]) {
 	return qrcodegen_encodeSegmentsAdvanced(segs, len, ecl,
@@ -878,6 +886,7 @@ bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
 }
 
 
+// Public function - see documentation comment in header file.
 bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], size_t len, enum qrcodegen_Ecc ecl,
 		int minVersion, int maxVersion, int mask, bool boostEcl, uint8_t tempBuffer[], uint8_t qrcode[]) {
 	assert(segs != NULL || len == 0);
@@ -965,6 +974,10 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 }
 
 
+// Returns the number of bits needed to encode the given list of segments at the given version.
+// The result is in the range [0, 32767] if successful. Otherwise, -1 is returned if any segment
+// has more characters than allowed by that segment's mode's character count field at the version,
+// or if the actual answer exceeds INT16_MAX.
 testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
 	assert(segs != NULL || len == 0);
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
@@ -989,6 +1002,8 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 }
 
 
+// Returns the bit width of the segment character count field for the
+// given mode at the given version number. The result is in the range [0, 16].
 static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int i;

@@ -206,10 +206,32 @@ struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t bu
 struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]);
 
 
+/* 
+ * Renders a QR Code symbol representing the given data segments at the given error correction
+ * level or higher. The smallest possible QR Code version is automatically chosen for the output.
+ * Returns true if QR Code creation succeeded, or false if the data is too long to fit in any version.
+ * This function allows the user to create a custom sequence of segments that switches
+ * between modes (such as alphanumeric and binary) to encode text more efficiently.
+ * This function is considered to be lower level than simply encoding text or binary data.
+ * To save memory, the segments' data buffers can alias/overlap tempBuffer, and will
+ * result in them being clobbered, but the QR Code output will still be correct.
+ * But the qrcode array must not overlap tempBuffer or any segment's data buffer.
+ */
 bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
 	enum qrcodegen_Ecc ecl, uint8_t tempBuffer[], uint8_t qrcode[]);
 
 
+/* 
+ * Renders a QR Code symbol representing the given data segments with the given encoding parameters.
+ * Returns true if QR Code creation succeeded, or false if the data is too long to fit in the range of versions.
+ * The smallest possible QR Code version within the given range is automatically chosen for the output.
+ * This function allows the user to create a custom sequence of segments that switches
+ * between modes (such as alphanumeric and binary) to encode text more efficiently.
+ * This function is considered to be lower level than simply encoding text or binary data.
+ * To save memory, the segments' data buffers can alias/overlap tempBuffer, and will
+ * result in them being clobbered, but the QR Code output will still be correct.
+ * But the qrcode array must not overlap tempBuffer or any segment's data buffer.
+ */
 bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], size_t len, enum qrcodegen_Ecc ecl,
 	int minVersion, int maxVersion, int mask, bool boostEcl, uint8_t tempBuffer[], uint8_t qrcode[]);
 
