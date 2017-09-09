@@ -33,25 +33,27 @@ Manual parameters:
 Examples
 --------
 
-    extern crate qrcodegen;
-    use qrcodegen::QrCode;
-    use qrcodegen::QrCodeEcc;
-    use qrcodegen::QrSegment;
-    
-    // Simple operation
-    let qr0 = QrCode::encode_text("Hello, world!",
-        QrCodeEcc::Medium).unwrap();
-    let svg = qr0.to_svg_string(4);
-    
-    // Manual operation
-    let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
-    let segs = QrSegment::make_segments(&chrs);
-    let qr1 = QrCode::encode_segments_advanced(
-        &segs, QrCodeEcc::High, 5, 5, Some(2), false).unwrap();
-    for y in 0 .. qr1.size() {
-        for x in 0 .. qr1.size() {
-            (... paint qr1.get_module(x, y) ...)
-        }
+```rust
+extern crate qrcodegen;
+use qrcodegen::QrCode;
+use qrcodegen::QrCodeEcc;
+use qrcodegen::QrSegment;
+
+// Simple operation
+let qr0 = QrCode::encode_text("Hello, world!",
+    QrCodeEcc::Medium).unwrap();
+let svg = qr0.to_svg_string(4);
+
+// Manual operation
+let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
+let segs = QrSegment::make_segments(&chrs);
+let qr1 = QrCode::encode_segments_advanced(
+    &segs, QrCodeEcc::High, 5, 5, Some(2), false).unwrap();
+for y in 0 .. qr1.size() {
+    for x in 0 .. qr1.size() {
+        (... paint qr1.get_module(x, y) ...)
     }
+}
+```
 
 More complete set of examples: https://github.com/nayuki/QR-Code-generator/blob/master/rust/examples/qrcodegen-demo.rs .
