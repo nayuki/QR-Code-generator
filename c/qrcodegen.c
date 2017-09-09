@@ -936,6 +936,7 @@ overflow:
 
 
 struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, uint8_t buf[]) {
+	assert(data != NULL || len == 0);
 	struct qrcodegen_Segment result;
 	result.mode = qrcodegen_Mode_BYTE;
 	result.bitLength = calcSegmentBitLength(result.mode, len);
@@ -949,6 +950,7 @@ struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, u
 
 
 struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]) {
+	assert(digits != NULL);
 	struct qrcodegen_Segment result;
 	size_t len = strlen(digits);
 	result.mode = qrcodegen_Mode_NUMERIC;
@@ -981,6 +983,7 @@ struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]
 
 
 struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t buf[]) {
+	assert(text != NULL);
 	struct qrcodegen_Segment result;
 	size_t len = strlen(text);
 	result.mode = qrcodegen_Mode_ALPHANUMERIC;
