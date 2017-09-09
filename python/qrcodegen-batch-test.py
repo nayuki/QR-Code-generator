@@ -72,16 +72,16 @@ def main():
 def do_trial():
 	mode = random.randrange(4)
 	if mode == 0:  # Numeric
-		length = max(round((2 * 7089) ** random.random()), 1)
+		length = round((2 * 7089) ** random.random())
 		data = [random.randrange(48, 58) for _ in range(length)]
 	elif mode == 1:  # Alphanumeric
-		length = max(round((2 * 4296) ** random.random()), 1)
+		length = round((2 * 4296) ** random.random())
 		data = [ord(random.choice("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")) for _ in range(length)]
 	elif mode == 2:  # ASCII
-		length = max(round((2 * 2953) ** random.random()), 1)
+		length = round((2 * 2953) ** random.random())
 		data = [random.randrange(128) for _ in range(length)]
 	elif mode == 3:  # Byte
-		length = max(round((2 * 2953) ** random.random()), 1)
+		length = round((2 * 2953) ** random.random())
 		data = [random.randrange(256) for _ in range(length)]
 	else:
 		raise AssertionError()
