@@ -970,7 +970,12 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = 0;
 	for (size_t i = 0; i < len; i++) {
+		int numChars = segs[i].numChars;
+		int bitLength = segs[i].bitLength;
+		assert(0 <= numChars && numChars <= INT16_MAX);
+		assert(0 <= bitLength && bitLength <= INT16_MAX);
 		int ccbits = numCharCountBits(segs[i].mode, version);
+		assert(0 <= ccbits && ccbits <= 16);
 		// Fail if segment length value doesn't fit in the length field's bit-width
 		if (segs[i].numChars >= (1L << ccbits))
 			return -1;
@@ -979,11 +984,13 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 			return -1;
 		result += temp;
 	}
+	assert(0 <= result && result <= INT16_MAX);
 	return result;
 }
 
 
 static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
+	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int i;
 	if      ( 1 <= version && version <=  9)  i = 0;
 	else if (10 <= version && version <= 26)  i = 1;
