@@ -64,6 +64,7 @@ bool getModule(const uint8_t qrcode[], int x, int y);
 void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
 void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
+int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
 
 
 /*---- Test cases ----*/
@@ -970,6 +971,87 @@ static void testMakeEci(void) {
 }
 
 
+static void testGetTotalBits(void) {
+	{
+		assert(getTotalBits(NULL, 0, 1) == 0);
+		numTestCases++;
+		assert(getTotalBits(NULL, 0, 40) == 0);
+		numTestCases++;
+	}
+	{
+		struct qrcodegen_Segment segs[] = {
+			{qrcodegen_Mode_BYTE, 3, NULL, 24},
+		};
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 2) == 36);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 10) == 44);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 39) == 44);
+		numTestCases++;
+	}
+	{
+		struct qrcodegen_Segment segs[] = {
+			{qrcodegen_Mode_ECI, 0, NULL, 8},
+			{qrcodegen_Mode_NUMERIC, 7, NULL, 24},
+			{qrcodegen_Mode_ALPHANUMERIC, 1, NULL, 6},
+			{qrcodegen_Mode_KANJI, 4, NULL, 52},
+		};
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 9) == 133);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 21) == 139);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 27) == 145);
+		numTestCases++;
+	}
+	{
+		struct qrcodegen_Segment segs[] = {
+			{qrcodegen_Mode_BYTE, 4093, NULL, 32744},
+		};
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 1) == -1);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 10) == 32764);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 27) == 32764);
+		numTestCases++;
+	}
+	{
+		struct qrcodegen_Segment segs[] = {
+			{qrcodegen_Mode_NUMERIC, 2047, NULL, 6824},
+			{qrcodegen_Mode_NUMERIC, 2047, NULL, 6824},
+			{qrcodegen_Mode_NUMERIC, 2047, NULL, 6824},
+			{qrcodegen_Mode_NUMERIC, 2047, NULL, 6824},
+			{qrcodegen_Mode_NUMERIC, 1617, NULL, 5390},
+		};
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 1) == -1);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 10) == 32766);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 27) == -1);
+		numTestCases++;
+	}
+	{
+		struct qrcodegen_Segment segs[] = {
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_KANJI, 255, NULL, 3315},
+			{qrcodegen_Mode_ALPHANUMERIC, 511, NULL, 2811},
+		};
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 9) == 32767);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 26) == -1);
+		numTestCases++;
+		assert(getTotalBits(segs, ARRAY_LENGTH(segs), 40) == -1);
+		numTestCases++;
+	}
+}
+
+
 /*---- Main runner ----*/
 
 int main(void) {
@@ -993,6 +1075,7 @@ int main(void) {
 	testMakeNumeric();
 	testMakeAlphanumeric();
 	testMakeEci();
+	testGetTotalBits();
 	printf("All %d test cases passed\n", numTestCases);
 	return EXIT_SUCCESS;
 }

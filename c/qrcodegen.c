@@ -84,7 +84,7 @@ testable void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
 testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 
 testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
-static int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
+testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
 static int numCharCountBits(enum qrcodegen_Mode mode, int version);
 
 
@@ -965,7 +965,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 }
 
 
-static int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
+testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
 	assert(segs != NULL || len == 0);
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = 0;
