@@ -132,106 +132,55 @@ static const int PENALTY_N4 = 10;
 // Public function - see documentation comment in header file.
 bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
-	assert(text != NULL && tempBuffer != NULL && qrcode != NULL);
-	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
-	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
-	// Set size to invalid value for safety
-	qrcode[0] = 0;
+	size_t textLen = strlen(text);
+	if (textLen == 0)
+		return qrcodegen_encodeSegmentsAdvanced(NULL, 0, ecl, minVersion, maxVersion, mask, boostEcl, tempBuffer, qrcode);
+	size_t bufLen = qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion);
 	
-	// Get text properties
-	bool isNumeric, isAlphanumeric;
-	int textBits;
-	int textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
-	if (textLen < 0)
-		return false;
-	
-	if (!isAlphanumeric) {  // Fully handle in binary mode
-		if (textLen > qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion))
-			return false;
-		for (int i = 0; i < textLen; i++)
+	struct qrcodegen_Segment seg;
+	if (qrcodegen_isNumeric(text)) {
+		if (qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_NUMERIC, textLen) > bufLen)
+			goto fail;
+		seg = qrcodegen_makeNumeric(text, tempBuffer);
+	} else if (qrcodegen_isAlphanumeric(text)) {
+		if (qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_ALPHANUMERIC, textLen) > bufLen)
+			goto fail;
+		seg = qrcodegen_makeAlphanumeric(text, tempBuffer);
+	} else {
+		if (textLen > bufLen)
+			goto fail;
+		for (size_t i = 0; i < textLen; i++)
 			tempBuffer[i] = (uint8_t)text[i];
-		return qrcodegen_encodeBinary(tempBuffer, (size_t)textLen, qrcode, ecl, minVersion, maxVersion, mask, boostEcl);
+		seg.mode = qrcodegen_Mode_BYTE;
+		seg.bitLength = calcSegmentBitLength(seg.mode, textLen);
+		if (seg.bitLength == -1)
+			goto fail;
+		seg.numChars = (int)textLen;
+		seg.data = tempBuffer;
 	}
+	return qrcodegen_encodeSegmentsAdvanced(&seg, 1, ecl, minVersion, maxVersion, mask, boostEcl, tempBuffer, qrcode);
 	
-	int version = fitVersionToData(minVersion, maxVersion, ecl, textLen, (int)textBits,
-		(isNumeric ? 10 : 9), (isNumeric ? 12 : 11), (isNumeric ? 14 : 13));
-	if (version == 0)
-		return false;
-	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
-	int bitLen = 0;
-	
-	// Make segment header and append data
-	if (isNumeric && textLen > 0) {
-		appendBitsToBuffer(1, 4, qrcode, &bitLen);
-		int lengthBits = version <= 9 ? 10 : (version <= 26 ? 12 : 14);
-		appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
-		int accumData = 0;
-		int accumCount = 0;
-		for (const char *p = text; *p != '\0'; p++) {
-			accumData = accumData * 10 + (*p - '0');
-			accumCount++;
-			if (accumCount == 3) {
-				appendBitsToBuffer(accumData, 10, qrcode, &bitLen);
-				accumData = 0;
-				accumCount = 0;
-			}
-		}
-		if (accumCount > 0)  // 1 or 2 digits remaining
-			appendBitsToBuffer(accumData, accumCount * 3 + 1, qrcode, &bitLen);
-		
-	} else if (isAlphanumeric && textLen > 0) {
-		appendBitsToBuffer(2, 4, qrcode, &bitLen);
-		int lengthBits = version <= 9 ? 9 : (version <= 26 ? 11 : 13);
-		appendBitsToBuffer((unsigned int)textLen, lengthBits, qrcode, &bitLen);
-		int accumData = 0;
-		int accumCount = 0;
-		for (const char *p = text; *p != '\0'; p++) {
-			accumData = accumData * 45 + (strchr(ALPHANUMERIC_CHARSET, *p) - ALPHANUMERIC_CHARSET);
-			accumCount++;
-			if (accumCount == 2) {
-				appendBitsToBuffer(accumData, 11, qrcode, &bitLen);
-				accumData = 0;
-				accumCount = 0;
-			}
-		}
-		if (accumCount > 0)  // 1 character remaining
-			appendBitsToBuffer(accumData, 6, qrcode, &bitLen);
-	}
-	
-	// Make QR Code
-	encodeQrCodeTail(qrcode, bitLen, tempBuffer, version, ecl, mask, boostEcl);
-	return true;
+fail:
+	qrcode[0] = 0;  // Set size to invalid value for safety
+	return false;
 }
 
 
 // Public function - see documentation comment in header file.
 bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcode[],
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
-	assert(dataAndTemp != NULL && qrcode != NULL);
-	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
-	assert(0 <= (int)ecl && (int)ecl <= 3 && -1 <= (int)mask && (int)mask <= 7);
 	
-	// Set size to invalid value for safety
-	qrcode[0] = 0;
-	
-	// Check length and find version
-	if (dataLen > INT16_MAX / 8)
+	struct qrcodegen_Segment seg;
+	seg.mode = qrcodegen_Mode_BYTE;
+	seg.bitLength = calcSegmentBitLength(seg.mode, dataLen);
+	if (seg.bitLength == -1) {
+		qrcode[0] = 0;  // Set size to invalid value for safety
 		return false;
-	// Now dataLen * 8 <= 32767 <= INT_MAX
-	int version = fitVersionToData(minVersion, maxVersion, ecl, (int)dataLen, (int)dataLen * 8, 8, 16, 16);
-	if (version == 0)
-		return false;
-	
-	// Make bit sequence and QR Code
-	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
-	int bitLen = 0;
-	appendBitsToBuffer(4, 4, qrcode, &bitLen);
-	appendBitsToBuffer((unsigned int)dataLen, (version <= 9 ? 8 : 16), qrcode, &bitLen);
-	for (size_t i = 0; i < dataLen; i++)
-		appendBitsToBuffer(dataAndTemp[i], 8, qrcode, &bitLen);
-	encodeQrCodeTail(qrcode, bitLen, dataAndTemp, version, ecl, mask, boostEcl);
-	return true;
+	}
+	seg.numChars = (int)dataLen;
+	seg.data = dataAndTemp;
+	return qrcodegen_encodeSegmentsAdvanced(&seg, 1, ecl, minVersion, maxVersion, mask, boostEcl, dataAndTemp, qrcode);
 }
 
 
