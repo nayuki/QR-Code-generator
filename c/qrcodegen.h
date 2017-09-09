@@ -28,10 +28,10 @@
 #include <stdint.h>
 
 
-/*---- Enumeration types and values ----*/
+/*---- Enum and struct types----*/
 
 /* 
- * Represents the error correction level used in a QR Code symbol.
+ * The error correction level used in a QR Code symbol.
  */
 enum qrcodegen_Ecc {
 	qrcodegen_Ecc_LOW = 0,
@@ -42,10 +42,13 @@ enum qrcodegen_Ecc {
 
 
 /* 
- * Represents the mask pattern used in a QR Code symbol.
+ * The mask pattern used in a QR Code symbol.
  */
 enum qrcodegen_Mask {
+	// A special value to tell the QR Code encoder to
+	// automatically select an appropriate mask pattern
 	qrcodegen_Mask_AUTO = -1,
+	// The eight actual mask patterns
 	qrcodegen_Mask_0 = 0,
 	qrcodegen_Mask_1,
 	qrcodegen_Mask_2,
@@ -69,21 +72,28 @@ enum qrcodegen_Mode {
 };
 
 
-/**
- * Represents a character string to be encoded in a QR Code symbol. Each segment has
- * a mode, and a sequence of characters that is already encoded as a sequence of bits.
+/* 
+ * A segment of user/application data that a QR Code symbol can convey.
+ * Each segment has a mode, a character count, and character/general data that is
+ * already encoded as a sequence of bits. The maximum allowed bit length is 32767,
+ * because even the largest QR Code (version 40) has only 31329 modules.
  */
 struct qrcodegen_Segment {
 	// The mode indicator for this segment.
 	enum qrcodegen_Mode mode;
 	
-	// The length of this segment's unencoded data, measured in characters. Always zero or positive.
+	// The length of this segment's unencoded data. Always in the range [0, 32767].
+	// For numeric, alphanumeric, and kanji modes, this measures in Unicode code points.
+	// For byte mode, this measures in bytes (raw binary data, text in UTF-8, or other encodings).
+	// For ECI mode, this is always zero.
 	int numChars;
 	
-	// The data bits of this segment, packed in bitwise big endian. Can be null.
+	// The data bits of this segment, packed in bitwise big endian.
+	// Can be null if the bit length is zero.
 	uint8_t *data;
 	
-	// The number of valid data bits used in the buffer. Requires 0 <= bitLength <= (capacity of data array * 8).
+	// The number of valid data bits used in the buffer. Requires
+	// 0 <= bitLength <= 32767, and bitLength <= (capacity of data array) * 8.
 	int bitLength;
 };
 
@@ -98,10 +108,12 @@ struct qrcodegen_Segment {
 // Calculates the number of bytes needed to store any QR Code up to and including the given version number,
 // as a compile-time constant. For example, 'uint8_t buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];'
 // can store any single QR Code from version 1 to 25, inclusive.
+// Requires qrcodegen_VERSION_MIN <= n <= qrcodegen_VERSION_MAX.
 #define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((n) * 4 + 17) * ((n) * 4 + 17) + 7) / 8 + 1)
 
 // The worst-case number of bytes needed to store one QR Code, up to and including
 // version 40. This value equals 3918, which is just under 4 kilobytes.
+// Use this more convenient value to avoid calculating tighter memory bounds for buffers.
 #define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(qrcodegen_VERSION_MAX)
 
 
