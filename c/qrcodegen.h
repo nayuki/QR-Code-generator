@@ -206,6 +206,13 @@ struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t bu
 struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]);
 
 
+bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
+	enum qrcodegen_Ecc ecl, uint8_t tempBuffer[], uint8_t qrcode[]);
+
+
+bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], size_t len, enum qrcodegen_Ecc ecl,
+	int minVersion, int maxVersion, int mask, bool boostEcl, uint8_t tempBuffer[], uint8_t qrcode[]);
+
 
 /*---- Functions to extract raw data from QR Codes ----*/
 
