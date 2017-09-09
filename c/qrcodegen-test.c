@@ -51,7 +51,6 @@ static int numTestCases = 0;
 // Prototypes of private functions under test
 extern const int8_t ECC_CODEWORDS_PER_BLOCK[4][41];
 extern const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41];
-int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
 void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
@@ -68,64 +67,6 @@ int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
 
 
 /*---- Test cases ----*/
-
-static void testGetTextProperties(void) {
-	bool isNumeric, isAlphanumeric;
-	int textLen, textBits;
-	
-	textLen = getTextProperties("", &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen == 0 && isNumeric && isAlphanumeric && textBits == 0);
-	numTestCases++;
-	
-	textLen = getTextProperties("0", &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen == 1 && isNumeric && isAlphanumeric && textBits == 4);
-	numTestCases++;
-	
-	textLen = getTextProperties("768", &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen == 3 && isNumeric && isAlphanumeric && textBits == 10);
-	numTestCases++;
-	
-	textLen = getTextProperties("A1", &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen == 2 && !isNumeric && isAlphanumeric && textBits == 11);
-	numTestCases++;
-	
-	textLen = getTextProperties("THE: QUICK+/*BROWN$FOX.", &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen == 23 && !isNumeric && isAlphanumeric && textBits == 127);
-	numTestCases++;
-	
-	textLen = getTextProperties("aB 9", &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen == 4 && !isNumeric && !isAlphanumeric && textBits == 32);
-	numTestCases++;
-	
-	char text[32769];
-	
-	memset(text, '5', sizeof(text));
-	text[32768] = '\0';
-	textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen < 0);
-	numTestCases++;
-	
-	memset(text, '1', sizeof(text));
-	text[32767] = '\0';
-	textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
-	assert((109224L > INT_MAX && textLen < 0) ||
-		(109224L <= INT_MAX && textLen == 32767 && isNumeric && isAlphanumeric && textBits == 109224L));
-	numTestCases++;
-	
-	memset(text, 'a', sizeof(text));
-	text[4095] = '\0';
-	textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
-	assert(textLen == 4095 && !isNumeric && !isAlphanumeric && textBits == 32760);
-	numTestCases++;
-	
-	memset(text, 'a', sizeof(text));
-	text[32767] = '\0';
-	textLen = getTextProperties(text, &isNumeric, &isAlphanumeric, &textBits);
-	assert((262136L > INT_MAX && textLen < 0) ||
-		(262136L <= INT_MAX && textLen == 32767 && !isNumeric && !isAlphanumeric && textBits == 262136L));
-	numTestCases++;
-}
-
 
 static void testAppendBitsToBuffer(void) {
 	{
@@ -1033,7 +974,6 @@ static void testMakeEci(void) {
 
 int main(void) {
 	srand(time(NULL));
-	testGetTextProperties();
 	testAppendBitsToBuffer();
 	testAppendErrorCorrection();
 	testGetNumDataCodewords();

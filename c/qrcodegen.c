@@ -58,11 +58,6 @@
 // - They are completely thread-safe if the caller does not give the
 //   same writable buffer to concurrent calls to these functions.
 
-testable int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits);
-static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc ecl,
-	int dataLen, int dataBitLen, int ver1To9LenBits, int ver10To26LenBits, int ver27To40LenBits);
-static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[],
-	int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl);
 testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 
 testable void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
@@ -181,120 +176,6 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 	seg.numChars = (int)dataLen;
 	seg.data = dataAndTemp;
 	return qrcodegen_encodeSegmentsAdvanced(&seg, 1, ecl, minVersion, maxVersion, mask, boostEcl, dataAndTemp, qrcode);
-}
-
-
-// Scans the given string, returns the number of characters, and sets output variables.
-// Returns a negative number if the length would exceed INT16_MAX or textBits would exceed INT_MAX.
-// Note that INT16_MAX <= 32767 <= INT_MAX and INT16_MAX < 65535 <= SIZE_MAX.
-// If the return value is negative, then the pointees of output arguments might not be set.
-testable int getTextProperties(const char *text, bool *isNumeric, bool *isAlphanumeric, int *textBits) {
-	int textLen = 0;
-	*isNumeric = true;
-	*isAlphanumeric = true;
-	for (const char *p = text; *p != '\0'; p++, textLen++) {  // Read every character
-		if (textLen >= INT16_MAX)
-			return -1;
-		char c = *p;
-		if (c < '0' || c > '9') {
-			*isNumeric = false;
-			*isAlphanumeric &= strchr(ALPHANUMERIC_CHARSET, c) != NULL;
-		}
-	}
-	
-	long tempBits;
-	if (*isNumeric)
-		tempBits = textLen * 3L + (textLen + 2L) / 3;
-	else if (*isAlphanumeric)
-		tempBits = textLen * 5L + (textLen + 1L) / 2;
-	else  // Binary mode
-		tempBits = textLen * 8L;
-	
-	if (tempBits > INT_MAX)
-		return -1;
-	*textBits = (int)tempBits;
-	return textLen;
-}
-
-
-// Returns the minimum possible version in the given range to fit one
-// segment with the given characteristics, or 0 if no version fits the data.
-static int fitVersionToData(int minVersion, int maxVersion, enum qrcodegen_Ecc ecl,
-	int dataLen, int dataBitLen, int ver1To9LenBits, int ver10To26LenBits, int ver27To40LenBits) {
-	
-	assert(qrcodegen_VERSION_MIN <= minVersion && minVersion <= maxVersion && maxVersion <= qrcodegen_VERSION_MAX);
-	assert(0 <= (int)ecl && (int)ecl <= 3);
-	assert(dataLen >= 0 && dataBitLen >= 0);
-	assert(1 <= ver1To9LenBits   && ver1To9LenBits   <= 16);
-	assert(1 <= ver10To26LenBits && ver10To26LenBits <= 16);
-	assert(1 <= ver27To40LenBits && ver27To40LenBits <= 16);
-	
-	for (int version = minVersion; ; version++) {
-		int lengthBits;
-		if (version <= 9) lengthBits = ver1To9LenBits;
-		else if (version <= 26) lengthBits = ver10To26LenBits;
-		else lengthBits = ver27To40LenBits;
-		if (dataLen < (1L << lengthBits)) {
-			int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-			int header = 4 + lengthBits;
-			if (dataBitLen <= INT_MAX - header && header + dataBitLen <= dataCapacityBits)
-				return version;  // This version number is found to be suitable
-		}
-		if (version >= maxVersion)  // All versions in the range could not fit the given data
-			return 0;
-	}
-}
-
-
-// Given a data bit sequence in dataAndQrcode without terminator or padding or ECC, plus the given QR Code
-// encoding parameters, this function handles ECC level boosting, bit stream termination and padding,
-// ECC computation, and block interleaving. Then the function renders the QR Code symbol back to the array
-// dataAndQrcode and handles automatic mask selection. The initial bit length must fit the given version and
-// ECC level, and each of the two arrays must have length at least qrcodegen_BUFFER_LEN_FOR_VERSION(version).
-static void encodeQrCodeTail(uint8_t dataAndQrcode[], int bitLen, uint8_t tempBuffer[],
-		int version, enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, bool boostEcl) {
-	
-	if (boostEcl) {
-		if (bitLen <= getNumDataCodewords(version, qrcodegen_Ecc_MEDIUM  ) * 8) ecl = qrcodegen_Ecc_MEDIUM  ;
-		if (bitLen <= getNumDataCodewords(version, qrcodegen_Ecc_QUARTILE) * 8) ecl = qrcodegen_Ecc_QUARTILE;
-		if (bitLen <= getNumDataCodewords(version, qrcodegen_Ecc_HIGH    ) * 8) ecl = qrcodegen_Ecc_HIGH    ;
-	}
-	int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
-	
-	// Add terminator, bit padding, byte padding
-	int terminatorBits = dataCapacityBits - bitLen;
-	if (terminatorBits > 4)
-		terminatorBits = 4;
-	appendBitsToBuffer(0, terminatorBits, dataAndQrcode, &bitLen);
-	appendBitsToBuffer(0, (8 - bitLen % 8) % 8, dataAndQrcode, &bitLen);
-	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-		appendBitsToBuffer(padByte, 8, dataAndQrcode, &bitLen);
-	assert(bitLen % 8 == 0);
-	
-	// Draw function and data codeword modules
-	appendErrorCorrection(dataAndQrcode, version, ecl, tempBuffer);
-	initializeFunctionModules(version, dataAndQrcode);
-	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, dataAndQrcode);
-	drawWhiteFunctionModules(dataAndQrcode, version);
-	initializeFunctionModules(version, tempBuffer);
-	
-	// Handle masking
-	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
-		long minPenalty = LONG_MAX;
-		for (int i = 0; i < 8; i++) {
-			drawFormatBits(ecl, (enum qrcodegen_Mask)i, dataAndQrcode);
-			applyMask(tempBuffer, dataAndQrcode, (enum qrcodegen_Mask)i);
-			long penalty = getPenaltyScore(dataAndQrcode);
-			if (penalty < minPenalty) {
-				mask = (enum qrcodegen_Mask)i;
-				minPenalty = penalty;
-			}
-			applyMask(tempBuffer, dataAndQrcode, (enum qrcodegen_Mask)i);  // Undoes the mask due to XOR
-		}
-	}
-	assert(0 <= (int)mask && (int)mask <= 7);
-	drawFormatBits(ecl, mask, dataAndQrcode);
-	applyMask(tempBuffer, dataAndQrcode, mask);
 }
 
 
