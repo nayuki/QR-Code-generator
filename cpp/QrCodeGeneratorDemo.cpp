@@ -64,8 +64,8 @@ static void doBasicDemo() {
 	
 	// Make and print the QR Code symbol
 	const QrCode qr = QrCode::encodeText(text, errCorLvl);
-	std::cout << qr.toSvgString(4) << std::endl;
 	printQr(qr);
+	std::cout << qr.toSvgString(4) << std::endl;
 }
 
 
@@ -190,4 +190,5 @@ static void printQr(const QrCode &qr) {
 		}
 		std::cout << std::endl;
 	}
+	std::cout << std::endl;
 }

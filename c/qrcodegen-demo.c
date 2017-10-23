@@ -300,4 +300,5 @@ static void printQr(const uint8_t qrcode[]) {
 		}
 		fputs("\n", stdout);
 	}
+	fputs("\n", stdout);
 }
