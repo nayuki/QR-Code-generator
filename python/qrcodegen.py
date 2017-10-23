@@ -31,6 +31,7 @@ This module "qrcodegen", public members:
   - Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
   - Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
         int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
+  - Constants int MIN_VERSION, MAX_VERSION
   - Constructor QrCode(bytes datacodewords, int mask, int version, QrCode.Ecc ecl)
   - Method get_version() -> int
   - Method get_size() -> int
@@ -95,7 +96,7 @@ class QrCode(object):
 		between modes (such as alphanumeric and binary) to encode text more efficiently.
 		This function is considered to be lower level than simply encoding text or binary data."""
 		
-		if not (1 <= minversion <= maxversion <= 40) or not (-1 <= mask <= 7):
+		if not (QrCode.MIN_VERSION <= minversion <= maxversion <= QrCode.MAX_VERSION) or not (-1 <= mask <= 7):
 			raise ValueError("Invalid value")
 		
 		# Find the minimal version number to use
@@ -137,6 +138,12 @@ class QrCode(object):
 		return QrCode(bb.get_bytes(), mask, version, ecl)
 	
 	
+	# ---- Public constants ----
+	
+	MIN_VERSION =  1
+	MAX_VERSION = 40
+	
+	
 	# ---- Constructor ----
 	
 	def __init__(self, datacodewords, mask, version, errcorlvl):
@@ -147,7 +154,7 @@ class QrCode(object):
 		# Check arguments and handle simple scalar fields
 		if not (-1 <= mask <= 7):
 			raise ValueError("Mask value out of range")
-		if not (1 <= version <= 40):
+		if not (QrCode.MIN_VERSION <= version <= QrCode.MAX_VERSION):
 			raise ValueError("Version value out of range")
 		if not isinstance(errcorlvl, QrCode.Ecc):
 			raise TypeError("QrCode.Ecc expected")
@@ -480,7 +487,7 @@ class QrCode(object):
 		"""Returns a sequence of positions of the alignment patterns in ascending order. These positions are
 		used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
 		This stateless pure function could be implemented as table of 40 variable-length lists of integers."""
-		if not (1 <= ver <= 40):
+		if not (QrCode.MIN_VERSION <= ver <= QrCode.MAX_VERSION):
 			raise ValueError("Version number out of range")
 		elif ver == 1:
 			return []
@@ -504,7 +511,7 @@ class QrCode(object):
 		"""Returns the number of data bits that can be stored in a QR Code of the given version number, after
 		all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 		The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table."""
-		if not (1 <= ver <= 40):
+		if not (QrCode.MIN_VERSION <= ver <= QrCode.MAX_VERSION):
 			raise ValueError("Version number out of range")
 		result = (16 * ver + 128) * ver + 64
 		if ver >= 2:
@@ -520,7 +527,7 @@ class QrCode(object):
 		"""Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 		QR Code of the given version number and error correction level, with remainder bits discarded.
 		This stateless pure function could be implemented as a (40*4)-cell lookup table."""
-		if not (1 <= ver <= 40):
+		if not (QrCode.MIN_VERSION <= ver <= QrCode.MAX_VERSION):
 			raise ValueError("Version number out of range")
 		return QrCode._get_num_raw_data_modules(ver) // 8 \
 			- QrCode._ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] \
@@ -698,7 +705,7 @@ class QrSegment(object):
 	# Package-private helper function.
 	@staticmethod
 	def get_total_bits(segs, version):
-		if not (1 <= version <= 40):
+		if not (QrCode.MIN_VERSION <= version <= QrCode.MAX_VERSION):
 			raise ValueError("Version number out of range")
 		result = 0
 		for seg in segs:

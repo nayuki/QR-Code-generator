@@ -89,7 +89,7 @@ impl QrCode {
 	// This function is considered to be lower level than simply encoding text or binary data.
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<QrCode> {
-		QrCode::encode_segments_advanced(segs, ecl, 1, 40, None, true)
+		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
 	}
 	
 	
@@ -102,7 +102,7 @@ impl QrCode {
 	// in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
 			minversion: u8, maxversion: u8, mask: Option<u8>, boostecl: bool) -> Option<QrCode> {
-		assert!(1 <= minversion && minversion <= maxversion && maxversion <= 40, "Invalid value");
+		assert!(QrCode_MIN_VERSION <= minversion && minversion <= maxversion && maxversion <= QrCode_MAX_VERSION, "Invalid value");
 		assert!(mask == None || mask.unwrap() <= 7, "Invalid value");
 		
 		// Find the minimal version number to use
@@ -170,7 +170,7 @@ impl QrCode {
 	// should not be invoked directly by the user. To go one level up, see the encode_segments() function.
 	pub fn encode_codewords(ver: u8, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<u8>) -> QrCode {
 		// Check arguments
-		assert!(1 <= ver && ver <= 40, "Value out of range");
+		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Value out of range");
 		assert!(mask == None || mask.unwrap() <= 7, "Value out of range");
 		
 		// Initialize fields
@@ -622,7 +622,7 @@ impl QrCode {
 	// used on both the x and y axes. Each value in the resulting list is in the range [0, 177).
 	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
 	fn get_alignment_pattern_positions(ver: u8) -> Vec<i32> {
-		assert!(1 <= ver && ver <= 40, "Version number out of range");
+		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
 		if ver == 1 {
 			vec![]
 		} else {
@@ -648,7 +648,7 @@ impl QrCode {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	fn get_num_raw_data_modules(ver: u8) -> usize {
-		assert!(1 <= ver && ver <= 40, "Version number out of range");
+		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
 		let mut result: usize = (16 * (ver as usize) + 128) * (ver as usize) + 64;
 		if ver >= 2 {
 			let numalign: usize = (ver as usize) / 7 + 2;
@@ -665,7 +665,7 @@ impl QrCode {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	fn get_num_data_codewords(ver: u8, ecl: QrCodeEcc) -> usize {
-		assert!(1 <= ver && ver <= 40, "Version number out of range");
+		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
 		QrCode::get_num_raw_data_modules(ver) / 8
 			- QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, ver, ecl)
 			* QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, ver, ecl)
@@ -674,11 +674,17 @@ impl QrCode {
 	
 	// Returns an entry from the given table based on the given values.
 	fn table_get(table: &'static [[i8; 41]; 4], ver: u8, ecl: QrCodeEcc) -> usize {
-		assert!(1 <= ver && ver <= 40, "Version number out of range");
+		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
 		table[ecl.ordinal()][ver as usize] as usize
 	}
 	
 }
+
+
+/*---- Public constants ----*/
+
+pub const QrCode_MIN_VERSION: u8 =  1;
+pub const QrCode_MAX_VERSION: u8 = 40;
 
 
 /*---- Private tables of constants ----*/
@@ -978,7 +984,7 @@ impl QrSegment {
 	
 	// Package-private helper function.
 	fn get_total_bits(segs: &[QrSegment], version: u8) -> Option<usize> {
-		assert!(1 <= version && version <= 40, "Version number out of range");
+		assert!(QrCode_MIN_VERSION <= version && version <= QrCode_MAX_VERSION, "Version number out of range");
 		let mut result: usize = 0;
 		for seg in segs {
 			let ccbits = seg.mode.num_char_count_bits(version);

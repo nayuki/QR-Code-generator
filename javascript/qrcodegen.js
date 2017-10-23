@@ -31,6 +31,7 @@
  *   - Function encodeBinary(list<byte> data, QrCode.Ecc ecl) -> QrCode
  *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
  *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
+ *   - Constants int MIN_VERSION, MAX_VERSION
  *   - Constructor QrCode(list<int> datacodewords, int mask, int version, QrCode.Ecc ecl)
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
@@ -74,7 +75,7 @@ var qrcodegen = new function() {
 		// Check arguments and handle simple scalar fields
 		if (mask < -1 || mask > 7)
 			throw "Mask value out of range";
-		if (version < 1 || version > 40)
+		if (version < MIN_VERSION || version > MAX_VERSION)
 			throw "Version value out of range";
 		var size = version * 4 + 17;
 		
@@ -536,11 +537,11 @@ var qrcodegen = new function() {
 	 * This function is considered to be lower level than simply encoding text or binary data.
 	 */
 	this.QrCode.encodeSegments = function(segs, ecl, minVersion, maxVersion, mask, boostEcl) {
-		if (minVersion == undefined) minVersion = 1;
-		if (maxVersion == undefined) maxVersion = 40;
+		if (minVersion == undefined) minVersion = MIN_VERSION;
+		if (maxVersion == undefined) maxVersion = MAX_VERSION;
 		if (mask == undefined) mask = -1;
 		if (boostEcl == undefined) boostEcl = true;
-		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
+		if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
 			throw "Invalid value";
 		
 		// Find the minimal version number to use
@@ -586,6 +587,14 @@ var qrcodegen = new function() {
 	};
 	
 	
+	/*---- Public constants for QrCode ----*/
+	
+	var MIN_VERSION =  1;
+	var MAX_VERSION = 40;
+	Object.defineProperty(this.QrCode, "MIN_VERSION", {value:MIN_VERSION});
+	Object.defineProperty(this.QrCode, "MAX_VERSION", {value:MAX_VERSION});
+	
+	
 	/*---- Private static helper functions QrCode ----*/
 	
 	var QrCode = {};  // Private object to assign properties to. Not the same object as 'this.QrCode'.
@@ -595,7 +604,7 @@ var qrcodegen = new function() {
 	// used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
 	// This stateless pure function could be implemented as table of 40 variable-length lists of integers.
 	QrCode.getAlignmentPatternPositions = function(ver) {
-		if (ver < 1 || ver > 40)
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw "Version number out of range";
 		else if (ver == 1)
 			return [];
@@ -620,7 +629,7 @@ var qrcodegen = new function() {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	QrCode.getNumRawDataModules = function(ver) {
-		if (ver < 1 || ver > 40)
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw "Version number out of range";
 		var result = (16 * ver + 128) * ver + 64;
 		if (ver >= 2) {
@@ -637,7 +646,7 @@ var qrcodegen = new function() {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	QrCode.getNumDataCodewords = function(ver, ecl) {
-		if (ver < 1 || ver > 40)
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw "Version number out of range";
 		return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
 			QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] *
@@ -816,7 +825,7 @@ var qrcodegen = new function() {
 	
 	// Package-private helper function.
 	this.QrSegment.getTotalBits = function(segs, version) {
-		if (version < 1 || version > 40)
+		if (version < MIN_VERSION || version > MAX_VERSION)
 			throw "Version number out of range";
 		var result = 0;
 		for (var i = 0; i < segs.length; i++) {

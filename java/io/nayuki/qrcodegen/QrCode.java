@@ -91,7 +91,7 @@ public final class QrCode {
 	 * @throws IllegalArgumentException if the data is too long to fit in the largest version QR Code at the ECL
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl) {
-		return encodeSegments(segs, ecl, 1, 40, -1, true);
+		return encodeSegments(segs, ecl, MIN_VERSION, MAX_VERSION, -1, true);
 	}
 	
 	
@@ -115,7 +115,7 @@ public final class QrCode {
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
 		Objects.requireNonNull(segs);
 		Objects.requireNonNull(ecl);
-		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
+		if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Invalid value");
 		
 		// Find the minimal version number to use
@@ -162,6 +162,13 @@ public final class QrCode {
 	
 	
 	
+	/*---- Public constants ----*/
+	
+	public static final int MIN_VERSION =  1;
+	public static final int MAX_VERSION = 40;
+	
+	
+	
 	/*---- Instance fields ----*/
 	
 	// Public immutable scalar parameters
@@ -203,7 +210,7 @@ public final class QrCode {
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments
 		Objects.requireNonNull(ecl);
-		if (ver < 1 || ver > 40 || mask < -1 || mask > 7)
+		if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Value out of range");
 		Objects.requireNonNull(dataCodewords);
 		
@@ -630,7 +637,7 @@ public final class QrCode {
 	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
 	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
 	private static int[] getAlignmentPatternPositions(int ver) {
-		if (ver < 1 || ver > 40)
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
 		else if (ver == 1)
 			return new int[]{};
@@ -656,7 +663,7 @@ public final class QrCode {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	private static int getNumRawDataModules(int ver) {
-		if (ver < 1 || ver > 40)
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
 		
 		int size = ver * 4 + 17;
@@ -681,7 +688,7 @@ public final class QrCode {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	static int getNumDataCodewords(int ver, Ecc ecl) {
-		if (ver < 1 || ver > 40)
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
 		return getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal()][ver]

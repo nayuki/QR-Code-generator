@@ -161,20 +161,20 @@ public final class QrCodeGeneratorDemo {
 		
 		// Project Nayuki URL
 		segs = QrSegment.makeSegments("https://www.nayuki.io/");
-		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 1, 40, -1, true);  // Automatic mask
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, -1, true);  // Automatic mask
 		writePng(qr.toImage(8, 6), "project-nayuki-automask-QR.png");
-		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 1, 40, 3, true);  // Force mask 3
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 3, true);  // Force mask 3
 		writePng(qr.toImage(8, 6), "project-nayuki-mask3-QR.png");
 		
 		// Chinese text as UTF-8
 		segs = QrSegment.makeSegments("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫");
-		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 0, true);  // Force mask 0
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 0, true);  // Force mask 0
 		writePng(qr.toImage(10, 3), "unicode-mask0-QR.png");
-		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 1, true);  // Force mask 1
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 1, true);  // Force mask 1
 		writePng(qr.toImage(10, 3), "unicode-mask1-QR.png");
-		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 5, true);  // Force mask 5
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 5, true);  // Force mask 5
 		writePng(qr.toImage(10, 3), "unicode-mask5-QR.png");
-		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 7, true);  // Force mask 7
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 7, true);  // Force mask 7
 		writePng(qr.toImage(10, 3), "unicode-mask7-QR.png");
 	}
 	

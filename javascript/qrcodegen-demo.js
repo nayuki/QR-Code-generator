@@ -139,8 +139,8 @@ function handleVersionMinMax(which) {
 	var maxElem = document.getElementById("version-max-input");
 	var minVal = parseInt(minElem.value, 10);
 	var maxVal = parseInt(maxElem.value, 10);
-	minVal = Math.max(Math.min(minVal, 40), 1);
-	maxVal = Math.max(Math.min(maxVal, 40), 1);
+	minVal = Math.max(Math.min(minVal, qrcodegen.QrCode.MAX_VERSION), qrcodegen.QrCode.MIN_VERSION);
+	maxVal = Math.max(Math.min(maxVal, qrcodegen.QrCode.MAX_VERSION), qrcodegen.QrCode.MIN_VERSION);
 	if (which == "min" && minVal > maxVal)
 		maxVal = minVal;
 	else if (which == "max" && maxVal < minVal)

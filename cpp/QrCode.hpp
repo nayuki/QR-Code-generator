@@ -97,6 +97,13 @@ class QrCode final {
 	
 	
 	
+	/*---- Public constants ----*/
+	
+	public: static constexpr int MIN_VERSION =  1;
+	public: static constexpr int MAX_VERSION = 40;
+	
+	
+	
 	/*---- Instance fields ----*/
 	
 	// Immutable scalar parameters

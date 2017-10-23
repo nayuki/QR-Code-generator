@@ -73,7 +73,7 @@ QrCode QrCode::encodeBinary(const vector<uint8_t> &data, Ecc ecl) {
 
 QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		int minVersion, int maxVersion, int mask, bool boostEcl) {
-	if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
+	if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
 		throw "Invalid value";
 	
 	// Find the minimal version number to use
@@ -122,13 +122,13 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask) :
 		// Initialize fields
 		version(ver),
-		size(1 <= ver && ver <= 40 ? ver * 4 + 17 : -1),  // Avoid signed overflow undefined behavior
+		size(MIN_VERSION <= ver && ver <= MAX_VERSION ? ver * 4 + 17 : -1),  // Avoid signed overflow undefined behavior
 		errorCorrectionLevel(ecl),
 		modules(size, vector<bool>(size)),  // Entirely white grid
 		isFunction(size, vector<bool>(size)) {
 	
 	// Check arguments
-	if (ver < 1 || ver > 40 || mask < -1 || mask > 7)
+	if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
 		throw "Value out of range";
 	
 	// Draw function patterns, draw all codewords, do masking
@@ -497,7 +497,7 @@ long QrCode::getPenaltyScore() const {
 
 
 vector<int> QrCode::getAlignmentPatternPositions(int ver) {
-	if (ver < 1 || ver > 40)
+	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw "Version number out of range";
 	else if (ver == 1)
 		return vector<int>();
@@ -520,7 +520,7 @@ vector<int> QrCode::getAlignmentPatternPositions(int ver) {
 
 
 int QrCode::getNumRawDataModules(int ver) {
-	if (ver < 1 || ver > 40)
+	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw "Version number out of range";
 	int result = (16 * ver + 128) * ver + 64;
 	if (ver >= 2) {
@@ -534,7 +534,7 @@ int QrCode::getNumRawDataModules(int ver) {
 
 
 int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
-	if (ver < 1 || ver > 40)
+	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw "Version number out of range";
 	return getNumRawDataModules(ver) / 8
 		- ECC_CODEWORDS_PER_BLOCK[ecl.getOrdinal()][ver]

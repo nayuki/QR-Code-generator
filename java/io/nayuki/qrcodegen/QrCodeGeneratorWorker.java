@@ -67,7 +67,7 @@ public final class QrCodeGeneratorWorker {
 			int mask       = input.nextInt();
 			int boostEcl   = input.nextInt();
 			if (!(0 <= errCorLvl && errCorLvl <= 3) || !(-1 <= mask && mask <= 7) || (boostEcl >>> 1) != 0
-					|| !(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40))
+					|| !(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION))
 				throw new RuntimeException();
 			
 			// Make segments for encoding
