@@ -46,7 +46,6 @@ static void doMaskDemo();
 static void printQr(const QrCode &qr);
 
 
-
 // The main application program.
 int main() {
 	doBasicDemo();
@@ -56,6 +55,9 @@ int main() {
 	return EXIT_SUCCESS;
 }
 
+
+
+/*---- Demo suite ----*/
 
 // Creates a single QR Code, then prints it to the console.
 static void doBasicDemo() {
@@ -180,6 +182,9 @@ static void doMaskDemo() {
 	printQr(QrCode::encodeSegments(segs1, QrCode::Ecc::MEDIUM, 1, 40, 7, true));  // Force mask 7
 }
 
+
+
+/*---- Utilities ----*/
 
 // Prints the given QR Code to the console.
 static void printQr(const QrCode &qr) {

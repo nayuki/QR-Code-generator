@@ -49,6 +49,9 @@ public final class QrCodeGeneratorDemo {
 	}
 	
 	
+	
+	/*---- Demo suite ----*/
+	
 	// Creates a single QR Code, then writes it to a PNG file and an SVG file.
 	private static void doBasicDemo() throws IOException {
 		String text = "Hello, world!";          // User-supplied Unicode text
@@ -175,6 +178,9 @@ public final class QrCodeGeneratorDemo {
 		writePng(qr.toImage(10, 3), "unicode-mask7-QR.png");
 	}
 	
+	
+	
+	/*---- Utilities ----*/
 	
 	// Helper function to reduce code duplication.
 	private static void writePng(BufferedImage img, String filepath) throws IOException {

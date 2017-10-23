@@ -28,8 +28,6 @@ from __future__ import print_function
 import qrcodegen
 
 
-# ---- Main program ----
-
 def main():
 	"""The main application program."""
 	do_basic_demo()
@@ -37,6 +35,9 @@ def main():
 	do_segment_demo()
 	do_mask_demo()
 
+
+
+# ---- Demo suite ----
 
 def do_basic_demo():
 	"""Creates a single QR Code, then prints it to the console."""

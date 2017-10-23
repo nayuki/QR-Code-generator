@@ -40,7 +40,6 @@ static void doMaskDemo(void);
 static void printQr(const uint8_t qrcode[]);
 
 
-
 // The main application program.
 int main(void) {
 	doBasicDemo();
@@ -50,6 +49,9 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
+
+
+/*---- Demo suite ----*/
 
 // Creates a single QR Code, then prints it to the console.
 static void doBasicDemo(void) {
@@ -115,6 +117,7 @@ static void doVarietyDemo(void) {
 }
 
 
+// Creates QR Codes with manually specified segments for better compactness.
 static void doSegmentDemo(void) {
 	{  // Illustration "silver"
 		const char *silver0 = "THE SQUARE ROOT OF 2 IS 1.";
@@ -289,6 +292,9 @@ static void doMaskDemo(void) {
 	}
 }
 
+
+
+/*---- Utilities ----*/
 
 // Prints the given QR Code to the console.
 static void printQr(const uint8_t qrcode[]) {

@@ -39,6 +39,9 @@ fn main() {
 }
 
 
+
+/*---- Demo suite ----*/
+
 // Creates a single QR Code, then prints it to the console.
 fn do_basic_demo() {
 	let text: &'static str = "Hello, world!";  // User-supplied Unicode text
@@ -153,6 +156,7 @@ fn do_mask_demo() {
 	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, 1, 40, Some(7), true).unwrap();  // Force mask 7
 	print_qr(&qr);
 }
+
 
 
 /*---- Utilities ----*/
