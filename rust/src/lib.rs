@@ -770,7 +770,7 @@ impl ReedSolomonGenerator {
 	fn new(degree: usize) -> ReedSolomonGenerator {
 		assert!(1 <= degree && degree <= 255, "Degree out of range");
 		// Start with the monomial x^0
-		let mut coefs = vec![0; degree - 1];
+		let mut coefs = vec![0u8; degree - 1];
 		coefs.push(1);
 		
 		// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
