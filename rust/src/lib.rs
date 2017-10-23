@@ -153,7 +153,7 @@ impl QrCode {
 		}
 		assert_eq!(bb.len() % 8, 0, "Assertion error");
 		
-		let mut bytes: Vec<u8> = vec![0; bb.len() / 8];
+		let mut bytes = vec![0u8; bb.len() / 8];
 		for (i, bit) in bb.iter().enumerate() {
 			bytes[i >> 3] |= (*bit as u8) << (7 - (i & 7));
 		}
@@ -633,7 +633,7 @@ impl QrCode {
 			} else {  // C-C-C-Combo breaker!
 				26
 			};
-			let mut result: Vec<i32> = vec![6];
+			let mut result = vec![6i32];
 			let mut pos: i32 = (ver as i32) * 4 + 10;
 			for _ in 0 .. numalign - 1 {
 				result.insert(1, pos);
@@ -796,7 +796,7 @@ impl ReedSolomonGenerator {
 	// Computes and returns the Reed-Solomon error correction codewords for the given sequence of data codewords.
 	fn get_remainder(&self, data: &[u8]) -> Vec<u8> {
 		// Compute the remainder by performing polynomial division
-		let mut result: Vec<u8> = vec![0; self.coefficients.len()];
+		let mut result = vec![0u8; self.coefficients.len()];
 		for b in data {
 			let factor: u8 = b ^ result.remove(0);
 			result.push(0);
