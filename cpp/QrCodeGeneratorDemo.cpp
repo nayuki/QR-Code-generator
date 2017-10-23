@@ -42,6 +42,7 @@ using qrcodegen::QrSegment;
 static void doBasicDemo();
 static void doVarietyDemo();
 static void doSegmentDemo();
+static void doMaskDemo();
 static void printQr(const QrCode &qr);
 
 
@@ -51,6 +52,7 @@ int main() {
 	doBasicDemo();
 	doVarietyDemo();
 	doSegmentDemo();
+	doMaskDemo();
 	return EXIT_SUCCESS;
 }
 
@@ -69,10 +71,6 @@ static void doBasicDemo() {
 
 // Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console.
 static void doVarietyDemo() {
-	// Project Nayuki URL
-	const QrCode qr0 = QrCode::encodeText("https://www.nayuki.io/", QrCode::Ecc::HIGH);
-	printQr(QrCode(qr0, 3));  // Change mask, forcing to mask #3
-	
 	// Numeric mode encoding (3.33 bits per digit)
 	const QrCode qr1 = QrCode::encodeText("314159265358979323846264338327950288419716939937510", QrCode::Ecc::MEDIUM);
 	printQr(qr1);
@@ -81,12 +79,9 @@ static void doVarietyDemo() {
 	const QrCode qr2 = QrCode::encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", QrCode::Ecc::HIGH);
 	printQr(qr2);
 	
-	// Unicode text as UTF-8, and different masks
+	// Unicode text as UTF-8
 	const QrCode qr3 = QrCode::encodeText("\xE3\x81\x93\xE3\x82\x93\xE3\x81\xAB\xE3\x81\xA1wa\xE3\x80\x81\xE4\xB8\x96\xE7\x95\x8C\xEF\xBC\x81\x20\xCE\xB1\xCE\xB2\xCE\xB3\xCE\xB4", QrCode::Ecc::QUARTILE);
-	printQr(QrCode(qr3, 0));
-	printQr(QrCode(qr3, 1));
-	printQr(QrCode(qr3, 5));
-	printQr(QrCode(qr3, 7));
+	printQr(qr3);
 	
 	// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 	const QrCode qr4 = QrCode::encodeText(
@@ -160,6 +155,29 @@ static void doSegmentDemo() {
 		{QrSegment(QrSegment::Mode::KANJI, kanjiChars.size(), bb)},
 		QrCode::Ecc::LOW);
 	printQr(qr5);
+}
+
+
+// Creates QR Codes with the same size and contents but different mask patterns.
+static void doMaskDemo() {
+	// Project Nayuki URL
+	std::vector<QrSegment> segs0 = QrSegment::makeSegments("https://www.nayuki.io/");
+	printQr(QrCode::encodeSegments(segs0, QrCode::Ecc::HIGH, 1, 40, -1, true));  // Automatic mask
+	printQr(QrCode::encodeSegments(segs0, QrCode::Ecc::HIGH, 1, 40, 3, true));  // Force mask 3
+	
+	// Chinese text as UTF-8
+	std::vector<QrSegment> segs1 = QrSegment::makeSegments(
+		"\xE7\xB6\xAD\xE5\x9F\xBA\xE7\x99\xBE\xE7\xA7\x91\xEF\xBC\x88\x57\x69\x6B\x69\x70"
+		"\x65\x64\x69\x61\xEF\xBC\x8C\xE8\x81\x86\xE8\x81\xBD\x69\x2F\xCB\x8C\x77\xC9\xAA"
+		"\x6B\xE1\xB5\xBB\xCB\x88\x70\x69\xCB\x90\x64\x69\x2E\xC9\x99\x2F\xEF\xBC\x89\xE6"
+		"\x98\xAF\xE4\xB8\x80\xE5\x80\x8B\xE8\x87\xAA\xE7\x94\xB1\xE5\x85\xA7\xE5\xAE\xB9"
+		"\xE3\x80\x81\xE5\x85\xAC\xE9\x96\x8B\xE7\xB7\xA8\xE8\xBC\xAF\xE4\xB8\x94\xE5\xA4"
+		"\x9A\xE8\xAA\x9E\xE8\xA8\x80\xE7\x9A\x84\xE7\xB6\xB2\xE8\xB7\xAF\xE7\x99\xBE\xE7"
+		"\xA7\x91\xE5\x85\xA8\xE6\x9B\xB8\xE5\x8D\x94\xE4\xBD\x9C\xE8\xA8\x88\xE7\x95\xAB");
+	printQr(QrCode::encodeSegments(segs1, QrCode::Ecc::MEDIUM, 1, 40, 0, true));  // Force mask 0
+	printQr(QrCode::encodeSegments(segs1, QrCode::Ecc::MEDIUM, 1, 40, 1, true));  // Force mask 1
+	printQr(QrCode::encodeSegments(segs1, QrCode::Ecc::MEDIUM, 1, 40, 5, true));  // Force mask 5
+	printQr(QrCode::encodeSegments(segs1, QrCode::Ecc::MEDIUM, 1, 40, 7, true));  // Force mask 7
 }
 
 

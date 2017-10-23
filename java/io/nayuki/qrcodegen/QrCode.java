@@ -222,38 +222,6 @@ public final class QrCode {
 	}
 	
 	
-	/**
-	 * Creates a new QR Code symbol based on the specified existing object, but with a potentially
-	 * different mask pattern. The version, error correction level, codewords, etc. of the newly
-	 * created object are all identical to the argument object; only the mask may differ.
-	 * @param qr the existing QR Code to copy and modify
-	 * @param mask the new mask pattern, 0 to 7 to force a fixed choice or -1 for an automatic choice
-	 * @throws NullPointerException if the QR Code is {@code null}
-	 * @throws IllegalArgumentException if the mask value is out of range
-	 */
-	public QrCode(QrCode qr, int mask) {
-		// Check arguments
-		Objects.requireNonNull(qr);
-		if (mask < -1 || mask > 7)
-			throw new IllegalArgumentException("Mask value out of range");
-		
-		// Copy scalar fields
-		version = qr.version;
-		size = qr.size;
-		errorCorrectionLevel = qr.errorCorrectionLevel;
-		
-		// Handle grid fields
-		isFunction = qr.isFunction;  // Shallow copy because the data is read-only
-		modules = qr.modules.clone();  // Deep copy
-		for (int i = 0; i < modules.length; i++)
-			modules[i] = modules[i].clone();
-		
-		// Handle masking
-		applyMask(qr.mask);  // Undo old mask
-		this.mask = handleConstructorMasking(mask);
-	}
-	
-	
 	
 	/*---- Public instance methods ----*/
 	

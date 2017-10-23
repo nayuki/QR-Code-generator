@@ -35,6 +35,7 @@ fn main() {
 	do_basic_demo();
 	do_variety_demo();
 	do_segment_demo();
+	do_mask_demo();
 }
 
 
@@ -52,11 +53,6 @@ fn do_basic_demo() {
 
 // Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console.
 fn do_variety_demo() {
-	// Project Nayuki URL
-	let qr = QrCode::encode_text("https://www.nayuki.io/", QrCodeEcc::High).unwrap();
-	let qr = QrCode::remask(&qr, Some(3));  // Change mask, forcing to mask #3
-	print_qr(&qr);
-	
 	// Numeric mode encoding (3.33 bits per digit)
 	let qr = QrCode::encode_text("314159265358979323846264338327950288419716939937510", QrCodeEcc::Medium).unwrap();
 	print_qr(&qr);
@@ -65,12 +61,9 @@ fn do_variety_demo() {
 	let qr = QrCode::encode_text("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", QrCodeEcc::High).unwrap();
 	print_qr(&qr);
 	
-	// Unicode text as UTF-8, and different masks
+	// Unicode text as UTF-8
 	let qr = QrCode::encode_text("こんにちwa、世界！ αβγδ", QrCodeEcc::Quartile).unwrap();
-	print_qr(&QrCode::remask(&qr, Some(0)));
-	print_qr(&QrCode::remask(&qr, Some(1)));
-	print_qr(&QrCode::remask(&qr, Some(5)));
-	print_qr(&QrCode::remask(&qr, Some(7)));
+	print_qr(&qr);
 	
 	// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 	let qr = QrCode::encode_text(concat!(
@@ -136,6 +129,28 @@ fn do_segment_demo() {
 		QrSegment::new(qrcodegen::QrSegmentMode::Kanji, kanjichars.len(), bb),
 	];
 	let qr = QrCode::encode_segments(&segs, QrCodeEcc::Low).unwrap();
+	print_qr(&qr);
+}
+
+
+// Creates QR Codes with the same size and contents but different mask patterns.
+fn do_mask_demo() {
+	// Project Nayuki URL
+	let segs = QrSegment::make_segments(&to_chars("https://www.nayuki.io/"));
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High, 1, 40, None, true).unwrap();  // Automatic mask
+	print_qr(&qr);
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High, 1, 40, Some(3), true).unwrap();  // Force mask 3
+	print_qr(&qr);
+	
+	// Chinese text as UTF-8
+	let segs = QrSegment::make_segments(&to_chars("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫"));
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, 1, 40, Some(0), true).unwrap();  // Force mask 0
+	print_qr(&qr);
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, 1, 40, Some(1), true).unwrap();  // Force mask 1
+	print_qr(&qr);
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, 1, 40, Some(5), true).unwrap();  // Force mask 5
+	print_qr(&qr);
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, 1, 40, Some(7), true).unwrap();  // Force mask 7
 	print_qr(&qr);
 }
 

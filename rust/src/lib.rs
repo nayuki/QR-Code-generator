@@ -193,30 +193,6 @@ impl QrCode {
 	}
 	
 	
-	// Creates a new QR Code symbol based on the given existing object, but with a potentially
-	// different mask pattern. The version, error correction level, codewords, etc. of the newly
-	// created object are all identical to the argument object; only the mask may differ.
-	pub fn remask(qr: &QrCode, mask: Option<u8>) -> QrCode {
-		// Check arguments
-		assert!(mask == None || mask.unwrap() <= 7, "Mask out of range");
-		
-		// Copy fields
-		let mut result = QrCode {
-			version: qr.version,
-			size: qr.size,
-			mask: 0,  // Dummy value
-			errorcorrectionlevel: qr.errorcorrectionlevel,
-			modules: qr.modules.clone(),
-			isfunction: qr.isfunction.clone(),
-		};
-		
-		// Handle masking
-		result.apply_mask(qr.mask);  // Undo old mask
-		result.handle_constructor_masking(mask);
-		result
-	}
-	
-	
 	// Returns this QR Code's version, in the range [1, 40].
 	pub fn version(&self) -> u8 {
 		self.version

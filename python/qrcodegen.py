@@ -31,7 +31,6 @@ This module "qrcodegen", public members:
   - Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
   - Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
         int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
-  - Constructor QrCode(QrCode qr, int mask)
   - Constructor QrCode(bytes datacodewords, int mask, int version, QrCode.Ecc ecl)
   - Method get_version() -> int
   - Method get_size() -> int
@@ -135,56 +134,36 @@ class QrCode(object):
 		assert len(bb) % 8 == 0
 		
 		# Create the QR Code symbol
-		return QrCode(None, bb.get_bytes(), mask, version, ecl)
+		return QrCode(bb.get_bytes(), mask, version, ecl)
 	
 	
 	# ---- Constructor ----
 	
-	def __init__(self, qrcode=None, datacodewords=None, mask=None, version=None, errcorlvl=None):
-		"""This constructor can be called in one of two ways:
-		- QrCode(datacodewords=list<int>, mask=int, version=int, errcorlvl=QrCode.Ecc):
-		      Creates a new QR Code symbol with the given version number, error correction level, binary data array,
-		      and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
-		      To go one level up, see the QrCode.encode_segments() function.
-		- QrCode(qrcode=QrCode, mask=int):
-		      Creates a new QR Code symbol based on the given existing object, but with a potentially different
-		      mask pattern. The version, error correction level, codewords, etc. of the newly created object are
-		      all identical to the argument object; only the mask may differ.
-		In both cases, mask = -1 is for automatic choice or 0 to 7 for fixed choice."""
+	def __init__(self, datacodewords, mask, version, errcorlvl):
+		"""Creates a new QR Code symbol with the given version number, error correction level, binary data array,
+		and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
+		that should not be invoked directly by the user. To go one level up, see the QrCode.encode_segments() function."""
 		
 		# Check arguments and handle simple scalar fields
 		if not (-1 <= mask <= 7):
 			raise ValueError("Mask value out of range")
-		if datacodewords is not None and qrcode is None:
-			if not (1 <= version <= 40):
-				raise ValueError("Version value out of range")
-			if not isinstance(errcorlvl, QrCode.Ecc):
-				raise TypeError("QrCode.Ecc expected")
-		elif qrcode is not None and datacodewords is None:
-			if version is not None or errcorlvl is not None:
-				raise ValueError("Values must be None")
-			version = qrcode._version
-			errcorlvl = qrcode._errcorlvl
-		else:
-			raise ValueError("Exactly one of datacodewords or qrcode must be not None")
+		if not (1 <= version <= 40):
+			raise ValueError("Version value out of range")
+		if not isinstance(errcorlvl, QrCode.Ecc):
+			raise TypeError("QrCode.Ecc expected")
 		self._version = version
 		self._errcorlvl = errcorlvl
 		self._size = version * 4 + 17
 		
-		if datacodewords is not None:  # Render from scratch a QR Code based on data codewords
-			if len(datacodewords) != QrCode._get_num_data_codewords(version, errcorlvl):
-				raise ValueError("Invalid array length")
-			# Initialize grids of modules
-			self._modules    = [[False] * self._size for _ in range(self._size)]  # The modules of the QR symbol; start with entirely white grid
-			self._isfunction = [[False] * self._size for _ in range(self._size)]  # Indicates function modules that are not subjected to masking
-			# Draw function patterns, draw all codewords
-			self._draw_function_patterns()
-			allcodewords = self._append_error_correction(datacodewords)
-			self._draw_codewords(allcodewords)
-		elif qrcode is not None:  # Modify the mask of an existing QR Code
-			self._modules = [list(row) for row in qrcode._modules]  # Deep copy
-			self._isfunction = qrcode._isfunction  # Shallow copy because the data is read-only
-			self._apply_mask(qrcode._mask)  # Undo existing mask
+		if len(datacodewords) != QrCode._get_num_data_codewords(version, errcorlvl):
+			raise ValueError("Invalid array length")
+		# Initialize grids of modules
+		self._modules    = [[False] * self._size for _ in range(self._size)]  # The modules of the QR symbol; start with entirely white grid
+		self._isfunction = [[False] * self._size for _ in range(self._size)]  # Indicates function modules that are not subjected to masking
+		# Draw function patterns, draw all codewords
+		self._draw_function_patterns()
+		allcodewords = self._append_error_correction(datacodewords)
+		self._draw_codewords(allcodewords)
 		
 		# Handle masking
 		if mask == -1:  # Automatically choose best mask

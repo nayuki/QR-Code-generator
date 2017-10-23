@@ -35,6 +35,7 @@ def main():
 	do_basic_demo()
 	do_variety_demo()
 	do_segment_demo()
+	do_mask_demo()
 
 
 def do_basic_demo():
@@ -51,11 +52,6 @@ def do_basic_demo():
 def do_variety_demo():
 	"""Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console."""
 	
-	# Project Nayuki URL
-	qr = qrcodegen.QrCode.encode_text("https://www.nayuki.io/", qrcodegen.QrCode.Ecc.HIGH)
-	qr = qrcodegen.QrCode(qrcode=qr, mask=3)  # Change mask, forcing to mask #3
-	print_qr(qr)
-	
 	# Numeric mode encoding (3.33 bits per digit)
 	qr = qrcodegen.QrCode.encode_text("314159265358979323846264338327950288419716939937510", qrcodegen.QrCode.Ecc.MEDIUM)
 	print_qr(qr)
@@ -64,12 +60,9 @@ def do_variety_demo():
 	qr = qrcodegen.QrCode.encode_text("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", qrcodegen.QrCode.Ecc.HIGH)
 	print_qr(qr)
 	
-	# Unicode text as UTF-8, and different masks
+	# Unicode text as UTF-8
 	qr = qrcodegen.QrCode.encode_text(u"\u3053\u3093\u306B\u3061\u0077\u0061\u3001\u4E16\u754C\uFF01\u0020\u03B1\u03B2\u03B3\u03B4", qrcodegen.QrCode.Ecc.QUARTILE)
-	print_qr(qrcodegen.QrCode(qrcode=qr, mask=0))
-	print_qr(qrcodegen.QrCode(qrcode=qr, mask=1))
-	print_qr(qrcodegen.QrCode(qrcode=qr, mask=5))
-	print_qr(qrcodegen.QrCode(qrcode=qr, mask=7))
+	print_qr(qr)
 	
 	# Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 	qr = qrcodegen.QrCode.encode_text(
@@ -151,6 +144,27 @@ def do_segment_demo():
 	segs = [qrcodegen.QrSegment(qrcodegen.QrSegment.Mode.KANJI, len(kanjiCharBits) // 13, kanjiCharBits)]
 	qr = qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.LOW)
 	print_qr(qr)
+
+
+def do_mask_demo():
+	"""Creates QR Codes with the same size and contents but different mask patterns."""
+	
+	# Project Nayuki URL
+	segs = qrcodegen.QrSegment.make_segments("https://www.nayuki.io/")
+	print_qr(qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.HIGH, mask=-1))  # Automatic mask
+	print_qr(qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.HIGH, mask=3))  # Force mask 3
+	
+	# Chinese text as UTF-8
+	segs = qrcodegen.QrSegment.make_segments(
+		u"\u7DAD\u57FA\u767E\u79D1\uFF08\u0057\u0069\u006B\u0069\u0070\u0065\u0064\u0069\u0061\uFF0C"
+		 "\u8046\u807D\u0069\u002F\u02CC\u0077\u026A\u006B\u1D7B\u02C8\u0070\u0069\u02D0\u0064\u0069"
+		 "\u002E\u0259\u002F\uFF09\u662F\u4E00\u500B\u81EA\u7531\u5167\u5BB9\u3001\u516C\u958B\u7DE8"
+		 "\u8F2F\u4E14\u591A\u8A9E\u8A00\u7684\u7DB2\u8DEF\u767E\u79D1\u5168\u66F8\u5354\u4F5C\u8A08"
+		 "\u756B")
+	print_qr(qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.MEDIUM, mask=0))  # Force mask 0
+	print_qr(qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.MEDIUM, mask=1))  # Force mask 1
+	print_qr(qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.MEDIUM, mask=5))  # Force mask 5
+	print_qr(qrcodegen.QrCode.encode_segments(segs, qrcodegen.QrCode.Ecc.MEDIUM, mask=7))  # Force mask 7
 
 
 

@@ -139,25 +139,6 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 }
 
 
-QrCode::QrCode(const QrCode &qr, int mask) :
-		// Copy scalar fields
-		version(qr.version),
-		size(qr.size),
-		errorCorrectionLevel(qr.errorCorrectionLevel),
-		// Handle grid fields
-		modules(qr.modules),
-		isFunction(qr.isFunction) {
-	
-	// Check arguments
-	if (mask < -1 || mask > 7)
-		throw "Mask value out of range";
-	
-	// Handle masking
-	applyMask(qr.mask);  // Undo old mask
-	this->mask = handleConstructorMasking(mask);
-}
-
-
 int QrCode::getVersion() const {
 	return version;
 }

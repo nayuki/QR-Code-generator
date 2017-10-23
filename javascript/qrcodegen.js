@@ -31,7 +31,6 @@
  *   - Function encodeBinary(list<byte> data, QrCode.Ecc ecl) -> QrCode
  *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
  *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
- *   - Constructor QrCode(QrCode qr, int mask)
  *   - Constructor QrCode(list<int> datacodewords, int mask, int version, QrCode.Ecc ecl)
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
@@ -64,35 +63,19 @@ var qrcodegen = new function() {
 	 * with associated static functions to create a QR Code from user-supplied textual or binary data.
 	 * This class covers the QR Code model 2 specification, supporting all versions (sizes)
 	 * from 1 to 40, all 4 error correction levels.
-	 * 
-	 * This constructor can be called in one of two ways:
-	 * - new QrCode(datacodewords, mask, version, errCorLvl):
-	 *       Creates a new QR Code symbol with the given version number, error correction level, binary data array,
-	 *       and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
-	 *       To go one level up, see the QrCode.encodeSegments() function.
-	 * - new QrCode(qr, mask):
-	 *       Creates a new QR Code symbol based on the given existing object, but with a potentially different
-	 *       mask pattern. The version, error correction level, codewords, etc. of the newly created object are
-	 *       all identical to the argument object; only the mask may differ.
-	 * In both cases, mask = -1 is for automatic choice or 0 to 7 for fixed choice.
+	 * This constructor creates a new QR Code symbol with the given version number, error correction level, binary data array,
+	 * and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
+	 * that should not be invoked directly by the user. To go one level up, see the QrCode.encodeSegments() function.
 	 */
-	this.QrCode = function(initData, mask, version, errCorLvl) {
+	this.QrCode = function(datacodewords, mask, version, errCorLvl) {
 		
 		/*---- Constructor ----*/
 		
 		// Check arguments and handle simple scalar fields
 		if (mask < -1 || mask > 7)
 			throw "Mask value out of range";
-		if (initData instanceof Array) {
-			if (version < 1 || version > 40)
-				throw "Version value out of range";
-		} else if (initData instanceof qrcodegen.QrCode) {
-			if (version != undefined || errCorLvl != undefined)
-				throw "Values must be undefined";
-			version = initData.version;
-			errCorLvl = initData.errorCorrectionLevel;
-		} else
-			throw "Invalid initial data";
+		if (version < 1 || version > 40)
+			throw "Version value out of range";
 		var size = version * 4 + 17;
 		
 		// Initialize both grids to be size*size arrays of Boolean false
@@ -106,22 +89,10 @@ var qrcodegen = new function() {
 			isFunction.push(row.slice());
 		}
 		
-		// Handle grid fields
-		if (initData instanceof Array) {
-			// Draw function patterns, draw all codewords
-			drawFunctionPatterns();
-			var allCodewords = appendErrorCorrection(initData);
-			drawCodewords(allCodewords);
-		} else if (initData instanceof qrcodegen.QrCode) {
-			for (var y = 0; y < size; y++) {
-				for (var x = 0; x < size; x++) {
-					modules[y][x] = initData.getModule(x, y);
-					isFunction[y][x] = initData.isFunctionModule(x, y);
-				}
-			}
-			applyMask(initData.mask);  // Undo old mask
-		} else
-			throw "Invalid initial data";
+		// Handle grid fields, draw function patterns, draw all codewords
+		drawFunctionPatterns();
+		var allCodewords = appendErrorCorrection(datacodewords);
+		drawCodewords(allCodewords);
 		
 		// Handle masking
 		if (mask == -1) {  // Automatically choose best mask

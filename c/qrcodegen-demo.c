@@ -36,6 +36,7 @@
 static void doBasicDemo(void);
 static void doVarietyDemo(void);
 static void doSegmentDemo(void);
+static void doMaskDemo(void);
 static void printQr(const uint8_t qrcode[]);
 
 
@@ -45,6 +46,7 @@ int main(void) {
 	doBasicDemo();
 	doVarietyDemo();
 	doSegmentDemo();
+	doMaskDemo();
 	return EXIT_SUCCESS;
 }
 
@@ -66,15 +68,6 @@ static void doBasicDemo(void) {
 
 // Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console.
 static void doVarietyDemo(void) {
-	{  // Project Nayuki URL
-		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
-		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-		bool ok = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
-			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_3, true);
-		if (ok)
-			printQr(qrcode);
-	}
-	
 	{  // Numeric mode encoding (3.33 bits per digit)
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
@@ -93,29 +86,12 @@ static void doVarietyDemo(void) {
 			printQr(qrcode);
 	}
 	
-	{  // Unicode text as UTF-8, and different masks
+	{  // Unicode text as UTF-8
 		const char *text = "\xE3\x81\x93\xE3\x82\x93\xE3\x81\xAB\xE3\x81\xA1wa\xE3\x80\x81\xE4\xB8\x96\xE7\x95\x8C\xEF\xBC\x81\x20\xCE\xB1\xCE\xB2\xCE\xB3\xCE\xB4";
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-		bool ok;
-		
-		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
-			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_0, true);
-		if (ok)
-			printQr(qrcode);
-		
-		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
-			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_1, true);
-		if (ok)
-			printQr(qrcode);
-		
-		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
-			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_5, true);
-		if (ok)
-			printQr(qrcode);
-		
-		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
-			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_7, true);
+		bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
+			qrcodegen_Ecc_QUARTILE, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 		if (ok)
 			printQr(qrcode);
 	}
@@ -256,6 +232,60 @@ static void doSegmentDemo(void) {
 			if (ok)
 				printQr(qrcode);
 		}
+	}
+}
+
+
+// Creates QR Codes with the same size and contents but different mask patterns.
+static void doMaskDemo(void) {
+	{  // Project Nayuki URL
+		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
+		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
+		bool ok;
+		
+		ok = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
+			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
+		if (ok)
+			printQr(qrcode);
+		
+		ok = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
+			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_3, true);
+		if (ok)
+			printQr(qrcode);
+	}
+	
+	{  // Chinese text as UTF-8
+		const char *text =
+			"\xE7\xB6\xAD\xE5\x9F\xBA\xE7\x99\xBE\xE7\xA7\x91\xEF\xBC\x88\x57\x69\x6B\x69\x70"
+			"\x65\x64\x69\x61\xEF\xBC\x8C\xE8\x81\x86\xE8\x81\xBD\x69\x2F\xCB\x8C\x77\xC9\xAA"
+			"\x6B\xE1\xB5\xBB\xCB\x88\x70\x69\xCB\x90\x64\x69\x2E\xC9\x99\x2F\xEF\xBC\x89\xE6"
+			"\x98\xAF\xE4\xB8\x80\xE5\x80\x8B\xE8\x87\xAA\xE7\x94\xB1\xE5\x85\xA7\xE5\xAE\xB9"
+			"\xE3\x80\x81\xE5\x85\xAC\xE9\x96\x8B\xE7\xB7\xA8\xE8\xBC\xAF\xE4\xB8\x94\xE5\xA4"
+			"\x9A\xE8\xAA\x9E\xE8\xA8\x80\xE7\x9A\x84\xE7\xB6\xB2\xE8\xB7\xAF\xE7\x99\xBE\xE7"
+			"\xA7\x91\xE5\x85\xA8\xE6\x9B\xB8\xE5\x8D\x94\xE4\xBD\x9C\xE8\xA8\x88\xE7\x95\xAB";
+		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
+		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
+		bool ok;
+		
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
+			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_0, true);
+		if (ok)
+			printQr(qrcode);
+		
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
+			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_1, true);
+		if (ok)
+			printQr(qrcode);
+		
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
+			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_5, true);
+		if (ok)
+			printQr(qrcode);
+		
+		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
+			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_7, true);
+		if (ok)
+			printQr(qrcode);
 	}
 }
 

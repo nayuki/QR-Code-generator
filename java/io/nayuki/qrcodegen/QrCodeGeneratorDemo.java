@@ -45,6 +45,7 @@ public final class QrCodeGeneratorDemo {
 		doBasicDemo();
 		doVarietyDemo();
 		doSegmentDemo();
+		doMaskDemo();
 	}
 	
 	
@@ -72,11 +73,6 @@ public final class QrCodeGeneratorDemo {
 	private static void doVarietyDemo() throws IOException {
 		QrCode qr;
 		
-		// Project Nayuki URL
-		qr = QrCode.encodeText("https://www.nayuki.io/", QrCode.Ecc.HIGH);
-		qr = new QrCode(qr, 3);  // Change mask, forcing to mask #3
-		writePng(qr.toImage(8, 6), "project-nayuki-QR.png");
-		
 		// Numeric mode encoding (3.33 bits per digit)
 		qr = QrCode.encodeText("314159265358979323846264338327950288419716939937510", QrCode.Ecc.MEDIUM);
 		writePng(qr.toImage(13, 1), "pi-digits-QR.png");
@@ -85,12 +81,9 @@ public final class QrCodeGeneratorDemo {
 		qr = QrCode.encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", QrCode.Ecc.HIGH);
 		writePng(qr.toImage(10, 2), "alphanumeric-QR.png");
 		
-		// Unicode text as UTF-8, and different masks
+		// Unicode text as UTF-8
 		qr = QrCode.encodeText("こんにちwa、世界！ αβγδ", QrCode.Ecc.QUARTILE);
-		writePng(new QrCode(qr, 0).toImage(10, 3), "unicode-mask0-QR.png");
-		writePng(new QrCode(qr, 1).toImage(10, 3), "unicode-mask1-QR.png");
-		writePng(new QrCode(qr, 5).toImage(10, 3), "unicode-mask5-QR.png");
-		writePng(new QrCode(qr, 7).toImage(10, 3), "unicode-mask7-QR.png");
+		writePng(qr.toImage(10, 3), "unicode-QR.png");
 		
 		// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 		qr = QrCode.encodeText(
@@ -155,6 +148,31 @@ public final class QrCodeGeneratorDemo {
 		segs = Arrays.asList(new QrSegment(QrSegment.Mode.KANJI, kanjiChars.length, bb));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
 		writePng(qr.toImage(9, 4), "madoka-kanji-QR.png");
+	}
+	
+	
+	// Creates QR Codes with the same size and contents but different mask patterns.
+	private static void doMaskDemo() throws IOException {
+		QrCode qr;
+		List<QrSegment> segs;
+		
+		// Project Nayuki URL
+		segs = QrSegment.makeSegments("https://www.nayuki.io/");
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 1, 40, -1, true);  // Automatic mask
+		writePng(qr.toImage(8, 6), "project-nayuki-automask-QR.png");
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 1, 40, 3, true);  // Force mask 3
+		writePng(qr.toImage(8, 6), "project-nayuki-mask3-QR.png");
+		
+		// Chinese text as UTF-8
+		segs = QrSegment.makeSegments("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫");
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 0, true);  // Force mask 0
+		writePng(qr.toImage(10, 3), "unicode-mask0-QR.png");
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 1, true);  // Force mask 1
+		writePng(qr.toImage(10, 3), "unicode-mask1-QR.png");
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 5, true);  // Force mask 5
+		writePng(qr.toImage(10, 3), "unicode-mask5-QR.png");
+		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, 1, 40, 7, true);  // Force mask 7
+		writePng(qr.toImage(10, 3), "unicode-mask7-QR.png");
 	}
 	
 	

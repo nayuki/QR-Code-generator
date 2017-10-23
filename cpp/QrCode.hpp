@@ -132,14 +132,6 @@ class QrCode final {
 	public: QrCode(int ver, Ecc ecl, const std::vector<std::uint8_t> &dataCodewords, int mask);
 	
 	
-	/* 
-	 * Creates a new QR Code symbol based on the given existing object, but with a potentially
-	 * different mask pattern. The version, error correction level, codewords, etc. of the newly
-	 * created object are all identical to the argument object; only the mask may differ.
-	 */
-	public: QrCode(const QrCode &qr, int mask);
-	
-	
 	
 	/*---- Public instance methods ----*/
 	
