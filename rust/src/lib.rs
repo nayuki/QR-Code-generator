@@ -132,7 +132,7 @@ impl QrCode {
 		
 		// Create the data bit string by concatenating all segments
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
-		let mut bb: Vec<bool> = Vec::new();
+		let mut bb = Vec::<bool>::new();
 		for seg in segs {
 			append_bits(&mut bb, seg.mode.mode_bits(), 4);
 			append_bits(&mut bb, seg.numchars as u32, seg.mode.num_char_count_bits(version));
@@ -414,11 +414,11 @@ impl QrCode {
 		let shortblocklen: usize = rawcodewords / numblocks;
 		
 		// Split data into blocks and append ECC to each block
-		let mut blocks: Vec<Vec<u8>> = Vec::with_capacity(numblocks);
+		let mut blocks = Vec::<Vec<u8>>::with_capacity(numblocks);
 		let rs = ReedSolomonGenerator::new(blockecclen);
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
-			let mut dat: Vec<u8> = Vec::with_capacity(shortblocklen + 1);
+			let mut dat = Vec::<u8>::with_capacity(shortblocklen + 1);
 			dat.extend_from_slice(&data[k .. k + shortblocklen - blockecclen + ((i >= numshortblocks) as usize)]);
 			k += dat.len();
 			let ecc: Vec<u8> = rs.get_remainder(&dat);
@@ -430,7 +430,7 @@ impl QrCode {
 		}
 		
 		// Interleave (not concatenate) the bytes from every block into a single sequence
-		let mut result: Vec<u8> = Vec::with_capacity(rawcodewords);
+		let mut result = Vec::<u8>::with_capacity(rawcodewords);
 		for i in 0 .. shortblocklen + 1 {
 			for j in 0 .. numblocks {
 				// Skip the padding byte in short blocks
@@ -849,7 +849,7 @@ impl QrSegment {
 	
 	// Returns a segment representing the given binary data encoded in byte mode.
 	pub fn make_bytes(data: &[u8]) -> QrSegment {
-		let mut bb: Vec<bool> = Vec::with_capacity(data.len() * 8);
+		let mut bb = Vec::<bool>::with_capacity(data.len() * 8);
 		for b in data {
 			for i in (0 .. 8).rev() {
 				bb.push((b >> i) & 1u8 != 0u8);
@@ -862,7 +862,7 @@ impl QrSegment {
 	// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	// Panics if the string contains non-digit characters.
 	pub fn make_numeric(text: &[char]) -> QrSegment {
-		let mut bb: Vec<bool> = Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3);
+		let mut bb = Vec::<bool>::with_capacity(text.len() * 3 + (text.len() + 2) / 3);
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text {
@@ -886,7 +886,7 @@ impl QrSegment {
 	// The characters allowed are: 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk,
 	// plus, hyphen, period, slash, colon. Panics if the string contains non-encodable characters.
 	pub fn make_alphanumeric(text: &[char]) -> QrSegment {
-		let mut bb: Vec<bool> = Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2);
+		let mut bb = Vec::<bool>::with_capacity(text.len() * 5 + (text.len() + 1) / 2);
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text {
@@ -928,7 +928,7 @@ impl QrSegment {
 	// Returns a segment representing an Extended Channel Interpretation
 	// (ECI) designator with the given assignment value.
 	pub fn make_eci(assignval: u32) -> QrSegment {
-		let mut bb: Vec<bool> = Vec::with_capacity(24);
+		let mut bb = Vec::<bool>::with_capacity(24);
 		if assignval < (1 << 7) {
 			append_bits(&mut bb, assignval, 8);
 		} else if assignval < (1 << 14) {
