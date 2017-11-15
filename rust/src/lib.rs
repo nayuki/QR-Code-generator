@@ -43,7 +43,7 @@ pub struct QrCode {
 	// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 	// Note that even if a constructor was called with automatic masking requested
 	// (mask = -1), the resulting object will still have a mask value between 0 and 7.
-	mask: u8,
+	mask: Mask,
 	
 	// The modules of this QR Code symbol (false = white, true = black)
 	modules: Vec<bool>,
@@ -101,9 +101,8 @@ impl QrCode {
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit
 	// in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
-			minversion: Version, maxversion: Version, mask: Option<u8>, boostecl: bool) -> Option<QrCode> {
+			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Option<QrCode> {
 		assert!(minversion.value() <= maxversion.value(), "Invalid value");
-		assert!(mask == None || mask.unwrap() <= 7, "Invalid value");
 		
 		// Find the minimal version number to use
 		let mut version = minversion;
@@ -168,16 +167,13 @@ impl QrCode {
 	// Creates a new QR Code symbol with the given version number, error correction level,
 	// binary data array, and mask number. This is a cumbersome low-level constructor that
 	// should not be invoked directly by the user. To go one level up, see the encode_segments() function.
-	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<u8>) -> QrCode {
-		// Check arguments
-		assert!(mask == None || mask.unwrap() <= 7, "Value out of range");
-		
+	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<Mask>) -> QrCode {
 		// Initialize fields
 		let size: usize = (ver.value() as usize) * 4 + 17;
 		let mut result = QrCode {
 			version: ver,
 			size: size as i32,
-			mask: 0,  // Dummy value
+			mask: Mask::new(0),  // Dummy value
 			errorcorrectionlevel: ecl,
 			modules: vec![false; size * size],  // Entirely white grid
 			isfunction: vec![false; size * size],
@@ -211,7 +207,7 @@ impl QrCode {
 	
 	
 	// Returns this QR Code's mask, in the range [0, 7].
-	pub fn mask(&self) -> u8 {
+	pub fn mask(&self) -> Mask {
 		self.mask
 	}
 	
@@ -297,18 +293,18 @@ impl QrCode {
 		}
 		
 		// Draw configuration data
-		self.draw_format_bits(0);  // Dummy mask value; overwritten later in the constructor
+		self.draw_format_bits(Mask::new(0));  // Dummy mask value; overwritten later in the constructor
 		self.draw_version();
 	}
 	
 	
 	// Draws two copies of the format bits (with its own error correction code)
 	// based on the given mask and this object's error correction level field.
-	fn draw_format_bits(&mut self, mask: u8) {
+	fn draw_format_bits(&mut self, mask: Mask) {
 		// Calculate error correction code and pack bits
 		let size: i32 = self.size;
 		// errcorrlvl is uint2, mask is uint3
-		let mut data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask as u32);
+		let mut data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask.value() as u32);
 		let mut rem: u32 = data;
 		for _ in 0 .. 10 {
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -477,8 +473,8 @@ impl QrCode {
 	// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
 	// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 	// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
-	fn apply_mask(&mut self, mask: u8) {
-		assert!(mask <= 7, "Mask value out of range");
+	fn apply_mask(&mut self, mask: Mask) {
+		let mask = mask.value();
 		for y in 0 .. self.size {
 			for x in 0 .. self.size {
 				let invert: bool = match mask {
@@ -501,22 +497,22 @@ impl QrCode {
 	// A messy helper function for the constructors. This QR Code must be in an unmasked state when this
 	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
 	// This method applies and returns the actual mask chosen, from 0 to 7.
-	fn handle_constructor_masking(&mut self, mut mask: Option<u8>) {
-		if mask == None {  // Automatically choose best mask
+	fn handle_constructor_masking(&mut self, mut mask: Option<Mask>) {
+		if mask.is_none() {  // Automatically choose best mask
 			let mut minpenalty: i32 = std::i32::MAX;
 			for i in 0u8 .. 8 {
-				self.draw_format_bits(i);
-				self.apply_mask(i);
+				let newmask = Mask::new(i);
+				self.draw_format_bits(newmask);
+				self.apply_mask(newmask);
 				let penalty: i32 = self.get_penalty_score();
 				if penalty < minpenalty {
-					mask = Some(i);
+					mask = Some(newmask);
 					minpenalty = penalty;
 				}
-				self.apply_mask(i);  // Undoes the mask due to XOR
+				self.apply_mask(newmask);  // Undoes the mask due to XOR
 			}
 		}
-		let msk: u8 = mask.unwrap();
-		assert!(msk <= 7, "Assertion error");
+		let msk: Mask = mask.unwrap();
 		self.draw_format_bits(msk);  // Overwrite old format bits
 		self.apply_mask(msk);  // Apply the final choice of mask
 		self.mask = msk;
@@ -1098,6 +1094,21 @@ impl Version {
 	pub fn new(ver: u8) -> Self {
 		assert!(QrCode_MIN_VERSION.value() <= ver && ver <= QrCode_MAX_VERSION.value(), "Version number out of range");
 		Version(ver)
+	}
+	
+	pub fn value(&self) -> u8 {
+		self.0
+	}
+}
+
+
+#[derive(Copy, Clone)]
+pub struct Mask(u8);
+
+impl Mask {
+	pub fn new(mask: u8) -> Self {
+		assert!(mask <= 7, "Mask value out of range");
+		Mask(mask)
 	}
 	
 	pub fn value(&self) -> u8 {

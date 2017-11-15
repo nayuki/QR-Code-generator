@@ -25,6 +25,7 @@
  */
 
 extern crate qrcodegen;
+use qrcodegen::Mask;
 use qrcodegen::QrCode;
 use qrcodegen::QrCodeEcc;
 use qrcodegen::QrSegment;
@@ -144,18 +145,18 @@ fn do_mask_demo() {
 	let segs = QrSegment::make_segments(&to_chars("https://www.nayuki.io/"));
 	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true).unwrap();  // Automatic mask
 	print_qr(&qr);
-	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(3), true).unwrap();  // Force mask 3
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(Mask::new(3)), true).unwrap();  // Force mask 3
 	print_qr(&qr);
 	
 	// Chinese text as UTF-8
 	let segs = QrSegment::make_segments(&to_chars("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫"));
-	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(0), true).unwrap();  // Force mask 0
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(Mask::new(0)), true).unwrap();  // Force mask 0
 	print_qr(&qr);
-	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(1), true).unwrap();  // Force mask 1
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(Mask::new(1)), true).unwrap();  // Force mask 1
 	print_qr(&qr);
-	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(5), true).unwrap();  // Force mask 5
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(Mask::new(5)), true).unwrap();  // Force mask 5
 	print_qr(&qr);
-	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(7), true).unwrap();  // Force mask 7
+	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, QrCode_MIN_VERSION, QrCode_MAX_VERSION, Some(Mask::new(7)), true).unwrap();  // Force mask 7
 	print_qr(&qr);
 }
 

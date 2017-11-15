@@ -27,6 +27,7 @@
  */
 
 extern crate qrcodegen;
+use qrcodegen::Mask;
 use qrcodegen::QrCode;
 use qrcodegen::QrCodeEcc;
 use qrcodegen::QrSegment;
@@ -74,7 +75,7 @@ fn main() {
 		}
 		
 		// Try to make QR Code symbol
-		let msk: Option<u8> = if mask == -1 { None } else { Some(mask as u8) };
+		let msk = if mask == -1 { None } else { Some(Mask::new(mask as u8)) };
 		match QrCode::encode_segments_advanced(&segs, ECC_LEVELS[errcorlvl as usize],
 				Version::new(minversion as u8), Version::new(maxversion as u8), msk, boostecl != 0) {
 		
