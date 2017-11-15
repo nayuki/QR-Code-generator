@@ -132,29 +132,29 @@ impl QrCode {
 		
 		// Create the data bit string by concatenating all segments
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
-		let mut bb = Vec::<bool>::new();
+		let mut bb = BitBuffer(Vec::new());
 		for seg in segs {
-			append_bits(&mut bb, seg.mode.mode_bits(), 4);
-			append_bits(&mut bb, seg.numchars as u32, seg.mode.num_char_count_bits(version));
-			bb.extend_from_slice(&seg.data);
+			bb.append_bits(seg.mode.mode_bits(), 4);
+			bb.append_bits(seg.numchars as u32, seg.mode.num_char_count_bits(version));
+			bb.0.extend_from_slice(&seg.data);
 		}
 		
 		// Add terminator and pad up to a byte if applicable
-		let numzerobits = std::cmp::min(4, datacapacitybits - bb.len());
-		append_bits(&mut bb, 0, numzerobits as u8);
-		let numzerobits = bb.len().wrapping_neg() & 7;
-		append_bits(&mut bb, 0, numzerobits as u8);
+		let numzerobits = std::cmp::min(4, datacapacitybits - bb.0.len());
+		bb.append_bits(0, numzerobits as u8);
+		let numzerobits = bb.0.len().wrapping_neg() & 7;
+		bb.append_bits(0, numzerobits as u8);
 		
 		// Pad with alternate bytes until data capacity is reached
 		let mut padbyte: u32 = 0xEC;
-		while bb.len() < datacapacitybits {
-			append_bits(&mut bb, padbyte, 8);
+		while bb.0.len() < datacapacitybits {
+			bb.append_bits(padbyte, 8);
 			padbyte ^= 0xEC ^ 0x11;
 		}
-		assert_eq!(bb.len() % 8, 0, "Assertion error");
+		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
 		
-		let mut bytes = vec![0u8; bb.len() / 8];
-		for (i, bit) in bb.iter().enumerate() {
+		let mut bytes = vec![0u8; bb.0.len() / 8];
+		for (i, bit) in bb.0.iter().enumerate() {
 			bytes[i >> 3] |= (*bit as u8) << (7 - (i & 7));
 		}
 		
@@ -855,20 +855,18 @@ impl QrSegment {
 	
 	// Returns a segment representing the given binary data encoded in byte mode.
 	pub fn make_bytes(data: &[u8]) -> QrSegment {
-		let mut bb = Vec::<bool>::with_capacity(data.len() * 8);
+		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
 		for b in data {
-			for i in (0 .. 8).rev() {
-				bb.push((b >> i) & 1u8 != 0u8);
-			}
+			bb.append_bits(*b as u32, 8);
 		}
-		QrSegment::new(QrSegmentMode::Byte, data.len(), bb)
+		QrSegment::new(QrSegmentMode::Byte, data.len(), bb.0)
 	}
 	
 	
 	// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	// Panics if the string contains non-digit characters.
 	pub fn make_numeric(text: &[char]) -> QrSegment {
-		let mut bb = Vec::<bool>::with_capacity(text.len() * 3 + (text.len() + 2) / 3);
+		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text {
@@ -876,15 +874,15 @@ impl QrSegment {
 			accumdata = accumdata * 10 + ((*c as u32) - ('0' as u32));
 			accumcount += 1;
 			if accumcount == 3 {
-				append_bits(&mut bb, accumdata, 10);
+				bb.append_bits(accumdata, 10);
 				accumdata = 0;
 				accumcount = 0;
 			}
 		}
 		if accumcount > 0 {  // 1 or 2 digits remaining
-			append_bits(&mut bb, accumdata, (accumcount as u8) * 3 + 1);
+			bb.append_bits(accumdata, (accumcount as u8) * 3 + 1);
 		}
-		QrSegment::new(QrSegmentMode::Numeric, text.len(), bb)
+		QrSegment::new(QrSegmentMode::Numeric, text.len(), bb.0)
 	}
 	
 	
@@ -892,7 +890,7 @@ impl QrSegment {
 	// The characters allowed are: 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk,
 	// plus, hyphen, period, slash, colon. Panics if the string contains non-encodable characters.
 	pub fn make_alphanumeric(text: &[char]) -> QrSegment {
-		let mut bb = Vec::<bool>::with_capacity(text.len() * 5 + (text.len() + 1) / 2);
+		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text {
@@ -903,15 +901,15 @@ impl QrSegment {
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
 			if accumcount == 2 {
-				append_bits(&mut bb, accumdata, 11);
+				bb.append_bits(accumdata, 11);
 				accumdata = 0;
 				accumcount = 0;
 			}
 		}
 		if accumcount > 0 {  // 1 character remaining
-			append_bits(&mut bb, accumdata, 6);
+			bb.append_bits(accumdata, 6);
 		}
-		QrSegment::new(QrSegmentMode::Alphanumeric, text.len(), bb)
+		QrSegment::new(QrSegmentMode::Alphanumeric, text.len(), bb.0)
 	}
 	
 	
@@ -934,19 +932,19 @@ impl QrSegment {
 	// Returns a segment representing an Extended Channel Interpretation
 	// (ECI) designator with the given assignment value.
 	pub fn make_eci(assignval: u32) -> QrSegment {
-		let mut bb = Vec::<bool>::with_capacity(24);
+		let mut bb = BitBuffer(Vec::with_capacity(24));
 		if assignval < (1 << 7) {
-			append_bits(&mut bb, assignval, 8);
+			bb.append_bits(assignval, 8);
 		} else if assignval < (1 << 14) {
-			append_bits(&mut bb, 2, 2);
-			append_bits(&mut bb, assignval, 14);
+			bb.append_bits(2, 2);
+			bb.append_bits(assignval, 14);
 		} else if assignval < 1_000_000 {
-			append_bits(&mut bb, 6, 3);
-			append_bits(&mut bb, assignval, 21);
+			bb.append_bits(6, 3);
+			bb.append_bits(assignval, 21);
 		} else {
 			panic!("ECI assignment value out of range");
 		}
-		QrSegment::new(QrSegmentMode::Eci, 0, bb)
+		QrSegment::new(QrSegmentMode::Eci, 0, bb.0)
 	}
 	
 	
@@ -1078,11 +1076,16 @@ impl QrSegmentMode {
 
 /*---- Bit buffer functionality ----*/
 
-// Appends the given number of low bits of the given value
-// to this sequence. Requires 0 <= val < 2^len.
-pub fn append_bits(bb: &mut Vec<bool>, val: u32, len: u8) {
-	assert!(len < 32 && (val >> len) == 0 || len == 32, "Value out of range");
-	for i in (0 .. len).rev() {  // Append bit by bit
-		bb.push((val >> i) & 1 != 0);
+pub struct BitBuffer(pub Vec<bool>);
+
+
+impl BitBuffer {
+	// Appends the given number of low bits of the given value
+	// to this sequence. Requires 0 <= val < 2^len.
+	pub fn append_bits(&mut self, val: u32, len: u8) {
+		assert!(len < 32 && (val >> len) == 0 || len == 32, "Value out of range");
+		for i in (0 .. len).rev() {  // Append bit by bit
+			self.0.push((val >> i) & 1 != 0);
+		}
 	}
 }
