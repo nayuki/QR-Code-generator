@@ -31,7 +31,7 @@
 pub struct QrCode {
 	
 	// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
-	version: u8,
+	version: Version,
 	
 	// The width and height of this QR Code symbol, measured in modules.
 	// Always equal to version &times; 4 + 17, in the range 21 to 177.
@@ -101,12 +101,12 @@ impl QrCode {
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit
 	// in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
-			minversion: u8, maxversion: u8, mask: Option<u8>, boostecl: bool) -> Option<QrCode> {
-		assert!(QrCode_MIN_VERSION <= minversion && minversion <= maxversion && maxversion <= QrCode_MAX_VERSION, "Invalid value");
+			minversion: Version, maxversion: Version, mask: Option<u8>, boostecl: bool) -> Option<QrCode> {
+		assert!(minversion.value() <= maxversion.value(), "Invalid value");
 		assert!(mask == None || mask.unwrap() <= 7, "Invalid value");
 		
 		// Find the minimal version number to use
-		let mut version: u8 = minversion;
+		let mut version = minversion;
 		let datausedbits: usize;
 		loop {
 			// Number of data bits available
@@ -117,10 +117,10 @@ impl QrCode {
 					break;  // This version number is found to be suitable
 				}
 			}
-			if version >= maxversion {  // All versions in the range could not fit the given data
+			if version.value() >= maxversion.value() {  // All versions in the range could not fit the given data
 				return None;
 			}
-			version += 1;
+			version = Version::new(version.value() + 1);
 		}
 		
 		// Increase the error correction level while the data still fits in the current version number
@@ -168,13 +168,12 @@ impl QrCode {
 	// Creates a new QR Code symbol with the given version number, error correction level,
 	// binary data array, and mask number. This is a cumbersome low-level constructor that
 	// should not be invoked directly by the user. To go one level up, see the encode_segments() function.
-	pub fn encode_codewords(ver: u8, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<u8>) -> QrCode {
+	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<u8>) -> QrCode {
 		// Check arguments
-		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Value out of range");
 		assert!(mask == None || mask.unwrap() <= 7, "Value out of range");
 		
 		// Initialize fields
-		let size: usize = (ver as usize) * 4 + 17;
+		let size: usize = (ver.value() as usize) * 4 + 17;
 		let mut result = QrCode {
 			version: ver,
 			size: size as i32,
@@ -194,7 +193,7 @@ impl QrCode {
 	
 	
 	// Returns this QR Code's version, in the range [1, 40].
-	pub fn version(&self) -> u8 {
+	pub fn version(&self) -> Version {
 		self.version
 	}
 	
@@ -343,16 +342,16 @@ impl QrCode {
 	// Draws two copies of the version bits (with its own error correction code),
 	// based on this object's version field (which only has an effect for 7 <= version <= 40).
 	fn draw_version(&mut self) {
-		if self.version < 7 {
+		if self.version.value() < 7 {
 			return;
 		}
 		
 		// Calculate error correction code and pack bits
-		let mut rem: u32 = self.version as u32;  // version is uint6, in the range [7, 40]
+		let mut rem: u32 = self.version.value() as u32;  // version is uint6, in the range [7, 40]
 		for _ in 0 .. 12 {
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
 		}
-		let data: u32 = (self.version as u32) << 12 | rem;  // uint18
+		let data: u32 = (self.version.value() as u32) << 12 | rem;  // uint18
 		assert!(data >> 18 == 0, "Assertion error");
 		
 		// Draw two copies
@@ -621,8 +620,8 @@ impl QrCode {
 	// Returns a set of positions of the alignment patterns in ascending order. These positions are
 	// used on both the x and y axes. Each value in the resulting list is in the range [0, 177).
 	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
-	fn get_alignment_pattern_positions(ver: u8) -> Vec<i32> {
-		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
+	fn get_alignment_pattern_positions(ver: Version) -> Vec<i32> {
+		let ver = ver.value();
 		if ver == 1 {
 			vec![]
 		} else {
@@ -647,8 +646,8 @@ impl QrCode {
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
-	fn get_num_raw_data_modules(ver: u8) -> usize {
-		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
+	fn get_num_raw_data_modules(ver: Version) -> usize {
+		let ver = ver.value();
 		let mut result: usize = (16 * (ver as usize) + 128) * (ver as usize) + 64;
 		if ver >= 2 {
 			let numalign: usize = (ver as usize) / 7 + 2;
@@ -664,8 +663,7 @@ impl QrCode {
 	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
-	fn get_num_data_codewords(ver: u8, ecl: QrCodeEcc) -> usize {
-		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
+	fn get_num_data_codewords(ver: Version, ecl: QrCodeEcc) -> usize {
 		QrCode::get_num_raw_data_modules(ver) / 8
 			- QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, ver, ecl)
 			* QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, ver, ecl)
@@ -673,9 +671,8 @@ impl QrCode {
 	
 	
 	// Returns an entry from the given table based on the given values.
-	fn table_get(table: &'static [[i8; 41]; 4], ver: u8, ecl: QrCodeEcc) -> usize {
-		assert!(QrCode_MIN_VERSION <= ver && ver <= QrCode_MAX_VERSION, "Version number out of range");
-		table[ecl.ordinal()][ver as usize] as usize
+	fn table_get(table: &'static [[i8; 41]; 4], ver: Version, ecl: QrCodeEcc) -> usize {
+		table[ecl.ordinal()][ver.value() as usize] as usize
 	}
 	
 }
@@ -683,8 +680,8 @@ impl QrCode {
 
 /*---- Public constants ----*/
 
-pub const QrCode_MIN_VERSION: u8 =  1;
-pub const QrCode_MAX_VERSION: u8 = 40;
+pub const QrCode_MIN_VERSION: Version = Version( 1);
+pub const QrCode_MAX_VERSION: Version = Version(40);
 
 
 /*---- Private tables of constants ----*/
@@ -981,8 +978,7 @@ impl QrSegment {
 	/*---- Other static functions ----*/
 	
 	// Package-private helper function.
-	fn get_total_bits(segs: &[QrSegment], version: u8) -> Option<usize> {
-		assert!(QrCode_MIN_VERSION <= version && version <= QrCode_MAX_VERSION, "Version number out of range");
+	fn get_total_bits(segs: &[QrSegment], version: Version) -> Option<usize> {
 		let mut result: usize = 0;
 		for seg in segs {
 			let ccbits = seg.mode.num_char_count_bits(version);
@@ -1050,7 +1046,7 @@ impl QrSegmentMode {
 	
 	// Returns the bit width of the segment character count field
 	// for this mode object at the given version number.
-	pub fn num_char_count_bits(&self, ver: u8) -> u8 {
+	pub fn num_char_count_bits(&self, ver: Version) -> u8 {
 		let array: [u8; 3] = match *self {
 			QrSegmentMode::Numeric      => [10, 12, 14],
 			QrSegmentMode::Alphanumeric => [ 9, 11, 13],
@@ -1059,6 +1055,7 @@ impl QrSegmentMode {
 			QrSegmentMode::Eci          => [ 0,  0,  0],
 		};
 		
+		let ver = ver.value();
 		if 1 <= ver && ver <= 9 {
 			array[0]
 		} else if 10 <= ver && ver <= 26 {
@@ -1087,5 +1084,23 @@ impl BitBuffer {
 		for i in (0 .. len).rev() {  // Append bit by bit
 			self.0.push((val >> i) & 1 != 0);
 		}
+	}
+}
+
+
+
+/*---- Miscellaneous values ----*/
+
+#[derive(Copy, Clone)]
+pub struct Version(u8);
+
+impl Version {
+	pub fn new(ver: u8) -> Self {
+		assert!(QrCode_MIN_VERSION.value() <= ver && ver <= QrCode_MAX_VERSION.value(), "Version number out of range");
+		Version(ver)
+	}
+	
+	pub fn value(&self) -> u8 {
+		self.0
 	}
 }

@@ -30,6 +30,7 @@ extern crate qrcodegen;
 use qrcodegen::QrCode;
 use qrcodegen::QrCodeEcc;
 use qrcodegen::QrSegment;
+use qrcodegen::Version;
 
 
 fn main() {
@@ -57,9 +58,9 @@ fn main() {
 		let mask       = read_int();
 		let boostecl   = read_int();
 		assert!(0 <= errcorlvl && errcorlvl <= 3);
-		assert!((qrcodegen::QrCode_MIN_VERSION as i16) <= minversion
+		assert!((qrcodegen::QrCode_MIN_VERSION.value() as i16) <= minversion
 			&& minversion <= maxversion
-			&& maxversion <= (qrcodegen::QrCode_MAX_VERSION as i16));
+			&& maxversion <= (qrcodegen::QrCode_MAX_VERSION.value() as i16));
 		assert!(-1 <= mask && mask <= 7);
 		assert!(boostecl >> 1 == 0);
 		
@@ -75,11 +76,11 @@ fn main() {
 		// Try to make QR Code symbol
 		let msk: Option<u8> = if mask == -1 { None } else { Some(mask as u8) };
 		match QrCode::encode_segments_advanced(&segs, ECC_LEVELS[errcorlvl as usize],
-				minversion as u8, maxversion as u8, msk, boostecl != 0) {
+				Version::new(minversion as u8), Version::new(maxversion as u8), msk, boostecl != 0) {
 		
 			Some(qr) => {
 				// Print grid of modules
-				println!("{}", qr.version());
+				println!("{}", qr.version().value());
 				for y in 0 .. qr.size() {
 					for x in 0 .. qr.size() {
 						println!("{}", qr.get_module(x, y) as i8);
