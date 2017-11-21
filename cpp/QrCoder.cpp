@@ -28,7 +28,7 @@
 #include <sstream>
 #include <utility>
 #include "BitBuffer.hpp"
-#include "QrCode.hpp"
+#include "QrCoder.hpp"
 
 using std::int8_t;
 using std::uint8_t;
@@ -38,40 +38,40 @@ using std::vector;
 
 namespace qrcodegen {
 
-QrCode::Ecc::Ecc(int ord, int fb) :
+QrCoder::Ecc::Ecc(int ord, int fb) :
 	ordinal(ord),
 	formatBits(fb) {}
 
 
-int QrCode::Ecc::getOrdinal() const {
+int QrCoder::Ecc::getOrdinal() const {
 	return ordinal;
 }
 
 
-int QrCode::Ecc::getFormatBits() const {
+int QrCoder::Ecc::getFormatBits() const {
 	return formatBits;
 }
 
 
-const QrCode::Ecc QrCode::Ecc::LOW     (0, 1);
-const QrCode::Ecc QrCode::Ecc::MEDIUM  (1, 0);
-const QrCode::Ecc QrCode::Ecc::QUARTILE(2, 3);
-const QrCode::Ecc QrCode::Ecc::HIGH    (3, 2);
+const QrCoder::Ecc QrCoder::Ecc::LOW     (0, 1);
+const QrCoder::Ecc QrCoder::Ecc::MEDIUM  (1, 0);
+const QrCoder::Ecc QrCoder::Ecc::QUARTILE(2, 3);
+const QrCoder::Ecc QrCoder::Ecc::HIGH    (3, 2);
 
 
-QrCode QrCode::encodeText(const char *text, Ecc ecl) {
+QrCoder QrCoder::encodeText(const char *text, Ecc ecl) {
 	vector<QrSegment> segs(QrSegment::makeSegments(text));
 	return encodeSegments(segs, ecl);
 }
 
 
-QrCode QrCode::encodeBinary(const vector<uint8_t> &data, Ecc ecl) {
+QrCoder QrCoder::encodeBinary(const vector<uint8_t> &data, Ecc ecl) {
 	vector<QrSegment> segs{QrSegment::makeBytes(data)};
 	return encodeSegments(segs, ecl);
 }
 
 
-QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
+QrCoder QrCoder::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		int minVersion, int maxVersion, int mask, bool boostEcl) {
 	if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
 		throw "Invalid value";
@@ -115,11 +115,11 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		throw "Assertion error";
 	
 	// Create the QR Code symbol
-	return QrCode(version, ecl, bb.getBytes(), mask);
+	return QrCoder(version, ecl, bb.getBytes(), mask);
 }
 
 
-QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask) :
+QrCoder::QrCoder(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask) :
 		// Initialize fields
 		version(ver),
 		size(MIN_VERSION <= ver && ver <= MAX_VERSION ? ver * 4 + 17 : -1),  // Avoid signed overflow undefined behavior
@@ -139,32 +139,32 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 }
 
 
-int QrCode::getVersion() const {
+int QrCoder::getVersion() const {
 	return version;
 }
 
 
-int QrCode::getSize() const {
+int QrCoder::getSize() const {
 	return size;
 }
 
 
-QrCode::Ecc QrCode::getErrorCorrectionLevel() const {
+QrCoder::Ecc QrCoder::getErrorCorrectionLevel() const {
 	return errorCorrectionLevel;
 }
 
 
-int QrCode::getMask() const {
+int QrCoder::getMask() const {
 	return mask;
 }
 
 
-bool QrCode::getModule(int x, int y) const {
+bool QrCoder::getModule(int x, int y) const {
 	return 0 <= x && x < size && 0 <= y && y < size && module(x, y);
 }
 
 
-std::string QrCode::toSvgString(int border) const {
+std::string QrCoder::toSvgString(int border) const {
 	if (border < 0)
 		throw "Border must be non-negative";
 	std::ostringstream sb;
@@ -192,7 +192,7 @@ std::string QrCode::toSvgString(int border) const {
 }
 
 
-void QrCode::drawFunctionPatterns() {
+void QrCoder::drawFunctionPatterns() {
 	// Draw horizontal and vertical timing patterns
 	for (int i = 0; i < size; i++) {
 		setFunctionModule(6, i, i % 2 == 0);
@@ -222,7 +222,7 @@ void QrCode::drawFunctionPatterns() {
 }
 
 
-void QrCode::drawFormatBits(int mask) {
+void QrCoder::drawFormatBits(int mask) {
 	// Calculate error correction code and pack bits
 	int data = errorCorrectionLevel.getFormatBits() << 3 | mask;  // errCorrLvl is uint2, mask is uint3
 	int rem = data;
@@ -251,7 +251,7 @@ void QrCode::drawFormatBits(int mask) {
 }
 
 
-void QrCode::drawVersion() {
+void QrCoder::drawVersion() {
 	if (version < 7)
 		return;
 	
@@ -273,7 +273,7 @@ void QrCode::drawVersion() {
 }
 
 
-void QrCode::drawFinderPattern(int x, int y) {
+void QrCoder::drawFinderPattern(int x, int y) {
 	for (int i = -4; i <= 4; i++) {
 		for (int j = -4; j <= 4; j++) {
 			int dist = std::max(std::abs(i), std::abs(j));  // Chebyshev/infinity norm
@@ -285,7 +285,7 @@ void QrCode::drawFinderPattern(int x, int y) {
 }
 
 
-void QrCode::drawAlignmentPattern(int x, int y) {
+void QrCoder::drawAlignmentPattern(int x, int y) {
 	for (int i = -2; i <= 2; i++) {
 		for (int j = -2; j <= 2; j++)
 			setFunctionModule(x + j, y + i, std::max(std::abs(i), std::abs(j)) != 1);
@@ -293,18 +293,18 @@ void QrCode::drawAlignmentPattern(int x, int y) {
 }
 
 
-void QrCode::setFunctionModule(int x, int y, bool isBlack) {
+void QrCoder::setFunctionModule(int x, int y, bool isBlack) {
 	modules.at(y).at(x) = isBlack;
 	isFunction.at(y).at(x) = true;
 }
 
 
-bool QrCode::module(int x, int y) const {
+bool QrCoder::module(int x, int y) const {
 	return modules.at(y).at(x);
 }
 
 
-vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const {
+vector<uint8_t> QrCoder::appendErrorCorrection(const vector<uint8_t> &data) const {
 	if (data.size() != static_cast<unsigned int>(getNumDataCodewords(version, errorCorrectionLevel)))
 		throw "Invalid argument";
 	
@@ -343,7 +343,7 @@ vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const
 }
 
 
-void QrCode::drawCodewords(const vector<uint8_t> &data) {
+void QrCoder::drawCodewords(const vector<uint8_t> &data) {
 	if (data.size() != static_cast<unsigned int>(getNumRawDataModules(version) / 8))
 		throw "Invalid argument";
 	
@@ -371,7 +371,7 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 }
 
 
-void QrCode::applyMask(int mask) {
+void QrCoder::applyMask(int mask) {
 	if (mask < 0 || mask > 7)
 		throw "Mask value out of range";
 	for (int y = 0; y < size; y++) {
@@ -394,7 +394,7 @@ void QrCode::applyMask(int mask) {
 }
 
 
-int QrCode::handleConstructorMasking(int mask) {
+int QrCoder::handleConstructorMasking(int mask) {
 	if (mask == -1) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
@@ -416,7 +416,7 @@ int QrCode::handleConstructorMasking(int mask) {
 }
 
 
-long QrCode::getPenaltyScore() const {
+long QrCoder::getPenaltyScore() const {
 	long result = 0;
 	
 	// Adjacent modules in row having same color
@@ -496,7 +496,7 @@ long QrCode::getPenaltyScore() const {
 }
 
 
-vector<int> QrCode::getAlignmentPatternPositions(int ver) {
+vector<int> QrCoder::getAlignmentPatternPositions(int ver) {
 	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw "Version number out of range";
 	else if (ver == 1)
@@ -519,7 +519,7 @@ vector<int> QrCode::getAlignmentPatternPositions(int ver) {
 }
 
 
-int QrCode::getNumRawDataModules(int ver) {
+int QrCoder::getNumRawDataModules(int ver) {
 	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw "Version number out of range";
 	int result = (16 * ver + 128) * ver + 64;
@@ -533,7 +533,7 @@ int QrCode::getNumRawDataModules(int ver) {
 }
 
 
-int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
+int QrCoder::getNumDataCodewords(int ver, Ecc ecl) {
 	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw "Version number out of range";
 	return getNumRawDataModules(ver) / 8
@@ -544,13 +544,13 @@ int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 
 /*---- Tables of constants ----*/
 
-const int QrCode::PENALTY_N1 = 3;
-const int QrCode::PENALTY_N2 = 3;
-const int QrCode::PENALTY_N3 = 40;
-const int QrCode::PENALTY_N4 = 10;
+const int QrCoder::PENALTY_N1 = 3;
+const int QrCoder::PENALTY_N2 = 3;
+const int QrCoder::PENALTY_N3 = 40;
+const int QrCoder::PENALTY_N4 = 10;
 
 
-const int8_t QrCode::ECC_CODEWORDS_PER_BLOCK[4][41] = {
+const int8_t QrCoder::ECC_CODEWORDS_PER_BLOCK[4][41] = {
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
 	//0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
 	{-1,  7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // Low
@@ -559,7 +559,7 @@ const int8_t QrCode::ECC_CODEWORDS_PER_BLOCK[4][41] = {
 	{-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // High
 };
 
-const int8_t QrCode::NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
+const int8_t QrCoder::NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
 	//0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
 	{-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4,  4,  4,  4,  4,  6,  6,  6,  6,  7,  8,  8,  9,  9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25},  // Low
@@ -569,7 +569,7 @@ const int8_t QrCode::NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
 };
 
 
-QrCode::ReedSolomonGenerator::ReedSolomonGenerator(int degree) :
+QrCoder::ReedSolomonGenerator::ReedSolomonGenerator(int degree) :
 		coefficients() {
 	if (degree < 1 || degree > 255)
 		throw "Degree out of range";
@@ -594,7 +594,7 @@ QrCode::ReedSolomonGenerator::ReedSolomonGenerator(int degree) :
 }
 
 
-vector<uint8_t> QrCode::ReedSolomonGenerator::getRemainder(const vector<uint8_t> &data) const {
+vector<uint8_t> QrCoder::ReedSolomonGenerator::getRemainder(const vector<uint8_t> &data) const {
 	// Compute the remainder by performing polynomial division
 	vector<uint8_t> result(coefficients.size());
 	for (uint8_t b : data) {
@@ -608,7 +608,7 @@ vector<uint8_t> QrCode::ReedSolomonGenerator::getRemainder(const vector<uint8_t>
 }
 
 
-uint8_t QrCode::ReedSolomonGenerator::multiply(uint8_t x, uint8_t y) {
+uint8_t QrCoder::ReedSolomonGenerator::multiply(uint8_t x, uint8_t y) {
 	// Russian peasant multiplication
 	int z = 0;
 	for (int i = 7; i >= 0; i--) {
