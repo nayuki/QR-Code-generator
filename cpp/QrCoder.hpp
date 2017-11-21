@@ -29,7 +29,7 @@
 #include "QrSegment.hpp"
 
 
-namespace qrcodegen {
+namespace QrCodegen {
 
 /* 
  * Represents an immutable square grid of black and white cells for a QR Code symbol, and
@@ -37,7 +37,7 @@ namespace qrcodegen {
  * This class covers the QR Code model 2 specification, supporting all versions (sizes)
  * from 1 to 40, all 4 error correction levels, and only 3 character encoding modes.
  */
-class QrCode final {
+class QrCoder final {
 	
 	/*---- Public helper enumeration ----*/
 	
@@ -73,7 +73,7 @@ class QrCode final {
 	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
 	 * the ecl argument if it can be done without increasing the version.
 	 */
-	public: static QrCode encodeText(const char *text, Ecc ecl);
+	public: static QrCoder encodeText(const char *text, Ecc ecl);
 	
 	
 	/* 
@@ -82,7 +82,7 @@ class QrCode final {
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 */
-	public: static QrCode encodeBinary(const std::vector<std::uint8_t> &data, Ecc ecl);
+	public: static QrCoder encodeBinary(const std::vector<std::uint8_t> &data, Ecc ecl);
 	
 	
 	/* 
@@ -92,7 +92,7 @@ class QrCode final {
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
 	 * This function is considered to be lower level than simply encoding text or binary data.
 	 */
-	public: static QrCode encodeSegments(const std::vector<QrSegment> &segs, Ecc ecl,
+	public: static QrCoder encodeSegments(const std::vector<QrSegment> &segs, Ecc ecl,
 		int minVersion=1, int maxVersion=40, int mask=-1, bool boostEcl=true);  // All optional parameters
 	
 	
@@ -136,7 +136,7 @@ class QrCode final {
 	 * and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
 	 * To go one level up, see the encodeSegments() function.
 	 */
-	public: QrCode(int ver, Ecc ecl, const std::vector<std::uint8_t> &dataCodewords, int mask);
+	public: QrCoder(int ver, Ecc ecl, const std::vector<std::uint8_t> &dataCodewords, int mask);
 	
 	
 	
