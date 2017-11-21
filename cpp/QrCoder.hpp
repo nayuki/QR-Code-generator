@@ -29,7 +29,7 @@
 #include "QrSegment.hpp"
 
 
-namespace QrCodegen {
+namespace qrcodegen {
 
 /* 
  * Represents an immutable square grid of black and white cells for a QR Code symbol, and
