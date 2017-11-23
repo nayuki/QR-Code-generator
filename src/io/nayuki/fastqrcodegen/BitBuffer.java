@@ -30,9 +30,9 @@ final class BitBuffer {
 	
 	/*---- Fields ----*/
 	
-	private int[] data;
+	int[] data;
 	
-	private int bitLength;
+	int bitLength;
 	
 	
 	
