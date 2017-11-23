@@ -75,7 +75,7 @@ public final class QrSegment {
 			char c = text.charAt(i);
 			if (c >= ALPHANUMERIC_MAP.length || ALPHANUMERIC_MAP[c] == -1)
 				throw new IllegalArgumentException("String contains unencodable characters in alphanumeric mode");
-			accumData = accumData * 10 + ALPHANUMERIC_MAP[c];
+			accumData = accumData * 45 + ALPHANUMERIC_MAP[c];
 			accumCount++;
 			if (accumCount == 2) {
 				bb.appendBits(accumData, 11);
