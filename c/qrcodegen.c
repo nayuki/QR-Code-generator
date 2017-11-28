@@ -1013,10 +1013,10 @@ static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 	else  assert(false);
 	
 	switch (mode) {
-		case qrcodegen_Mode_NUMERIC     : { const int temp[] = {10, 12, 14}; return temp[i]; }
-		case qrcodegen_Mode_ALPHANUMERIC: { const int temp[] = { 9, 11, 13}; return temp[i]; }
-		case qrcodegen_Mode_BYTE        : { const int temp[] = { 8, 16, 16}; return temp[i]; }
-		case qrcodegen_Mode_KANJI       : { const int temp[] = { 8, 10, 12}; return temp[i]; }
+		case qrcodegen_Mode_NUMERIC     : { static const int temp[] = {10, 12, 14}; return temp[i]; }
+		case qrcodegen_Mode_ALPHANUMERIC: { static const int temp[] = { 9, 11, 13}; return temp[i]; }
+		case qrcodegen_Mode_BYTE        : { static const int temp[] = { 8, 16, 16}; return temp[i]; }
+		case qrcodegen_Mode_KANJI       : { static const int temp[] = { 8, 10, 12}; return temp[i]; }
 		case qrcodegen_Mode_ECI         : return 0;
 		default:  assert(false);
 	}
