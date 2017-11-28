@@ -424,7 +424,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]) {
 	// Calculate error correction code and pack bits
 	assert(0 <= (int)mask && (int)mask <= 7);
-	int data;
+	int data = -1;  // Dummy value
 	switch (ecl) {
 		case qrcodegen_Ecc_LOW     :  data = 1;  break;
 		case qrcodegen_Ecc_MEDIUM  :  data = 0;  break;
@@ -529,7 +529,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qr
 		for (int x = 0; x < qrsize; x++) {
 			if (getModule(functionModules, x, y))
 				continue;
-			bool invert;
+			bool invert = false;  // Dummy value
 			switch ((int)mask) {
 				case 0:  invert = (x + y) % 2 == 0;                    break;
 				case 1:  invert = y % 2 == 0;                          break;
@@ -919,7 +919,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	int bitLen = 0;
 	for (size_t i = 0; i < len; i++) {
 		const struct qrcodegen_Segment *seg = &segs[i];
-		unsigned int modeBits;
+		unsigned int modeBits = 0;  // Dummy value
 		switch (seg->mode) {
 			case qrcodegen_Mode_NUMERIC     :  modeBits = 0x1;  break;
 			case qrcodegen_Mode_ALPHANUMERIC:  modeBits = 0x2;  break;
@@ -1006,7 +1006,7 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 // given mode at the given version number. The result is in the range [0, 16].
 static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	int i;
+	int i = -1;  // Dummy value
 	if      ( 1 <= version && version <=  9)  i = 0;
 	else if (10 <= version && version <= 26)  i = 1;
 	else if (27 <= version && version <= 40)  i = 2;
@@ -1020,4 +1020,5 @@ static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 		case qrcodegen_Mode_ECI         : return 0;
 		default:  assert(false);
 	}
+	return -1;  // Dummy value
 }
