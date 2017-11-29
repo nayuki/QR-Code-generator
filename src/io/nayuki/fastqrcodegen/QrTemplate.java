@@ -57,13 +57,18 @@ final class QrTemplate {
 			}
 		}
 		
-		QrTemplate tpl = new QrTemplate(version);
-		synchronized(cache) {
-			cache[version] = new SoftReference<>(tpl);
-			isPending[version] = false;
-			cache.notifyAll();
+		try {
+			QrTemplate tpl = new QrTemplate(version);
+			synchronized(cache) {
+				cache[version] = new SoftReference<>(tpl);
+			}
+			return tpl;
+		} finally {
+			synchronized(cache) {
+				isPending[version] = false;
+				cache.notifyAll();
+			}
 		}
-		return tpl;
 	}
 	
 	

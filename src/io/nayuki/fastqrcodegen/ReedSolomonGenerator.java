@@ -59,13 +59,18 @@ final class ReedSolomonGenerator {
 			}
 		}
 		
-		ReedSolomonGenerator rs = new ReedSolomonGenerator(degree);
-		synchronized(cache) {
-			cache[degree] = new SoftReference<>(rs);
-			isPending[degree] = false;
-			cache.notifyAll();
+		try {
+			ReedSolomonGenerator rs = new ReedSolomonGenerator(degree);
+			synchronized(cache) {
+				cache[degree] = new SoftReference<>(rs);
+			}
+			return rs;
+		} finally {
+			synchronized(cache) {
+				isPending[degree] = false;
+				cache.notifyAll();
+			}
 		}
-		return rs;
 	}
 	
 	
