@@ -161,8 +161,11 @@ public final class QrCode {
 	 * @return the module's color, which is either false (white) or true (black)
 	 */
 	public boolean getModule(int x, int y) {
-		return 0 <= x && x < size && 0 <= y && y < size
-			&& getModuleUnchecked(x, y) != 0;
+		if (0 <= x && x < size && 0 <= y && y < size) {
+			int i = y * size + x;
+			return ((modules[i >>> 5] >>> i) & 1) != 0;
+		} else
+			return false;
 	}
 	
 	
@@ -270,12 +273,6 @@ public final class QrCode {
 			modules[i >>> 5] |= 1 << i;
 		else
 			throw new IllegalArgumentException();
-	}
-	
-	
-	private int getModuleUnchecked(int x, int y) {
-		int i = y * size + x;
-		return (modules[i >>> 5] >>> i) & 1;
 	}
 	
 	
