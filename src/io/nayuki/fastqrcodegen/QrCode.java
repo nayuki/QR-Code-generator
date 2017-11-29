@@ -378,72 +378,72 @@ public final class QrCode {
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
 	private int getPenaltyScore() {
 		int result = 0;
+		int black = 0;
 		
-		// Adjacent modules in row having same color
-		for (int y = 0; y < size; y++) {
-			int colorX = 0;
-			for (int x = 0, runX = 0; x < size; x++) {
-				if (x == 0 || getModuleUnchecked(x, y) != colorX) {
-					colorX = getModuleUnchecked(x, y);
-					runX = 1;
+		// Iterate over adjacent pairs of rows
+		for (int index = 0, downIndex = size, end = size * size; index < end; ) {
+			int bits = 0;
+			int downBits = 0;
+			int runColor = 0;
+			int runLen = 0;
+			for (int x = 0; x < size; x++, index++, downIndex++) {
+				
+				// Adjacent modules having same color
+				int bit = (modules[index >>> 5] >>> index) & 1;
+				if (bit != runColor) {
+					runColor = bit;
+					runLen = 1;
 				} else {
-					runX++;
-					if (runX == 5)
+					runLen++;
+					if (runLen == 5)
 						result += PENALTY_N1;
-					else if (runX > 5)
+					else if (runLen > 5)
 						result++;
 				}
-			}
-		}
-		// Adjacent modules in column having same color
-		for (int x = 0; x < size; x++) {
-			int colorY = 0;
-			for (int y = 0, runY = 0; y < size; y++) {
-				if (y == 0 || getModuleUnchecked(x, y) != colorY) {
-					colorY = getModuleUnchecked(x, y);
-					runY = 1;
-				} else {
-					runY++;
-					if (runY == 5)
-						result += PENALTY_N1;
-					else if (runY > 5)
-						result++;
+				
+				black += bit;
+				bits = ((bits & 0b1111111111) << 1) | bit;
+				if (downIndex < end) {
+					downBits = ((downBits & 1) << 1) | ((modules[downIndex >>> 5] >>> downIndex) & 1);
+					// 2*2 blocks of modules having same color
+					if (x >= 1 && (downBits == 0 || downBits == 3) && downBits == (bits & 3))
+						result += PENALTY_N2;
 				}
-			}
-		}
-		
-		// 2*2 blocks of modules having same color
-		for (int y = 0; y < size - 1; y++) {
-			for (int x = 0; x < size - 1; x++) {
-				int color = getModuleUnchecked(x, y);
-				if (  color == getModuleUnchecked(x + 1, y) &&
-				      color == getModuleUnchecked(x, y + 1) &&
-				      color == getModuleUnchecked(x + 1, y + 1))
-					result += PENALTY_N2;
-			}
-		}
-		
-		// Finder-like pattern in rows
-		for (int y = 0; y < size; y++) {
-			for (int x = 0, bits = 0; x < size; x++) {
-				bits = ((bits << 1) & 0x7FF) | getModuleUnchecked(x, y);
-				if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+				
+				// Finder-like pattern
+				if (x >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))
 					result += PENALTY_N3;
 			}
 		}
-		// Finder-like pattern in columns
+		
+		// Iterate over single columns
 		for (int x = 0; x < size; x++) {
-			for (int y = 0, bits = 0; y < size; y++) {
-				bits = ((bits << 1) & 0x7FF) | getModuleUnchecked(x, y);
-				if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+			int bits = 0;
+			int runColor = 0;
+			int runLen = 0;
+			for (int y = 0, index = x; y < size; y++, index += size) {
+				
+				// Adjacent modules having same color
+				int bit = (modules[index >>> 5] >>> index) & 1;
+				if (bit != runColor) {
+					runColor = bit;
+					runLen = 1;
+				} else {
+					runLen++;
+					if (runLen == 5)
+						result += PENALTY_N1;
+					else if (runLen > 5)
+						result++;
+				}
+				
+				// Finder-like pattern
+				bits = ((bits & 0b1111111111) << 1) | bit;
+				if (y >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))
 					result += PENALTY_N3;
 			}
 		}
 		
 		// Balance of black and white modules
-		int black = 0;
-		for (int x : modules)
-			black += Integer.bitCount(x);
 		int total = size * size;
 		// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
 		for (int k = 0; black*20 < (9-k)*total || black*20 > (11+k)*total; k++)
