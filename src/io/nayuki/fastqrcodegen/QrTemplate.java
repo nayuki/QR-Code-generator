@@ -23,6 +23,8 @@
 
 package io.nayuki.fastqrcodegen;
 
+import static io.nayuki.fastqrcodegen.QrCode.MAX_VERSION;
+import static io.nayuki.fastqrcodegen.QrCode.MIN_VERSION;
 import java.lang.ref.SoftReference;
 
 
@@ -71,9 +73,6 @@ final class QrTemplate {
 		}
 	}
 	
-	
-	private static final int MIN_VERSION = 1;
-	private static final int MAX_VERSION = 40;
 	
 	@SuppressWarnings("unchecked")
 	private static final SoftReference<QrTemplate>[] cache = new SoftReference[MAX_VERSION + 1];
