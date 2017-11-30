@@ -5,7 +5,7 @@
  * PNG and SVG files in the current working directory to demonstrate the creation of QR Codes.
  * 
  * Copyright (c) Project Nayuki. (MIT License)
- * https://www.nayuki.io/
+ * https://www.nayuki.io/page/fast-qr-code-generator-library
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
