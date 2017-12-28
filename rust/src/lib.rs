@@ -486,7 +486,7 @@ impl QrCode {
 					5 => x * y % 2 + x * y % 3 == 0,
 					6 => (x * y % 2 + x * y % 3) % 2 == 0,
 					7 => ((x + y) % 2 + x * y % 3) % 2 == 0,
-					_ => panic!("Assertion error"),
+					_ => unreachable!(),
 				};
 				*self.module_mut(x, y) ^= invert & !self.isfunction[(y * self.size + x) as usize];
 			}
