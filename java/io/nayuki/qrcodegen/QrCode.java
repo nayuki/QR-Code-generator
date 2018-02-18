@@ -932,30 +932,6 @@ public final class QrCode {
 		
 	}
 
-	static class NullWriter extends java.io.Writer {
-
-        @Override
-        public void write(char[] cbuf, int off, int len)
-            throws java.io.IOException
-        {
-            // Do nothing
-        }
-
-        @Override
-        public void flush()
-            throws java.io.IOException
-        {
-            // Do nothing
-        }
-
-        @Override
-        public void close()
-            throws java.io.IOException
-        {
-            // Do nothing
-        }
-	}
-
 	public static void main(String[] args) {
 	    QrCode qr = QrCode.encodeText("Hello, World", Ecc.MEDIUM);
 
