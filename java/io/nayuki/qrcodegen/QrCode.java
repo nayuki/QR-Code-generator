@@ -93,7 +93,7 @@ public final class QrCode {
 	 * @throws IllegalArgumentException if the data is too long to fit in the largest version QR Code at the ECL
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl) {
-		return encodeSegments(segs, ecl, 1, 40, -1, true);
+		return encodeSegments(segs, ecl, MIN_VERSION, MAX_VERSION, -1, true);
 	}
 	
 	
@@ -117,7 +117,7 @@ public final class QrCode {
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
 		Objects.requireNonNull(segs);
 		Objects.requireNonNull(ecl);
-		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40) || mask < -1 || mask > 7)
+		if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Invalid value");
 		
 		// Find the minimal version number to use
@@ -161,10 +161,13 @@ public final class QrCode {
 		// Create the QR Code symbol
 		return new QrCode(version, ecl, bb.getBytes(), mask);
 	}
-	
-	
-	
-	/*---- Instance fields ----*/
+
+    /*---- Public constants ----*/
+
+    public static final int MIN_VERSION =  1;
+    public static final int MAX_VERSION = 40;
+
+    /*---- Instance fields ----*/
 	
 	// Public immutable scalar parameters
 	
