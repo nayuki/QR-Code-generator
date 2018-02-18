@@ -265,44 +265,8 @@ public final class QrCode {
 		}
 		return result;
 	}
-	
-	
-	/**
-	 * Based on the specified number of border modules to add as padding, this returns a
-	 * string whose contents represents an SVG XML file that depicts this QR Code symbol.
-	 * Note that Unix newlines (\n) are always used, regardless of the platform.
-	 * @param border the number of border modules to add, which must be non-negative
-	 * @return a string representing this QR Code as an SVG document
-	 */
-	public String toSvgString_old(int border) {
-		if (border < 0)
-			throw new IllegalArgumentException("Border must be non-negative");
-		StringBuilder sb = new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
-		sb.append(String.format(
-			"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 %1$d %1$d\" stroke=\"none\">\n",
-			size + border * 2));
-		sb.append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n");
-		sb.append("\t<path d=\"");
-		boolean head = true;
-		for (int y = -border; y < size + border; y++) {
-			for (int x = -border; x < size + border; x++) {
-				if (getModule(x, y)) {
-					if (head)
-						head = false;
-					else
-						sb.append(" ");
-					sb.append(String.format("M%d,%dh1v1h-1z", x + border, y + border));
-				}
-			}
-		}
-		sb.append("\" fill=\"#000000\"/>\n");
-		sb.append("</svg>\n");
-		return sb.toString();
-	}
 
-    /**
+	/**
      * Returns a String containing a Scalable Vector Graphic (SVG) that depicts
      * this QR Code symbol.
      * 
@@ -933,47 +897,5 @@ public final class QrCode {
 			return z;
 		}
 		
-	}
-
-	public static void main(String[] args) {
-	    QrCode qr = QrCode.encodeText("Hello, World", Ecc.MEDIUM);
-
-	    int iterations;
-	    if(args.length > 0)
-	        iterations = Integer.parseInt(args[0]);
-	    else
-	        iterations = 99999;
-
-        System.out.println("Running benchmark with " + iterations + " iterations...");
-        System.out.println("QrCode.toSvgString_old:");
-        System.out.flush();
-
-        long elapsed = System.currentTimeMillis();
-	    for(int i=0; i<iterations; ++i)
-	        qr.toSvgString_old(0);
-
-        elapsed = System.currentTimeMillis() - elapsed;
-        System.out.println("Completed " + iterations + " conversions in " + elapsed + " ms");
-        System.out.flush();
-        
-        System.out.println("QrCode.toSvgString:");
-
-        elapsed = System.currentTimeMillis();
-        for(int i=0; i<iterations; ++i)
-            qr.toSvgString(0);
-
-        elapsed = System.currentTimeMillis() - elapsed;
-
-        System.out.println("Completed " + iterations + " conversions in " + elapsed + " ms");
-        System.out.flush();
-
-        // Demonstrate that the outputs are identical:
-        String svg0 = qr.toSvgString_old(0);
-        String svg1 = qr.toSvgString(0);
-	    if(!svg0.equals(svg1)) {
-	        System.out.println("Differences exist:");
-	        System.out.println(svg0);
-            System.out.println(svg1);
-	    }
 	}
 }
