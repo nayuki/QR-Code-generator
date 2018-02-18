@@ -329,17 +329,13 @@ public final class QrCode {
         out.print(dim);
         out.write(' ');
         out.print(dim);
-        out.write("\" stroke=\"none\">");
+        out.write("\">", 0, 2);
 
         if(prettyPrint) {
             out.println();
             out.write('\t');
         }
-        out.write("<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>");
-        if(prettyPrint) {
-            out.println();
-            out.write('\t');
-        }
+
         out.write("<path d=\"");
         boolean head = true;
         for (int y = -border; y < size + border; y++) {
@@ -358,7 +354,7 @@ public final class QrCode {
                 }
             }
         }
-        out.write("\" fill=\"#000000\"/>");
+        out.write("\"/>");
         if(prettyPrint)
             out.println();
         out.write("</svg>");
