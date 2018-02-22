@@ -24,6 +24,8 @@
 package io.nayuki.qrcodegen;
 
 import java.awt.image.BufferedImage;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -159,16 +161,12 @@ public final class QrCode {
 		// Create the QR Code symbol
 		return new QrCode(version, ecl, bb.getBytes(), mask);
 	}
-	
-	
-	
+
 	/*---- Public constants ----*/
-	
+
 	public static final int MIN_VERSION =  1;
 	public static final int MAX_VERSION = 40;
-	
-	
-	
+
 	/*---- Instance fields ----*/
 	
 	// Public immutable scalar parameters
@@ -267,43 +265,100 @@ public final class QrCode {
 		}
 		return result;
 	}
-	
-	
+
 	/**
-	 * Based on the specified number of border modules to add as padding, this returns a
-	 * string whose contents represents an SVG XML file that depicts this QR Code symbol.
-	 * Note that Unix newlines (\n) are always used, regardless of the platform.
-	 * @param border the number of border modules to add, which must be non-negative
-	 * @return a string representing this QR Code as an SVG document
-	 */
-	public String toSvgString(int border) {
-		if (border < 0)
-			throw new IllegalArgumentException("Border must be non-negative");
-		StringBuilder sb = new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
-		sb.append(String.format(
-			"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 %1$d %1$d\" stroke=\"none\">\n",
-			size + border * 2));
-		sb.append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n");
-		sb.append("\t<path d=\"");
-		boolean head = true;
-		for (int y = -border; y < size + border; y++) {
-			for (int x = -border; x < size + border; x++) {
-				if (getModule(x, y)) {
-					if (head)
-						head = false;
-					else
-						sb.append(" ");
-					sb.append(String.format("M%d,%dh1v1h-1z", x + border, y + border));
-				}
-			}
-		}
-		sb.append("\" fill=\"#000000\"/>\n");
-		sb.append("</svg>\n");
-		return sb.toString();
+     * Returns a String containing a Scalable Vector Graphic (SVG) that depicts
+     * this QR Code symbol.
+     * 
+     * @param border The number of border modules to add, which must be non-negative.
+     * 
+     * @return A String representing this QR Code as an SVG document.
+     */
+    public String toSvgString(int border) {
+        return toSvgString(border, true, true, true);
+    }
+
+    /**
+     * Returns a String containing a Scalable Vector Graphic (SVG) that depicts
+     * this QR Code symbol.
+     * 
+     * @param border The number of border modules to add, which must be non-negative.
+     * @param includeXMLPI Flag to include the XML processing instruction (&lt;?xml ... ?&gt;).
+     * @param includeDoctype Flag to include the DOCTYPE.
+     * @param prettyPrint Flag to include optional newlines and indents.
+     * 
+     * @return A String representing this QR Code as an SVG document.
+     */
+    public String toSvgString(int border, boolean includeXMLPI, boolean includeDoctype, boolean prettyPrint) {
+	    StringWriter sw = new StringWriter();
+	    PrintWriter out = new PrintWriter(sw);
+	    toSvg(out, border, includeXMLPI, includeDoctype, prettyPrint);
+	    if(prettyPrint)
+	        out.println(); // Matches previous implementation
+	    return sw.toString();
 	}
-	
+
+    /**
+     * Writes a Scalable Vector Graphic (SVG) to the specified PrintWriter
+     * that depicts this QR Code symbol.
+     * 
+     * @param border The number of border modules to add, which must be non-negative.
+     * @param includeXMLPI Flag to include the XML processing instruction (&lt;?xml ... ?&gt;).
+     * @param includeDoctype Flag to include the DOCTYPE.
+     * @param prettyPrint Flag to include optional newlines and indents.
+     * 
+     * @return A String representing this QR Code as an SVG document.
+     */
+	public void toSvg(PrintWriter out, int border, boolean includeXMLPI, boolean includeDoctype, boolean prettyPrint) {
+        if (border < 0)
+            throw new IllegalArgumentException("Border must be non-negative");
+
+        if(includeXMLPI)
+            out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+
+        if(prettyPrint)
+            out.println();
+
+        if(includeDoctype)
+            out.write("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
+
+        if(prettyPrint)
+            out.println();
+        int dim = size + (border << 1); // Double border size by shifting
+        out.write("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 ");
+        out.print(dim);
+        out.write(' ');
+        out.print(dim);
+        out.write("\">", 0, 2);
+
+        if(prettyPrint) {
+            out.println();
+            out.write('\t');
+        }
+
+        out.write("<path d=\"");
+        boolean head = true;
+        for (int y = -border; y < size + border; y++) {
+            for (int x = -border; x < size + border; x++) {
+                if (getModule(x, y)) {
+                    if (head)
+                        head = false;
+                    else
+                        out.write(" ");
+
+                    out.write('M');
+                    out.print(x+border);
+                    out.write(',');
+                    out.print(y+border);
+                    out.write("h1v1h-1z",0,8);
+                }
+            }
+        }
+        out.write("\"/>");
+        if(prettyPrint)
+            out.println();
+        out.write("</svg>");
+    }
 	
 	
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
@@ -637,7 +692,7 @@ public final class QrCode {
 	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
 	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
 	private static int[] getAlignmentPatternPositions(int ver) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
+		if (ver < 1 || ver > 40)
 			throw new IllegalArgumentException("Version number out of range");
 		else if (ver == 1)
 			return new int[]{};
@@ -663,7 +718,7 @@ public final class QrCode {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	private static int getNumRawDataModules(int ver) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
+		if (ver < 1 || ver > 40)
 			throw new IllegalArgumentException("Version number out of range");
 		
 		int size = ver * 4 + 17;
@@ -688,7 +743,7 @@ public final class QrCode {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	static int getNumDataCodewords(int ver, Ecc ecl) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
+		if (ver < 1 || ver > 40)
 			throw new IllegalArgumentException("Version number out of range");
 		return getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal()][ver]
@@ -839,5 +894,4 @@ public final class QrCode {
 		}
 		
 	}
-	
 }
