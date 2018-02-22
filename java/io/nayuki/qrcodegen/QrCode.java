@@ -162,12 +162,12 @@ public final class QrCode {
 		return new QrCode(version, ecl, bb.getBytes(), mask);
 	}
 
-    /*---- Public constants ----*/
+	/*---- Public constants ----*/
 
-    public static final int MIN_VERSION =  1;
-    public static final int MAX_VERSION = 40;
+	public static final int MIN_VERSION =  1;
+	public static final int MAX_VERSION = 40;
 
-    /*---- Instance fields ----*/
+	/*---- Instance fields ----*/
 	
 	// Public immutable scalar parameters
 	
@@ -208,7 +208,7 @@ public final class QrCode {
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments
 		Objects.requireNonNull(ecl);
-		if (ver < 1 || ver > 40 || mask < -1 || mask > 7)
+		if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Value out of range");
 		Objects.requireNonNull(dataCodewords);
 		
