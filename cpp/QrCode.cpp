@@ -157,6 +157,9 @@ bool QrCode::getModule(int x, int y) const {
 std::string QrCode::toSvgString(int border) const {
 	if (border < 0)
 		throw "Border must be non-negative";
+	if (border > INT_MAX / 2 || border * 2 > INT_MAX - size)
+		throw "Border too large";
+	
 	std::ostringstream sb;
 	sb << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	sb << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";

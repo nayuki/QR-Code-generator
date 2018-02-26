@@ -258,6 +258,9 @@ public final class QrCode {
 	public BufferedImage toImage(int scale, int border) {
 		if (scale <= 0 || border < 0)
 			throw new IllegalArgumentException("Value out of range");
+		if (border > Integer.MAX_VALUE / 2 || size + border * 2L > Integer.MAX_VALUE / scale)
+			throw new IllegalArgumentException("Scale or border too large");
+		
 		BufferedImage result = new BufferedImage((size + border * 2) * scale, (size + border * 2) * scale, BufferedImage.TYPE_INT_RGB);
 		for (int y = 0; y < result.getHeight(); y++) {
 			for (int x = 0; x < result.getWidth(); x++) {
@@ -279,6 +282,9 @@ public final class QrCode {
 	public String toSvgString(int border) {
 		if (border < 0)
 			throw new IllegalArgumentException("Border must be non-negative");
+		if (size + border * 2L > Integer.MAX_VALUE)
+			throw new IllegalArgumentException("Border too large");
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		sb.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
