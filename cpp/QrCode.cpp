@@ -50,7 +50,7 @@ int QrCode::getFormatBits(Ecc ecl) {
 
 
 QrCode QrCode::encodeText(const char *text, Ecc ecl) {
-	vector<QrSegment> segs(QrSegment::makeSegments(text));
+	vector<QrSegment> segs = QrSegment::makeSegments(text);
 	return encodeSegments(segs, ecl);
 }
 
@@ -123,7 +123,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	
 	// Draw function patterns, draw all codewords, do masking
 	drawFunctionPatterns();
-	const vector<uint8_t> allCodewords(appendErrorCorrection(dataCodewords));
+	const vector<uint8_t> allCodewords = appendErrorCorrection(dataCodewords);
 	drawCodewords(allCodewords);
 	this->mask = handleConstructorMasking(mask);
 }
@@ -195,7 +195,7 @@ void QrCode::drawFunctionPatterns() {
 	drawFinderPattern(3, size - 4);
 	
 	// Draw numerous alignment patterns
-	const vector<int> alignPatPos(getAlignmentPatternPositions(version));
+	const vector<int> alignPatPos = getAlignmentPatternPositions(version);
 	int numAlign = alignPatPos.size();
 	for (int i = 0; i < numAlign; i++) {
 		for (int j = 0; j < numAlign; j++) {
@@ -311,7 +311,7 @@ vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const
 	for (int i = 0, k = 0; i < numBlocks; i++) {
 		vector<uint8_t> dat(data.cbegin() + k, data.cbegin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
 		k += dat.size();
-		const vector<uint8_t> ecc(rs.getRemainder(dat));
+		const vector<uint8_t> ecc = rs.getRemainder(dat);
 		if (i < numShortBlocks)
 			dat.push_back(0);
 		dat.insert(dat.end(), ecc.cbegin(), ecc.cend());
