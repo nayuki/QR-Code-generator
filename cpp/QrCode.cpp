@@ -38,25 +38,15 @@ using std::vector;
 
 namespace qrcodegen {
 
-QrCode::Ecc::Ecc(int ord, int fb) :
-	ordinal(ord),
-	formatBits(fb) {}
-
-
-int QrCode::Ecc::getOrdinal() const {
-	return ordinal;
+int QrCode::getFormatBits(Ecc ecl) {
+	switch (ecl) {
+		case Ecc::LOW     :  return 1;
+		case Ecc::MEDIUM  :  return 0;
+		case Ecc::QUARTILE:  return 3;
+		case Ecc::HIGH    :  return 2;
+		default:  throw "Assertion error";
+	}
 }
-
-
-int QrCode::Ecc::getFormatBits() const {
-	return formatBits;
-}
-
-
-const QrCode::Ecc QrCode::Ecc::LOW     (0, 1);
-const QrCode::Ecc QrCode::Ecc::MEDIUM  (1, 0);
-const QrCode::Ecc QrCode::Ecc::QUARTILE(2, 3);
-const QrCode::Ecc QrCode::Ecc::HIGH    (3, 2);
 
 
 QrCode QrCode::encodeText(const char *text, Ecc ecl) {
@@ -224,7 +214,7 @@ void QrCode::drawFunctionPatterns() {
 
 void QrCode::drawFormatBits(int mask) {
 	// Calculate error correction code and pack bits
-	int data = errorCorrectionLevel.getFormatBits() << 3 | mask;  // errCorrLvl is uint2, mask is uint3
+	int data = getFormatBits(errorCorrectionLevel) << 3 | mask;  // errCorrLvl is uint2, mask is uint3
 	int rem = data;
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -309,8 +299,8 @@ vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const
 		throw "Invalid argument";
 	
 	// Calculate parameter numbers
-	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.getOrdinal()][version];
-	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[errorCorrectionLevel.getOrdinal()][version];
+	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(errorCorrectionLevel)][version];
+	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[static_cast<int>(errorCorrectionLevel)][version];
 	int rawCodewords = getNumRawDataModules(version) / 8;
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockLen = rawCodewords / numBlocks;
@@ -537,8 +527,8 @@ int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw "Version number out of range";
 	return getNumRawDataModules(ver) / 8
-		- ECC_CODEWORDS_PER_BLOCK[ecl.getOrdinal()][ver]
-		* NUM_ERROR_CORRECTION_BLOCKS[ecl.getOrdinal()][ver];
+		- ECC_CODEWORDS_PER_BLOCK[static_cast<int>(ecl)][ver]
+		* NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(ecl)][ver];
 }
 
 

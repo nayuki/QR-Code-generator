@@ -44,23 +44,14 @@ class QrCode final {
 	/* 
 	 * Represents the error correction level used in a QR Code symbol.
 	 */
-	public: class Ecc final {
+	public: enum class Ecc {
 		// Constants declared in ascending order of error protection.
-		public: const static Ecc LOW, MEDIUM, QUARTILE, HIGH;
-		
-		// Fields.
-		private: int ordinal;
-		private: int formatBits;
-		
-		// Constructor.
-		private: Ecc(int ord, int fb);
-		
-		// (Public) Returns a value in the range 0 to 3 (unsigned 2-bit integer).
-		public: int getOrdinal() const;
-		
-		// (Package-private) Returns a value in the range 0 to 3 (unsigned 2-bit integer).
-		public: int getFormatBits() const;
+		LOW = 0, MEDIUM = 1, QUARTILE = 2, HIGH = 3
 	};
+	
+	
+	// Returns a value in the range 0 to 3 (unsigned 2-bit integer).
+	private: static int getFormatBits(Ecc ecl);
 	
 	
 	

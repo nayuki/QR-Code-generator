@@ -37,11 +37,11 @@ using qrcodegen::QrCode;
 using qrcodegen::QrSegment;
 
 
-static const QrCode::Ecc *(ECC_LEVELS[]) = {
-	&QrCode::Ecc::LOW,
-	&QrCode::Ecc::MEDIUM,
-	&QrCode::Ecc::QUARTILE,
-	&QrCode::Ecc::HIGH,
+static const QrCode::Ecc ECC_LEVELS[] = {
+	QrCode::Ecc::LOW,
+	QrCode::Ecc::MEDIUM,
+	QrCode::Ecc::QUARTILE,
+	QrCode::Ecc::HIGH,
 };
 
 
@@ -83,7 +83,7 @@ int main() {
 		
 		try {  // Try to make QR Code symbol
 			const QrCode qr = QrCode::encodeSegments(segs,
-				*ECC_LEVELS[errCorLvl], minVersion, maxVersion, mask, boostEcl == 1);
+				ECC_LEVELS[errCorLvl], minVersion, maxVersion, mask, boostEcl == 1);
 			// Print grid of modules
 			std::cout << qr.getVersion() << std::endl;
 			for (int y = 0; y < qr.getSize(); y++) {
