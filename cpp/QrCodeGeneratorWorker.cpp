@@ -60,7 +60,7 @@ int main() {
 		for (int i = 0; i < length; i++) {
 			int b;
 			std::cin >> b;
-			data.push_back((uint8_t)b);
+			data.push_back(static_cast<uint8_t>(b));
 			isAscii &= 0 < b && b < 128;
 		}
 		

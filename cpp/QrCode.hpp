@@ -280,7 +280,7 @@ class QrCode final {
 		 * Creates a Reed-Solomon ECC generator for the given degree. This could be implemented
 		 * as a lookup table over all possible parameter values, instead of as an algorithm.
 		 */
-		public: ReedSolomonGenerator(int degree);
+		public: explicit ReedSolomonGenerator(int degree);
 		
 		
 		/*-- Method --*/

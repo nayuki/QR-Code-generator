@@ -147,7 +147,7 @@ class QrSegment final {
 	private: std::vector<bool> data;
 	
 	
-	/*---- Constructor ----*/
+	/*---- Constructors ----*/
 	
 	/* 
 	 * Creates a new QR Code data segment with the given parameters and data.
