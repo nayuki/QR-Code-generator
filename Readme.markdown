@@ -34,6 +34,8 @@ Optional advanced features (Java only):
 * Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes
 * Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general parts
 
+More information about QR Code technology and this library's design can be found on the project home page.
+
 
 Examples
 --------
@@ -167,13 +169,11 @@ Rust language:
         }
     }
 
-More information about QR Code technology and this library's design can be found on the project home page.
-
 
 License
 -------
 
-Copyright © 2017 Project Nayuki. (MIT License)  
+Copyright © 2018 Project Nayuki. (MIT License)  
 [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
