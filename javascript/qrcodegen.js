@@ -250,18 +250,18 @@ var qrcodegen = new function() {
 			
 			// Draw first copy
 			for (var i = 0; i <= 5; i++)
-				setFunctionModule(8, i, ((data >>> i) & 1) != 0);
-			setFunctionModule(8, 7, ((data >>> 6) & 1) != 0);
-			setFunctionModule(8, 8, ((data >>> 7) & 1) != 0);
-			setFunctionModule(7, 8, ((data >>> 8) & 1) != 0);
+				setFunctionModule(8, i, getBit(data, i));
+			setFunctionModule(8, 7, getBit(data, 6));
+			setFunctionModule(8, 8, getBit(data, 7));
+			setFunctionModule(7, 8, getBit(data, 8));
 			for (var i = 9; i < 15; i++)
-				setFunctionModule(14 - i, 8, ((data >>> i) & 1) != 0);
+				setFunctionModule(14 - i, 8, getBit(data, i));
 			
 			// Draw second copy
 			for (var i = 0; i <= 7; i++)
-				setFunctionModule(size - 1 - i, 8, ((data >>> i) & 1) != 0);
+				setFunctionModule(size - 1 - i, 8, getBit(data, i));
 			for (var i = 8; i < 15; i++)
-				setFunctionModule(8, size - 15 + i, ((data >>> i) & 1) != 0);
+				setFunctionModule(8, size - 15 + i, getBit(data, i));
 			setFunctionModule(8, size - 8, true);
 		}
 		
@@ -282,7 +282,7 @@ var qrcodegen = new function() {
 			
 			// Draw two copies
 			for (var i = 0; i < 18; i++) {
-				var bit = ((data >>> i) & 1) != 0;
+				var bit = getBit(data, i);
 				var a = size - 11 + i % 3, b = Math.floor(i / 3);
 				setFunctionModule(a, b, bit);
 				setFunctionModule(b, a, bit);
@@ -381,7 +381,7 @@ var qrcodegen = new function() {
 						var upward = ((right + 1) & 2) == 0;
 						var y = upward ? size - 1 - vert : vert;  // Actual y coordinate
 						if (!isFunction[y][x] && i < data.length * 8) {
-							modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) != 0;
+							modules[y][x] = getBit(data[i >>> 3], 7 - (i & 7));
 							i++;
 						}
 						// If there are any remainder bits (0 to 7), they are already
@@ -498,6 +498,12 @@ var qrcodegen = new function() {
 			for (var k = 0; black*20 < (9-k)*total || black*20 > (11+k)*total; k++)
 				result += QrCode.PENALTY_N4;
 			return result;
+		}
+		
+		
+		// Returns true iff the i'th bit of x is set to 1.
+		function getBit(x, i) {
+			return ((x >>> i) & 1) != 0;
 		}
 	};
 	

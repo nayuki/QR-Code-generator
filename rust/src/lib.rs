@@ -315,21 +315,21 @@ impl QrCode {
 		
 		// Draw first copy
 		for i in 0 .. 6 {
-			self.set_function_module(8, i, (data >> i) & 1 != 0);
+			self.set_function_module(8, i, get_bit(data, i));
 		}
-		self.set_function_module(8, 7, (data >> 6) & 1 != 0);
-		self.set_function_module(8, 8, (data >> 7) & 1 != 0);
-		self.set_function_module(7, 8, (data >> 8) & 1 != 0);
+		self.set_function_module(8, 7, get_bit(data, 6));
+		self.set_function_module(8, 8, get_bit(data, 7));
+		self.set_function_module(7, 8, get_bit(data, 8));
 		for i in 9 .. 15 {
-			self.set_function_module(14 - i, 8, (data >> i) & 1 != 0);
+			self.set_function_module(14 - i, 8, get_bit(data, i));
 		}
 		
 		// Draw second copy
 		for i in 0 .. 8 {
-			self.set_function_module(size - 1 - i, 8, (data >> i) & 1 != 0);
+			self.set_function_module(size - 1 - i, 8, get_bit(data, i));
 		}
 		for i in 8 .. 15 {
-			self.set_function_module(8, size - 15 + i, (data >> i) & 1 != 0);
+			self.set_function_module(8, size - 15 + i, get_bit(data, i));
 		}
 		self.set_function_module(8, size - 8, true);
 	}
@@ -352,7 +352,7 @@ impl QrCode {
 		
 		// Draw two copies
 		for i in 0 .. 18 {
-			let bit: bool = (data >> i) & 1 != 0;
+			let bit: bool = get_bit(data, i);
 			let a: i32 = self.size - 11 + i % 3;
 			let b: i32 = i / 3;
 			self.set_function_module(a, b, bit);
@@ -458,7 +458,7 @@ impl QrCode {
 					let upward: bool = (right + 1) & 2 == 0;
 					let y: i32 = if upward { self.size - 1 - vert } else { vert };  // Actual y coordinate
 					if !self.isfunction[(y * self.size + x) as usize] && i < data.len() * 8 {
-						*self.module_mut(x, y) = (data[i >> 3] >> (7 - (i & 7))) & 1 != 0;
+						*self.module_mut(x, y) = get_bit(data[i >> 3] as u32, 7 - ((i & 7) as i32));
 						i += 1;
 					}
 					// If there are any remainder bits (0 to 7), they are already
@@ -1081,8 +1081,8 @@ impl BitBuffer {
 	// to this sequence. Requires 0 <= val < 2^len.
 	pub fn append_bits(&mut self, val: u32, len: u8) {
 		assert!(len < 32 && (val >> len) == 0 || len == 32, "Value out of range");
-		for i in (0 .. len).rev() {  // Append bit by bit
-			self.0.push((val >> i) & 1 != 0);
+		for i in (0 .. len as i32).rev() {  // Append bit by bit
+			self.0.push(get_bit(val, i));
 		}
 	}
 }
@@ -1118,4 +1118,10 @@ impl Mask {
 	pub fn value(&self) -> u8 {
 		self.0
 	}
+}
+
+
+// Returns true iff the i'th bit of x is set to 1.
+fn get_bit(x: u32, i: i32) -> bool {
+	(x >> i) & 1 != 0
 }

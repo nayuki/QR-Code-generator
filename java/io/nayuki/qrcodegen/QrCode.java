@@ -359,18 +359,18 @@ public final class QrCode {
 		
 		// Draw first copy
 		for (int i = 0; i <= 5; i++)
-			setFunctionModule(8, i, ((data >>> i) & 1) != 0);
-		setFunctionModule(8, 7, ((data >>> 6) & 1) != 0);
-		setFunctionModule(8, 8, ((data >>> 7) & 1) != 0);
-		setFunctionModule(7, 8, ((data >>> 8) & 1) != 0);
+			setFunctionModule(8, i, getBit(data, i));
+		setFunctionModule(8, 7, getBit(data, 6));
+		setFunctionModule(8, 8, getBit(data, 7));
+		setFunctionModule(7, 8, getBit(data, 8));
 		for (int i = 9; i < 15; i++)
-			setFunctionModule(14 - i, 8, ((data >>> i) & 1) != 0);
+			setFunctionModule(14 - i, 8, getBit(data, i));
 		
 		// Draw second copy
 		for (int i = 0; i <= 7; i++)
-			setFunctionModule(size - 1 - i, 8, ((data >>> i) & 1) != 0);
+			setFunctionModule(size - 1 - i, 8, getBit(data, i));
 		for (int i = 8; i < 15; i++)
-			setFunctionModule(8, size - 15 + i, ((data >>> i) & 1) != 0);
+			setFunctionModule(8, size - 15 + i, getBit(data, i));
 		setFunctionModule(8, size - 8, true);
 	}
 	
@@ -391,7 +391,7 @@ public final class QrCode {
 		
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
-			boolean bit = ((data >>> i) & 1) != 0;
+			boolean bit = getBit(data, i);
 			int a = size - 11 + i % 3, b = i / 3;
 			setFunctionModule(a, b, bit);
 			setFunctionModule(b, a, bit);
@@ -489,7 +489,7 @@ public final class QrCode {
 					boolean upward = ((right + 1) & 2) == 0;
 					int y = upward ? size - 1 - vert : vert;  // Actual y coordinate
 					if (!isFunction[y][x] && i < data.length * 8) {
-						modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) != 0;
+						modules[y][x] = getBit(data[i >>> 3], 7 - (i & 7));
 						i++;
 					}
 					// If there are any remainder bits (0 to 7), they are already
@@ -699,6 +699,12 @@ public final class QrCode {
 		return getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal()][ver]
 			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
+	}
+	
+	
+	// Returns true iff the i'th bit of x is set to 1.
+	static boolean getBit(int x, int i) {
+		return ((x >>> i) & 1) != 0;
 	}
 	
 	

@@ -228,18 +228,18 @@ void QrCode::drawFormatBits(int mask) {
 	
 	// Draw first copy
 	for (int i = 0; i <= 5; i++)
-		setFunctionModule(8, i, ((data >> i) & 1) != 0);
-	setFunctionModule(8, 7, ((data >> 6) & 1) != 0);
-	setFunctionModule(8, 8, ((data >> 7) & 1) != 0);
-	setFunctionModule(7, 8, ((data >> 8) & 1) != 0);
+		setFunctionModule(8, i, getBit(data, i));
+	setFunctionModule(8, 7, getBit(data, 6));
+	setFunctionModule(8, 8, getBit(data, 7));
+	setFunctionModule(7, 8, getBit(data, 8));
 	for (int i = 9; i < 15; i++)
-		setFunctionModule(14 - i, 8, ((data >> i) & 1) != 0);
+		setFunctionModule(14 - i, 8, getBit(data, i));
 	
 	// Draw second copy
 	for (int i = 0; i <= 7; i++)
-		setFunctionModule(size - 1 - i, 8, ((data >> i) & 1) != 0);
+		setFunctionModule(size - 1 - i, 8, getBit(data, i));
 	for (int i = 8; i < 15; i++)
-		setFunctionModule(8, size - 15 + i, ((data >> i) & 1) != 0);
+		setFunctionModule(8, size - 15 + i, getBit(data, i));
 	setFunctionModule(8, size - 8, true);
 }
 
@@ -258,7 +258,7 @@ void QrCode::drawVersion() {
 	
 	// Draw two copies
 	for (int i = 0; i < 18; i++) {
-		bool bit = ((data >> i) & 1) != 0;
+		bool bit = getBit(data, i);
 		int a = size - 11 + i % 3, b = i / 3;
 		setFunctionModule(a, b, bit);
 		setFunctionModule(b, a, bit);
@@ -351,7 +351,7 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 				bool upward = ((right + 1) & 2) == 0;
 				int y = upward ? size - 1 - vert : vert;  // Actual y coordinate
 				if (!isFunction.at(y).at(x) && i < data.size() * 8) {
-					modules.at(y).at(x) = ((data.at(i >> 3) >> (7 - (i & 7))) & 1) != 0;
+					modules.at(y).at(x) = getBit(data.at(i >> 3), 7 - static_cast<int>(i & 7));
 					i++;
 				}
 				// If there are any remainder bits (0 to 7), they are already
@@ -532,6 +532,11 @@ int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 	return getNumRawDataModules(ver) / 8
 		- ECC_CODEWORDS_PER_BLOCK[static_cast<int>(ecl)][ver]
 		* NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(ecl)][ver];
+}
+
+
+bool QrCode::getBit(long x, int i) {
+	return ((x >> i) & 1) != 0;
 }
 
 

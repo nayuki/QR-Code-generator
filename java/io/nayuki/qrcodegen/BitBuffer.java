@@ -99,7 +99,7 @@ public final class BitBuffer implements Cloneable {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
 		for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
-			data.set(bitLength, ((val >>> i) & 1) != 0);
+			data.set(bitLength, QrCode.getBit(val, i));
 	}
 	
 	

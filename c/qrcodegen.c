@@ -82,6 +82,7 @@ static long getPenaltyScore(const uint8_t qrcode[]);
 testable bool getModule(const uint8_t qrcode[], int x, int y);
 testable void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
 testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
+static bool getBit(int x, int i);
 
 testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
 testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
@@ -442,19 +443,19 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 	
 	// Draw first copy
 	for (int i = 0; i <= 5; i++)
-		setModule(qrcode, 8, i, ((data >> i) & 1) != 0);
-	setModule(qrcode, 8, 7, ((data >> 6) & 1) != 0);
-	setModule(qrcode, 8, 8, ((data >> 7) & 1) != 0);
-	setModule(qrcode, 7, 8, ((data >> 8) & 1) != 0);
+		setModule(qrcode, 8, i, getBit(data, i));
+	setModule(qrcode, 8, 7, getBit(data, 6));
+	setModule(qrcode, 8, 8, getBit(data, 7));
+	setModule(qrcode, 7, 8, getBit(data, 8));
 	for (int i = 9; i < 15; i++)
-		setModule(qrcode, 14 - i, 8, ((data >> i) & 1) != 0);
+		setModule(qrcode, 14 - i, 8, getBit(data, i));
 	
 	// Draw second copy
 	int qrsize = qrcodegen_getSize(qrcode);
 	for (int i = 0; i <= 7; i++)
-		setModule(qrcode, qrsize - 1 - i, 8, ((data >> i) & 1) != 0);
+		setModule(qrcode, qrsize - 1 - i, 8, getBit(data, i));
 	for (int i = 8; i < 15; i++)
-		setModule(qrcode, 8, qrsize - 15 + i, ((data >> i) & 1) != 0);
+		setModule(qrcode, 8, qrsize - 15 + i, getBit(data, i));
 	setModule(qrcode, 8, qrsize - 8, true);
 }
 
@@ -505,7 +506,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 				bool upward = ((right + 1) & 2) == 0;
 				int y = upward ? qrsize - 1 - vert : vert;  // Actual y coordinate
 				if (!getModule(qrcode, x, y) && i < dataLen * 8) {
-					bool black = ((data[i >> 3] >> (7 - (i & 7))) & 1) != 0;
+					bool black = getBit(data[i >> 3], 7 - (i & 7));
 					setModule(qrcode, x, y, black);
 					i++;
 				}
@@ -657,9 +658,7 @@ testable bool getModule(const uint8_t qrcode[], int x, int y) {
 	int qrsize = qrcode[0];
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
 	int index = y * qrsize + x;
-	int bitIndex = index & 7;
-	int byteIndex = (index >> 3) + 1;
-	return ((qrcode[byteIndex] >> bitIndex) & 1) != 0;
+	return getBit(qrcode[(index >> 3) + 1], index & 7);
 }
 
 
@@ -682,6 +681,12 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack) {
 	int qrsize = qrcode[0];
 	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)
 		setModule(qrcode, x, y, isBlack);
+}
+
+
+// Returns true iff the i'th bit of x is set to 1.
+static bool getBit(int x, int i) {
+	return ((x >> i) & 1) != 0;
 }
 
 

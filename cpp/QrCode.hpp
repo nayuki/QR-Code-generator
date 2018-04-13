@@ -245,6 +245,10 @@ class QrCode final {
 	private: static int getNumDataCodewords(int ver, Ecc ecl);
 	
 	
+	// Returns true iff the i'th bit of x is set to 1.
+	private: static bool getBit(long x, int i);
+	
+	
 	/*---- Private tables of constants ----*/
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
