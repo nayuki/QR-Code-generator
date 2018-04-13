@@ -399,12 +399,14 @@ impl QrCode {
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
 	fn append_error_correction(&self, data: &[u8]) -> Vec<u8> {
-		assert_eq!(data.len(), QrCode::get_num_data_codewords(self.version, self.errorcorrectionlevel), "Illegal argument");
+		let ver = self.version;
+		let ecl = self.errorcorrectionlevel;
+		assert_eq!(data.len(), QrCode::get_num_data_codewords(ver, ecl), "Illegal argument");
 		
 		// Calculate parameter numbers
-		let numblocks: usize = QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, self.version, self.errorcorrectionlevel);
-		let blockecclen: usize = QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, self.version, self.errorcorrectionlevel);
-		let rawcodewords: usize = QrCode::get_num_raw_data_modules(self.version) / 8;
+		let numblocks: usize = QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, ver, ecl);
+		let blockecclen: usize = QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, ver, ecl);
+		let rawcodewords: usize = QrCode::get_num_raw_data_modules(ver) / 8;
 		let numshortblocks: usize = numblocks - rawcodewords % numblocks;
 		let shortblocklen: usize = rawcodewords / numblocks;
 		
