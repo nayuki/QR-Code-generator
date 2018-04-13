@@ -725,22 +725,24 @@ impl QrCodeEcc {
 	
 	// Returns an unsigned 2-bit integer (in the range 0 to 3).
 	fn ordinal(&self) -> usize {
+		use QrCodeEcc::*;
 		match *self {
-			QrCodeEcc::Low      => 0,
-			QrCodeEcc::Medium   => 1,
-			QrCodeEcc::Quartile => 2,
-			QrCodeEcc::High     => 3,
+			Low      => 0,
+			Medium   => 1,
+			Quartile => 2,
+			High     => 3,
 		}
 	}
 	
 	
 	// Returns an unsigned 2-bit integer (in the range 0 to 3).
 	fn format_bits(&self) -> u32 {
+		use QrCodeEcc::*;
 		match *self {
-			QrCodeEcc::Low      => 1,
-			QrCodeEcc::Medium   => 0,
-			QrCodeEcc::Quartile => 3,
-			QrCodeEcc::High     => 2,
+			Low      => 1,
+			Medium   => 0,
+			Quartile => 3,
+			High     => 2,
 		}
 	}
 	
@@ -1030,12 +1032,13 @@ impl QrSegmentMode {
 	// Returns an unsigned 4-bit integer value (range 0 to 15)
 	// representing the mode indicator bits for this mode object.
 	fn mode_bits(&self) -> u32 {
+		use QrSegmentMode::*;
 		match *self {
-			QrSegmentMode::Numeric      => 0x1,
-			QrSegmentMode::Alphanumeric => 0x2,
-			QrSegmentMode::Byte         => 0x4,
-			QrSegmentMode::Kanji        => 0x8,
-			QrSegmentMode::Eci          => 0x7,
+			Numeric      => 0x1,
+			Alphanumeric => 0x2,
+			Byte         => 0x4,
+			Kanji        => 0x8,
+			Eci          => 0x7,
 		}
 	}
 	
@@ -1043,12 +1046,13 @@ impl QrSegmentMode {
 	// Returns the bit width of the segment character count field
 	// for this mode object at the given version number.
 	pub fn num_char_count_bits(&self, ver: Version) -> u8 {
+		use QrSegmentMode::*;
 		let array: [u8; 3] = match *self {
-			QrSegmentMode::Numeric      => [10, 12, 14],
-			QrSegmentMode::Alphanumeric => [ 9, 11, 13],
-			QrSegmentMode::Byte         => [ 8, 16, 16],
-			QrSegmentMode::Kanji        => [ 8, 10, 12],
-			QrSegmentMode::Eci          => [ 0,  0,  0],
+			Numeric      => [10, 12, 14],
+			Alphanumeric => [ 9, 11, 13],
+			Byte         => [ 8, 16, 16],
+			Kanji        => [ 8, 10, 12],
+			Eci          => [ 0,  0,  0],
 		};
 		
 		let ver = ver.value();
