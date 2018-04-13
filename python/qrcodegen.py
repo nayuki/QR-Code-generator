@@ -498,12 +498,9 @@ class QrCode(object):
 				step = (ver * 4 + numalign * 2 + 1) // (2 * numalign - 2) * 2
 			else:  # C-C-C-Combo breaker!
 				step = 26
-			result = [6]
-			pos = ver * 4 + 10
-			for _ in range(numalign - 1):
-				result.insert(1, pos)
-				pos -= step
-			return result
+			start = ver * 4 + 10
+			result = [(start - i * step) for i in range(numalign - 1)] + [6]
+			return list(reversed(result))
 	
 	
 	@staticmethod

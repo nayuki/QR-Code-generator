@@ -628,12 +628,10 @@ impl QrCode {
 			} else {  // C-C-C-Combo breaker!
 				26
 			};
-			let mut result = vec![6i32];
-			let mut pos: i32 = (ver as i32) * 4 + 10;
-			for _ in 0 .. numalign - 1 {
-				result.insert(1, pos);
-				pos -= step;
-			}
+			let start = (ver as i32) * 4 + 10;
+			let mut result: Vec<i32> = (0 .. numalign - 1).map(|i| start - i * step).collect();
+			result.push(6);
+			result.reverse();
 			result
 		}
 	}
