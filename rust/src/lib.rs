@@ -849,7 +849,7 @@ impl QrSegment {
 	/*---- Static factory functions ----*/
 	
 	// Returns a segment representing the given binary data encoded in byte mode.
-	pub fn make_bytes(data: &[u8]) -> QrSegment {
+	pub fn make_bytes(data: &[u8]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
 		for b in data {
 			bb.append_bits(*b as u32, 8);
@@ -860,7 +860,7 @@ impl QrSegment {
 	
 	// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	// Panics if the string contains non-digit characters.
-	pub fn make_numeric(text: &[char]) -> QrSegment {
+	pub fn make_numeric(text: &[char]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
@@ -884,7 +884,7 @@ impl QrSegment {
 	// Returns a segment representing the given text string encoded in alphanumeric mode.
 	// The characters allowed are: 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk,
 	// plus, hyphen, period, slash, colon. Panics if the string contains non-encodable characters.
-	pub fn make_alphanumeric(text: &[char]) -> QrSegment {
+	pub fn make_alphanumeric(text: &[char]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
@@ -910,7 +910,7 @@ impl QrSegment {
 	
 	// Returns a new mutable list of zero or more segments to represent the given Unicode text string.
 	// The result may use various segment modes and switch modes to optimize the length of the bit stream.
-	pub fn make_segments(text: &[char]) -> Vec<QrSegment> {
+	pub fn make_segments(text: &[char]) -> Vec<Self> {
 		if text.is_empty() {
 			vec![]
 		} else if QrSegment::is_numeric(text) {
@@ -926,7 +926,7 @@ impl QrSegment {
 	
 	// Returns a segment representing an Extended Channel Interpretation
 	// (ECI) designator with the given assignment value.
-	pub fn make_eci(assignval: u32) -> QrSegment {
+	pub fn make_eci(assignval: u32) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(24));
 		if assignval < (1 << 7) {
 			bb.append_bits(assignval, 8);
@@ -944,8 +944,8 @@ impl QrSegment {
 	
 	
 	// Creates a new QR Code data segment with the given parameters and data.
-	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> QrSegment {
-		QrSegment {
+	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> Self {
+		Self {
 			mode: mode,
 			numchars: numchars,
 			data: data,
@@ -976,7 +976,7 @@ impl QrSegment {
 	/*---- Other static functions ----*/
 	
 	// Package-private helper function.
-	fn get_total_bits(segs: &[QrSegment], version: Version) -> Option<usize> {
+	fn get_total_bits(segs: &[Self], version: Version) -> Option<usize> {
 		let mut result: usize = 0;
 		for seg in segs {
 			let ccbits = seg.mode.num_char_count_bits(version);
