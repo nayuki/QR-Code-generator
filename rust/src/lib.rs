@@ -245,7 +245,7 @@ impl QrCode {
 			"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {0} {0}\" stroke=\"none\">\n", dimension);
 		result += "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n";
 		result += "\t<path d=\"";
-		let mut head: bool = true;
+		let mut head = true;
 		for y in -border .. self.size + border {
 			for x in -border .. self.size + border {
 				if self.get_module(x, y) {
@@ -527,7 +527,7 @@ impl QrCode {
 		
 		// Adjacent modules in row having same color
 		for y in 0 .. size {
-			let mut colorx: bool = false;
+			let mut colorx = false;
 			let mut runx: i32 = 0;
 			for x in 0 .. size {
 				if x == 0 || self.module(x, y) != colorx {
@@ -545,7 +545,7 @@ impl QrCode {
 		}
 		// Adjacent modules in column having same color
 		for x in 0 .. size {
-			let mut colory: bool = false;
+			let mut colory = false;
 			let mut runy: i32 = 0;
 			for y in 0 .. size {
 				if y == 0 || self.module(x, y) != colory {
