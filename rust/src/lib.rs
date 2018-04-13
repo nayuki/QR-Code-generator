@@ -145,10 +145,11 @@ impl QrCode {
 		bb.append_bits(0, numzerobits as u8);
 		
 		// Pad with alternate bytes until data capacity is reached
-		let mut padbyte: u32 = 0xEC;
-		while bb.0.len() < datacapacitybits {
-			bb.append_bits(padbyte, 8);
-			padbyte ^= 0xEC ^ 0x11;
+		for padbyte in [0xEC, 0x11].iter().cycle() {
+			if bb.0.len() >= datacapacitybits {
+				break;
+			}
+			bb.append_bits(*padbyte, 8);
 		}
 		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
 		
@@ -476,7 +477,7 @@ impl QrCode {
 	// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
 	// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
 	fn apply_mask(&mut self, mask: Mask) {
-		let mask = mask.value();
+		let mask: u8 = mask.value();
 		for y in 0 .. self.size {
 			for x in 0 .. self.size {
 				let invert: bool = match mask {
@@ -768,7 +769,7 @@ impl ReedSolomonGenerator {
 	
 	// Creates a Reed-Solomon ECC generator for the given degree. This could be implemented
 	// as a lookup table over all possible parameter values, instead of as an algorithm.
-	fn new(degree: usize) -> ReedSolomonGenerator {
+	fn new(degree: usize) -> Self {
 		assert!(1 <= degree && degree <= 255, "Degree out of range");
 		// Start with the monomial x^0
 		let mut coefs = vec![0u8; degree - 1];
@@ -788,9 +789,7 @@ impl ReedSolomonGenerator {
 			}
 			root = ReedSolomonGenerator::multiply(root, 0x02);
 		}
-		ReedSolomonGenerator {
-			coefficients: coefs
-		}
+		Self { coefficients: coefs }
 	}
 	
 	
@@ -1081,9 +1080,7 @@ impl BitBuffer {
 	// to this sequence. Requires 0 <= val < 2^len.
 	pub fn append_bits(&mut self, val: u32, len: u8) {
 		assert!(len < 32 && (val >> len) == 0 || len == 32, "Value out of range");
-		for i in (0 .. len as i32).rev() {  // Append bit by bit
-			self.0.push(get_bit(val, i));
-		}
+		self.0.extend((0 .. len as i32).rev().map(|i| get_bit(val, i)));  // Append bit by bit
 	}
 }
 
