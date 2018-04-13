@@ -64,7 +64,7 @@ impl QrCode {
 	// QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
 	// the ecl argument if it can be done without increasing the version. Returns a wrapped QrCode if successful,
 	// or None if the data is too long to fit in any version at the given ECC level.
-	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Option<QrCode> {
+	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Option<Self> {
 		let chrs: Vec<char> = text.chars().collect();
 		let segs: Vec<QrSegment> = QrSegment::make_segments(&chrs);
 		QrCode::encode_segments(&segs, ecl)
@@ -76,7 +76,7 @@ impl QrCode {
 	// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
-	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Option<QrCode> {
+	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Option<Self> {
 		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
 		QrCode::encode_segments(&segs, ecl)
 	}
@@ -88,7 +88,7 @@ impl QrCode {
 	// between modes (such as alphanumeric and binary) to encode text more efficiently.
 	// This function is considered to be lower level than simply encoding text or binary data.
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
-	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<QrCode> {
+	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<Self> {
 		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
 	}
 	
@@ -101,7 +101,7 @@ impl QrCode {
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit
 	// in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
-			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Option<QrCode> {
+			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Option<Self> {
 		assert!(minversion.value() <= maxversion.value(), "Invalid value");
 		
 		// Find the minimal version number to use
@@ -167,10 +167,10 @@ impl QrCode {
 	// Creates a new QR Code symbol with the given version number, error correction level,
 	// binary data array, and mask number. This is a cumbersome low-level constructor that
 	// should not be invoked directly by the user. To go one level up, see the encode_segments() function.
-	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<Mask>) -> QrCode {
+	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<Mask>) -> Self {
 		// Initialize fields
 		let size: usize = (ver.value() as usize) * 4 + 17;
-		let mut result = QrCode {
+		let mut result = Self {
 			version: ver,
 			size: size as i32,
 			mask: Mask::new(0),  // Dummy value
