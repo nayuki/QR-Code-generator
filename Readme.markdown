@@ -100,7 +100,7 @@ for y in range(qr1.get_size()):
         (... paint qr1.get_module(x, y) ...)
 ```
 
-C++ language:
+C++:
 
 ```c++
 #include <string>
@@ -124,7 +124,7 @@ for (int y = 0; y < qr1.getSize(); y++) {
 }
 ```
 
-C language:
+C:
 
 ```c
 #include <stdbool.h>
