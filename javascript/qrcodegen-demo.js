@@ -127,10 +127,7 @@ function redrawQrCode() {
 	stats += "encoding mode = " + describeSegments(segs) + ", ";
 	stats += "error correction = level " + "LMQH".charAt(qr.errorCorrectionLevel.ordinal) + ", ";
 	stats += "data bits = " + qrcodegen.QrSegment.getTotalBits(segs, qr.version) + ".";
-	var elem = document.getElementById("statistics-output");
-	while (elem.firstChild != null)
-		elem.removeChild(elem.firstChild);
-	elem.appendChild(document.createTextNode(stats));
+	document.getElementById("statistics-output").textContent = stats;
 }
 
 
