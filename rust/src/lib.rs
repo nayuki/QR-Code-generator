@@ -163,7 +163,7 @@ impl QrCode {
 	}
 	
 	
-	/*---- Constructors ----*/
+	/*---- Constructor ----*/
 	
 	// Creates a new QR Code symbol with the given version number, error correction level,
 	// binary data array, and mask number. This is a cumbersome low-level constructor that

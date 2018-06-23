@@ -120,7 +120,7 @@ class QrCode final {
 	
 	
 	
-	/*---- Constructors ----*/
+	/*---- Constructor ----*/
 	
 	/* 
 	 * Creates a new QR Code symbol with the given version number, error correction level, binary data array,

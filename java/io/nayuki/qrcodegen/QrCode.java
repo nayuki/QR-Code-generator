@@ -194,7 +194,7 @@ public final class QrCode {
 	
 	
 	
-	/*---- Constructors ----*/
+	/*---- Constructor ----*/
 	
 	/**
 	 * Creates a new QR Code symbol with the specified version number, error correction level, binary data array, and mask number.
