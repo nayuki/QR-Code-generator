@@ -142,16 +142,6 @@ var qrcodegen = new function() {
 			return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
 		};
 		
-		// (Package-private) Tests whether the module at the given coordinates is a function module (true) or not (false).
-		// The top left corner has the coordinates (x=0, y=0). If the given coordinates are out of bounds, then false is returned.
-		// The JavaScript version of this library has this method because it is impossible to access private variables of another object.
-		this.isFunctionModule = function(x, y) {
-			if (0 <= x && x < size && 0 <= y && y < size)
-				return isFunction[y][x];
-			else
-				return false;  // Infinite border
-		};
-		
 		
 		/*---- Public instance methods ----*/
 		
