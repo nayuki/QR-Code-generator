@@ -1,0 +1,121 @@
+<!--
+  - QR Code generator demo (HTML+TypeScript)
+  - 
+  - Copyright (c) Project Nayuki. (MIT License)
+  - https://www.nayuki.io/page/qr-code-generator-library
+  - 
+  - Permission is hereby granted, free of charge, to any person obtaining a copy of
+  - this software and associated documentation files (the "Software"), to deal in
+  - the Software without restriction, including without limitation the rights to
+  - use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  - the Software, and to permit persons to whom the Software is furnished to do so,
+  - subject to the following conditions:
+  - * The above copyright notice and this permission notice shall be included in
+  -   all copies or substantial portions of the Software.
+  - * The Software is provided "as is", without warranty of any kind, express or
+  -   implied, including but not limited to the warranties of merchantability,
+  -   fitness for a particular purpose and noninfringement. In no event shall the
+  -   authors or copyright holders be liable for any claim, damages or other
+  -   liability, whether in an action of contract, tort or otherwise, arising from,
+  -   out of or in connection with the Software or the use or other dealings in the
+  -   Software.
+  -->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QR Code generator library demo (TypeScript)</title>
+	<style type="text/css">
+	html {
+		font-family: sans-serif;
+	}
+	td {
+		vertical-align: top;
+		padding-top: 0.2em;
+		padding-bottom: 0.2em;
+	}
+	td:first-child {
+		white-space: pre;
+	}
+	input[type=radio] + label, input[type=checkbox] + label {
+		margin-left: 0.1em;
+		margin-right: 0.7em;
+	}
+	</style>
+</head>
+
+<body>
+<h1>QR Code generator demo library (TypeScript)</h1>
+<form action="#" method="get" onsubmit="return false;">
+	<table class="noborder" style="width:100%">
+		<tbody>
+			<tr>
+				<td><strong>Text string:</strong></td>
+				<td style="width:100%"><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:100%; max-width:30em; height:5em; font-family:inherit" oninput="redrawQrCode();"></textarea></td>
+			</tr>
+			<tr>
+				<td><strong>QR Code:</strong></td>
+				<td>
+					<canvas id="qrcode-canvas" style="padding:1em; background-color:#E8E8E8"></canvas>
+					<svg id="qrcode-svg" style="width:30em; height:30em; padding:1em; background-color:#E8E8E8">
+						<rect width="100%" height="100%" fill="#FFFFFF" stroke-width="0"></rect>
+						<path d="" fill="#000000" stroke-width="0"></path>
+					</svg>
+				</td>
+			</tr>
+			<tr>
+				<td><strong>Error correction:</strong></td>
+				<td>
+					<input type="radio" name="errcorlvl" id="errcorlvl-low" onchange="redrawQrCode();" checked="checked"><label for="errcorlvl-low">Low</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-medium" onchange="redrawQrCode();"><label for="errcorlvl-medium">Medium</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-quartile" onchange="redrawQrCode();"><label for="errcorlvl-quartile">Quartile</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-high" onchange="redrawQrCode();"><label for="errcorlvl-high">High</label>
+				</td>
+			</tr>
+			<tr>
+				<td>Output format:</td>
+				<td>
+					<input type="radio" name="output-format" id="output-format-bitmap" onchange="redrawQrCode();" checked="checked"><label for="output-format-bitmap">Bitmap</label>
+					<input type="radio" name="output-format" id="output-format-vector" onchange="redrawQrCode();"><label for="output-format-vector">Vector</label>
+				</td>
+			</tr>
+			<tr>
+				<td>Border:</td>
+				<td><input type="number" value="4" min="0" max="100" step="1" id="border-input" style="width:4em" oninput="redrawQrCode();"> modules</td>
+			</tr>
+			<tr id="scale-row">
+				<td>Scale:</td>
+				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
+			</tr>
+			<tr>
+				<td>Version range:</td>
+				<td>Minimum = <input type="number" value="1" min="1" max="40" step="1" id="version-min-input" style="width:4em" oninput="handleVersionMinMax('min');">, maximum = <input type="number" value="40" min="1" max="40" step="1" id="version-max-input" style="width:4em" oninput="handleVersionMinMax('max');"></td>
+			</tr>
+			<tr>
+				<td>Mask pattern:</td>
+				<td><input type="number" value="-1" min="-1" max="7" step="1" id="mask-input" style="width:4em" oninput="redrawQrCode();"> (−1 for automatic, 0 to 7 for manual)</td>
+			</tr>
+			<tr>
+				<td>Boost ECC:</td>
+				<td><input type="checkbox" checked="checked" id="boost-ecc-input" onchange="redrawQrCode();"><label for="boost-ecc-input">Increase <abbr title="error-correcting code">ECC</abbr> level within same version</label></td>
+			</tr>
+			<tr>
+				<td>Statistics:</td>
+				<td id="statistics-output" style="white-space:pre"></td>
+			</tr>
+			<tr id="svg-xml-row">
+				<td>SVG XML code:</td>
+				<td>
+					<textarea id="svg-xml-output" readonly="readonly" style="width:100%; max-width:50em; height:15em; font-family:monospace"></textarea>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
+<script type="application/javascript" src="qrcodegen.js"></script>
+<script type="application/javascript" src="qrcodegen-demo.js"></script>
+
+<hr>
+<p>Copyright © Project Nayuki – <a href="https://www.nayuki.io/page/qr-code-generator-library">https://www.nayuki.io/page/qr-code-generator-library</a></p>
+</body>
+</html>
