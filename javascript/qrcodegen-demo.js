@@ -109,7 +109,7 @@ function redrawQrCode() {
 			var c = str.charCodeAt(i);
 			if (c < 0xD800 || c >= 0xE000)
 				continue;
-			else if (0xD800 <= c && c < 0xDC00) {  // High surrogate
+			else if (0xD800 <= c && c < 0xDC00 && i + 1 < str.length) {  // High surrogate
 				i++;
 				var d = str.charCodeAt(i);
 				if (0xDC00 <= d && d < 0xE000)  // Low surrogate
