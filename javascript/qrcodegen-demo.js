@@ -85,7 +85,6 @@ function redrawQrCode() {
 		svgXml.value = qr.toSvgString(border);
 	}
 	
-	
 	// Returns a string to describe the given list of segments.
 	function describeSegments(segs) {
 		if (segs.length == 0)

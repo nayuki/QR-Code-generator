@@ -189,6 +189,8 @@ impl QrCode {
 	}
 	
 	
+	/*---- Public methods ----*/
+	
 	// Returns this QR Code's version, in the range [1, 40].
 	pub fn version(&self) -> Version {
 		self.version

@@ -584,7 +584,7 @@ var qrcodegen = new function() {
 	Object.defineProperty(this.QrCode, "MAX_VERSION", {value:MAX_VERSION});
 	
 	
-	/*---- Private static helper functions QrCode ----*/
+	/*---- Private static helper functions for QrCode ----*/
 	
 	var QrCode = {};  // Private object to assign properties to. Not the same object as 'this.QrCode'.
 	
