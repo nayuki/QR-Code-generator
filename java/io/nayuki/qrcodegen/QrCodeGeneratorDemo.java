@@ -132,7 +132,7 @@ public final class QrCodeGeneratorDemo {
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
 		writePng(qr.toImage(8, 5), "phi-segmented-QR.png");
 		
-		// Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+		// Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 		String madoka = "「魔法少女まどか☆マギカ」って、　ИАИ　ｄｅｓｕ　κα？";
 		qr = QrCode.encodeText(madoka, QrCode.Ecc.LOW);
 		writePng(qr.toImage(9, 4), "madoka-utf8-QR.png");

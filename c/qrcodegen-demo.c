@@ -190,7 +190,7 @@ static void doSegmentDemo(void) {
 		}
 	}
 	
-	{  // Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+	{  // Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
 		bool ok;

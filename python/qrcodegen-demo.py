@@ -106,7 +106,7 @@ def do_segment_demo():
 	qr = QrCode.encode_segments(segs, QrCode.Ecc.LOW)
 	print_qr(qr)
 	
-	# Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+	# Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 	madoka = u"\u300C\u9B54\u6CD5\u5C11\u5973\u307E\u3069\u304B\u2606\u30DE\u30AE\u30AB\u300D\u3063\u3066\u3001\u3000\u0418\u0410\u0418\u3000\uFF44\uFF45\uFF53\uFF55\u3000\u03BA\u03B1\uFF1F"
 	qr = QrCode.encode_text(madoka, QrCode.Ecc.LOW)
 	print_qr(qr)

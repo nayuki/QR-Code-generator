@@ -114,7 +114,7 @@ fn do_segment_demo() {
 	let qr = QrCode::encode_segments(&segs, QrCodeEcc::Low).unwrap();
 	print_qr(&qr);
 	
-	// Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+	// Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 	let madoka = "「魔法少女まどか☆マギカ」って、　ИАИ　ｄｅｓｕ　κα？";
 	let qr = QrCode::encode_text(madoka, QrCodeEcc::Low).unwrap();
 	print_qr(&qr);

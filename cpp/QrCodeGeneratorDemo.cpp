@@ -128,7 +128,7 @@ static void doSegmentDemo() {
 		QrCode::Ecc::LOW);
 	printQr(qr3);
 	
-	// Illustration "Madoka": kanji, kana, Greek, Cyrillic, full-width Latin characters
+	// Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 	const char *madoka =  // Encoded in UTF-8
 		"\xE3\x80\x8C\xE9\xAD\x94\xE6\xB3\x95\xE5"
 		"\xB0\x91\xE5\xA5\xB3\xE3\x81\xBE\xE3\x81"
