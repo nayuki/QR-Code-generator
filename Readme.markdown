@@ -44,6 +44,7 @@ Java language:
 
     import java.awt.image.BufferedImage;
     import java.io.File;
+    import java.util.List;
     import javax.imageio.ImageIO;
     import io.nayuki.qrcodegen.*;
     
