@@ -237,7 +237,7 @@ public final class QrSegmentAdvanced {
 	 * @throws IllegalArgumentException if the string contains non-kanji-mode characters
 	 * @see #isEncodableAsKanji(String)
 	 */
-	public static QrSegment makeKanjiSegment(String text) {
+	public static QrSegment makeKanji(String text) {
 		Objects.requireNonNull(text);
 		BitBuffer bb = new BitBuffer();
 		for (int i = 0; i < text.length(); i++) {
@@ -258,7 +258,7 @@ public final class QrSegmentAdvanced {
 	 * @param text the string to test for encodability
 	 * @return {@code true} if and only if the string can be encoded in kanji mode
 	 * @throws NullPointerException if the string is {@code null}
-	 * @see #makeKanjiSegment(String)
+	 * @see #makeKanji(String)
 	 */
 	public static boolean isEncodableAsKanji(String text) {
 		Objects.requireNonNull(text);
