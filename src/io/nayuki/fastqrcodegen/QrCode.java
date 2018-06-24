@@ -125,7 +125,7 @@ public final class QrCode {
 	
 	
 	
-	/*---- Constructors ----*/
+	/*---- Constructor ----*/
 	
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments

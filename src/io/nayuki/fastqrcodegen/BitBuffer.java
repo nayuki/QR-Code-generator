@@ -37,7 +37,7 @@ final class BitBuffer {
 	
 	
 	
-	/*---- Constructors ----*/
+	/*---- Constructor ----*/
 	
 	public BitBuffer() {
 		data = new int[64];
