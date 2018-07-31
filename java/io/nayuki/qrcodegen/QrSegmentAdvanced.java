@@ -26,12 +26,12 @@ package io.nayuki.qrcodegen;
 import static io.nayuki.qrcodegen.QrSegment.Mode.ALPHANUMERIC;
 import static io.nayuki.qrcodegen.QrSegment.Mode.BYTE;
 import static io.nayuki.qrcodegen.QrSegment.Mode.NUMERIC;
-import java.nio.charset.StandardCharsets;
+//import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
+//import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
+//import java.util.Objects;
 
 
 public final class QrSegmentAdvanced {
