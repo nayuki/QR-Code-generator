@@ -174,7 +174,7 @@ public final class QrSegmentAdvanced {
 	
 	
 	private static List<QrSegment> splitIntoSegments(byte[] data, QrSegment.Mode[] charModes) {
-		List<QrSegment> result = new ArrayList<>();
+		List<QrSegment> result = new ArrayList<QrSegment>();
 		if (data.length == 0)
 			return result;
 		
