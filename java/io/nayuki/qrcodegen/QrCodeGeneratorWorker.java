@@ -28,7 +28,6 @@
 
 package io.nayuki.qrcodegen;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -38,10 +37,10 @@ public final class QrCodeGeneratorWorker {
 	
 	public static void main(String[] args) {
 		// Set up input stream and start loop
-		try (Scanner input = new Scanner(System.in, "US-ASCII")) {
-			input.useDelimiter("\r\n|\n|\r");
-			while (processCase(input));
-		}
+		Scanner input = new Scanner(System.in, "US-ASCII");
+		input.useDelimiter("\r\n|\n|\r");
+		while (processCase(input));
+		input.close();
 	}
 	
 	

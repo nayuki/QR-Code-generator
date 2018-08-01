@@ -23,10 +23,8 @@
 
 package io.nayuki.qrcodegen;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 
@@ -118,7 +116,7 @@ public final class QrSegment {
 		Objects.requireNonNull(text);
 		
 		// Select the most efficient segment encoding automatically
-		List<QrSegment> result = new ArrayList<>();
+		List<QrSegment> result = new ArrayList<QrSegment>();
 		if (text.equals(""));  // Leave result empty
 		else if (NUMERIC_REGEX.matcher(text).matches())
 			result.add(makeNumeric(text));

@@ -26,7 +26,6 @@ package io.nayuki.qrcodegen;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 
 /**

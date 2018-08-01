@@ -32,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -64,10 +63,13 @@ public final class QrCodeGeneratorDemo {
 		ImageIO.write(img, "png", imgFile);             // Write image to file
 		
 		String svg = qr.toSvgString(4);  // Convert to SVG XML code
-		try (Writer out = new OutputStreamWriter(
+		Writer out = new OutputStreamWriter(
 				new FileOutputStream("hello-world-QR.svg"),
-				StandardCharsets.UTF_8)) {
+				StandardCharsets.UTF_8);
+		try {
 			out.write(svg);  // Create/overwrite file and write SVG data
+		} finally {
+			try { out.close(); } catch (IOException e) { }
 		}
 	}
 	

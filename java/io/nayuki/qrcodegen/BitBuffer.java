@@ -24,7 +24,6 @@
 package io.nayuki.qrcodegen;
 
 import java.util.BitSet;
-import java.util.Objects;
 
 
 /**
