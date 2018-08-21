@@ -23,6 +23,7 @@
 
 #include <climits>
 #include <cstring>
+#include <stdexcept>
 #include <utility>
 #include "QrSegment.hpp"
 
@@ -49,7 +50,7 @@ int QrSegment::Mode::numCharCountBits(int ver) const {
 	if      ( 1 <= ver && ver <=  9)  return numBitsCharCount[0];
 	else if (10 <= ver && ver <= 26)  return numBitsCharCount[1];
 	else if (27 <= ver && ver <= 40)  return numBitsCharCount[2];
-	else  throw "Version number out of range";
+	else  throw std::domain_error("Version number out of range");
 }
 
 
@@ -63,7 +64,7 @@ const QrSegment::Mode QrSegment::Mode::ECI         (0x7,  0,  0,  0);
 
 QrSegment QrSegment::makeBytes(const vector<uint8_t> &data) {
 	if (data.size() > INT_MAX)
-		throw "Data too long";
+		throw std::length_error("Data too long");
 	BitBuffer bb;
 	for (uint8_t b : data)
 		bb.appendBits(b, 8);
@@ -79,7 +80,7 @@ QrSegment QrSegment::makeNumeric(const char *digits) {
 	for (; *digits != '\0'; digits++, charCount++) {
 		char c = *digits;
 		if (c < '0' || c > '9')
-			throw "String contains non-numeric characters";
+			throw std::domain_error("String contains non-numeric characters");
 		accumData = accumData * 10 + (c - '0');
 		accumCount++;
 		if (accumCount == 3) {
@@ -102,7 +103,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	for (; *text != '\0'; text++, charCount++) {
 		const char *temp = std::strchr(ALPHANUMERIC_CHARSET, *text);
 		if (temp == nullptr)
-			throw "String contains unencodable characters in alphanumeric mode";
+			throw std::domain_error("String contains unencodable characters in alphanumeric mode");
 		accumData = accumData * 45 + (temp - ALPHANUMERIC_CHARSET);
 		accumCount++;
 		if (accumCount == 2) {
@@ -146,7 +147,7 @@ QrSegment QrSegment::makeEci(long assignVal) {
 		bb.appendBits(6, 3);
 		bb.appendBits(assignVal, 21);
 	} else
-		throw "ECI assignment value out of range";
+		throw std::domain_error("ECI assignment value out of range");
 	return QrSegment(Mode::ECI, 0, std::move(bb));
 }
 
@@ -156,7 +157,7 @@ QrSegment::QrSegment(Mode md, int numCh, const std::vector<bool> &dt) :
 		numChars(numCh),
 		data(dt) {
 	if (numCh < 0)
-		throw "Invalid value";
+		throw std::domain_error("Invalid value");
 }
 
 
@@ -165,13 +166,13 @@ QrSegment::QrSegment(Mode md, int numCh, std::vector<bool> &&dt) :
 		numChars(numCh),
 		data(std::move(dt)) {
 	if (numCh < 0)
-		throw "Invalid value";
+		throw std::domain_error("Invalid value");
 }
 
 
 int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 	if (version < 1 || version > 40)
-		throw "Version number out of range";
+		throw std::domain_error("Version number out of range");
 	int result = 0;
 	for (const QrSegment &seg : segs) {
 		int ccbits = seg.mode.numCharCountBits(version);
