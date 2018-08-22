@@ -225,8 +225,8 @@ class QrCode(object):
 		if border < 0:
 			raise ValueError("Border must be non-negative")
 		parts = []
-		for y in range(-border, self._size + border):
-			for x in range(-border, self._size + border):
+		for y in range(self._size):
+			for x in range(self._size):
 				if self.get_module(x, y):
 					parts.append("M{},{}h1v1h-1z".format(x + border, y + border))
 		return """<?xml version="1.0" encoding="UTF-8"?>

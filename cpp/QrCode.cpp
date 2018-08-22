@@ -169,8 +169,8 @@ std::string QrCode::toSvgString(int border) const {
 	sb << "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n";
 	sb << "\t<path d=\"";
 	bool head = true;
-	for (int y = -border; y < size + border; y++) {
-		for (int x = -border; x < size + border; x++) {
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x < size; x++) {
 			if (getModule(x, y)) {
 				if (head)
 					head = false;

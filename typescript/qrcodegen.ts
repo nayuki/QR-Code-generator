@@ -233,8 +233,8 @@ namespace qrcodegen {
 			if (border < 0)
 				throw "Border must be non-negative";
 			let parts: Array<string> = [];
-			for (let y = -border; y < this.size + border; y++) {
-				for (let x = -border; x < this.size + border; x++) {
+			for (let y = 0; y < this.size; y++) {
+				for (let x = 0; x < this.size; x++) {
 					if (this.getModule(x, y))
 						parts.push(`M${x + border},${y + border}h1v1h-1z`);
 				}

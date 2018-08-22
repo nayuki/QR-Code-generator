@@ -249,8 +249,8 @@ impl QrCode {
 		result += "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n";
 		result += "\t<path d=\"";
 		let mut head = true;
-		for y in -border .. self.size + border {
-			for x in -border .. self.size + border {
+		for y in 0 .. self.size {
+			for x in 0 .. self.size {
 				if self.get_module(x, y) {
 					if head {
 						head = false;

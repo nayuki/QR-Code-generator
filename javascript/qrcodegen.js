@@ -170,8 +170,8 @@ var qrcodegen = new function() {
 			if (border < 0)
 				throw "Border must be non-negative";
 			var parts = [];
-			for (var y = -border; y < size + border; y++) {
-				for (var x = -border; x < size + border; x++) {
+			for (var y = 0; y < size; y++) {
+				for (var x = 0; x < size; x++) {
 					if (this.getModule(x, y))
 						parts.push("M" + (x + border) + "," + (y + border) + "h1v1h-1z");
 				}
