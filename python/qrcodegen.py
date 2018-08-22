@@ -310,7 +310,8 @@ class QrCode(object):
 		# Draw two copies
 		for i in range(18):
 			bit = _get_bit(bits, i)
-			a, b = self._size - 11 + i % 3, i // 3
+			a = self._size - 11 + i % 3
+			b = i // 3
 			self._set_function_module(a, b, bit)
 			self._set_function_module(b, a, bit)
 	

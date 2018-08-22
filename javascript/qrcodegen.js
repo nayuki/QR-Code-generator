@@ -266,7 +266,8 @@ var qrcodegen = new function() {
 			// Draw two copies
 			for (var i = 0; i < 18; i++) {
 				var bit = getBit(bits, i);
-				var a = size - 11 + i % 3, b = Math.floor(i / 3);
+				var a = size - 11 + i % 3;
+				var b = Math.floor(i / 3);
 				setFunctionModule(a, b, bit);
 				setFunctionModule(b, a, bit);
 			}

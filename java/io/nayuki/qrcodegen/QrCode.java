@@ -388,7 +388,8 @@ public final class QrCode {
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
 			boolean bit = getBit(bits, i);
-			int a = size - 11 + i % 3, b = i / 3;
+			int a = size - 11 + i % 3;
+			int b = i / 3;
 			setFunctionModule(a, b, bit);
 			setFunctionModule(b, a, bit);
 		}
