@@ -49,7 +49,8 @@ public final class QrCode {
 	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the text
 	 * @throws NullPointerException if the text or error correction level is {@code null}
-	 * @throws IllegalArgumentException if the text fails to fit in the largest version QR Code, which means it is too long
+	 * @throws IllegalArgumentException if the text fails to fit in the
+	 * largest version QR Code at the ECL, which means it is too long
 	 */
 	public static QrCode encodeText(String text, Ecc ecl) {
 		Objects.requireNonNull(text);
@@ -68,7 +69,8 @@ public final class QrCode {
 	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the binary data
 	 * @throws NullPointerException if the data or error correction level is {@code null}
-	 * @throws IllegalArgumentException if the data fails to fit in the largest version QR Code, which means it is too long
+	 * @throws IllegalArgumentException if the data fails to fit in the
+	 * largest version QR Code at the ECL, which means it is too long
 	 */
 	public static QrCode encodeBinary(byte[] data, Ecc ecl) {
 		Objects.requireNonNull(data);
@@ -87,8 +89,9 @@ public final class QrCode {
 	 * @param segs the segments to encode
 	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the segments
-	 * @throws NullPointerException if the list of segments, a segment, or the error correction level is {@code null}
-	 * @throws IllegalArgumentException if the data is too long to fit in the largest version QR Code at the ECL
+	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
+	 * @throws IllegalArgumentException if the segments fail to fit in the
+	 * largest version QR Code at the ECL, which means they are too long
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl) {
 		return encodeSegments(segs, ecl, MIN_VERSION, MAX_VERSION, -1, true);
@@ -108,9 +111,10 @@ public final class QrCode {
 	 * @param mask the mask pattern to use, which is either -1 for automatic choice or from 0 to 7 for fixed choice
 	 * @param boostEcl increases the error correction level if it can be done without increasing the version number
 	 * @return a QR Code representing the segments
-	 * @throws NullPointerException if the list of segments, a segment, or the error correction level is {@code null}
-	 * @throws IllegalArgumentException if 1 &le; minVersion &le; maxVersion &le; 40 is violated, or if mask
-	 * &lt; &minus;1 or mask > 7, or if the data is too long to fit in a QR Code at maxVersion at the ECL
+	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
+	 * @throws IllegalArgumentException if 1 &le; minVersion &le; maxVersion &le; 40
+	 * is violated, or if mask &lt; &minus;1 or mask > 7, or if the segments fail
+	 * to fit in the maxVersion QR Code at the ECL, which means they are too long
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
 		Objects.requireNonNull(segs);
@@ -197,13 +201,14 @@ public final class QrCode {
 	/**
 	 * Constructs a QR Code symbol with the specified version number, error correction level, binary data array, and mask number.
 	 * <p>This is a cumbersome low-level constructor that should not be invoked directly by the user.
-	 * To go one level up, see the {@link #encodeSegments(List,Ecc)} function.</p>
+	 * To go one level up, see the {@link #encodeSegments(List,Ecc,int,int,int,boolean)} function.</p>
 	 * @param ver the version number to use, which must be in the range 1 to 40, inclusive
 	 * @param ecl the error correction level to use
-	 * @param dataCodewords the raw binary user data to encode
-	 * @param mask the mask pattern to use, which is either -1 for automatic choice or from 0 to 7 for fixed choice
+	 * @param dataCodewords the bytes representing segments to encode (without ECC)
+	 * @param mask the mask pattern to use, which is either &minus;1 for automatic choice or from 0 to 7 for fixed choice
 	 * @throws NullPointerException if the byte array or error correction level is {@code null}
-	 * @throws IllegalArgumentException if the version or mask value is out of range
+	 * @throws IllegalArgumentException if the version or mask value is out of range,
+	 * or if the data is the wrong length for the specified version and error correction level
 	 */
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments
@@ -251,7 +256,8 @@ public final class QrCode {
 	 * @param scale the module scale factor, which must be positive
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return an image representing this QR Code, with padding and scaling
-	 * @throws IllegalArgumentException if the scale or border is out of range
+	 * @throws IllegalArgumentException if the scale or border is out of range, or if
+	 * {scale, border, size} cause the image dimensions to exceed Integer.MAX_VALUE
 	 */
 	public BufferedImage toImage(int scale, int border) {
 		if (scale <= 0 || border < 0)
@@ -276,6 +282,7 @@ public final class QrCode {
 	 * Note that Unix newlines (\n) are always used, regardless of the platform.
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return a string representing this QR Code as an SVG document
+	 * @throws IllegalArgumentException if the border is negative
 	 */
 	public String toSvgString(int border) {
 		if (border < 0)
@@ -526,7 +533,7 @@ public final class QrCode {
 	}
 	
 	
-	// A messy helper function for the constructors. This QR Code must be in an unmasked state when this
+	// A messy helper function for the constructor. This QR Code must be in an unmasked state when this
 	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
 	// This method applies and returns the actual mask chosen, from 0 to 7.
 	private int handleConstructorMasking(int mask) {
@@ -672,7 +679,7 @@ public final class QrCode {
 		int result = size * size;   // Number of modules in the whole QR symbol square
 		result -= 8 * 8 * 3;        // Subtract the three finders with separators
 		result -= 15 * 2 + 1;       // Subtract the format information and black module
-		result -= (size - 16) * 2;  // Subtract the timing patterns
+		result -= (size - 16) * 2;  // Subtract the timing patterns (excluding finders)
 		// The five lines above are equivalent to: int result = (16 * ver + 128) * ver + 64;
 		if (ver >= 2) {
 			int numAlign = ver / 7 + 2;
@@ -763,7 +770,7 @@ public final class QrCode {
 	 */
 	private static final class ReedSolomonGenerator {
 		
-		/*-- Immutable field --*/
+		/*-- Field --*/
 		
 		// Coefficients of the divisor polynomial, stored from highest to lowest power, excluding the leading term which
 		// is always 1. For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.

@@ -36,7 +36,7 @@ public final class BitBuffer implements Cloneable {
 	
 	private BitSet data;
 	
-	private int bitLength;
+	private int bitLength;  // Non-negative
 	
 	
 	
