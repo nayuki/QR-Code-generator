@@ -497,12 +497,8 @@ vector<int> QrCode::getAlignmentPatternPositions(int ver) {
 		return vector<int>();
 	else {
 		int numAlign = ver / 7 + 2;
-		int step;
-		if (ver != 32) {
-			// ceil((size - 13) / (2*numAlign - 2)) * 2
-			step = (ver * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;
-		} else  // C-C-C-Combo breaker!
-			step = 26;
+		int step = (ver == 32) ? 26 :
+			(ver*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
 		
 		vector<int> result;
 		for (int i = 0, pos = ver * 4 + 10; i < numAlign - 1; i++, pos -= step)

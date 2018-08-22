@@ -496,11 +496,8 @@ class QrCode(object):
 			return []
 		else:
 			numalign = ver // 7 + 2
-			if ver != 32:
-				# ceil((size - 13) / (2*numalign - 2)) * 2
-				step = (ver * 4 + numalign * 2 + 1) // (2 * numalign - 2) * 2
-			else:  # C-C-C-Combo breaker!
-				step = 26
+			step = 26 if (ver == 32) else \
+				(ver*4 + numalign*2 + 1) // (numalign*2 - 2) * 2
 			start = ver * 4 + 10
 			result = [(start - i * step) for i in range(numalign - 1)] + [6]
 			return list(reversed(result))

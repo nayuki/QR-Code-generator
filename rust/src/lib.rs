@@ -629,12 +629,8 @@ impl QrCode {
 			vec![]
 		} else {
 			let numalign: i32 = (ver as i32) / 7 + 2;
-			let step: i32 = if ver != 32 {
-				// ceil((size - 13) / (2*numAlign - 2)) * 2
-				((ver as i32) * 4 + numalign * 2 + 1) / (2 * numalign - 2) * 2
-			} else {  // C-C-C-Combo breaker!
-				26
-			};
+			let step: i32 = if ver == 32 { 26 } else
+				{((ver as i32)*4 + numalign*2 + 1) / (numalign*2 - 2) * 2};
 			let start = (ver as i32) * 4 + 10;
 			let mut result: Vec<i32> = (0 .. numalign - 1).map(|i| start - i * step).collect();
 			result.push(6);

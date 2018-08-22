@@ -604,11 +604,8 @@ var qrcodegen = new function() {
 		else {
 			var size = ver * 4 + 17;
 			var numAlign = Math.floor(ver / 7) + 2;
-			var step;
-			if (ver != 32)
-				step = Math.ceil((size - 13) / (2 * numAlign - 2)) * 2;
-			else  // C-C-C-Combo breaker!
-				step = 26;
+			var step = (ver == 32) ? 26 :
+				Math.ceil((size - 13) / (numAlign*2 - 2)) * 2;
 			
 			var result = [6];
 			for (var i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)

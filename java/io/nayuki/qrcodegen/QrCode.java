@@ -653,11 +653,10 @@ public final class QrCode {
 		else {
 			int numAlign = ver / 7 + 2;
 			int step;
-			if (ver != 32) {
-				// ceil((size - 13) / (2*numAlign - 2)) * 2
-				step = (ver * 4 + numAlign * 2 + 1) / (2 * numAlign - 2) * 2;
-			} else  // C-C-C-Combo breaker!
+			if (ver == 32)  // Special snowflake
 				step = 26;
+			else  // step = ceil[(size - 13) / (numAlign*2 - 2)] * 2
+				step = (ver*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
 			
 			int[] result = new int[numAlign];
 			result[0] = 6;

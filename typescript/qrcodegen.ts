@@ -567,11 +567,8 @@ namespace qrcodegen {
 			else {
 				let size: int = ver * 4 + 17;
 				let numAlign: int = Math.floor(ver / 7) + 2;
-				let step: int;
-				if (ver != 32)
-					step = Math.ceil((size - 13) / (2 * numAlign - 2)) * 2;
-				else  // C-C-C-Combo breaker!
-					step = 26;
+				let step: int = (ver == 32) ? 26 :
+					Math.ceil((size - 13) / (numAlign*2 - 2)) * 2;
 				
 				let result: Array<int> = [6];
 				for (let i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
