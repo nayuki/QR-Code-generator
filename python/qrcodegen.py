@@ -241,6 +241,7 @@ class QrCode(object):
 	# ---- Private helper methods for constructor: Drawing function modules ----
 	
 	def _draw_function_patterns(self):
+		"""Reads this object's version field, and draws and marks all function modules."""
 		# Draw horizontal and vertical timing patterns
 		for i in range(self._size):
 			self._set_function_module(6, i, i % 2 == 0)
@@ -296,7 +297,7 @@ class QrCode(object):
 	
 	def _draw_version(self):
 		"""Draws two copies of the version bits (with its own error correction code),
-		based on this object's version field (which only has an effect for 7 <= version <= 40)."""
+		based on this object's version field, iff 7 <= version <= 40."""
 		if self._version < 7:
 			return
 		
@@ -316,7 +317,8 @@ class QrCode(object):
 	
 	
 	def _draw_finder_pattern(self, x, y):
-		"""Draws a 9*9 finder pattern including the border separator, with the center module at (x, y)."""
+		"""Draws a 9*9 finder pattern including the border separator,
+		with the center module at (x, y). Modules can be out of bounds."""
 		for i in range(-4, 5):
 			for j in range(-4, 5):
 				xx, yy = x + j, y + i
@@ -326,7 +328,8 @@ class QrCode(object):
 	
 	
 	def _draw_alignment_pattern(self, x, y):
-		"""Draws a 5*5 alignment pattern, with the center module at (x, y)."""
+		"""Draws a 5*5 alignment pattern, with the center module
+		at (x, y). All modules must be in bounds."""
 		for i in range(-2, 3):
 			for j in range(-2, 3):
 				self._set_function_module(x + j, y + i, max(abs(i), abs(j)) != 1)
@@ -334,7 +337,7 @@ class QrCode(object):
 	
 	def _set_function_module(self, x, y, isblack):
 		"""Sets the color of a module and marks it as a function module.
-		Only used by the constructor. Coordinates must be in range."""
+		Only used by the constructor. Coordinates must be in bounds."""
 		assert type(isblack) is bool
 		self._modules[y][x] = isblack
 		self._isfunction[y][x] = True

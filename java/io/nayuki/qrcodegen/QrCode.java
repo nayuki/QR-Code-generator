@@ -312,6 +312,7 @@ public final class QrCode {
 	
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
+	// Reads this object's version field, and draws and marks all function modules.
 	private void drawFunctionPatterns() {
 		// Draw horizontal and vertical timing patterns
 		for (int i = 0; i < size; i++) {
@@ -373,7 +374,7 @@ public final class QrCode {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field (which only has an effect for 7 <= version <= 40).
+	// based on this object's version field, iff 7 <= version <= 40.
 	private void drawVersion() {
 		if (version < 7)
 			return;
@@ -395,7 +396,8 @@ public final class QrCode {
 	}
 	
 	
-	// Draws a 9*9 finder pattern including the border separator, with the center module at (x, y).
+	// Draws a 9*9 finder pattern including the border separator,
+	// with the center module at (x, y). Modules can be out of bounds.
 	private void drawFinderPattern(int x, int y) {
 		for (int i = -4; i <= 4; i++) {
 			for (int j = -4; j <= 4; j++) {
@@ -408,7 +410,8 @@ public final class QrCode {
 	}
 	
 	
-	// Draws a 5*5 alignment pattern, with the center module at (x, y).
+	// Draws a 5*5 alignment pattern, with the center module
+	// at (x, y). All modules must be in bounds.
 	private void drawAlignmentPattern(int x, int y) {
 		for (int i = -2; i <= 2; i++) {
 			for (int j = -2; j <= 2; j++)
@@ -418,7 +421,7 @@ public final class QrCode {
 	
 	
 	// Sets the color of a module and marks it as a function module.
-	// Only used by the constructor. Coordinates must be in range.
+	// Only used by the constructor. Coordinates must be in bounds.
 	private void setFunctionModule(int x, int y, boolean isBlack) {
 		modules[y][x] = isBlack;
 		isFunction[y][x] = true;

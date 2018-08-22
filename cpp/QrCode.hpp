@@ -164,6 +164,7 @@ class QrCode final {
 	
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
+	// Reads this object's version field, and draws and marks all function modules.
 	private: void drawFunctionPatterns();
 	
 	
@@ -173,20 +174,22 @@ class QrCode final {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field (which only has an effect for 7 <= version <= 40).
+	// based on this object's version field, iff 7 <= version <= 40.
 	private: void drawVersion();
 	
 	
-	// Draws a 9*9 finder pattern including the border separator, with the center module at (x, y).
+	// Draws a 9*9 finder pattern including the border separator,
+	// with the center module at (x, y). Modules can be out of bounds.
 	private: void drawFinderPattern(int x, int y);
 	
 	
-	// Draws a 5*5 alignment pattern, with the center module at (x, y).
+	// Draws a 5*5 alignment pattern, with the center module
+	// at (x, y). All modules must be in bounds.
 	private: void drawAlignmentPattern(int x, int y);
 	
 	
 	// Sets the color of a module and marks it as a function module.
-	// Only used by the constructor. Coordinates must be in range.
+	// Only used by the constructor. Coordinates must be in bounds.
 	private: void setFunctionModule(int x, int y, bool isBlack);
 	
 	

@@ -269,6 +269,7 @@ impl QrCode {
 	
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
+	// Reads this object's version field, and draws and marks all function modules.
 	fn draw_function_patterns(&mut self) {
 		// Draw horizontal and vertical timing patterns
 		let size: i32 = self.size;
@@ -339,7 +340,7 @@ impl QrCode {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field (which only has an effect for 7 <= version <= 40).
+	// based on this object's version field, iff 7 <= version <= 40.
 	fn draw_version(&mut self) {
 		if self.version.value() < 7 {
 			return;
@@ -364,7 +365,8 @@ impl QrCode {
 	}
 	
 	
-	// Draws a 9*9 finder pattern including the border separator, with the center module at (x, y).
+	// Draws a 9*9 finder pattern including the border separator,
+	// with the center module at (x, y). Modules can be out of bounds.
 	fn draw_finder_pattern(&mut self, x: i32, y: i32) {
 		for i in -4 .. 5 {
 			for j in -4 .. 5 {
@@ -379,7 +381,8 @@ impl QrCode {
 	}
 	
 	
-	// Draws a 5*5 alignment pattern, with the center module at (x, y).
+	// Draws a 5*5 alignment pattern, with the center module
+	// at (x, y). All modules must be in bounds.
 	fn draw_alignment_pattern(&mut self, x: i32, y: i32) {
 		for i in -2 .. 3 {
 			for j in -2 .. 3 {
@@ -390,7 +393,7 @@ impl QrCode {
 	
 	
 	// Sets the color of a module and marks it as a function module.
-	// Only used by the constructor. Coordinates must be in range.
+	// Only used by the constructor. Coordinates must be in bounds.
 	fn set_function_module(&mut self, x: i32, y: i32, isblack: bool) {
 		*self.module_mut(x, y) = isblack;
 		self.isfunction[(y * self.size + x) as usize] = true;

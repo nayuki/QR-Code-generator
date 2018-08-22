@@ -251,6 +251,7 @@ namespace qrcodegen {
 		
 		/*-- Private helper methods for constructor: Drawing function modules --*/
 		
+		// Reads this object's version field, and draws and marks all function modules.
 		private drawFunctionPatterns(): void {
 			// Draw horizontal and vertical timing patterns
 			for (let i = 0; i < this.size; i++) {
@@ -313,7 +314,7 @@ namespace qrcodegen {
 		
 		
 		// Draws two copies of the version bits (with its own error correction code),
-		// based on this object's version field (which only has an effect for 7 <= version <= 40).
+		// based on this object's version field, iff 7 <= version <= 40.
 		private drawVersion(): void {
 			if (this.version < 7)
 				return;
@@ -337,7 +338,8 @@ namespace qrcodegen {
 		}
 		
 		
-		// Draws a 9*9 finder pattern including the border separator, with the center module at (x, y).
+		// Draws a 9*9 finder pattern including the border separator,
+		// with the center module at (x, y). Modules can be out of bounds.
 		private drawFinderPattern(x: int, y: int): void {
 			for (let i = -4; i <= 4; i++) {
 				for (let j = -4; j <= 4; j++) {
@@ -351,7 +353,8 @@ namespace qrcodegen {
 		}
 		
 		
-		// Draws a 5*5 alignment pattern, with the center module at (x, y).
+		// Draws a 5*5 alignment pattern, with the center module
+		// at (x, y). All modules must be in bounds.
 		private drawAlignmentPattern(x: int, y: int): void {
 			for (let i = -2; i <= 2; i++) {
 				for (let j = -2; j <= 2; j++)
@@ -361,7 +364,7 @@ namespace qrcodegen {
 		
 		
 		// Sets the color of a module and marks it as a function module.
-		// Only used by the constructor. Coordinates must be in range.
+		// Only used by the constructor. Coordinates must be in bounds.
 		private setFunctionModule(x: int, y: int, isBlack: boolean): void {
 			this.modules[y][x] = isBlack;
 			this.isFunction[y][x] = true;
