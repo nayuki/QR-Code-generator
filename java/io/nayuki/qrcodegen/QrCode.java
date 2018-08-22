@@ -197,7 +197,7 @@ public final class QrCode {
 	/*---- Constructor ----*/
 	
 	/**
-	 * Creates a new QR Code symbol with the specified version number, error correction level, binary data array, and mask number.
+	 * Constructs a QR Code symbol with the specified version number, error correction level, binary data array, and mask number.
 	 * <p>This is a cumbersome low-level constructor that should not be invoked directly by the user.
 	 * To go one level up, see the {@link #encodeSegments(List,Ecc)} function.</p>
 	 * @param ver the version number to use, which must be in the range 1 to 40, inclusive
@@ -777,7 +777,7 @@ public final class QrCode {
 		/*-- Constructor --*/
 		
 		/**
-		 * Creates a Reed-Solomon ECC generator for the specified degree. This could be implemented
+		 * Constructs a Reed-Solomon ECC generator for the specified degree. This could be implemented
 		 * as a lookup table over all possible parameter values, instead of as an algorithm.
 		 * @param degree the divisor polynomial degree, which must be between 1 and 255
 		 * @throws IllegalArgumentException if degree &lt; 1 or degree > 255

@@ -169,7 +169,7 @@ public final class QrSegment {
 	/*---- Constructor ----*/
 	
 	/**
-	 * Creates a new QR Code data segment with the specified parameters and data.
+	 * Constructs a QR Code data segment with the specified parameters and data.
 	 * @param md the mode, which is not {@code null}
 	 * @param numCh the data length in characters, which is non-negative
 	 * @param data the data bits of this segment, which is not {@code null}
