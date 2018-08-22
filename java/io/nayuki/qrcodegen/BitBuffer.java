@@ -82,7 +82,7 @@ public final class BitBuffer implements Cloneable {
 	 * @return this sequence as a new array of bytes (not {@code null})
 	 */
 	public byte[] getBytes() {
-		byte[] result = new byte[(bitLength + 7) / 8];
+		byte[] result = new byte[(bitLength + 7) >>> 3];  // Round up to whole byte, won't overflow
 		for (int i = 0; i < bitLength; i++)
 			result[i >>> 3] |= data.get(i) ? 1 << (7 - (i & 7)) : 0;
 		return result;

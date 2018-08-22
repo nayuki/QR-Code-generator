@@ -71,7 +71,7 @@ public final class QrSegment {
 		
 		BitBuffer bb = new BitBuffer();
 		int i;
-		for (i = 0; i + 3 <= digits.length(); i += 3)  // Process groups of 3
+		for (i = 0; i <= digits.length() - 3; i += 3)  // Process groups of 3
 			bb.appendBits(Integer.parseInt(digits.substring(i, i + 3)), 10);
 		int rem = digits.length() - i;
 		if (rem > 0)  // 1 or 2 digits remaining
@@ -96,7 +96,7 @@ public final class QrSegment {
 		
 		BitBuffer bb = new BitBuffer();
 		int i;
-		for (i = 0; i + 2 <= text.length(); i += 2) {  // Process groups of 2
+		for (i = 0; i <= text.length() - 2; i += 2) {  // Process groups of 2
 			int temp = ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
 			temp += ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
 			bb.appendBits(temp, 11);
