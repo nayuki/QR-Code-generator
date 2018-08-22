@@ -24,7 +24,6 @@
 #   Software.
 # 
 
-from __future__ import print_function
 import itertools, random, subprocess, sys, time
 if sys.version_info.major < 3:
 	raise RuntimeError("Requires Python 3+")
