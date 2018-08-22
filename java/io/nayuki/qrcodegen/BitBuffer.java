@@ -94,10 +94,14 @@ public final class BitBuffer implements Cloneable {
 	 * to this sequence. Requires 0 &le; val &lt; 2<sup>len</sup>.
 	 * @param val the value to append
 	 * @param len the number of low bits in the value to take
+	 * @throws IllegalStateException if appending the data
+	 * would make bitLength exceed Integer.MAX_VALUE
 	 */
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
+		if (Integer.MAX_VALUE - bitLength < len)
+			throw new IllegalStateException("Maximum length reached");
 		for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
 			data.set(bitLength, QrCode.getBit(val, i));
 	}
@@ -107,10 +111,14 @@ public final class BitBuffer implements Cloneable {
 	 * Appends the bit data of the specified segment to this bit buffer.
 	 * @param seg the segment whose data to append (not {@code null})
 	 * @throws NullPointerException if the segment is {@code null}
+	 * @throws IllegalStateException if appending the data
+	 * would make bitLength exceed Integer.MAX_VALUE
 	 */
 	public void appendData(QrSegment seg) {
 		Objects.requireNonNull(seg);
 		BitBuffer bb = seg.data;
+		if (Integer.MAX_VALUE - bitLength < bb.bitLength)
+			throw new IllegalStateException("Maximum length reached");
 		for (int i = 0; i < bb.bitLength; i++, bitLength++)  // Append bit by bit
 			data.set(bitLength, bb.data.get(i));
 	}
