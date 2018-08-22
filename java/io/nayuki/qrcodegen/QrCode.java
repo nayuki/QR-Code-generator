@@ -262,8 +262,8 @@ public final class QrCode {
 		BufferedImage result = new BufferedImage((size + border * 2) * scale, (size + border * 2) * scale, BufferedImage.TYPE_INT_RGB);
 		for (int y = 0; y < result.getHeight(); y++) {
 			for (int x = 0; x < result.getWidth(); x++) {
-				boolean val = getModule(x / scale - border, y / scale - border);
-				result.setRGB(x, y, val ? 0x000000 : 0xFFFFFF);
+				boolean color = getModule(x / scale - border, y / scale - border);
+				result.setRGB(x, y, color ? 0x000000 : 0xFFFFFF);
 			}
 		}
 		return result;
@@ -445,8 +445,8 @@ public final class QrCode {
 		ReedSolomonGenerator rs = new ReedSolomonGenerator(blockEccLen);
 		for (int i = 0, k = 0; i < numBlocks; i++) {
 			byte[] dat = Arrays.copyOfRange(data, k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
-			byte[] block = Arrays.copyOf(dat, shortBlockLen + 1);
 			k += dat.length;
+			byte[] block = Arrays.copyOf(dat, shortBlockLen + 1);
 			byte[] ecc = rs.getRemainder(dat);
 			System.arraycopy(ecc, 0, block, block.length - blockEccLen, ecc.length);
 			blocks[i] = block;
@@ -668,7 +668,7 @@ public final class QrCode {
 		
 		int size = ver * 4 + 17;
 		int result = size * size;   // Number of modules in the whole QR symbol square
-		result -= 64 * 3;           // Subtract the three finders with separators
+		result -= 8 * 8 * 3;        // Subtract the three finders with separators
 		result -= 15 * 2 + 1;       // Subtract the format information and black module
 		result -= (size - 16) * 2;  // Subtract the timing patterns
 		// The five lines above are equivalent to: int result = (16 * ver + 128) * ver + 64;

@@ -224,6 +224,7 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
+	
 	/*---- Kanji mode segment encoder ----*/
 	
 	/**
@@ -384,17 +385,17 @@ public final class QrSegmentAdvanced {
 		"/////////////////////////////////////////////w==";
 	
 	
-	private static short[] UNICODE_TO_QR_KANJI = new short[65536];
+	private static short[] UNICODE_TO_QR_KANJI = new short[1 << 16];
 	
 	static {  // Unpack the Shift JIS table into a more computation-friendly form
 		Arrays.fill(UNICODE_TO_QR_KANJI, (short)-1);
 		byte[] bytes = Base64.getDecoder().decode(PACKED_QR_KANJI_TO_UNICODE);
 		for (int i = 0; i < bytes.length; i += 2) {
-			int j = ((bytes[i] & 0xFF) << 8) | (bytes[i + 1] & 0xFF);
-			if (j == 0xFFFF)
+			char c = (char)(((bytes[i] & 0xFF) << 8) | (bytes[i + 1] & 0xFF));
+			if (c == 0xFFFF)
 				continue;
-			assert UNICODE_TO_QR_KANJI[j] == -1;
-			UNICODE_TO_QR_KANJI[j] = (short)(i / 2);
+			assert UNICODE_TO_QR_KANJI[c] == -1;
+			UNICODE_TO_QR_KANJI[c] = (short)(i / 2);
 		}
 	}
 	

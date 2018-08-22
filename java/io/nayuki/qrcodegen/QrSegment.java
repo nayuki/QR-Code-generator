@@ -259,7 +259,7 @@ public final class QrSegment {
 		/*-- Constructor --*/
 		
 		private Mode(int mode, int... ccbits) {
-			this.modeBits = mode;
+			modeBits = mode;
 			numBitsCharCount = ccbits;
 		}
 		
