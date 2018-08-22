@@ -322,13 +322,13 @@ namespace qrcodegen {
 			let rem: int = this.version;  // version is uint6, in the range [7, 40]
 			for (let i = 0; i < 12; i++)
 				rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
-			let data: int = this.version << 12 | rem;  // uint18
-			if (data >>> 18 != 0)
+			let bits: int = this.version << 12 | rem;  // uint18
+			if (bits >>> 18 != 0)
 				throw "Assertion error";
 			
 			// Draw two copies
 			for (let i = 0; i < 18; i++) {
-				let bt: boolean = getBit(data, i);
+				let bt: boolean = getBit(bits, i);
 				let a: int = this.size - 11 + i % 3;
 				let b: int = Math.floor(i / 3);
 				this.setFunctionModule(a, b, bt);

@@ -350,12 +350,12 @@ impl QrCode {
 		for _ in 0 .. 12 {
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
 		}
-		let data: u32 = (self.version.value() as u32) << 12 | rem;  // uint18
-		assert!(data >> 18 == 0, "Assertion error");
+		let bits: u32 = (self.version.value() as u32) << 12 | rem;  // uint18
+		assert!(bits >> 18 == 0, "Assertion error");
 		
 		// Draw two copies
 		for i in 0 .. 18 {
-			let bit: bool = get_bit(data, i);
+			let bit: bool = get_bit(bits, i);
 			let a: i32 = self.size - 11 + i % 3;
 			let b: i32 = i / 3;
 			self.set_function_module(a, b, bit);

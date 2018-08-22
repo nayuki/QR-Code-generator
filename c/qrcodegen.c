@@ -403,16 +403,16 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 		int rem = version;  // version is uint6, in the range [7, 40]
 		for (int i = 0; i < 12; i++)
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
-		long data = (long)version << 12 | rem;  // uint18
-		assert(data >> 18 == 0);
+		long bits = (long)version << 12 | rem;  // uint18
+		assert(bits >> 18 == 0);
 		
 		// Draw two copies
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 3; j++) {
 				int k = qrsize - 11 + j;
-				setModule(qrcode, k, i, (data & 1) != 0);
-				setModule(qrcode, i, k, (data & 1) != 0);
-				data >>= 1;
+				setModule(qrcode, k, i, (bits & 1) != 0);
+				setModule(qrcode, i, k, (bits & 1) != 0);
+				bits >>= 1;
 			}
 		}
 	}

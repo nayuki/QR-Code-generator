@@ -382,12 +382,12 @@ public final class QrCode {
 		int rem = version;  // version is uint6, in the range [7, 40]
 		for (int i = 0; i < 12; i++)
 			rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
-		int data = version << 12 | rem;  // uint18
-		assert data >>> 18 == 0;
+		int bits = version << 12 | rem;  // uint18
+		assert bits >>> 18 == 0;
 		
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
-			boolean bit = getBit(data, i);
+			boolean bit = getBit(bits, i);
 			int a = size - 11 + i % 3, b = i / 3;
 			setFunctionModule(a, b, bit);
 			setFunctionModule(b, a, bit);

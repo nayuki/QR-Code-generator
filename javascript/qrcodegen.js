@@ -259,13 +259,13 @@ var qrcodegen = new function() {
 			var rem = version;  // version is uint6, in the range [7, 40]
 			for (var i = 0; i < 12; i++)
 				rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
-			var data = version << 12 | rem;  // uint18
-			if (data >>> 18 != 0)
+			var bits = version << 12 | rem;  // uint18
+			if (bits >>> 18 != 0)
 				throw "Assertion error";
 			
 			// Draw two copies
 			for (var i = 0; i < 18; i++) {
-				var bit = getBit(data, i);
+				var bit = getBit(bits, i);
 				var a = size - 11 + i % 3, b = Math.floor(i / 3);
 				setFunctionModule(a, b, bit);
 				setFunctionModule(b, a, bit);
