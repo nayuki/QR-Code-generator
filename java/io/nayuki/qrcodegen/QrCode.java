@@ -142,7 +142,7 @@ public final class QrCode {
 		for (QrSegment seg : segs) {
 			bb.appendBits(seg.mode.modeBits, 4);
 			bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-			bb.appendData(seg);
+			bb.appendData(seg.data);
 		}
 		
 		// Add terminator and pad up to a byte if applicable

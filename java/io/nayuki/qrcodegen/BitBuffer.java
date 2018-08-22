@@ -110,15 +110,14 @@ public final class BitBuffer implements Cloneable {
 	
 	
 	/**
-	 * Appends the bit data of the specified segment to this bit buffer.
-	 * @param seg the segment whose data to append (not {@code null})
-	 * @throws NullPointerException if the segment is {@code null}
+	 * Appends the specified bit buffer to this bit buffer.
+	 * @param bb the bit buffer whose data to append (not {@code null})
+	 * @throws NullPointerException if the bit buffer is {@code null}
 	 * @throws IllegalStateException if appending the data
 	 * would make bitLength exceed Integer.MAX_VALUE
 	 */
-	public void appendData(QrSegment seg) {
-		Objects.requireNonNull(seg);
-		BitBuffer bb = seg.data;
+	public void appendData(BitBuffer bb) {
+		Objects.requireNonNull(bb);
 		if (Integer.MAX_VALUE - bitLength < bb.bitLength)
 			throw new IllegalStateException("Maximum length reached");
 		for (int i = 0; i < bb.bitLength; i++, bitLength++)  // Append bit by bit
