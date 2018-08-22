@@ -368,8 +368,7 @@ class QrCode(object):
 			ecc = rs.get_remainder(dat)
 			if i < numshortblocks:
 				dat.append(0)
-			dat.extend(ecc)
-			blocks.append(dat)
+			blocks.append(dat + ecc)
 		assert k == len(data)
 		
 		# Interleave (not concatenate) the bytes from every block into a single sequence

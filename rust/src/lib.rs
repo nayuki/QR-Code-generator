@@ -240,7 +240,7 @@ impl QrCode {
 	// Note that Unix newlines (\n) are always used, regardless of the platform.
 	pub fn to_svg_string(&self, border: i32) -> String {
 		assert!(border >= 0, "Border must be non-negative");
-		let mut result: String = String::new();
+		let mut result = String::new();
 		result += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 		result += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
 		let dimension = self.size.checked_add(border.checked_mul(2).unwrap()).unwrap();
@@ -308,7 +308,7 @@ impl QrCode {
 		// Calculate error correction code and pack bits
 		let size: i32 = self.size;
 		// errcorrlvl is uint2, mask is uint3
-		let mut data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask.value() as u32);
+		let data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask.value() as u32);
 		let mut rem: u32 = data;
 		for _ in 0 .. 10 {
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -420,8 +420,7 @@ impl QrCode {
 		let rs = ReedSolomonGenerator::new(blockecclen);
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
-			let mut dat = Vec::<u8>::with_capacity(shortblocklen + 1);
-			dat.extend_from_slice(&data[k .. k + shortblocklen - blockecclen + ((i >= numshortblocks) as usize)]);
+			let mut dat = data[k .. k + shortblocklen - blockecclen + ((i >= numshortblocks) as usize)].to_vec();
 			k += dat.len();
 			let ecc: Vec<u8> = rs.get_remainder(&dat);
 			if i < numshortblocks {
