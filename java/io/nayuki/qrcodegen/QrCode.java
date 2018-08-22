@@ -128,8 +128,7 @@ public final class QrCode {
 			if (version >= maxVersion)  // All versions in the range could not fit the given data
 				throw new IllegalArgumentException("Data too long");
 		}
-		if (dataUsedBits == -1)
-			throw new AssertionError();
+		assert dataUsedBits != -1;
 		
 		// Increase the error correction level while the data still fits in the current version number
 		for (Ecc newEcl : Ecc.values()) {
@@ -153,8 +152,7 @@ public final class QrCode {
 		// Pad with alternate bytes until data capacity is reached
 		for (int padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bb.appendBits(padByte, 8);
-		if (bb.bitLength() % 8 != 0)
-			throw new AssertionError();
+		assert bb.bitLength() % 8 == 0;
 		
 		// Create the QR Code symbol
 		return new QrCode(version, ecl, bb.getBytes(), mask);
@@ -354,8 +352,7 @@ public final class QrCode {
 			rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
 		data = data << 10 | rem;
 		data ^= 0x5412;  // uint15
-		if (data >>> 15 != 0)
-			throw new AssertionError();
+		assert data >>> 15 == 0;
 		
 		// Draw first copy
 		for (int i = 0; i <= 5; i++)
@@ -386,8 +383,7 @@ public final class QrCode {
 		for (int i = 0; i < 12; i++)
 			rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
 		int data = version << 12 | rem;  // uint18
-		if (data >>> 18 != 0)
-			throw new AssertionError();
+		assert data >>> 18 == 0;
 		
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
@@ -497,8 +493,7 @@ public final class QrCode {
 				}
 			}
 		}
-		if (i != data.length * 8)
-			throw new AssertionError();
+		assert i == data.length * 8;
 	}
 	
 	
@@ -546,8 +541,7 @@ public final class QrCode {
 				applyMask(i);  // Undoes the mask due to XOR
 			}
 		}
-		if (mask < 0 || mask > 7)
-			throw new AssertionError();
+		assert 0 <= mask && mask <= 7;
 		drawFormatBits(mask);  // Overwrite old format bits
 		applyMask(mask);  // Apply the final choice of mask
 		return mask;  // The caller shall assign this value to the final-declared field
@@ -837,16 +831,14 @@ public final class QrCode {
 		// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 		// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
 		private static int multiply(int x, int y) {
-			if (x >>> 8 != 0 || y >>> 8 != 0)
-				throw new IllegalArgumentException("Byte out of range");
+			assert x >>> 8 == 0 && y >>> 8 == 0;
 			// Russian peasant multiplication
 			int z = 0;
 			for (int i = 7; i >= 0; i--) {
 				z = (z << 1) ^ ((z >>> 7) * 0x11D);
 				z ^= ((y >>> i) & 1) * x;
 			}
-			if (z >>> 8 != 0)
-				throw new AssertionError();
+			assert z >>> 8 == 0;
 			return z;
 		}
 		

@@ -393,8 +393,7 @@ public final class QrSegmentAdvanced {
 			int j = ((bytes[i] & 0xFF) << 8) | (bytes[i + 1] & 0xFF);
 			if (j == 0xFFFF)
 				continue;
-			if (UNICODE_TO_QR_KANJI[j] != -1)
-				throw new AssertionError();
+			assert UNICODE_TO_QR_KANJI[j] == -1;
 			UNICODE_TO_QR_KANJI[j] = (short)(i / 2);
 		}
 	}
