@@ -131,12 +131,12 @@ public final class QrCode {
 		assert dataUsedBits != -1;
 		
 		// Increase the error correction level while the data still fits in the current version number
-		for (Ecc newEcl : Ecc.values()) {
+		for (Ecc newEcl : Ecc.values()) {  // From low to high
 			if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
 				ecl = newEcl;
 		}
 		
-		// Create the data bit string by concatenating all segments
+		// Concatenate all segments to create the data bit string
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 		BitBuffer bb = new BitBuffer();
 		for (QrSegment seg : segs) {
@@ -368,7 +368,7 @@ public final class QrCode {
 			setFunctionModule(size - 1 - i, 8, getBit(data, i));
 		for (int i = 8; i < 15; i++)
 			setFunctionModule(8, size - 15 + i, getBit(data, i));
-		setFunctionModule(8, size - 8, true);
+		setFunctionModule(8, size - 8, true);  // Always black
 	}
 	
 	
@@ -497,10 +497,11 @@ public final class QrCode {
 	}
 	
 	
-	// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-	// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
-	// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-	// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+	// XORs the codeword modules in this QR Code with the given mask pattern.
+	// The function modules must be marked and the codeword bits must be drawn
+	// before masking. Due to the arithmetic of XOR, calling applyMask() with
+	// the same mask value a second time will undo the mask. A final well-formed
+	// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
 	private void applyMask(int mask) {
 		if (mask < 0 || mask > 7)
 			throw new IllegalArgumentException("Mask value out of range");

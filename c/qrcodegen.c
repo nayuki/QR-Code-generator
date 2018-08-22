@@ -456,7 +456,7 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 		setModule(qrcode, qrsize - 1 - i, 8, getBit(data, i));
 	for (int i = 8; i < 15; i++)
 		setModule(qrcode, 8, qrsize - 15 + i, getBit(data, i));
-	setModule(qrcode, 8, qrsize - 8, true);
+	setModule(qrcode, 8, qrsize - 8, true);  // Always black
 }
 
 
@@ -519,10 +519,11 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 }
 
 
-// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-// properties, calling applyMask(..., m) twice with the same value is equivalent to no change at all.
-// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+// XORs the codeword modules in this QR Code with the given mask pattern.
+// The function modules must be marked and the codeword bits must be drawn
+// before masking. Due to the arithmetic of XOR, calling applyMask() with
+// the same mask value a second time will undo the mask. A final well-formed
+// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask) {
 	assert(0 <= (int)mask && (int)mask <= 7);  // Disallows qrcodegen_Mask_AUTO
 	int qrsize = qrcodegen_getSize(qrcode);
@@ -913,12 +914,12 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	assert(dataUsedBits != -1);
 	
 	// Increase the error correction level while the data still fits in the current version number
-	for (int i = (int)qrcodegen_Ecc_MEDIUM; i <= (int)qrcodegen_Ecc_HIGH; i++) {
+	for (int i = (int)qrcodegen_Ecc_MEDIUM; i <= (int)qrcodegen_Ecc_HIGH; i++) {  // From low to high
 		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, (enum qrcodegen_Ecc)i) * 8)
 			ecl = (enum qrcodegen_Ecc)i;
 	}
 	
-	// Create the data bit string by concatenating all segments
+	// Concatenate all segments to create the data bit string
 	int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;

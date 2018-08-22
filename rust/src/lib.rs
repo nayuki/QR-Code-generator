@@ -123,13 +123,13 @@ impl QrCode {
 		}
 		
 		// Increase the error correction level while the data still fits in the current version number
-		for newecl in &[QrCodeEcc::Medium, QrCodeEcc::Quartile, QrCodeEcc::High] {
+		for newecl in &[QrCodeEcc::Medium, QrCodeEcc::Quartile, QrCodeEcc::High] {  // From low to high
 			if boostecl && datausedbits <= QrCode::get_num_data_codewords(version, *newecl) * 8 {
 				ecl = *newecl;
 			}
 		}
 		
-		// Create the data bit string by concatenating all segments
+		// Concatenate all segments to create the data bit string
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 		let mut bb = BitBuffer(Vec::new());
 		for seg in segs {
@@ -334,7 +334,7 @@ impl QrCode {
 		for i in 8 .. 15 {
 			self.set_function_module(8, size - 15 + i, get_bit(data, i));
 		}
-		self.set_function_module(8, size - 8, true);
+		self.set_function_module(8, size - 8, true);  // Always black
 	}
 	
 	
@@ -474,10 +474,11 @@ impl QrCode {
 	}
 	
 	
-	// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-	// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
-	// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-	// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+	// XORs the codeword modules in this QR Code with the given mask pattern.
+	// The function modules must be marked and the codeword bits must be drawn
+	// before masking. Due to the arithmetic of XOR, calling applyMask() with
+	// the same mask value a second time will undo the mask. A final well-formed
+	// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
 	fn apply_mask(&mut self, mask: Mask) {
 		let mask: u8 = mask.value();
 		for y in 0 .. self.size {

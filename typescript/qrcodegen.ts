@@ -95,12 +95,12 @@ namespace qrcodegen {
 			}
 			
 			// Increase the error correction level while the data still fits in the current version number
-			[QrCode_Ecc.MEDIUM, QrCode_Ecc.QUARTILE, QrCode_Ecc.HIGH].forEach((newEcl: QrCode_Ecc) => {
+			[QrCode_Ecc.MEDIUM, QrCode_Ecc.QUARTILE, QrCode_Ecc.HIGH].forEach((newEcl: QrCode_Ecc) => {  // From low to high
 				if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
 					ecl = newEcl;
 			});
 			
-			// Create the data bit string by concatenating all segments
+			// Concatenate all segments to create the data bit string
 			let dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;
 			let bb = new BitBuffer();
 			segs.forEach((seg: QrSegment) => {
@@ -308,7 +308,7 @@ namespace qrcodegen {
 				this.setFunctionModule(this.size - 1 - i, 8, getBit(data, i));
 			for (let i = 8; i < 15; i++)
 				this.setFunctionModule(8, this.size - 15 + i, getBit(data, i));
-			this.setFunctionModule(8, this.size - 8, true);
+			this.setFunctionModule(8, this.size - 8, true);  // Always black
 		}
 		
 		
@@ -443,10 +443,11 @@ namespace qrcodegen {
 		}
 		
 		
-		// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-		// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
-		// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-		// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+		// XORs the codeword modules in this QR Code with the given mask pattern.
+		// The function modules must be marked and the codeword bits must be drawn
+		// before masking. Due to the arithmetic of XOR, calling applyMask() with
+		// the same mask value a second time will undo the mask. A final well-formed
+		// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
 		private applyMask(mask: int): void {
 			if (mask < 0 || mask > 7)
 				throw "Mask value out of range";

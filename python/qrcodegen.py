@@ -111,11 +111,11 @@ class QrCode(object):
 			raise AssertionError()
 		
 		# Increase the error correction level while the data still fits in the current version number
-		for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):
+		for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):  # From low to high
 			if boostecl and datausedbits <= QrCode._get_num_data_codewords(version, newecl) * 8:
 				ecl = newecl
 		
-		# Create the data bit string by concatenating all segments
+		# Concatenate all segments to create the data bit string
 		datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8
 		bb = _BitBuffer()
 		for seg in segs:
@@ -291,7 +291,7 @@ class QrCode(object):
 			self._set_function_module(self._size - 1 - i, 8, _get_bit(data, i))
 		for i in range(8, 15):
 			self._set_function_module(8, self._size - 15 + i, _get_bit(data, i))
-		self._set_function_module(8, self._size - 8, True)
+		self._set_function_module(8, self._size - 8, True)  # Always black
 	
 	
 	def _draw_version(self):
@@ -404,10 +404,11 @@ class QrCode(object):
 	
 	
 	def _apply_mask(self, mask):
-		"""XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-		properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
-		This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-		well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.)."""
+		"""XORs the codeword modules in this QR Code with the given mask pattern.
+		The function modules must be marked and the codeword bits must be drawn
+		before masking. Due to the arithmetic of XOR, calling applyMask() with
+		the same mask value a second time will undo the mask. A final well-formed
+		QR Code symbol needs exactly one (not zero, two, etc.) mask applied."""
 		if not (0 <= mask <= 7):
 			raise ValueError("Mask value out of range")
 		masker = QrCode._MASK_PATTERNS[mask]

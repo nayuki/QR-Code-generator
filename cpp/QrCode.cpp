@@ -81,12 +81,12 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		throw std::logic_error("Assertion error");
 	
 	// Increase the error correction level while the data still fits in the current version number
-	for (Ecc newEcl : vector<Ecc>{Ecc::MEDIUM, Ecc::QUARTILE, Ecc::HIGH}) {
+	for (Ecc newEcl : vector<Ecc>{Ecc::MEDIUM, Ecc::QUARTILE, Ecc::HIGH}) {  // From low to high
 		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
 			ecl = newEcl;
 	}
 	
-	// Create the data bit string by concatenating all segments
+	// Concatenate all segments to create the data bit string
 	size_t dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 	BitBuffer bb;
 	for (const QrSegment &seg : segs) {
@@ -241,7 +241,7 @@ void QrCode::drawFormatBits(int mask) {
 		setFunctionModule(size - 1 - i, 8, getBit(data, i));
 	for (int i = 8; i < 15; i++)
 		setFunctionModule(8, size - 15 + i, getBit(data, i));
-	setFunctionModule(8, size - 8, true);
+	setFunctionModule(8, size - 8, true);  // Always black
 }
 
 

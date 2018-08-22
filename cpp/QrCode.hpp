@@ -206,10 +206,11 @@ class QrCode final {
 	private: void drawCodewords(const std::vector<std::uint8_t> &data);
 	
 	
-	// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-	// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
-	// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-	// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+	// XORs the codeword modules in this QR Code with the given mask pattern.
+	// The function modules must be marked and the codeword bits must be drawn
+	// before masking. Due to the arithmetic of XOR, calling applyMask() with
+	// the same mask value a second time will undo the mask. A final well-formed
+	// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
 	private: void applyMask(int mask);
 	
 	

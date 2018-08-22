@@ -245,7 +245,7 @@ var qrcodegen = new function() {
 				setFunctionModule(size - 1 - i, 8, getBit(data, i));
 			for (var i = 8; i < 15; i++)
 				setFunctionModule(8, size - 15 + i, getBit(data, i));
-			setFunctionModule(8, size - 8, true);
+			setFunctionModule(8, size - 8, true);  // Always black
 		}
 		
 		
@@ -377,10 +377,11 @@ var qrcodegen = new function() {
 		}
 		
 		
-		// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-		// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
-		// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-		// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+		// XORs the codeword modules in this QR Code with the given mask pattern.
+		// The function modules must be marked and the codeword bits must be drawn
+		// before masking. Due to the arithmetic of XOR, calling applyMask() with
+		// the same mask value a second time will undo the mask. A final well-formed
+		// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
 		function applyMask(mask) {
 			if (mask < 0 || mask > 7)
 				throw "Mask value out of range";
@@ -545,12 +546,12 @@ var qrcodegen = new function() {
 		}
 		
 		// Increase the error correction level while the data still fits in the current version number
-		[this.Ecc.MEDIUM, this.Ecc.QUARTILE, this.Ecc.HIGH].forEach(function(newEcl) {
+		[this.Ecc.MEDIUM, this.Ecc.QUARTILE, this.Ecc.HIGH].forEach(function(newEcl) {  // From low to high
 			if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
 				ecl = newEcl;
 		});
 		
-		// Create the data bit string by concatenating all segments
+		// Concatenate all segments to create the data bit string
 		var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
 		var bb = new BitBuffer();
 		segs.forEach(function(seg) {
