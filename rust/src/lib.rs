@@ -313,27 +313,26 @@ impl QrCode {
 		for _ in 0 .. 10 {
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537);
 		}
-		data = data << 10 | rem;
-		data ^= 0x5412;  // uint15
-		assert_eq!(data >> 15, 0, "Assertion error");
+		let bits: u32 = (data << 10 | rem) ^ 0x5412;  // uint15
+		assert_eq!(bits >> 15, 0, "Assertion error");
 		
 		// Draw first copy
 		for i in 0 .. 6 {
-			self.set_function_module(8, i, get_bit(data, i));
+			self.set_function_module(8, i, get_bit(bits, i));
 		}
-		self.set_function_module(8, 7, get_bit(data, 6));
-		self.set_function_module(8, 8, get_bit(data, 7));
-		self.set_function_module(7, 8, get_bit(data, 8));
+		self.set_function_module(8, 7, get_bit(bits, 6));
+		self.set_function_module(8, 8, get_bit(bits, 7));
+		self.set_function_module(7, 8, get_bit(bits, 8));
 		for i in 9 .. 15 {
-			self.set_function_module(14 - i, 8, get_bit(data, i));
+			self.set_function_module(14 - i, 8, get_bit(bits, i));
 		}
 		
 		// Draw second copy
 		for i in 0 .. 8 {
-			self.set_function_module(size - 1 - i, 8, get_bit(data, i));
+			self.set_function_module(size - 1 - i, 8, get_bit(bits, i));
 		}
 		for i in 8 .. 15 {
-			self.set_function_module(8, size - 15 + i, get_bit(data, i));
+			self.set_function_module(8, size - 15 + i, get_bit(bits, i));
 		}
 		self.set_function_module(8, size - 8, true);  // Always black
 	}

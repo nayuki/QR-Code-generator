@@ -274,24 +274,23 @@ class QrCode(object):
 		rem = data
 		for _ in range(10):
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537)
-		data = data << 10 | rem
-		data ^= 0x5412  # uint15
-		assert data >> 15 == 0
+		bits = (data << 10 | rem) ^ 0x5412  # uint15
+		assert bits >> 15 == 0
 		
 		# Draw first copy
 		for i in range(0, 6):
-			self._set_function_module(8, i, _get_bit(data, i))
-		self._set_function_module(8, 7, _get_bit(data, 6))
-		self._set_function_module(8, 8, _get_bit(data, 7))
-		self._set_function_module(7, 8, _get_bit(data, 8))
+			self._set_function_module(8, i, _get_bit(bits, i))
+		self._set_function_module(8, 7, _get_bit(bits, 6))
+		self._set_function_module(8, 8, _get_bit(bits, 7))
+		self._set_function_module(7, 8, _get_bit(bits, 8))
 		for i in range(9, 15):
-			self._set_function_module(14 - i, 8, _get_bit(data, i))
+			self._set_function_module(14 - i, 8, _get_bit(bits, i))
 		
 		# Draw second copy
 		for i in range(0, 8):
-			self._set_function_module(self._size - 1 - i, 8, _get_bit(data, i))
+			self._set_function_module(self._size - 1 - i, 8, _get_bit(bits, i))
 		for i in range(8, 15):
-			self._set_function_module(8, self._size - 15 + i, _get_bit(data, i))
+			self._set_function_module(8, self._size - 15 + i, _get_bit(bits, i))
 		self._set_function_module(8, self._size - 8, True)  # Always black
 	
 	

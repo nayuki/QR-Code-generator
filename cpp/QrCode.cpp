@@ -222,25 +222,24 @@ void QrCode::drawFormatBits(int mask) {
 	int rem = data;
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
-	data = data << 10 | rem;
-	data ^= 0x5412;  // uint15
-	if (data >> 15 != 0)
+	int bits = (data << 10 | rem) ^ 0x5412;  // uint15
+	if (bits >> 15 != 0)
 		throw std::logic_error("Assertion error");
 	
 	// Draw first copy
 	for (int i = 0; i <= 5; i++)
-		setFunctionModule(8, i, getBit(data, i));
-	setFunctionModule(8, 7, getBit(data, 6));
-	setFunctionModule(8, 8, getBit(data, 7));
-	setFunctionModule(7, 8, getBit(data, 8));
+		setFunctionModule(8, i, getBit(bits, i));
+	setFunctionModule(8, 7, getBit(bits, 6));
+	setFunctionModule(8, 8, getBit(bits, 7));
+	setFunctionModule(7, 8, getBit(bits, 8));
 	for (int i = 9; i < 15; i++)
-		setFunctionModule(14 - i, 8, getBit(data, i));
+		setFunctionModule(14 - i, 8, getBit(bits, i));
 	
 	// Draw second copy
 	for (int i = 0; i <= 7; i++)
-		setFunctionModule(size - 1 - i, 8, getBit(data, i));
+		setFunctionModule(size - 1 - i, 8, getBit(bits, i));
 	for (int i = 8; i < 15; i++)
-		setFunctionModule(8, size - 15 + i, getBit(data, i));
+		setFunctionModule(8, size - 15 + i, getBit(bits, i));
 	setFunctionModule(8, size - 8, true);  // Always black
 }
 

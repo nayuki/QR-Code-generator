@@ -290,25 +290,24 @@ namespace qrcodegen {
 			let rem: int = data;
 			for (let i = 0; i < 10; i++)
 				rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
-			data = data << 10 | rem;
-			data ^= 0x5412;  // uint15
-			if (data >>> 15 != 0)
+			let bits = (data << 10 | rem) ^ 0x5412;  // uint15
+			if (bits >>> 15 != 0)
 				throw "Assertion error";
 			
 			// Draw first copy
 			for (let i = 0; i <= 5; i++)
-				this.setFunctionModule(8, i, getBit(data, i));
-			this.setFunctionModule(8, 7, getBit(data, 6));
-			this.setFunctionModule(8, 8, getBit(data, 7));
-			this.setFunctionModule(7, 8, getBit(data, 8));
+				this.setFunctionModule(8, i, getBit(bits, i));
+			this.setFunctionModule(8, 7, getBit(bits, 6));
+			this.setFunctionModule(8, 8, getBit(bits, 7));
+			this.setFunctionModule(7, 8, getBit(bits, 8));
 			for (let i = 9; i < 15; i++)
-				this.setFunctionModule(14 - i, 8, getBit(data, i));
+				this.setFunctionModule(14 - i, 8, getBit(bits, i));
 			
 			// Draw second copy
 			for (let i = 0; i <= 7; i++)
-				this.setFunctionModule(this.size - 1 - i, 8, getBit(data, i));
+				this.setFunctionModule(this.size - 1 - i, 8, getBit(bits, i));
 			for (let i = 8; i < 15; i++)
-				this.setFunctionModule(8, this.size - 15 + i, getBit(data, i));
+				this.setFunctionModule(8, this.size - 15 + i, getBit(bits, i));
 			this.setFunctionModule(8, this.size - 8, true);  // Always black
 		}
 		

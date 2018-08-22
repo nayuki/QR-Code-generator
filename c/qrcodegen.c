@@ -437,25 +437,24 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 	int rem = data;
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
-	data = data << 10 | rem;
-	data ^= 0x5412;  // uint15
-	assert(data >> 15 == 0);
+	int bits = (data << 10 | rem) ^ 0x5412;  // uint15
+	assert(bits >> 15 == 0);
 	
 	// Draw first copy
 	for (int i = 0; i <= 5; i++)
-		setModule(qrcode, 8, i, getBit(data, i));
-	setModule(qrcode, 8, 7, getBit(data, 6));
-	setModule(qrcode, 8, 8, getBit(data, 7));
-	setModule(qrcode, 7, 8, getBit(data, 8));
+		setModule(qrcode, 8, i, getBit(bits, i));
+	setModule(qrcode, 8, 7, getBit(bits, 6));
+	setModule(qrcode, 8, 8, getBit(bits, 7));
+	setModule(qrcode, 7, 8, getBit(bits, 8));
 	for (int i = 9; i < 15; i++)
-		setModule(qrcode, 14 - i, 8, getBit(data, i));
+		setModule(qrcode, 14 - i, 8, getBit(bits, i));
 	
 	// Draw second copy
 	int qrsize = qrcodegen_getSize(qrcode);
 	for (int i = 0; i <= 7; i++)
-		setModule(qrcode, qrsize - 1 - i, 8, getBit(data, i));
+		setModule(qrcode, qrsize - 1 - i, 8, getBit(bits, i));
 	for (int i = 8; i < 15; i++)
-		setModule(qrcode, 8, qrsize - 15 + i, getBit(data, i));
+		setModule(qrcode, 8, qrsize - 15 + i, getBit(bits, i));
 	setModule(qrcode, 8, qrsize - 8, true);  // Always black
 }
 
