@@ -295,16 +295,13 @@ public final class QrCode {
 		int shortBlockLen = rawCodewords / numBlocks;
 		
 		// Split data into blocks and append ECC to each block
-		byte[][] blocks = new byte[numBlocks][];
+		byte[][] blocks = new byte[numBlocks][shortBlockLen + 1];
 		ReedSolomonGenerator rs = ReedSolomonGenerator.getInstance(blockEccLen);
-		byte[] ecc = new byte[blockEccLen];
 		for (int i = 0, k = 0; i < numBlocks; i++) {
-			byte[] dat = Arrays.copyOfRange(data, k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
-			byte[] block = Arrays.copyOf(dat, shortBlockLen + 1);
-			k += dat.length;
-			rs.getRemainder(dat, ecc);
-			System.arraycopy(ecc, 0, block, block.length - blockEccLen, ecc.length);
-			blocks[i] = block;
+			int datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
+			System.arraycopy(data, k, blocks[i], 0, datLen);
+			rs.getRemainder(data, k, datLen, blocks[i], shortBlockLen + 1 - blockEccLen);
+			k += datLen;
 		}
 		
 		// Interleave (not concatenate) the bytes from every block into a single sequence

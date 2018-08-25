@@ -116,20 +116,20 @@ final class ReedSolomonGenerator {
 	}
 	
 	
-	public void getRemainder(byte[] data, byte[] result) {
+	public void getRemainder(byte[] data, int dataOff, int dataLen, byte[] result, int resultOff) {
 		Objects.requireNonNull(data);
 		Objects.requireNonNull(result);
-		if (result.length != multiplies.length)
-			throw new IllegalArgumentException("Array length mismatch");
 		
 		// Compute the remainder by performing polynomial division
-		Arrays.fill(result, (byte)0);
-		for (byte b : data) {
-			int factor = (b ^ result[0]) & 0xFF;
-			System.arraycopy(result, 1, result, 0, result.length - 1);
-			result[result.length - 1] = 0;
-			for (int i = 0; i < result.length; i++)
-				result[i] ^= multiplies[i][factor];
+		int resultEnd = resultOff + multiplies.length;
+		Arrays.fill(result, resultOff, resultEnd, (byte)0);
+		for (int i = dataOff, dataEnd = dataOff + dataLen; i < dataEnd; i++) {
+			byte b = data[i];
+			int factor = (b ^ result[resultOff]) & 0xFF;
+			System.arraycopy(result, resultOff + 1, result, resultOff, multiplies.length - 1);
+			result[resultEnd - 1] = 0;
+			for (int j = 0; j < multiplies.length; j++)
+				result[resultOff + j] ^= multiplies[j][factor];
 		}
 	}
 	
