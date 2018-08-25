@@ -113,9 +113,9 @@ public final class QrSegmentAdvanced {
 				result[2][j] = result[2][i] + 20;  // 3.33 bits per digit
 			
 			// Switch modes, rounding up fractional bits
-			result[0][j] = Math.min((Math.min(result[1][j], result[2][j]) + 5) / 6 * 6 + bytesCost  , result[0][j]);
-			result[1][j] = Math.min((Math.min(result[2][j], result[0][j]) + 5) / 6 * 6 + alphnumCost, result[1][j]);
-			result[2][j] = Math.min((Math.min(result[0][j], result[1][j]) + 5) / 6 * 6 + numberCost , result[2][j]);
+			result[0][j] = Math.min(roundUp6(Math.min(result[1][j], result[2][j])) + bytesCost  , result[0][j]);
+			result[1][j] = Math.min(roundUp6(Math.min(result[2][j], result[0][j])) + alphnumCost, result[1][j]);
+			result[2][j] = Math.min(roundUp6(Math.min(result[0][j], result[1][j])) + numberCost , result[2][j]);
 		}
 		return result;
 	}
@@ -147,21 +147,21 @@ public final class QrSegmentAdvanced {
 			if (curMode == NUMERIC) {
 				if (isNumeric(c))
 					curMode = NUMERIC;
-				else if (isAlphanumeric(c) && (bitCosts[1][i] + 33 + 5) / 6 * 6 + numberCost == bitCosts[2][i + 1])
+				else if (isAlphanumeric(c) && roundUp6(bitCosts[1][i] + 33) + numberCost == bitCosts[2][i + 1])
 					curMode = ALPHANUMERIC;
 				else
 					curMode = BYTE;
 			} else if (curMode == ALPHANUMERIC) {
-				if (isNumeric(c) && (bitCosts[2][i] + 20 + 5) / 6 * 6 + alphnumCost == bitCosts[1][i + 1])
+				if (isNumeric(c) && roundUp6(bitCosts[2][i] + 20) + alphnumCost == bitCosts[1][i + 1])
 					curMode = NUMERIC;
 				else if (isAlphanumeric(c))
 					curMode = ALPHANUMERIC;
 				else
 					curMode = BYTE;
 			} else if (curMode == BYTE) {
-				if (isNumeric(c) && (bitCosts[2][i] + 20 + 5) / 6 * 6 + bytesCost == bitCosts[0][i + 1])
+				if (isNumeric(c) && roundUp6(bitCosts[2][i] + 20) + bytesCost == bitCosts[0][i + 1])
 					curMode = NUMERIC;
-				else if (isAlphanumeric(c) && (bitCosts[1][i] + 33 + 5) / 6 * 6 + bytesCost == bitCosts[0][i + 1])
+				else if (isAlphanumeric(c) && roundUp6(bitCosts[1][i] + 33) + bytesCost == bitCosts[0][i + 1])
 					curMode = ALPHANUMERIC;
 				else
 					curMode = BYTE;
@@ -221,6 +221,11 @@ public final class QrSegmentAdvanced {
 	
 	private static boolean isNumeric(char c) {
 		return '0' <= c && c <= '9';
+	}
+	
+	
+	private static int roundUp6(int x) {
+		return (x + 5) / 6 * 6;
 	}
 	
 	
