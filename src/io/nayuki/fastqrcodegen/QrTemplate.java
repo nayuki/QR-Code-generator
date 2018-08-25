@@ -169,8 +169,7 @@ final class QrTemplate {
 		for (int i = 0; i < 12; i++)
 			rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
 		int data = version << 12 | rem;  // uint18
-		if (data >>> 18 != 0)
-			throw new AssertionError();
+		assert data >>> 18 == 0;
 		
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
@@ -249,8 +248,7 @@ final class QrTemplate {
 				}
 			}
 		}
-		if (i != result.length)
-			throw new AssertionError();
+		assert i == result.length;
 		return result;
 	}
 	

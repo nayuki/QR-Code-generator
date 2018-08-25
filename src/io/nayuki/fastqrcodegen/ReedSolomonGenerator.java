@@ -140,16 +140,14 @@ final class ReedSolomonGenerator {
 	// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 	// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
 	private static int multiply(int x, int y) {
-		if (x >>> 8 != 0 || y >>> 8 != 0)
-			throw new IllegalArgumentException("Byte out of range");
+		assert x >>> 8 == 0 && y >>> 8 == 0;
 		// Russian peasant multiplication
 		int z = 0;
 		for (int i = 7; i >= 0; i--) {
 			z = (z << 1) ^ ((z >>> 7) * 0x11D);
 			z ^= ((y >>> i) & 1) * x;
 		}
-		if (z >>> 8 != 0)
-			throw new AssertionError();
+		assert z >>> 8 == 0;
 		return z;
 	}
 	
