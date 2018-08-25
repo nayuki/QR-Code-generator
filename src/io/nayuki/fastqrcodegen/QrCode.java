@@ -129,7 +129,7 @@ public final class QrCode {
 	
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments
-		Objects.requireNonNull(ecl);
+		errorCorrectionLevel = Objects.requireNonNull(ecl);
 		if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Value out of range");
 		Objects.requireNonNull(dataCodewords);
@@ -137,7 +137,6 @@ public final class QrCode {
 		// Initialize fields
 		version = ver;
 		size = ver * 4 + 17;
-		errorCorrectionLevel = ecl;
 		
 		QrTemplate tpl = QrTemplate.getInstance(ver);
 		modules = tpl.template.clone();  

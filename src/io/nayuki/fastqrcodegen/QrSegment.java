@@ -156,13 +156,11 @@ public final class QrSegment {
 	/*---- Constructor ----*/
 	
 	public QrSegment(Mode md, int numCh, int[] data, int bitLen) {
-		Objects.requireNonNull(md);
-		Objects.requireNonNull(data);
+		mode = Objects.requireNonNull(md);
+		this.data = Objects.requireNonNull(data);
 		if (numCh < 0 || bitLen < 0 || bitLen > data.length * 32)
 			throw new IllegalArgumentException("Invalid value");
-		mode = md;
 		numChars = numCh;
-		this.data = data;
 		bitLength = bitLen;
 	}
 	
