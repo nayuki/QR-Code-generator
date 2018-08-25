@@ -181,8 +181,8 @@ public final class QrSegmentAdvanced {
 		// Accumulate run of modes
 		QrSegment.Mode curMode = charModes[0];
 		int start = 0;
-		for (int i = 1; i < data.length; i++) {
-			if (charModes[i] != curMode) {
+		for (int i = 1; ; i++) {
+			if (i >= data.length || charModes[i] != curMode) {
 				if (curMode == BYTE)
 					result.add(QrSegment.makeBytes(Arrays.copyOfRange(data, start, i)));
 				else {
@@ -194,24 +194,12 @@ public final class QrSegmentAdvanced {
 					else
 						throw new AssertionError();
 				}
+				if (i >= data.length)
+					return result;
 				curMode = charModes[i];
 				start = i;
 			}
 		}
-		
-		// Final segment
-		if (curMode == BYTE)
-			result.add(QrSegment.makeBytes(Arrays.copyOfRange(data, start, data.length)));
-		else {
-			String temp = new String(data, start, data.length - start, StandardCharsets.US_ASCII);
-			if (curMode == NUMERIC)
-				result.add(QrSegment.makeNumeric(temp));
-			else if (curMode == ALPHANUMERIC)
-				result.add(QrSegment.makeAlphanumeric(temp));
-			else
-				throw new AssertionError();
-		}
-		return result;
 	}
 	
 	
