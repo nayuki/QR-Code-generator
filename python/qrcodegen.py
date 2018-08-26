@@ -116,7 +116,6 @@ class QrCode(object):
 				ecl = newecl
 		
 		# Concatenate all segments to create the data bit string
-		datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8
 		bb = _BitBuffer()
 		for seg in segs:
 			bb.append_bits(seg.get_mode().get_mode_bits(), 4)
@@ -124,15 +123,17 @@ class QrCode(object):
 			bb.extend(seg._bitdata)
 		
 		# Add terminator and pad up to a byte if applicable
+		datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8
+		assert len(bb) <= datacapacitybits
 		bb.append_bits(0, min(4, datacapacitybits - len(bb)))
 		bb.append_bits(0, -len(bb) % 8)  # Note: Python's modulo on negative numbers behaves better than C family languages
+		assert len(bb) % 8 == 0
 		
-		# Pad with alternate bytes until data capacity is reached
+		# Pad with alternating bytes until data capacity is reached
 		for padbyte in itertools.cycle((0xEC, 0x11)):
 			if len(bb) >= datacapacitybits:
 				break
 			bb.append_bits(padbyte, 8)
-		assert len(bb) % 8 == 0
 		
 		# Create the QR Code symbol
 		return QrCode(bb.get_bytes(), mask, version, ecl)

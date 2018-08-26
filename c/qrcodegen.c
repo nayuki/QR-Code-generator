@@ -914,7 +914,6 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	}
 	
 	// Concatenate all segments to create the data bit string
-	int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	for (size_t i = 0; i < len; i++) {
@@ -935,16 +934,18 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	}
 	
 	// Add terminator and pad up to a byte if applicable
+	int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
+	assert(bitLen <= dataCapacityBits);
 	int terminatorBits = dataCapacityBits - bitLen;
 	if (terminatorBits > 4)
 		terminatorBits = 4;
 	appendBitsToBuffer(0, terminatorBits, qrcode, &bitLen);
 	appendBitsToBuffer(0, (8 - bitLen % 8) % 8, qrcode, &bitLen);
+	assert(bitLen % 8 == 0);
 	
-	// Pad with alternate bytes until data capacity is reached
+	// Pad with alternating bytes until data capacity is reached
 	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
-	assert(bitLen % 8 == 0);
 	
 	// Draw function and data codeword modules
 	addEccAndInterleave(qrcode, version, ecl, tempBuffer);

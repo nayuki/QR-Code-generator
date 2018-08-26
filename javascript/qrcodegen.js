@@ -554,7 +554,6 @@ var qrcodegen = new function() {
 		});
 		
 		// Concatenate all segments to create the data bit string
-		var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
 		var bb = new BitBuffer();
 		segs.forEach(function(seg) {
 			bb.appendBits(seg.mode.modeBits, 4);
@@ -565,14 +564,17 @@ var qrcodegen = new function() {
 		});
 		
 		// Add terminator and pad up to a byte if applicable
+		var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
+		if (bb.length > dataCapacityBits)
+			throw "Assertion error";
 		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.length));
 		bb.appendBits(0, (8 - bb.length % 8) % 8);
-		
-		// Pad with alternate bytes until data capacity is reached
-		for (var padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-			bb.appendBits(padByte, 8);
 		if (bb.length % 8 != 0)
 			throw "Assertion error";
+		
+		// Pad with alternating bytes until data capacity is reached
+		for (var padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+			bb.appendBits(padByte, 8);
 		
 		// Create the QR Code symbol
 		return new this(bb.getBytes(), mask, version, ecl);

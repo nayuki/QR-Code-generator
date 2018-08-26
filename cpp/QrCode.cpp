@@ -87,7 +87,6 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	}
 	
 	// Concatenate all segments to create the data bit string
-	size_t dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 	BitBuffer bb;
 	for (const QrSegment &seg : segs) {
 		bb.appendBits(seg.getMode().getModeBits(), 4);
@@ -96,14 +95,17 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	}
 	
 	// Add terminator and pad up to a byte if applicable
+	size_t dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
+	if (bb.size() > dataCapacityBits)
+		throw std::logic_error("Assertion error");
 	bb.appendBits(0, std::min<size_t>(4, dataCapacityBits - bb.size()));
 	bb.appendBits(0, (8 - bb.size() % 8) % 8);
-	
-	// Pad with alternate bytes until data capacity is reached
-	for (uint8_t padByte = 0xEC; bb.size() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-		bb.appendBits(padByte, 8);
 	if (bb.size() % 8 != 0)
 		throw std::logic_error("Assertion error");
+	
+	// Pad with alternating bytes until data capacity is reached
+	for (uint8_t padByte = 0xEC; bb.size() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+		bb.appendBits(padByte, 8);
 	
 	// Create the QR Code symbol
 	return QrCode(version, ecl, bb.getBytes(), mask);

@@ -101,7 +101,6 @@ namespace qrcodegen {
 			});
 			
 			// Concatenate all segments to create the data bit string
-			let dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;
 			let bb = new BitBuffer();
 			segs.forEach((seg: QrSegment) => {
 				bb.appendBits(seg.mode.modeBits, 4);
@@ -111,14 +110,17 @@ namespace qrcodegen {
 			});
 			
 			// Add terminator and pad up to a byte if applicable
+			let dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;
+			if (bb.length > dataCapacityBits)
+				throw "Assertion error";
 			bb.appendBits(0, Math.min(4, dataCapacityBits - bb.length));
 			bb.appendBits(0, (8 - bb.length % 8) % 8);
-			
-			// Pad with alternate bytes until data capacity is reached
-			for (let padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-				bb.appendBits(padByte, 8);
 			if (bb.length % 8 != 0)
 				throw "Assertion error";
+			
+			// Pad with alternating bytes until data capacity is reached
+			for (let padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+				bb.appendBits(padByte, 8);
 			
 			// Create the QR Code symbol
 			return new QrCode(bb.getBytes(), mask, version, ecl);

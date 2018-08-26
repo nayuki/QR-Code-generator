@@ -130,7 +130,6 @@ impl QrCode {
 		}
 		
 		// Concatenate all segments to create the data bit string
-		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 		let mut bb = BitBuffer(Vec::new());
 		for seg in segs {
 			bb.append_bits(seg.mode.mode_bits(), 4);
@@ -139,19 +138,21 @@ impl QrCode {
 		}
 		
 		// Add terminator and pad up to a byte if applicable
+		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
+		assert!(bb.0.len() <= datacapacitybits);
 		let numzerobits = std::cmp::min(4, datacapacitybits - bb.0.len());
 		bb.append_bits(0, numzerobits as u8);
 		let numzerobits = bb.0.len().wrapping_neg() & 7;
 		bb.append_bits(0, numzerobits as u8);
+		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
 		
-		// Pad with alternate bytes until data capacity is reached
+		// Pad with alternating bytes until data capacity is reached
 		for padbyte in [0xEC, 0x11].iter().cycle() {
 			if bb.0.len() >= datacapacitybits {
 				break;
 			}
 			bb.append_bits(*padbyte, 8);
 		}
-		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
 		
 		let mut bytes = vec![0u8; bb.0.len() / 8];
 		for (i, bit) in bb.0.iter().enumerate() {
