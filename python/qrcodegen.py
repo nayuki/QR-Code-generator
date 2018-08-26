@@ -169,7 +169,7 @@ class QrCode(object):
 		self._isfunction = [[False] * self._size for _ in range(self._size)]  # Indicates function modules that are not subjected to masking
 		# Draw function patterns, draw all codewords
 		self._draw_function_patterns()
-		allcodewords = self._append_error_correction(datacodewords)
+		allcodewords = self._add_ecc_and_interleave(datacodewords)
 		self._draw_codewords(allcodewords)
 		
 		# Handle masking
@@ -345,7 +345,7 @@ class QrCode(object):
 	
 	# ---- Private helper methods for constructor: Codewords and masking ----
 	
-	def _append_error_correction(self, data):
+	def _add_ecc_and_interleave(self, data):
 		"""Returns a new byte string representing the given data with the appropriate error correction
 		codewords appended to it, based on this object's version and error correction level."""
 		version = self._version

@@ -182,7 +182,7 @@ impl QrCode {
 		
 		// Draw function patterns, draw all codewords, do masking
 		result.draw_function_patterns();
-		let allcodewords: Vec<u8> = result.append_error_correction(datacodewords);
+		let allcodewords: Vec<u8> = result.add_ecc_and_interleave(datacodewords);
 		result.draw_codewords(&allcodewords);
 		result.handle_constructor_masking(mask);
 		result
@@ -403,7 +403,7 @@ impl QrCode {
 	
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
-	fn append_error_correction(&self, data: &[u8]) -> Vec<u8> {
+	fn add_ecc_and_interleave(&self, data: &[u8]) -> Vec<u8> {
 		let ver = self.version;
 		let ecl = self.errorcorrectionlevel;
 		assert_eq!(data.len(), QrCode::get_num_data_codewords(ver, ecl), "Illegal argument");

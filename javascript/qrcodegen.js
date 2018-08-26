@@ -92,7 +92,7 @@ var qrcodegen = new function() {
 		
 		// Handle grid fields, draw function patterns, draw all codewords
 		drawFunctionPatterns();
-		var allCodewords = appendErrorCorrection(datacodewords);
+		var allCodewords = addEccAndInterleave(datacodewords);
 		drawCodewords(allCodewords);
 		
 		// Handle masking
@@ -310,7 +310,7 @@ var qrcodegen = new function() {
 		
 		// Returns a new byte string representing the given data with the appropriate error correction
 		// codewords appended to it, based on this object's version and error correction level.
-		function appendErrorCorrection(data) {
+		function addEccAndInterleave(data) {
 			if (data.length != QrCode.getNumDataCodewords(version, errCorLvl))
 				throw "Invalid argument";
 			

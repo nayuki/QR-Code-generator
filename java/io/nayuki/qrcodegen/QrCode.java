@@ -226,7 +226,7 @@ public final class QrCode {
 		
 		// Draw function patterns, draw all codewords, do masking
 		drawFunctionPatterns();
-		byte[] allCodewords = appendErrorCorrection(dataCodewords);
+		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
 		this.mask = handleConstructorMasking(mask);
 	}
@@ -437,7 +437,7 @@ public final class QrCode {
 	
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
-	private byte[] appendErrorCorrection(byte[] data) {
+	private byte[] addEccAndInterleave(byte[] data) {
 		if (data.length != getNumDataCodewords(version, errorCorrectionLevel))
 			throw new IllegalArgumentException();
 		

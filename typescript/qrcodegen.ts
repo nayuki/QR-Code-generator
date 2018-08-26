@@ -170,7 +170,7 @@ namespace qrcodegen {
 			
 			// Handle grid fields, draw function patterns, draw all codewords
 			this.drawFunctionPatterns();
-			let allCodewords: Array<byte> = this.appendErrorCorrection(datacodewords);
+			let allCodewords: Array<byte> = this.addEccAndInterleave(datacodewords);
 			this.drawCodewords(allCodewords);
 			
 			// Handle masking
@@ -374,7 +374,7 @@ namespace qrcodegen {
 		
 		// Returns a new byte string representing the given data with the appropriate error correction
 		// codewords appended to it, based on this object's version and error correction level.
-		private appendErrorCorrection(data: Array<byte>): Array<byte> {
+		private addEccAndInterleave(data: Array<byte>): Array<byte> {
 			const ver: int = this.version;
 			const ecl: QrCode_Ecc = this.errorCorrectionLevel;
 			if (data.length != QrCode.getNumDataCodewords(ver, ecl))

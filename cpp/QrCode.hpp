@@ -201,7 +201,7 @@ class QrCode final {
 	
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
-	private: std::vector<std::uint8_t> appendErrorCorrection(const std::vector<std::uint8_t> &data) const;
+	private: std::vector<std::uint8_t> addEccAndInterleave(const std::vector<std::uint8_t> &data) const;
 	
 	
 	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire

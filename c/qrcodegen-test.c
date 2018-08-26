@@ -52,7 +52,7 @@ static int numTestCases = 0;
 extern const int8_t ECC_CODEWORDS_PER_BLOCK[4][41];
 extern const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41];
 void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
-void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
+void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 int getNumRawDataModules(int version);
 void calcReedSolomonGenerator(int degree, uint8_t result[]);
@@ -111,7 +111,7 @@ static void testAppendBitsToBuffer(void) {
 
 
 // Ported from the Java version of the code.
-static uint8_t *appendErrorCorrectionReference(const uint8_t *data, int version, enum qrcodegen_Ecc ecl) {
+static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, enum qrcodegen_Ecc ecl) {
 	// Calculate parameter numbers
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
 	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
@@ -151,20 +151,20 @@ static uint8_t *appendErrorCorrectionReference(const uint8_t *data, int version,
 }
 
 
-static void testAppendErrorCorrection(void) {
+static void testAddEccAndInterleave(void) {
 	for (int version = 1; version <= 40; version++) {
 		for (int ecl = 0; ecl < 4; ecl++) {
 			int dataLen = getNumDataCodewords(version, (enum qrcodegen_Ecc)ecl);
 			uint8_t *pureData = MALLOC(dataLen, uint8_t);
 			for (int i = 0; i < dataLen; i++)
 				pureData[i] = rand() % 256;
-			uint8_t *expectOutput = appendErrorCorrectionReference(pureData, version, (enum qrcodegen_Ecc)ecl);
+			uint8_t *expectOutput = addEccAndInterleaveReference(pureData, version, (enum qrcodegen_Ecc)ecl);
 			
 			int dataAndEccLen = getNumRawDataModules(version) / 8;
 			uint8_t *paddedData = MALLOC(dataAndEccLen, uint8_t);
 			memcpy(paddedData, pureData, dataLen * sizeof(uint8_t));
 			uint8_t *actualOutput = MALLOC(dataAndEccLen, uint8_t);
-			appendErrorCorrection(paddedData, version, (enum qrcodegen_Ecc)ecl, actualOutput);
+			addEccAndInterleave(paddedData, version, (enum qrcodegen_Ecc)ecl, actualOutput);
 			
 			assert(memcmp(actualOutput, expectOutput, dataAndEccLen * sizeof(uint8_t)) == 0);
 			free(pureData);
@@ -1057,7 +1057,7 @@ static void testGetTotalBits(void) {
 int main(void) {
 	srand(time(NULL));
 	testAppendBitsToBuffer();
-	testAppendErrorCorrection();
+	testAddEccAndInterleave();
 	testGetNumDataCodewords();
 	testGetNumRawDataModules();
 	testCalcReedSolomonGenerator();

@@ -60,7 +60,7 @@
 
 testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen);
 
-testable void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
+testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 testable int getNumRawDataModules(int version);
 
@@ -195,7 +195,7 @@ testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[]
 // from the blocks and stores them in the result array. data[0 : rawCodewords - totalEcc] contains
 // the input data. data[rawCodewords - totalEcc : rawCodewords] is used as a temporary work area
 // and will be clobbered by this function. The final answer is stored in result[0 : rawCodewords].
-testable void appendErrorCorrection(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]) {
+testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]) {
 	// Calculate parameter numbers
 	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
@@ -948,7 +948,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	assert(bitLen % 8 == 0);
 	
 	// Draw function and data codeword modules
-	appendErrorCorrection(qrcode, version, ecl, tempBuffer);
+	addEccAndInterleave(qrcode, version, ecl, tempBuffer);
 	initializeFunctionModules(version, qrcode);
 	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, qrcode);
 	drawWhiteFunctionModules(qrcode, version);

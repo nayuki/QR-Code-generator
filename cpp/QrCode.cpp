@@ -124,7 +124,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	
 	// Draw function patterns, draw all codewords, do masking
 	drawFunctionPatterns();
-	const vector<uint8_t> allCodewords = appendErrorCorrection(dataCodewords);
+	const vector<uint8_t> allCodewords = addEccAndInterleave(dataCodewords);
 	drawCodewords(allCodewords);
 	this->mask = handleConstructorMasking(mask);
 }
@@ -298,7 +298,7 @@ bool QrCode::module(int x, int y) const {
 }
 
 
-vector<uint8_t> QrCode::appendErrorCorrection(const vector<uint8_t> &data) const {
+vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	if (data.size() != static_cast<unsigned int>(getNumDataCodewords(version, errorCorrectionLevel)))
 		throw std::invalid_argument("Invalid argument");
 	
