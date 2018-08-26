@@ -230,6 +230,7 @@ public final class QrCode {
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
 		this.mask = handleConstructorMasking(mask);
+		isFunction = null;
 	}
 	
 	

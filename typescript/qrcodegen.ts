@@ -194,6 +194,7 @@ namespace qrcodegen {
 			this.mask = mask;
 			this.drawFormatBits(mask);  // Overwrite old format bits
 			this.applyMask(mask);  // Apply the final choice of mask
+			this.isFunction = [];
 		}
 		
 		

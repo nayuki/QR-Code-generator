@@ -129,6 +129,8 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	const vector<uint8_t> allCodewords = addEccAndInterleave(dataCodewords);
 	drawCodewords(allCodewords);
 	this->mask = handleConstructorMasking(mask);
+	isFunction.clear();
+	isFunction.shrink_to_fit();
 }
 
 

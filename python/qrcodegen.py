@@ -188,6 +188,7 @@ class QrCode(object):
 		self._draw_format_bits(mask)  # Overwrite old format bits
 		self._apply_mask(mask)  # Apply the final choice of mask
 		self._mask = mask
+		del self._isfunction
 	
 	
 	# ---- Accessor methods ----

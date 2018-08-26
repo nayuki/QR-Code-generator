@@ -113,6 +113,7 @@ var qrcodegen = new function() {
 			throw "Assertion error";
 		drawFormatBits(mask);  // Overwrite old format bits
 		applyMask(mask);  // Apply the final choice of mask
+		isFunction = null;
 		
 		
 		/*---- Read-only instance properties ----*/

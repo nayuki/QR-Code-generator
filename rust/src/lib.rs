@@ -186,6 +186,8 @@ impl QrCode {
 		let allcodewords: Vec<u8> = result.add_ecc_and_interleave(datacodewords);
 		result.draw_codewords(&allcodewords);
 		result.handle_constructor_masking(mask);
+		result.isfunction.clear();
+		result.isfunction.shrink_to_fit();
 		result
 	}
 	
