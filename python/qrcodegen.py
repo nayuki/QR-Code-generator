@@ -476,12 +476,11 @@ class QrCode(object):
 		
 		# Balance of black and white modules
 		black = sum((1 if cell else 0) for row in modules for cell in row)
+		# Note that size is odd, so black/total != 1/2
 		total = size**2
-		# Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
-		for k in itertools.count():
-			if (9-k)*total <= black*20 <= (11+k)*total:
-				break
-			result += QrCode._PENALTY_N4
+		# Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
+		k = (abs(black * 20 - total * 10) + total - 1) // total - 1
+		result += k * QrCode._PENALTY_N4
 		return result
 	
 	

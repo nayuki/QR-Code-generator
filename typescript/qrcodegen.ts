@@ -548,10 +548,11 @@ namespace qrcodegen {
 						black++;
 				});
 			});
+			// Note that size is odd, so black/total != 1/2
 			let total: int = this.size * this.size;
-			// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
-			for (let k = 0; black*20 < (9-k)*total || black*20 > (11+k)*total; k++)
-				result += QrCode.PENALTY_N4;
+			// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
+			let k: int = Math.ceil(Math.abs(black * 20 - total * 10) / total) - 1;
+			result += k * QrCode.PENALTY_N4;
 			return result;
 		}
 		
