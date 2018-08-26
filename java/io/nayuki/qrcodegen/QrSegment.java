@@ -268,8 +268,8 @@ public final class QrSegment {
 		
 		/**
 		 * Returns the bit width of the segment character count field for this mode object at the specified version number.
-		 * @param ver the version number, which is between 1 to 40, inclusive
-		 * @return the number of bits for the character count, which is between 8 to 16, inclusive
+		 * @param ver the version number, which is between 1 to 40 (inclusive)
+		 * @return the number of bits for the character count, which is between 8 to 16 (inclusive)
 		 * @throws IllegalArgumentException if the version number is out of range
 		 */
 		int numCharCountBits(int ver) {

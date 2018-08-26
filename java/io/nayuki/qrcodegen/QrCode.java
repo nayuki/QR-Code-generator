@@ -180,7 +180,7 @@ public final class QrCode {
 	public final int version;
 	
 	/** The width and height of this QR Code symbol, measured in modules.
-	 * Always equal to version &times; 4 + 17, in the range 21 to 177. */
+	 * Always equal to version &times; 4 + 17, in the range 21 to 177 (inclusive). */
 	public final int size;
 	
 	/** The error correction level used in this QR Code symbol. Never {@code null}. */
@@ -203,7 +203,7 @@ public final class QrCode {
 	 * Constructs a QR Code symbol with the specified version number, error correction level, binary data array, and mask number.
 	 * <p>This is a cumbersome low-level constructor that should not be invoked directly by the user.
 	 * To go one level up, see the {@link #encodeSegments(List,Ecc,int,int,int,boolean)} function.</p>
-	 * @param ver the version number to use, which must be in the range 1 to 40, inclusive
+	 * @param ver the version number to use, which must be in the range 1 to 40 (inclusive)
 	 * @param ecl the error correction level to use
 	 * @param dataCodewords the bytes representing segments to encode (without ECC)
 	 * @param mask the mask pattern to use, which is either &minus;1 for automatic choice or from 0 to 7 for fixed choice
@@ -782,7 +782,7 @@ public final class QrCode {
 		/**
 		 * Constructs a Reed-Solomon ECC generator for the specified degree. This could be implemented
 		 * as a lookup table over all possible parameter values, instead of as an algorithm.
-		 * @param degree the divisor polynomial degree, which must be between 1 and 255
+		 * @param degree the divisor polynomial degree, which must be between 1 and 255 (inclusive)
 		 * @throws IllegalArgumentException if degree &lt; 1 or degree > 255
 		 */
 		public ReedSolomonGenerator(int degree) {
