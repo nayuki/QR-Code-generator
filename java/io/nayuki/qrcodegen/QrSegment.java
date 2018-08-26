@@ -177,11 +177,10 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the character count is negative
 	 */
 	public QrSegment(Mode md, int numCh, BitBuffer data) {
-		Objects.requireNonNull(md);
+		mode = Objects.requireNonNull(md);
 		Objects.requireNonNull(data);
 		if (numCh < 0)
 			throw new IllegalArgumentException("Invalid value");
-		mode = md;
 		numChars = numCh;
 		this.data = data.clone();  // Make defensive copy
 	}
