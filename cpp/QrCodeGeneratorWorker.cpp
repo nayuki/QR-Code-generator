@@ -91,9 +91,9 @@ int main() {
 					std::cout << (qr.getModule(x, y) ? 1 : 0) << std::endl;
 			}
 			
-		} catch (const char *msg) {
-			if (strcmp(msg, "Data too long") != 0) {
-				std::cerr << msg << std::endl;
+		} catch (const std::length_error &ex) {
+			if (strcmp(ex.what(), "Data too long") != 0) {
+				std::cerr << ex.what() << std::endl;
 				return EXIT_FAILURE;
 			}
 			std::cout << -1 << std::endl;
