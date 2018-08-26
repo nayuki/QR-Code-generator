@@ -28,11 +28,9 @@ package io.nayuki.fastqrcodegen;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -64,11 +62,8 @@ public final class QrCodeGeneratorDemo {
 		ImageIO.write(img, "png", imgFile);             // Write image to file
 		
 		String svg = qr.toSvgString(4);  // Convert to SVG XML code
-		try (Writer out = new OutputStreamWriter(
-				new FileOutputStream("hello-world-QR.svg"),
-				StandardCharsets.UTF_8)) {
-			out.write(svg);  // Create/overwrite file and write SVG data
-		}
+		Files.write(new File("hello-world-QR.svg").toPath(),
+			svg.getBytes(StandardCharsets.UTF_8));
 	}
 	
 	

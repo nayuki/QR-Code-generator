@@ -174,7 +174,8 @@ final class QrTemplate {
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
 			int bit = (bits >>> i) & 1;
-			int a = size - 11 + i % 3, b = i / 3;
+			int a = size - 11 + i % 3;
+			int b = i / 3;
 			darkenFunctionModule(a, b, bit);
 			darkenFunctionModule(b, a, bit);
 		}

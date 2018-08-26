@@ -185,8 +185,8 @@ public final class QrCode {
 		BufferedImage result = new BufferedImage((size + border * 2) * scale, (size + border * 2) * scale, BufferedImage.TYPE_INT_RGB);
 		for (int y = 0; y < result.getHeight(); y++) {
 			for (int x = 0; x < result.getWidth(); x++) {
-				boolean val = getModule(x / scale - border, y / scale - border);
-				result.setRGB(x, y, val ? 0x000000 : 0xFFFFFF);
+				boolean color = getModule(x / scale - border, y / scale - border);
+				result.setRGB(x, y, color ? 0x000000 : 0xFFFFFF);
 			}
 		}
 		return result;
