@@ -214,9 +214,9 @@ public final class QrCode {
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments
 		errorCorrectionLevel = Objects.requireNonNull(ecl);
+		Objects.requireNonNull(dataCodewords);
 		if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Value out of range");
-		Objects.requireNonNull(dataCodewords);
 		
 		// Initialize fields
 		version = ver;
@@ -438,6 +438,7 @@ public final class QrCode {
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
 	private byte[] addEccAndInterleave(byte[] data) {
+		Objects.requireNonNull(data);
 		if (data.length != getNumDataCodewords(version, errorCorrectionLevel))
 			throw new IllegalArgumentException();
 		
