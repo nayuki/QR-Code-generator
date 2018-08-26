@@ -436,10 +436,10 @@ public final class QrCode {
 		}
 		
 		// Balance of black and white modules
-		int total = size * size;
-		// Find smallest k such that (45-5k)% <= dark/total <= (55+5k)%
-		for (int k = 0; black*20 < (9-k)*total || black*20 > (11+k)*total; k++)
-			result += PENALTY_N4;
+		int total = size * size;  // Note that size is odd, so black/total != 1/2
+		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
+		int k = (Math.abs(black * 20 - total * 10) + total - 1) / total - 1;
+		result += k * PENALTY_N4;
 		return result;
 	}
 	
