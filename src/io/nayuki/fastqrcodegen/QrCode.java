@@ -241,24 +241,23 @@ public final class QrCode {
 		int rem = data;
 		for (int i = 0; i < 10; i++)
 			rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
-		data = data << 10 | rem;
-		data ^= 0x5412;  // uint15
-		assert data >>> 15 == 0;
+		int bits  = (data << 10 | rem) ^ 0x5412;  // uint15
+		assert bits >>> 15 == 0;
 		
 		// Draw first copy
 		for (int i = 0; i <= 5; i++)
-			setModule(8, i, (data >>> i) & 1);
-		setModule(8, 7, (data >>> 6) & 1);
-		setModule(8, 8, (data >>> 7) & 1);
-		setModule(7, 8, (data >>> 8) & 1);
+			setModule(8, i, (bits >>> i) & 1);
+		setModule(8, 7, (bits >>> 6) & 1);
+		setModule(8, 8, (bits >>> 7) & 1);
+		setModule(7, 8, (bits >>> 8) & 1);
 		for (int i = 9; i < 15; i++)
-			setModule(14 - i, 8, (data >>> i) & 1);
+			setModule(14 - i, 8, (bits >>> i) & 1);
 		
 		// Draw second copy
 		for (int i = 0; i <= 7; i++)
-			setModule(size - 1 - i, 8, (data >>> i) & 1);
+			setModule(size - 1 - i, 8, (bits >>> i) & 1);
 		for (int i = 8; i < 15; i++)
-			setModule(8, size - 15 + i, (data >>> i) & 1);
+			setModule(8, size - 15 + i, (bits >>> i) & 1);
 		setModule(8, size - 8, 1);
 	}
 	
