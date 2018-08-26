@@ -870,11 +870,11 @@ namespace qrcodegen {
 		
 		/*-- Constants --*/
 		
-		public static get NUMERIC     () { return new QrSegment_Mode(0x1, [10, 12, 14]); }
-		public static get ALPHANUMERIC() { return new QrSegment_Mode(0x2, [ 9, 11, 13]); }
-		public static get BYTE        () { return new QrSegment_Mode(0x4, [ 8, 16, 16]); }
-		public static get KANJI       () { return new QrSegment_Mode(0x8, [ 8, 10, 12]); }
-		public static get ECI         () { return new QrSegment_Mode(0x7, [ 0,  0,  0]); }
+		public static readonly NUMERIC      = new QrSegment_Mode(0x1, [10, 12, 14]);
+		public static readonly ALPHANUMERIC = new QrSegment_Mode(0x2, [ 9, 11, 13]);
+		public static readonly BYTE         = new QrSegment_Mode(0x4, [ 8, 16, 16]);
+		public static readonly KANJI        = new QrSegment_Mode(0x8, [ 8, 10, 12]);
+		public static readonly ECI          = new QrSegment_Mode(0x7, [ 0,  0,  0]);
 		
 		
 		/*-- Fields --*/
