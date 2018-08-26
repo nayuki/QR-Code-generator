@@ -288,9 +288,8 @@ impl QrCode {
 		let numalign: usize = alignpatpos.len();
 		for i in 0 .. numalign {
 			for j in 0 .. numalign {
-				if i == 0 && j == 0 || i == 0 && j == numalign - 1 || i == numalign - 1 && j == 0 {
-					continue;  // Skip the three finder corners
-				} else {
+				// Don't draw on the three finder corners
+				if !(i == 0 && j == 0 || i == 0 && j == numalign - 1 || i == numalign - 1 && j == 0) {
 					self.draw_alignment_pattern(alignpatpos[i], alignpatpos[j]);
 				}
 			}

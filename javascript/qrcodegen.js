@@ -206,9 +206,8 @@ var qrcodegen = new function() {
 			var numAlign = alignPatPos.length;
 			for (var i = 0; i < numAlign; i++) {
 				for (var j = 0; j < numAlign; j++) {
-					if (i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0)
-						continue;  // Skip the three finder corners
-					else
+					// Don't draw on the three finder corners
+					if (!(i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0))
 						drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
 				}
 			}

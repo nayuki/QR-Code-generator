@@ -341,9 +341,8 @@ testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
 	for (int i = 0; i < numAlign; i++) {
 		for (int j = 0; j < numAlign; j++) {
-			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
-				continue;  // Skip the three finder corners
-			else
+			// Don't draw on the three finder corners
+			if (!((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0)))
 				fillRectangle(alignPatPos[i] - 2, alignPatPos[j] - 2, 5, 5, qrcode);
 		}
 	}

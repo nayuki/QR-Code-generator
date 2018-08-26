@@ -255,10 +255,10 @@ class QrCode(object):
 		# Draw numerous alignment patterns
 		alignpatpos = QrCode._get_alignment_pattern_positions(self._version)
 		numalign = len(alignpatpos)
-		skips = ((0, 0), (0, numalign - 1), (numalign - 1, 0))  # Skip the three finder corners
+		skips = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
 		for i in range(numalign):
 			for j in range(numalign):
-				if (i, j) not in skips:
+				if (i, j) not in skips:  # Don't draw on the three finder corners
 					self._draw_alignment_pattern(alignpatpos[i], alignpatpos[j])
 		
 		# Draw configuration data
