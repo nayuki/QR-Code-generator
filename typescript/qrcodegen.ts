@@ -612,15 +612,15 @@ namespace qrcodegen {
 		
 		/*-- Constants --*/
 		
-		public static get MIN_VERSION(): int { return  1; }
-		public static get MAX_VERSION(): int { return 40; }
+		public static readonly MIN_VERSION: int =  1;
+		public static readonly MAX_VERSION: int = 40;
 		
 		
 		// For use in getPenaltyScore(), when evaluating which mask is best.
-		private static get PENALTY_N1(): int { return 3; }
-		private static get PENALTY_N2(): int { return 3; }
-		private static get PENALTY_N3(): int { return 40; }
-		private static get PENALTY_N4(): int { return 10; }
+		private static readonly PENALTY_N1: int = 3;
+		private static readonly PENALTY_N2: int = 3;
+		private static readonly PENALTY_N3: int = 40;
+		private static readonly PENALTY_N4: int = 10;
 		
 	}
 	
@@ -661,10 +661,10 @@ namespace qrcodegen {
 		
 		/*-- Constants --*/
 		
-		public static get LOW     () { return new QrCode_Ecc(0, 1); }
-		public static get MEDIUM  () { return new QrCode_Ecc(1, 0); }
-		public static get QUARTILE() { return new QrCode_Ecc(2, 3); }
-		public static get HIGH    () { return new QrCode_Ecc(3, 2); }
+		public static readonly LOW      = new QrCode_Ecc(0, 1);
+		public static readonly MEDIUM   = new QrCode_Ecc(1, 0);
+		public static readonly QUARTILE = new QrCode_Ecc(2, 3);
+		public static readonly HIGH     = new QrCode_Ecc(3, 2);
 		
 		
 		/*-- Fields --*/
@@ -843,19 +843,13 @@ namespace qrcodegen {
 		/*-- Constants --*/
 		
 		// Can test whether a string is encodable in numeric mode (such as by using QrSegment.makeNumeric()).
-		public static get NUMERIC_REGEX(): RegExp {
-			return /^[0-9]*$/;
-		}
+		public static readonly NUMERIC_REGEX: RegExp = /^[0-9]*$/;
 		
 		// Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
-		public static get ALPHANUMERIC_REGEX(): RegExp {
-			return /^[A-Z0-9 $%*+.\/:-]*$/;
-		}
+		public static readonly ALPHANUMERIC_REGEX: RegExp = /^[A-Z0-9 $%*+.\/:-]*$/;
 		
 		// The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string.
-		private static get ALPHANUMERIC_CHARSET(): string {
-			return "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
-		}
+		private static readonly ALPHANUMERIC_CHARSET: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 		
 	}
 	
