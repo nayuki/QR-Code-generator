@@ -619,8 +619,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 				black++;
 		}
 	}
-	// Note that size is odd, so black/total != 1/2
-	int total = qrsize * qrsize;
+	int total = qrsize * qrsize;  // Note that size is odd, so black/total != 1/2
 	// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 	int k = (int)((labs(black * 20L - total * 10L) + total - 1) / total) - 1;
 	result += k * PENALTY_N4;

@@ -609,8 +609,7 @@ impl QrCode {
 		for color in &self.modules {
 			black += *color as i32;
 		}
-		// Note that size is odd, so black/total != 1/2
-		let total: i32 = size * size;
+		let total: i32 = size * size;  // Note that size is odd, so black/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 		let k: i32 = ((black * 20 - total * 10).abs() + total - 1) / total - 1;
 		result += k * PENALTY_N4;

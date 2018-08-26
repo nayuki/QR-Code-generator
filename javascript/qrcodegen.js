@@ -480,8 +480,7 @@ var qrcodegen = new function() {
 						black++;
 				});
 			});
-			// Note that size is odd, so black/total != 1/2
-			var total = size * size;
+			var total = size * size;  // Note that size is odd, so black/total != 1/2
 			// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 			var k = Math.ceil(Math.abs(black * 20 - total * 10) / total) - 1;
 			result += k * QrCode.PENALTY_N4;

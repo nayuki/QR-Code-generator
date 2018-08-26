@@ -632,8 +632,7 @@ public final class QrCode {
 					black++;
 			}
 		}
-		// Note that size is odd, so black/total != 1/2
-		int total = size * size;
+		int total = size * size;  // Note that size is odd, so black/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 		int k = (Math.abs(black * 20 - total * 10) + total - 1) / total - 1;
 		result += k * PENALTY_N4;

@@ -485,8 +485,7 @@ long QrCode::getPenaltyScore() const {
 				black++;
 		}
 	}
-	// Note that size is odd, so black/total != 1/2
-	int total = size * size;
+	int total = size * size;  // Note that size is odd, so black/total != 1/2
 	// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 	int k = static_cast<int>((std::abs(black * 20L - total * 10L) + total - 1) / total) - 1;
 	result += k * PENALTY_N4;
