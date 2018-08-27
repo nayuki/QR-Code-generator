@@ -173,18 +173,18 @@ Rust language:
     use qrcodegen::QrSegment;
     
     // Simple operation
-    let qr0 = QrCode::encode_text("Hello, world!",
+    let qr = QrCode::encode_text("Hello, world!",
         QrCodeEcc::Medium).unwrap();
-    let svg = qr0.to_svg_string(4);
+    let svg = qr.to_svg_string(4);
     
     // Manual operation
     let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
     let segs = QrSegment::make_segments(&chrs);
-    let qr1 = QrCode::encode_segments_advanced(
+    let qr = QrCode::encode_segments_advanced(
         &segs, QrCodeEcc::High, 5, 5, Some(2), false).unwrap();
-    for y in 0 .. qr1.size() {
-        for x in 0 .. qr1.size() {
-            (... paint qr1.get_module(x, y) ...)
+    for y in 0 .. qr.size() {
+        for x in 0 .. qr.size() {
+            (... paint qr.get_module(x, y) ...)
         }
     }
 
