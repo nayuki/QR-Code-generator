@@ -51,7 +51,7 @@ namespace qrcodegen {
 		// Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
 		// QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
 		// ecl argument if it can be done without increasing the version.
-		public static encodeText(text: string, ecl: QrCode_Ecc): QrCode {
+		public static encodeText(text: string, ecl: QrCode.Ecc): QrCode {
 			let segs: Array<QrSegment> = qrcodegen.QrSegment.makeSegments(text);
 			return QrCode.encodeSegments(segs, ecl);
 		}
@@ -61,7 +61,7 @@ namespace qrcodegen {
 		// This function always encodes using the binary segment mode, not any text mode. The maximum number of
 		// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 		// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
-		public static encodeBinary(data: Array<byte>, ecl: QrCode_Ecc): QrCode {
+		public static encodeBinary(data: Array<byte>, ecl: QrCode.Ecc): QrCode {
 			let seg: QrSegment = qrcodegen.QrSegment.makeBytes(data);
 			return QrCode.encodeSegments([seg], ecl);
 		}
@@ -72,7 +72,7 @@ namespace qrcodegen {
 		// This function allows the user to create a custom sequence of segments that switches
 		// between modes (such as alphanumeric and binary) to encode text more efficiently.
 		// This function is considered to be lower level than simply encoding text or binary data.
-		public static encodeSegments(segs: Array<QrSegment>, ecl: QrCode_Ecc,
+		public static encodeSegments(segs: Array<QrSegment>, ecl: QrCode.Ecc,
 				minVersion: int = 1, maxVersion: int = 1,
 				mask: int = -1, boostEcl: boolean = true): QrCode {
 			
@@ -95,7 +95,7 @@ namespace qrcodegen {
 			}
 			
 			// Increase the error correction level while the data still fits in the current version number
-			[QrCode_Ecc.MEDIUM, QrCode_Ecc.QUARTILE, QrCode_Ecc.HIGH].forEach((newEcl: QrCode_Ecc) => {  // From low to high
+			[QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH].forEach((newEcl: QrCode.Ecc) => {  // From low to high
 				if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
 					ecl = newEcl;
 			});
@@ -137,7 +137,7 @@ namespace qrcodegen {
 		public readonly size: int;
 		
 		// The error correction level used in this QR Code symbol.
-		public readonly errorCorrectionLevel: QrCode_Ecc;
+		public readonly errorCorrectionLevel: QrCode.Ecc;
 		
 		// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 		// Note that even if the constructor was called with automatic masking requested
@@ -151,7 +151,7 @@ namespace qrcodegen {
 		private readonly isFunction: Array<Array<boolean>> = [];
 		
 		
-		public constructor(datacodewords: Array<byte>, mask: int, version: int, errCorLvl: QrCode_Ecc) {
+		public constructor(datacodewords: Array<byte>, mask: int, version: int, errCorLvl: QrCode.Ecc) {
 			// Check arguments and handle simple scalar fields
 			if (mask < -1 || mask > 7)
 				throw "Mask value out of range";
@@ -378,7 +378,7 @@ namespace qrcodegen {
 		// codewords appended to it, based on this object's version and error correction level.
 		private addEccAndInterleave(data: Array<byte>): Array<byte> {
 			const ver: int = this.version;
-			const ecl: QrCode_Ecc = this.errorCorrectionLevel;
+			const ecl: QrCode.Ecc = this.errorCorrectionLevel;
 			if (data.length != QrCode.getNumDataCodewords(ver, ecl))
 				throw "Invalid argument";
 			
@@ -600,7 +600,7 @@ namespace qrcodegen {
 		// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 		// QR Code of the given version number and error correction level, with remainder bits discarded.
 		// This stateless pure function could be implemented as a (40*4)-cell lookup table.
-		private static getNumDataCodewords(ver: int, ecl: QrCode_Ecc): int {
+		private static getNumDataCodewords(ver: int, ecl: QrCode.Ecc): int {
 			if (ver < QrCode.MIN_VERSION || ver > QrCode.MAX_VERSION)
 				throw "Version number out of range";
 			return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
@@ -651,41 +651,6 @@ namespace qrcodegen {
 	
 	
 	
-	/*---- Public helper enumeration ----*/
-	
-	/* 
-	 * Represents the error correction level used in a QR Code symbol.
-	 */
-	export class QrCode_Ecc {
-		
-		/*-- Constants --*/
-		
-		public static readonly LOW      = new QrCode_Ecc(0, 1);
-		public static readonly MEDIUM   = new QrCode_Ecc(1, 0);
-		public static readonly QUARTILE = new QrCode_Ecc(2, 3);
-		public static readonly HIGH     = new QrCode_Ecc(3, 2);
-		
-		
-		/*-- Fields --*/
-		
-		// In the range 0 to 3 (unsigned 2-bit integer).
-		public readonly ordinal: int;
-		
-		// (Package-private) In the range 0 to 3 (unsigned 2-bit integer).
-		public readonly formatBits: int;
-		
-		
-		/*-- Constructor --*/
-		
-		private constructor(ord: int, fb: int) {
-			this.ordinal = ord;
-			this.formatBits = fb;
-		}
-		
-	}
-	
-	
-	
 	/*---- Data segment class ----*/
 	
 	/* 
@@ -705,7 +670,7 @@ namespace qrcodegen {
 			let bb = new BitBuffer();
 			data.forEach(
 				(b: byte) => bb.appendBits(b, 8));
-			return new QrSegment(QrSegment_Mode.BYTE, data.length, bb);
+			return new QrSegment(QrSegment.Mode.BYTE, data.length, bb);
 		}
 		
 		
@@ -720,7 +685,7 @@ namespace qrcodegen {
 			let rem: int = digits.length - i;
 			if (rem > 0)  // 1 or 2 digits remaining
 				bb.appendBits(parseInt(digits.substring(i), 10), rem * 3 + 1);
-			return new QrSegment(QrSegment_Mode.NUMERIC, digits.length, bb);
+			return new QrSegment(QrSegment.Mode.NUMERIC, digits.length, bb);
 		}
 		
 		
@@ -739,7 +704,7 @@ namespace qrcodegen {
 			}
 			if (i < text.length)  // 1 character remaining
 				bb.appendBits(QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
-			return new QrSegment(QrSegment_Mode.ALPHANUMERIC, text.length, bb);
+			return new QrSegment(QrSegment.Mode.ALPHANUMERIC, text.length, bb);
 		}
 		
 		
@@ -772,14 +737,14 @@ namespace qrcodegen {
 				bb.appendBits(assignVal, 21);
 			} else
 				throw "ECI assignment value out of range";
-			return new QrSegment(QrSegment_Mode.ECI, 0, bb);
+			return new QrSegment(QrSegment.Mode.ECI, 0, bb);
 		}
 		
 		
 		/*-- Fields --*/
 		
 		// The mode indicator for this segment.
-		public readonly mode: QrSegment_Mode;
+		public readonly mode: QrSegment.Mode;
 		
 		// The length of this segment's unencoded data, measured in characters. Always zero or positive.
 		public readonly numChars: int;
@@ -789,7 +754,7 @@ namespace qrcodegen {
 		
 		/*-- Constructor --*/
 		
-		public constructor(mode: QrSegment_Mode, numChars: int, bitData: Array<bit>) {
+		public constructor(mode: QrSegment.Mode, numChars: int, bitData: Array<bit>) {
 			if (numChars < 0)
 				throw "Invalid argument";
 			this.mode = mode;
@@ -849,52 +814,6 @@ namespace qrcodegen {
 		
 		// The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string.
 		private static readonly ALPHANUMERIC_CHARSET: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
-		
-	}
-	
-	
-	
-	/*---- Public helper enumeration ----*/
-	
-	/* 
-	 * Represents the mode field of a segment. Immutable.
-	 */
-	export class QrSegment_Mode {
-		
-		/*-- Constants --*/
-		
-		public static readonly NUMERIC      = new QrSegment_Mode(0x1, [10, 12, 14]);
-		public static readonly ALPHANUMERIC = new QrSegment_Mode(0x2, [ 9, 11, 13]);
-		public static readonly BYTE         = new QrSegment_Mode(0x4, [ 8, 16, 16]);
-		public static readonly KANJI        = new QrSegment_Mode(0x8, [ 8, 10, 12]);
-		public static readonly ECI          = new QrSegment_Mode(0x7, [ 0,  0,  0]);
-		
-		
-		/*-- Fields --*/
-		
-		// An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object.
-		public readonly modeBits: int;
-		
-		private readonly numBitsCharCount: [int,int,int];
-		
-		
-		/*-- Constructor --*/
-		
-		private constructor(mode: int, ccbits: [int,int,int]) {
-			this.modeBits = mode;
-			this.numBitsCharCount = ccbits;
-		}
-		
-		
-		/*-- Method --*/
-		
-		// (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.
-		public numCharCountBits(ver: int): int {
-			if      ( 1 <= ver && ver <=  9)  return this.numBitsCharCount[0];
-			else if (10 <= ver && ver <= 26)  return this.numBitsCharCount[1];
-			else if (27 <= ver && ver <= 40)  return this.numBitsCharCount[2];
-			else  throw "Version number out of range";
-		}
 		
 	}
 	
@@ -1006,4 +925,97 @@ namespace qrcodegen {
 		
 	}
 	
+}
+
+
+
+/*---- Public helper enumeration ----*/
+
+namespace qrcodegen.QrCode {
+	
+	type int = number;
+	
+	
+	/* 
+	 * Represents the error correction level used in a QR Code symbol.
+	 */
+	export class Ecc {
+		
+		/*-- Constants --*/
+		
+		public static readonly LOW      = new Ecc(0, 1);
+		public static readonly MEDIUM   = new Ecc(1, 0);
+		public static readonly QUARTILE = new Ecc(2, 3);
+		public static readonly HIGH     = new Ecc(3, 2);
+		
+		
+		/*-- Fields --*/
+		
+		// In the range 0 to 3 (unsigned 2-bit integer).
+		public readonly ordinal: int;
+		
+		// (Package-private) In the range 0 to 3 (unsigned 2-bit integer).
+		public readonly formatBits: int;
+		
+		
+		/*-- Constructor --*/
+		
+		private constructor(ord: int, fb: int) {
+			this.ordinal = ord;
+			this.formatBits = fb;
+		}
+		
+	}
+}
+
+
+
+/*---- Public helper enumeration ----*/
+
+namespace qrcodegen.QrSegment {
+	
+	type int = number;
+	
+	
+	/* 
+	 * Represents the mode field of a segment. Immutable.
+	 */
+	export class Mode {
+		
+		/*-- Constants --*/
+		
+		public static readonly NUMERIC      = new Mode(0x1, [10, 12, 14]);
+		public static readonly ALPHANUMERIC = new Mode(0x2, [ 9, 11, 13]);
+		public static readonly BYTE         = new Mode(0x4, [ 8, 16, 16]);
+		public static readonly KANJI        = new Mode(0x8, [ 8, 10, 12]);
+		public static readonly ECI          = new Mode(0x7, [ 0,  0,  0]);
+		
+		
+		/*-- Fields --*/
+		
+		// An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object.
+		public readonly modeBits: int;
+		
+		private readonly numBitsCharCount: [int,int,int];
+		
+		
+		/*-- Constructor --*/
+		
+		private constructor(mode: int, ccbits: [int,int,int]) {
+			this.modeBits = mode;
+			this.numBitsCharCount = ccbits;
+		}
+		
+		
+		/*-- Method --*/
+		
+		// (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.
+		public numCharCountBits(ver: int): int {
+			if      ( 1 <= ver && ver <=  9)  return this.numBitsCharCount[0];
+			else if (10 <= ver && ver <= 26)  return this.numBitsCharCount[1];
+			else if (27 <= ver && ver <= 40)  return this.numBitsCharCount[2];
+			else  throw "Version number out of range";
+		}
+		
+	}
 }

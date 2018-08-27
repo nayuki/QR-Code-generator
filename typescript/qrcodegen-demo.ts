@@ -52,19 +52,19 @@
 		svg.style.display = "none";
 		
 		// Returns a QrCode.Ecc object based on the radio buttons in the HTML form.
-		function getInputErrorCorrectionLevel(): qrcodegen.QrCode_Ecc {
+		function getInputErrorCorrectionLevel(): qrcodegen.QrCode.Ecc {
 			if (getInput("errcorlvl-medium").checked)
-				return qrcodegen.QrCode_Ecc.MEDIUM;
+				return qrcodegen.QrCode.Ecc.MEDIUM;
 			else if (getInput("errcorlvl-quartile").checked)
-				return qrcodegen.QrCode_Ecc.QUARTILE;
+				return qrcodegen.QrCode.Ecc.QUARTILE;
 			else if (getInput("errcorlvl-high").checked)
-				return qrcodegen.QrCode_Ecc.HIGH;
+				return qrcodegen.QrCode.Ecc.HIGH;
 			else  // In case no radio button is depressed
-				return qrcodegen.QrCode_Ecc.LOW;
+				return qrcodegen.QrCode.Ecc.LOW;
 		}
 		
 		// Get form inputs and compute QR Code
-		const ecl: qrcodegen.QrCode_Ecc = getInputErrorCorrectionLevel();
+		const ecl: qrcodegen.QrCode.Ecc = getInputErrorCorrectionLevel();
 		const text: string = (getElem("text-input") as HTMLTextAreaElement).value;
 		const segs: Array<qrcodegen.QrSegment> = qrcodegen.QrSegment.makeSegments(text);
 		const minVer: number = parseInt(getInput("version-min-input").value, 10);
@@ -98,8 +98,8 @@
 			if (segs.length == 0)
 				return "none";
 			else if (segs.length == 1) {
-				const mode: qrcodegen.QrSegment_Mode = segs[0].mode;
-				const Mode = qrcodegen.QrSegment_Mode;
+				const mode: qrcodegen.QrSegment.Mode = segs[0].mode;
+				const Mode = qrcodegen.QrSegment.Mode;
 				if (mode == Mode.NUMERIC     )  return "numeric";
 				if (mode == Mode.ALPHANUMERIC)  return "alphanumeric";
 				if (mode == Mode.BYTE        )  return "byte";
