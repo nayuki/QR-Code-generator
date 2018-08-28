@@ -210,9 +210,7 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	uint8_t generator[qrcodegen_REED_SOLOMON_DEGREE_MAX];
 	calcReedSolomonGenerator(blockEccLen, generator);
 	for (int i = 0, j = dataLen, k = 0; i < numBlocks; i++) {
-		int blockLen = shortBlockDataLen;
-		if (i >= numShortBlocks)
-			blockLen++;
+		int blockLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
 		calcReedSolomonRemainder(&data[k], blockLen, generator, blockEccLen, &data[j]);
 		j += blockEccLen;
 		k += blockLen;
@@ -430,15 +428,8 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]) {
 	// Calculate error correction code and pack bits
 	assert(0 <= (int)mask && (int)mask <= 7);
-	int data;
-	switch (ecl) {
-		case qrcodegen_Ecc_LOW     :  data = 1;  break;
-		case qrcodegen_Ecc_MEDIUM  :  data = 0;  break;
-		case qrcodegen_Ecc_QUARTILE:  data = 3;  break;
-		case qrcodegen_Ecc_HIGH    :  data = 2;  break;
-		default:  assert(false);  return;
-	}
-	data = data << 3 | (int)mask;  // errCorrLvl is uint2, mask is uint3
+	static const int table[] = {1, 0, 3, 2};
+	int data = table[(int)ecl] << 3 | (int)mask;  // errCorrLvl is uint2, mask is uint3
 	int rem = data;
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -740,13 +731,13 @@ testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars) {
 		return -1;
 	int n = (int)numChars;
 	
-	int result = -2;
+	int result;
 	if (mode == qrcodegen_Mode_NUMERIC) {
 		// n * 3 + ceil(n / 3)
 		if (n > LIMIT / 3)
 			goto overflow;
 		result = n * 3;
-		int temp = n / 3 + (n % 3 == 0 ? 0 : 1);
+		int temp = n / 3 + (n % 3 > 0 ? 1 : 0);
 		if (temp > LIMIT - result)
 			goto overflow;
 		result += temp;
@@ -769,6 +760,10 @@ testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars) {
 		result = n * 13;
 	} else if (mode == qrcodegen_Mode_ECI && numChars == 0)
 		result = 3 * 8;
+	else {
+		assert(false);
+		return -1;
+	}
 	assert(0 <= result && result <= LIMIT);
 	return result;
 overflow:
@@ -809,7 +804,7 @@ struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]
 	for (; *digits != '\0'; digits++) {
 		char c = *digits;
 		assert('0' <= c && c <= '9');
-		accumData = accumData * 10 + (c - '0');
+		accumData = accumData * 10 + (unsigned int)(c - '0');
 		accumCount++;
 		if (accumCount == 3) {
 			appendBitsToBuffer(accumData, 10, buf, &result.bitLength);
@@ -843,7 +838,7 @@ struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t bu
 	for (; *text != '\0'; text++) {
 		const char *temp = strchr(ALPHANUMERIC_CHARSET, *text);
 		assert(temp != NULL);
-		accumData = accumData * 45 + (temp - ALPHANUMERIC_CHARSET);
+		accumData = accumData * 45 + (unsigned int)(temp - ALPHANUMERIC_CHARSET);
 		accumCount++;
 		if (accumCount == 2) {
 			appendBitsToBuffer(accumData, 11, buf, &result.bitLength);
@@ -964,14 +959,15 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
-			drawFormatBits(ecl, (enum qrcodegen_Mask)i, qrcode);
-			applyMask(tempBuffer, qrcode, (enum qrcodegen_Mask)i);
+			enum qrcodegen_Mask msk = (enum qrcodegen_Mask)i;
+			drawFormatBits(ecl, msk, qrcode);
+			applyMask(tempBuffer, qrcode, msk);
 			long penalty = getPenaltyScore(qrcode);
 			if (penalty < minPenalty) {
-				mask = (enum qrcodegen_Mask)i;
+				mask = msk;
 				minPenalty = penalty;
 			}
-			applyMask(tempBuffer, qrcode, (enum qrcodegen_Mask)i);  // Undoes the mask due to XOR
+			applyMask(tempBuffer, qrcode, msk);  // Undoes the mask due to XOR
 		}
 	}
 	assert(0 <= (int)mask && (int)mask <= 7);
