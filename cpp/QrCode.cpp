@@ -205,7 +205,7 @@ void QrCode::drawFunctionPatterns() {
 	drawFinderPattern(3, size - 4);
 	
 	// Draw numerous alignment patterns
-	const vector<int> alignPatPos = getAlignmentPatternPositions(version);
+	const vector<int> alignPatPos = getAlignmentPatternPositions();
 	int numAlign = alignPatPos.size();
 	for (int i = 0; i < numAlign; i++) {
 		for (int j = 0; j < numAlign; j++) {
@@ -495,18 +495,15 @@ long QrCode::getPenaltyScore() const {
 }
 
 
-vector<int> QrCode::getAlignmentPatternPositions(int ver) {
-	if (ver < MIN_VERSION || ver > MAX_VERSION)
-		throw std::domain_error("Version number out of range");
-	else if (ver == 1)
+vector<int> QrCode::getAlignmentPatternPositions() const {
+	if (version == 1)
 		return vector<int>();
 	else {
-		int numAlign = ver / 7 + 2;
-		int step = (ver == 32) ? 26 :
-			(ver*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
-		
+		int numAlign = version / 7 + 2;
+		int step = (version == 32) ? 26 :
+			(version*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
 		vector<int> result;
-		for (int i = 0, pos = ver * 4 + 10; i < numAlign - 1; i++, pos -= step)
+		for (int i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
 			result.insert(result.begin(), pos);
 		result.insert(result.begin(), 6);
 		return result;

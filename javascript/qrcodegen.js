@@ -203,7 +203,7 @@ var qrcodegen = new function() {
 			drawFinderPattern(3, size - 4);
 			
 			// Draw numerous alignment patterns
-			var alignPatPos = QrCode.getAlignmentPatternPositions(version);
+			var alignPatPos = getAlignmentPatternPositions();
 			var numAlign = alignPatPos.length;
 			for (var i = 0; i < numAlign; i++) {
 				for (var j = 0; j < numAlign; j++) {
@@ -488,6 +488,24 @@ var qrcodegen = new function() {
 		}
 		
 		
+		// Returns an ascending list of positions of alignment patterns for this version number.
+		// Each position is in the range [0,177), and are used on both the x and y axes.
+		// This could be implemented as lookup table of 40 variable-length lists of integers.
+		function getAlignmentPatternPositions() {
+			if (version == 1)
+				return [];
+			else {
+				var numAlign = Math.floor(version / 7) + 2;
+				var step = (version == 32) ? 26 :
+					Math.ceil((size - 13) / (numAlign*2 - 2)) * 2;
+				var result = [6];
+				for (var i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
+					result.splice(1, 0, pos);
+				return result;
+			}
+		}
+		
+		
 		// Returns true iff the i'th bit of x is set to 1.
 		function getBit(x, i) {
 			return ((x >>> i) & 1) != 0;
@@ -595,28 +613,6 @@ var qrcodegen = new function() {
 	/*---- Private static helper functions for QrCode ----*/
 	
 	var QrCode = {};  // Private object to assign properties to. Not the same object as 'this.QrCode'.
-	
-	
-	// Returns a sequence of positions of the alignment patterns in ascending order. These positions are
-	// used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
-	// This stateless pure function could be implemented as table of 40 variable-length lists of integers.
-	QrCode.getAlignmentPatternPositions = function(ver) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
-			throw "Version number out of range";
-		else if (ver == 1)
-			return [];
-		else {
-			var size = ver * 4 + 17;
-			var numAlign = Math.floor(ver / 7) + 2;
-			var step = (ver == 32) ? 26 :
-				Math.ceil((size - 13) / (numAlign*2 - 2)) * 2;
-			
-			var result = [6];
-			for (var i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
-				result.splice(1, 0, pos);
-			return result;
-		}
-	};
 	
 	
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after

@@ -256,7 +256,7 @@ class QrCode(object):
 		self._draw_finder_pattern(3, self._size - 4)
 		
 		# Draw numerous alignment patterns
-		alignpatpos = QrCode._get_alignment_pattern_positions(self._version)
+		alignpatpos = self._get_alignment_pattern_positions()
 		numalign = len(alignpatpos)
 		skips = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
 		for i in range(numalign):
@@ -486,21 +486,18 @@ class QrCode(object):
 	
 	# ---- Private static helper functions ----
 	
-	@staticmethod
-	def _get_alignment_pattern_positions(ver):
-		"""Returns a sequence of positions of the alignment patterns in ascending order. These positions are
-		used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
-		This stateless pure function could be implemented as table of 40 variable-length lists of integers."""
-		if not (QrCode.MIN_VERSION <= ver <= QrCode.MAX_VERSION):
-			raise ValueError("Version number out of range")
-		elif ver == 1:
+	def _get_alignment_pattern_positions(self):
+		"""Returns an ascending list of positions of alignment patterns for this version number.
+		Each position is in the range [0,177), and are used on both the x and y axes.
+		This could be implemented as lookup table of 40 variable-length lists of integers."""
+		ver = self._version
+		if ver == 1:
 			return []
 		else:
 			numalign = ver // 7 + 2
 			step = 26 if (ver == 32) else \
 				(ver*4 + numalign*2 + 1) // (numalign*2 - 2) * 2
-			start = ver * 4 + 10
-			result = [(start - i * step) for i in range(numalign - 1)] + [6]
+			result = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
 			return list(reversed(result))
 	
 	

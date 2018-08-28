@@ -231,10 +231,10 @@ class QrCode final {
 	
 	/*---- Private static helper functions ----*/
 	
-	// Returns a set of positions of the alignment patterns in ascending order. These positions are
-	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
-	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
-	private: static std::vector<int> getAlignmentPatternPositions(int ver);
+	// Returns an ascending list of positions of alignment patterns for this version number.
+	// Each position is in the range [0,177), and are used on both the x and y axes.
+	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
+	private: std::vector<int> getAlignmentPatternPositions() const;
 	
 	
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after

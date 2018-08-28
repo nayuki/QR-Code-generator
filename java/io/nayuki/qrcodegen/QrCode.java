@@ -333,7 +333,7 @@ public final class QrCode {
 		drawFinderPattern(3, size - 4);
 		
 		// Draw numerous alignment patterns
-		int[] alignPatPos = getAlignmentPatternPositions(version);
+		int[] alignPatPos = getAlignmentPatternPositions();
 		int numAlign = alignPatPos.length;
 		for (int i = 0; i < numAlign; i++) {
 			for (int j = 0; j < numAlign; j++) {
@@ -644,25 +644,22 @@ public final class QrCode {
 	
 	/*---- Private static helper functions ----*/
 	
-	// Returns a set of positions of the alignment patterns in ascending order. These positions are
-	// used on both the x and y axes. Each value in the resulting array is in the range [0, 177).
-	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
-	private static int[] getAlignmentPatternPositions(int ver) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
-			throw new IllegalArgumentException("Version number out of range");
-		else if (ver == 1)
+	// Returns an ascending list of positions of alignment patterns for this version number.
+	// Each position is in the range [0,177), and are used on both the x and y axes.
+	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
+	private int[] getAlignmentPatternPositions() {
+		if (version == 1)
 			return new int[]{};
 		else {
-			int numAlign = ver / 7 + 2;
+			int numAlign = version / 7 + 2;
 			int step;
-			if (ver == 32)  // Special snowflake
+			if (version == 32)  // Special snowflake
 				step = 26;
 			else  // step = ceil[(size - 13) / (numAlign*2 - 2)] * 2
-				step = (ver*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
-			
+				step = (version*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
 			int[] result = new int[numAlign];
 			result[0] = 6;
-			for (int i = result.length - 1, pos = ver * 4 + 10; i >= 1; i--, pos -= step)
+			for (int i = result.length - 1, pos = size - 7; i >= 1; i--, pos -= step)
 				result[i] = pos;
 			return result;
 		}

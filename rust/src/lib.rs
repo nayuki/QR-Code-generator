@@ -288,7 +288,7 @@ impl QrCode {
 		self.draw_finder_pattern(3, size - 4);
 		
 		// Draw numerous alignment patterns
-		let alignpatpos: Vec<i32> = QrCode::get_alignment_pattern_positions(self.version);
+		let alignpatpos: Vec<i32> = self.get_alignment_pattern_positions();
 		let numalign: usize = alignpatpos.len();
 		for i in 0 .. numalign {
 			for j in 0 .. numalign {
@@ -620,19 +620,19 @@ impl QrCode {
 	
 	/*---- Private static helper functions ----*/
 	
-	// Returns a set of positions of the alignment patterns in ascending order. These positions are
-	// used on both the x and y axes. Each value in the resulting list is in the range [0, 177).
-	// This stateless pure function could be implemented as table of 40 variable-length lists of unsigned bytes.
-	fn get_alignment_pattern_positions(ver: Version) -> Vec<i32> {
-		let ver = ver.value();
+	// Returns an ascending list of positions of alignment patterns for this version number.
+	// Each position is in the range [0,177), and are used on both the x and y axes.
+	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
+	fn get_alignment_pattern_positions(&self) -> Vec<i32> {
+		let ver = self.version.value();
 		if ver == 1 {
 			vec![]
 		} else {
 			let numalign: i32 = (ver as i32) / 7 + 2;
 			let step: i32 = if ver == 32 { 26 } else
 				{((ver as i32)*4 + numalign*2 + 1) / (numalign*2 - 2) * 2};
-			let start = (ver as i32) * 4 + 10;
-			let mut result: Vec<i32> = (0 .. numalign - 1).map(|i| start - i * step).collect();
+			let mut result: Vec<i32> = (0 .. numalign - 1).map(
+				|i| self.size - 7 - i * step).collect();
 			result.push(6);
 			result.reverse();
 			result

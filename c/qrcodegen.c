@@ -447,8 +447,10 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 }
 
 
-// Calculates the positions of alignment patterns in ascending order for the given version number,
-// storing them to the given array and returning an array length in the range [0, 7].
+// Calculates and stores an ascending list of positions of alignment patterns
+// for this version number, returning the length of the list (in the range [0,7)).
+// Each position is in the range [0,177), and are used on both the x and y axes.
+// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
 testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 	if (version == 1)
 		return 0;

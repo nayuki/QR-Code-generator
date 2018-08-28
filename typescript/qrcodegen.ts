@@ -270,7 +270,7 @@ namespace qrcodegen {
 			this.drawFinderPattern(3, this.size - 4);
 			
 			// Draw numerous alignment patterns
-			let alignPatPos: Array<int> = QrCode.getAlignmentPatternPositions(this.version);
+			let alignPatPos: Array<int> = this.getAlignmentPatternPositions();
 			let numAlign: int = alignPatPos.length;
 			for (let i = 0; i < numAlign; i++) {
 				for (let j = 0; j < numAlign; j++) {
@@ -560,22 +560,18 @@ namespace qrcodegen {
 		
 		/*-- Private static helper functions QrCode --*/
 		
-		// Returns a sequence of positions of the alignment patterns in ascending order. These positions are
-		// used on both the x and y axes. Each value in the resulting sequence is in the range [0, 177).
-		// This stateless pure function could be implemented as table of 40 variable-length lists of integers.
-		private static getAlignmentPatternPositions(ver: int): Array<int> {
-			if (ver < QrCode.MIN_VERSION || ver > QrCode.MAX_VERSION)
-				throw "Version number out of range";
-			else if (ver == 1)
+		// Returns an ascending list of positions of alignment patterns for this version number.
+		// Each position is in the range [0,177), and are used on both the x and y axes.
+		// This could be implemented as lookup table of 40 variable-length lists of integers.
+		private getAlignmentPatternPositions(): Array<int> {
+			if (this.version == 1)
 				return [];
 			else {
-				let size: int = ver * 4 + 17;
-				let numAlign: int = Math.floor(ver / 7) + 2;
-				let step: int = (ver == 32) ? 26 :
-					Math.ceil((size - 13) / (numAlign*2 - 2)) * 2;
-				
+				let numAlign: int = Math.floor(this.version / 7) + 2;
+				let step: int = (this.version == 32) ? 26 :
+					Math.ceil((this.size - 13) / (numAlign*2 - 2)) * 2;
 				let result: Array<int> = [6];
-				for (let i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
+				for (let i = 0, pos = this.size - 7; i < numAlign - 1; i++, pos -= step)
 					result.splice(1, 0, pos);
 				return result;
 			}
