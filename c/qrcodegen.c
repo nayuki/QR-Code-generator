@@ -105,6 +105,8 @@ testable const int8_t ECC_CODEWORDS_PER_BLOCK[4][41] = {
 	{-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // High
 };
 
+#define qrcodegen_REED_SOLOMON_DEGREE_MAX 30  // Based on the table above
+
 // For generating error correction codes.
 testable const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
@@ -206,7 +208,7 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
 	
 	// Split data into blocks and append ECC after all data
-	uint8_t generator[30];
+	uint8_t generator[qrcodegen_REED_SOLOMON_DEGREE_MAX];
 	calcReedSolomonGenerator(blockEccLen, generator);
 	for (int i = 0, j = dataLen, k = 0; i < numBlocks; i++) {
 		int blockLen = shortBlockDataLen;
@@ -265,7 +267,7 @@ testable int getNumRawDataModules(int version) {
 // Calculates the Reed-Solomon generator polynomial of the given degree, storing in result[0 : degree].
 testable void calcReedSolomonGenerator(int degree, uint8_t result[]) {
 	// Start with the monomial x^0
-	assert(1 <= degree && degree <= 30);
+	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
 	memset(result, 0, degree * sizeof(result[0]));
 	result[degree - 1] = 1;
 	
@@ -291,7 +293,7 @@ testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
 		const uint8_t generator[], int degree, uint8_t result[]) {
 	
 	// Perform polynomial division
-	assert(1 <= degree && degree <= 30);
+	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
 	memset(result, 0, degree * sizeof(result[0]));
 	for (int i = 0; i < dataLen; i++) {
 		uint8_t factor = data[i] ^ result[0];
@@ -301,6 +303,8 @@ testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
 			result[j] ^= finiteFieldMultiply(generator[j], factor);
 	}
 }
+
+#undef qrcodegen_REED_SOLOMON_DEGREE_MAX
 
 
 // Returns the product of the two given field elements modulo GF(2^8/0x11D).
