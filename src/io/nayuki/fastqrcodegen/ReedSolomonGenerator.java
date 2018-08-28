@@ -85,7 +85,11 @@ final class ReedSolomonGenerator {
 	
 	/*---- Instance members ----*/
 	
-	private byte[][] multiplies;
+	// A table of size 256 * degree, where polynomialMultiply[i][j] = multiply(i, coefficients[j]).
+	// 'coefficients' is the temporary array representing the coefficients of the divisor polynomial,
+	// stored from highest to lowest power, excluding the leading term which is always 1.
+	// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
+	private byte[][] polynomialMultiply;
 	
 	
 	private ReedSolomonGenerator(int degree) {
@@ -110,10 +114,10 @@ final class ReedSolomonGenerator {
 			root = multiply(root, 0x02);
 		}
 		
-		multiplies = new byte[degree][256];
-		for (int i = 0; i < multiplies.length; i++) {
-			for (int j = 0; j < 256; j++)
-				multiplies[i][j] = (byte)multiply(coefficients[i] & 0xFF, j);
+		polynomialMultiply = new byte[256][degree];
+		for (int i = 0; i < polynomialMultiply.length; i++) {
+			for (int j = 0; j < degree; j++)
+				polynomialMultiply[i][j] = (byte)multiply(i, coefficients[j] & 0xFF);
 		}
 	}
 	
@@ -123,15 +127,14 @@ final class ReedSolomonGenerator {
 		Objects.requireNonNull(result);
 		
 		// Compute the remainder by performing polynomial division
-		int resultEnd = resultOff + multiplies.length;
+		int degree = polynomialMultiply[0].length;
+		int resultEnd = resultOff + degree;
 		Arrays.fill(result, resultOff, resultEnd, (byte)0);
 		for (int i = dataOff, dataEnd = dataOff + dataLen; i < dataEnd; i++) {
-			byte b = data[i];
-			int factor = (b ^ result[resultOff]) & 0xFF;
-			System.arraycopy(result, resultOff + 1, result, resultOff, multiplies.length - 1);
-			result[resultEnd - 1] = 0;
-			for (int j = 0; j < multiplies.length; j++)
-				result[resultOff + j] ^= multiplies[j][factor];
+			byte[] table = polynomialMultiply[(data[i] ^ result[resultOff]) & 0xFF];
+			for (int j = 0; j < degree - 1; j++)
+				result[resultOff + j] = (byte)(result[resultOff + j + 1] ^ table[j]);
+			result[resultOff + degree - 1] = table[degree - 1];
 		}
 	}
 	
