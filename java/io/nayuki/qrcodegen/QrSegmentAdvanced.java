@@ -81,6 +81,8 @@ public final class QrSegmentAdvanced {
 	
 	// Returns a list of segments that is optimal for the given text at the given version number.
 	private static List<QrSegment> makeSegmentsOptimally(String text, int version) {
+		if (text.length() == 0)
+			return new ArrayList<>();
 		byte[] data = text.getBytes(StandardCharsets.UTF_8);
 		int[][] bitCosts = computeBitCosts(data, version);
 		Mode[] charModes = computeCharacterModes(data, version, bitCosts);
@@ -123,6 +125,9 @@ public final class QrSegmentAdvanced {
 	
 	
 	private static Mode[] computeCharacterModes(byte[] data, int version, int[][] bitCosts) {
+		if (data.length == 0)
+			throw new IllegalArgumentException();
+		
 		// Segment header sizes, measured in 1/6 bits
 		int bytesCost   = (4 + BYTE        .numCharCountBits(version)) * 6;
 		int alphnumCost = (4 + ALPHANUMERIC.numCharCountBits(version)) * 6;
@@ -140,8 +145,6 @@ public final class QrSegmentAdvanced {
 		
 		// Work backwards to calculate optimal encoding mode for each character
 		Mode[] result = new Mode[data.length];
-		if (data.length == 0)
-			return result;
 		result[data.length - 1] = curMode;
 		for (int i = data.length - 2; i >= 0; i--) {
 			char c = (char)data[i];
@@ -175,9 +178,9 @@ public final class QrSegmentAdvanced {
 	
 	
 	private static List<QrSegment> splitIntoSegments(byte[] data, Mode[] charModes) {
-		List<QrSegment> result = new ArrayList<>();
 		if (data.length == 0)
-			return result;
+			throw new IllegalArgumentException();
+		List<QrSegment> result = new ArrayList<>();
 		
 		// Accumulate run of modes
 		Mode curMode = charModes[0];
