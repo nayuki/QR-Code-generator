@@ -984,7 +984,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
 	assert(segs != NULL || len == 0);
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	int result = 0;
+	long result = 0;
 	for (size_t i = 0; i < len; i++) {
 		int numChars  = segs[i].numChars;
 		int bitLength = segs[i].bitLength;
@@ -995,13 +995,12 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 		// Fail if segment length value doesn't fit in the length field's bit-width
 		if (numChars >= (1L << ccbits))
 			return -1;
-		long temp = 4L + ccbits + bitLength;
-		if (temp > INT16_MAX - result)
+		result += 4L + ccbits + bitLength;
+		if (result > INT16_MAX)
 			return -1;
-		result += temp;
 	}
 	assert(0 <= result && result <= INT16_MAX);
-	return result;
+	return (int)result;
 }
 
 
