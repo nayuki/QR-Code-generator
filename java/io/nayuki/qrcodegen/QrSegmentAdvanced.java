@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import io.nayuki.qrcodegen.QrSegment.Mode;
 
 
 public final class QrSegmentAdvanced {
@@ -82,7 +83,7 @@ public final class QrSegmentAdvanced {
 	private static List<QrSegment> makeSegmentsOptimally(String text, int version) {
 		byte[] data = text.getBytes(StandardCharsets.UTF_8);
 		int[][] bitCosts = computeBitCosts(data, version);
-		QrSegment.Mode[] charModes = computeCharacterModes(data, version, bitCosts);
+		Mode[] charModes = computeCharacterModes(data, version, bitCosts);
 		return splitIntoSegments(data, charModes);
 	}
 	
@@ -121,14 +122,14 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	private static QrSegment.Mode[] computeCharacterModes(byte[] data, int version, int[][] bitCosts) {
+	private static Mode[] computeCharacterModes(byte[] data, int version, int[][] bitCosts) {
 		// Segment header sizes, measured in 1/6 bits
 		int bytesCost   = (4 + BYTE        .numCharCountBits(version)) * 6;
 		int alphnumCost = (4 + ALPHANUMERIC.numCharCountBits(version)) * 6;
 		int numberCost  = (4 + NUMERIC     .numCharCountBits(version)) * 6;
 		
 		// Infer the mode used for last character by taking the minimum
-		QrSegment.Mode curMode;
+		Mode curMode;
 		int end = bitCosts[0].length - 1;
 		if (bitCosts[0][end] <= Math.min(bitCosts[1][end], bitCosts[2][end]))
 			curMode = BYTE;
@@ -138,7 +139,7 @@ public final class QrSegmentAdvanced {
 			curMode = NUMERIC;
 		
 		// Work backwards to calculate optimal encoding mode for each character
-		QrSegment.Mode[] result = new QrSegment.Mode[data.length];
+		Mode[] result = new Mode[data.length];
 		if (data.length == 0)
 			return result;
 		result[data.length - 1] = curMode;
@@ -173,13 +174,13 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	private static List<QrSegment> splitIntoSegments(byte[] data, QrSegment.Mode[] charModes) {
+	private static List<QrSegment> splitIntoSegments(byte[] data, Mode[] charModes) {
 		List<QrSegment> result = new ArrayList<>();
 		if (data.length == 0)
 			return result;
 		
 		// Accumulate run of modes
-		QrSegment.Mode curMode = charModes[0];
+		Mode curMode = charModes[0];
 		int start = 0;
 		for (int i = 1; ; i++) {
 			if (i < data.length && charModes[i] == curMode)
