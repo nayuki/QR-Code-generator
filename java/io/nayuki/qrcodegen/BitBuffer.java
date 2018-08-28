@@ -59,6 +59,7 @@ public final class BitBuffer implements Cloneable {
 	 * @return the length of this sequence
 	 */
 	public int bitLength() {
+		assert bitLength >= 0;
 		return bitLength;
 	}
 	

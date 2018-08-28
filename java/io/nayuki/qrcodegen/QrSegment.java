@@ -173,7 +173,7 @@ public final class QrSegment {
 	 * @param md the mode, which is not {@code null}
 	 * @param numCh the data length in characters, which is non-negative
 	 * @param data the data bits of this segment, which is not {@code null}
-	 * @throws NullPointerException if the mode or bit buffer is {@code null}
+	 * @throws NullPointerException if the mode or data is {@code null}
 	 * @throws IllegalArgumentException if the character count is negative
 	 */
 	public QrSegment(Mode md, int numCh, BitBuffer data) {
@@ -189,7 +189,7 @@ public final class QrSegment {
 	/*---- Methods ----*/
 	
 	/**
-	 * Returns the data bits of this segment.
+	 * Returns a copy of the data bits of this segment.
 	 * @return the data bits of this segment (not {@code null})
 	 */
 	public BitBuffer getBits() {
@@ -267,7 +267,6 @@ public final class QrSegment {
 		 * Returns the bit width of the segment character count field for this mode object at the specified version number.
 		 * @param ver the version number, which is between 1 to 40 (inclusive)
 		 * @return the number of bits for the character count, which is between 8 to 16 (inclusive)
-		 * @throws IllegalArgumentException if the version number is out of range
 		 */
 		int numCharCountBits(int ver) {
 			assert QrCode.MIN_VERSION <= ver && ver <= QrCode.MAX_VERSION;
