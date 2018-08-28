@@ -23,10 +23,6 @@
 
 package io.nayuki.qrcodegen;
 
-import static io.nayuki.qrcodegen.QrSegment.Mode.ALPHANUMERIC;
-import static io.nayuki.qrcodegen.QrSegment.Mode.BYTE;
-import static io.nayuki.qrcodegen.QrSegment.Mode.KANJI;
-import static io.nayuki.qrcodegen.QrSegment.Mode.NUMERIC;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,7 +89,7 @@ public final class QrSegmentAdvanced {
 	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
-		final Mode[] modeTypes = {BYTE, ALPHANUMERIC, NUMERIC, KANJI};  // Do not modify
+		final Mode[] modeTypes = {Mode.BYTE, Mode.ALPHANUMERIC, Mode.NUMERIC, Mode.KANJI};  // Do not modify
 		final int numModes = modeTypes.length;
 		
 		// Segment header sizes, measured in 1/6 bits
@@ -192,13 +188,13 @@ public final class QrSegmentAdvanced {
 			if (i < codePoints.length && charModes[i] == curMode)
 				continue;
 			String s = new String(codePoints, start, i - start);
-			if (curMode == BYTE)
+			if (curMode == Mode.BYTE)
 				result.add(QrSegment.makeBytes(s.getBytes(StandardCharsets.UTF_8)));
-			else if (curMode == NUMERIC)
+			else if (curMode == Mode.NUMERIC)
 				result.add(QrSegment.makeNumeric(s));
-			else if (curMode == ALPHANUMERIC)
+			else if (curMode == Mode.ALPHANUMERIC)
 				result.add(QrSegment.makeAlphanumeric(s));
-			else if (curMode == KANJI)
+			else if (curMode == Mode.KANJI)
 				result.add(makeKanji(s));
 			else
 				throw new AssertionError();
