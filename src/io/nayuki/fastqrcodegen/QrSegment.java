@@ -168,9 +168,6 @@ public final class QrSegment {
 	// Package-private helper function.
 	static int getTotalBits(List<QrSegment> segs, int version) {
 		Objects.requireNonNull(segs);
-		if (version < 1 || version > 40)
-			throw new IllegalArgumentException("Version number out of range");
-		
 		long result = 0;
 		for (QrSegment seg : segs) {
 			Objects.requireNonNull(seg);
@@ -235,10 +232,7 @@ public final class QrSegment {
 		/*-- Method --*/
 		
 		int numCharCountBits(int ver) {
-			if      ( 1 <= ver && ver <=  9)  return numBitsCharCount[0];
-			else if (10 <= ver && ver <= 26)  return numBitsCharCount[1];
-			else if (27 <= ver && ver <= 40)  return numBitsCharCount[2];
-			else  throw new IllegalArgumentException("Version number out of range");
+			return numBitsCharCount[(ver + 7) / 17];
 		}
 		
 	}
