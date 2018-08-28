@@ -974,16 +974,18 @@ impl QrSegment {
 	
 	/*---- Other static functions ----*/
 	
-	// Package-private helper function.
+	// Calculates and returns the number of bits needed to encode the given
+	// segments at the given version. The result is None if a segment has too many
+	// characters to fit its length field, or the total bits exceeds usize::MAX.
 	fn get_total_bits(segs: &[Self], version: Version) -> Option<usize> {
 		let mut result: usize = 0;
 		for seg in segs {
 			let ccbits = seg.mode.num_char_count_bits(version);
 			if seg.numchars >= 1 << ccbits {
-				return None;
+				return None;  // The segment's length doesn't fit the field's bit width
 			}
 			match result.checked_add(4 + (ccbits as usize) + seg.data.len()) {
-				None => return None,
+				None => return None,  // The sum will overflow a usize type
 				Some(val) => result = val,
 			}
 		}

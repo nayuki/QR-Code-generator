@@ -817,7 +817,8 @@ var qrcodegen = new function() {
 	};
 	
 	
-	// Package-private helper function.
+	// Calculates and returns the number of bits needed to encode the given segments at the given version.
+	// The result is infinity if a segment has too many characters to fit its length field.
 	this.QrSegment.getTotalBits = function(segs, version) {
 		if (version < MIN_VERSION || version > MAX_VERSION)
 			throw "Version number out of range";
@@ -825,9 +826,8 @@ var qrcodegen = new function() {
 		for (var i = 0; i < segs.length; i++) {
 			var seg = segs[i];
 			var ccbits = seg.mode.numCharCountBits(version);
-			// Fail if segment length value doesn't fit in the length field's bit-width
 			if (seg.numChars >= (1 << ccbits))
-				return Infinity;
+				return Infinity;  // The segment's length doesn't fit the field's bit width
 			result += 4 + ccbits + seg.getBits().length;
 		}
 		return result;

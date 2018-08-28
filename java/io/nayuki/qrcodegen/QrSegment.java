@@ -197,7 +197,9 @@ public final class QrSegment {
 	}
 	
 	
-	// Package-private helper function.
+	// Calculates the number of bits needed to encode the given segments at the given version.
+	// Returns a non-negative number if successful. Otherwise returns -1 if a segment has too
+	// many characters to fit its length field, or the total bits exceeds Integer.MAX_VALUE.
 	static int getTotalBits(List<QrSegment> segs, int version) {
 		Objects.requireNonNull(segs);
 		if (version < 1 || version > 40)
@@ -207,12 +209,11 @@ public final class QrSegment {
 		for (QrSegment seg : segs) {
 			Objects.requireNonNull(seg);
 			int ccbits = seg.mode.numCharCountBits(version);
-			// Fail if segment length value doesn't fit in the length field's bit-width
 			if (seg.numChars >= (1 << ccbits))
-				return -1;
+				return -1;  // The segment's length doesn't fit the field's bit width
 			result += 4L + ccbits + seg.data.bitLength();
 			if (result > Integer.MAX_VALUE)
-				return -1;
+				return -1;  // The sum will overflow an int type
 		}
 		return (int)result;
 	}

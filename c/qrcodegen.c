@@ -970,10 +970,9 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 }
 
 
-// Returns the number of bits needed to encode the given list of segments at the given version.
-// The result is in the range [0, 32767] if successful. Otherwise, -1 is returned if any segment
-// has more characters than allowed by that segment's mode's character count field at the version,
-// or if the actual answer exceeds INT16_MAX.
+// Calculates the number of bits needed to encode the given segments at the given version.
+// Returns a non-negative number if successful. Otherwise returns -1 if a segment has too
+// many characters to fit its length field, or the total bits exceeds INT16_MAX.
 testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
 	assert(segs != NULL || len == 0);
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
@@ -985,12 +984,11 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 		assert(0 <= bitLength && bitLength <= INT16_MAX);
 		int ccbits = numCharCountBits(segs[i].mode, version);
 		assert(0 <= ccbits && ccbits <= 16);
-		// Fail if segment length value doesn't fit in the length field's bit-width
 		if (numChars >= (1L << ccbits))
-			return -1;
+			return -1;  // The segment's length doesn't fit the field's bit width
 		result += 4L + ccbits + bitLength;
 		if (result > INT16_MAX)
-			return -1;
+			return -1;  // The sum might overflow an int type
 	}
 	assert(0 <= result && result <= INT16_MAX);
 	return (int)result;
