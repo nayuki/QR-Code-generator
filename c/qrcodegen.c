@@ -999,12 +999,7 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 // given mode at the given version number. The result is in the range [0, 16].
 static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	int i;
-	if      ( 1 <= version && version <=  9)  i = 0;
-	else if (10 <= version && version <= 26)  i = 1;
-	else if (27 <= version && version <= 40)  i = 2;
-	else { assert(false);  return -1; }  // Dummy value
-	
+	int i = (version + 7) / 17;
 	switch (mode) {
 		case qrcodegen_Mode_NUMERIC     : { static const int temp[] = {10, 12, 14}; return temp[i]; }
 		case qrcodegen_Mode_ALPHANUMERIC: { static const int temp[] = { 9, 11, 13}; return temp[i]; }

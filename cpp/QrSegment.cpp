@@ -47,10 +47,7 @@ int QrSegment::Mode::getModeBits() const {
 
 
 int QrSegment::Mode::numCharCountBits(int ver) const {
-	if      ( 1 <= ver && ver <=  9)  return numBitsCharCount[0];
-	else if (10 <= ver && ver <= 26)  return numBitsCharCount[1];
-	else if (27 <= ver && ver <= 40)  return numBitsCharCount[2];
-	else  throw std::domain_error("Version number out of range");
+	return numBitsCharCount[(ver + 7) / 17];
 }
 
 

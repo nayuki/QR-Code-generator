@@ -1048,24 +1048,13 @@ impl QrSegmentMode {
 	// for this mode object at the given version number.
 	pub fn num_char_count_bits(&self, ver: Version) -> u8 {
 		use QrSegmentMode::*;
-		let array: [u8; 3] = match *self {
+		(match *self {
 			Numeric      => [10, 12, 14],
 			Alphanumeric => [ 9, 11, 13],
 			Byte         => [ 8, 16, 16],
 			Kanji        => [ 8, 10, 12],
 			Eci          => [ 0,  0,  0],
-		};
-		
-		let ver = ver.value();
-		if 1 <= ver && ver <= 9 {
-			array[0]
-		} else if 10 <= ver && ver <= 26 {
-			array[1]
-		} else if 27 <= ver && ver <= 40 {
-			array[2]
-		} else {
-			panic!("Version number out of range");
-		}
+		})[((ver.value() + 7) / 17) as usize]
 	}
 	
 }

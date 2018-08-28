@@ -1005,10 +1005,7 @@ namespace qrcodegen.QrSegment {
 		
 		// (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.
 		public numCharCountBits(ver: int): int {
-			if      ( 1 <= ver && ver <=  9)  return this.numBitsCharCount[0];
-			else if (10 <= ver && ver <= 26)  return this.numBitsCharCount[1];
-			else if (27 <= ver && ver <= 40)  return this.numBitsCharCount[2];
-			else  throw "Version number out of range";
+			return this.numBitsCharCount[Math.floor((ver + 7) / 17)];
 		}
 		
 	}

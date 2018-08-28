@@ -740,10 +740,7 @@ class QrSegment(object):
 		# Package-private method
 		def num_char_count_bits(self, ver):
 			"""Returns the bit width of the segment character count field for this mode object at the given version number."""
-			if    1 <= ver <=  9:  return self._charcounts[0]
-			elif 10 <= ver <= 26:  return self._charcounts[1]
-			elif 27 <= ver <= 40:  return self._charcounts[2]
-			else:  raise ValueError("Version number out of range")
+			return self._charcounts[(ver + 7) // 17]
 	
 	# Public constants. Create them outside the class.
 	Mode.NUMERIC      = Mode(0x1, (10, 12, 14))

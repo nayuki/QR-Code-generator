@@ -861,10 +861,7 @@ var qrcodegen = new function() {
 		
 		// (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.
 		this.numCharCountBits = function(ver) {
-			if      ( 1 <= ver && ver <=  9)  return ccbits[0];
-			else if (10 <= ver && ver <= 26)  return ccbits[1];
-			else if (27 <= ver && ver <= 40)  return ccbits[2];
-			else  throw "Version number out of range";
+			return ccbits[Math.floor((ver + 7) / 17)];
 		};
 	}
 	

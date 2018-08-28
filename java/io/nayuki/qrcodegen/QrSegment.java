@@ -270,10 +270,8 @@ public final class QrSegment {
 		 * @throws IllegalArgumentException if the version number is out of range
 		 */
 		int numCharCountBits(int ver) {
-			if      ( 1 <= ver && ver <=  9)  return numBitsCharCount[0];
-			else if (10 <= ver && ver <= 26)  return numBitsCharCount[1];
-			else if (27 <= ver && ver <= 40)  return numBitsCharCount[2];
-			else  throw new IllegalArgumentException("Version number out of range");
+			assert QrCode.MIN_VERSION <= ver && ver <= QrCode.MAX_VERSION;
+			return numBitsCharCount[(ver + 7) / 17];
 		}
 		
 	}
