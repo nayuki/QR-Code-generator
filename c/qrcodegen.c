@@ -206,28 +206,23 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
 	
-	// Split data into blocks and append ECC after all data
+	// Split data into blocks, calculate ECC, and interleave
+	// (not concatenate) the bytes into a single sequence
 	uint8_t generator[qrcodegen_REED_SOLOMON_DEGREE_MAX];
 	calcReedSolomonGenerator(blockEccLen, generator);
-	for (int i = 0, k = 0; i < numBlocks; i++) {
+	const uint8_t *dat = data;
+	for (int i = 0; i < numBlocks; i++) {
 		int datLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
-		calcReedSolomonRemainder(&data[k], datLen, generator, blockEccLen, &data[dataLen + i * blockEccLen]);
-		k += datLen;
-	}
-	
-	// Interleave (not concatenate) the bytes from every block into a single sequence
-	for (int i = 0, k = 0; i < numBlocks; i++) {  // Copy data
-		for (int j = 0, l = i; j < shortBlockDataLen; j++, k++, l += numBlocks)
-			result[l] = data[k];
-		if (i >= numShortBlocks)
-			k++;
-	}
-	for (int i = numShortBlocks, k = (numShortBlocks + 1) * shortBlockDataLen, l = numBlocks * shortBlockDataLen;
-			i < numBlocks; i++, k += shortBlockDataLen + 1, l++)
-		result[l] = data[k];
-	for (int i = 0, k = dataLen; i < numBlocks; i++) {  // Copy ECC
-		for (int j = 0, l = dataLen + i; j < blockEccLen; j++, k++, l += numBlocks)
-			result[l] = data[k];
+		uint8_t *ecc = &data[dataLen];  // Temporary storage
+		calcReedSolomonRemainder(dat, datLen, generator, blockEccLen, ecc);
+		for (int j = 0, k = i; j < datLen; j++, k += numBlocks) {  // Copy data
+			if (j == shortBlockDataLen)
+				k -= numShortBlocks;
+			result[k] = dat[j];
+		}
+		for (int j = 0, k = dataLen + i; j < blockEccLen; j++, k += numBlocks)  // Copy ECC
+			result[k] = ecc[j];
+		dat += datLen;
 	}
 }
 
