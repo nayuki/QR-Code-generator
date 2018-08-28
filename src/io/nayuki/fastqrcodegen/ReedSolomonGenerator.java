@@ -110,9 +110,11 @@ final class ReedSolomonGenerator {
 			root = multiply(root, 0x02);
 		}
 		
-		multiplies = new byte[degree][];
-		for (int i = 0; i < multiplies.length; i++)
-			multiplies[i] = MULTIPLICATION_TABLE[coefficients[i] & 0xFF];
+		multiplies = new byte[degree][256];
+		for (int i = 0; i < multiplies.length; i++) {
+			for (int j = 0; j < 256; j++)
+				multiplies[i][j] = (byte)multiply(coefficients[i] & 0xFF, j);
+		}
 	}
 	
 	
@@ -149,19 +151,6 @@ final class ReedSolomonGenerator {
 		}
 		assert z >>> 8 == 0;
 		return z;
-	}
-	
-	
-	private static final byte[][] MULTIPLICATION_TABLE = new byte[256][256];
-	
-	static {
-		for (int i = 0; i < MULTIPLICATION_TABLE.length; i++) {
-			for (int j = 0; j <= i; j++) {
-				byte k = (byte)multiply(i, j);
-				MULTIPLICATION_TABLE[i][j] = k;
-				MULTIPLICATION_TABLE[j][i] = k;
-			}
-		}
 	}
 	
 }
