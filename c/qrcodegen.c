@@ -33,8 +33,7 @@
 	// Expose private functions
 	#ifndef __cplusplus
 		#define testable
-	#else
-		// Needed for const variables because they are treated as implicitly 'static' in C++
+	#else  // Because in C++, const variables are treated as implicitly 'static'
 		#define testable extern
 	#endif
 #endif
@@ -43,7 +42,7 @@
 /*---- Forward declarations for private functions ----*/
 
 // Regarding all public and private functions defined in this source file:
-// - They require all pointer/array arguments to be not null.
+// - They require all pointer/array arguments to be not null unless the array length is zero.
 // - They only read input scalar/array arguments, write to output pointer/array
 //   arguments, and return scalar values; they are "pure" functions.
 // - They don't read mutable global variables or write to any global variables.
@@ -193,10 +192,10 @@ testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[]
 
 /*---- Error correction code generation functions ----*/
 
-// Appends error correction bytes to each block of the given data array, then interleaves bytes
-// from the blocks and stores them in the result array. data[0 : rawCodewords - totalEcc] contains
-// the input data. data[rawCodewords - totalEcc : rawCodewords] is used as a temporary work area
-// and will be clobbered by this function. The final answer is stored in result[0 : rawCodewords].
+// Appends error correction bytes to each block of the given data array, then interleaves
+// bytes from the blocks and stores them in the result array. data[0 : dataLen] contains
+// the input data. data[dataLen : rawCodewords] is used as a temporary work area and will
+// be clobbered by this function. The final answer is stored in result[0 : rawCodewords].
 testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]) {
 	// Calculate parameter numbers
 	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
@@ -220,7 +219,7 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	}
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
-	for (int i = 0, k = 0; i < numBlocks; i++) {
+	for (int i = 0, k = 0; i < numBlocks; i++) {  // Copy data
 		for (int j = 0, l = i; j < shortBlockDataLen; j++, k++, l += numBlocks)
 			result[l] = data[k];
 		if (i >= numShortBlocks)
@@ -229,7 +228,7 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	for (int i = numShortBlocks, k = (numShortBlocks + 1) * shortBlockDataLen, l = numBlocks * shortBlockDataLen;
 			i < numBlocks; i++, k += shortBlockDataLen + 1, l++)
 		result[l] = data[k];
-	for (int i = 0, k = dataLen; i < numBlocks; i++) {
+	for (int i = 0, k = dataLen; i < numBlocks; i++) {  // Copy ECC
 		for (int j = 0, l = dataLen + i; j < blockEccLen; j++, k++, l += numBlocks)
 			result[l] = data[k];
 	}
@@ -436,7 +435,7 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 		case qrcodegen_Ecc_HIGH    :  data = 2;  break;
 		default:  assert(false);  return;
 	}
-	data = data << 3 | (int)mask;  // ecl-derived value is uint2, mask is uint3
+	data = data << 3 | (int)mask;  // errCorrLvl is uint2, mask is uint3
 	int rem = data;
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -683,7 +682,7 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack) {
 }
 
 
-// Returns true iff the i'th bit of x is set to 1.
+// Returns true iff the i'th bit of x is set to 1. Requires x >= 0 and 0 <= i <= 14.
 static bool getBit(int x, int i) {
 	return ((x >> i) & 1) != 0;
 }

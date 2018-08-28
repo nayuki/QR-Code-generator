@@ -107,7 +107,7 @@ struct qrcodegen_Segment {
 
 // Calculates the number of bytes needed to store any QR Code up to and including the given version number,
 // as a compile-time constant. For example, 'uint8_t buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];'
-// can store any single QR Code from version 1 to 25 (inclusive).
+// can store any single QR Code from version 1 to 25 (inclusive). The result fits in an int (or int16).
 // Requires qrcodegen_VERSION_MIN <= n <= qrcodegen_VERSION_MAX.
 #define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((n) * 4 + 17) * ((n) * 4 + 17) + 7) / 8 + 1)
 
