@@ -257,10 +257,15 @@ public final class QrSegmentAdvanced {
 	public static boolean isEncodableAsKanji(String text) {
 		Objects.requireNonNull(text);
 		for (int i = 0; i < text.length(); i++) {
-			if (UNICODE_TO_QR_KANJI[text.charAt(i)] == -1)
+			if (!isKanji(text.charAt(i)))
 				return false;
 		}
 		return true;
+	}
+	
+	
+	private static boolean isKanji(char c) {
+		return UNICODE_TO_QR_KANJI[c] != -1;
 	}
 	
 	
