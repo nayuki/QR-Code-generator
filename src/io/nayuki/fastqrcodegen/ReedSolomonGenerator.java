@@ -122,19 +122,19 @@ final class ReedSolomonGenerator {
 	}
 	
 	
-	public void getRemainder(byte[] data, int dataOff, int dataLen, byte[] result, int resultOff) {
+	public void getRemainder(byte[] data, int dataOff, int dataLen, byte[] result) {
 		Objects.requireNonNull(data);
 		Objects.requireNonNull(result);
+		int degree = polynomialMultiply[0].length;
+		assert result.length == degree;
 		
 		// Compute the remainder by performing polynomial division
-		int degree = polynomialMultiply[0].length;
-		int resultEnd = resultOff + degree;
-		Arrays.fill(result, resultOff, resultEnd, (byte)0);
+		Arrays.fill(result, (byte)0);
 		for (int i = dataOff, dataEnd = dataOff + dataLen; i < dataEnd; i++) {
-			byte[] table = polynomialMultiply[(data[i] ^ result[resultOff]) & 0xFF];
+			byte[] table = polynomialMultiply[(data[i] ^ result[0]) & 0xFF];
 			for (int j = 0; j < degree - 1; j++)
-				result[resultOff + j] = (byte)(result[resultOff + j + 1] ^ table[j]);
-			result[resultOff + degree - 1] = table[degree - 1];
+				result[j] = (byte)(result[j + 1] ^ table[j]);
+			result[degree - 1] = table[degree - 1];
 		}
 	}
 	

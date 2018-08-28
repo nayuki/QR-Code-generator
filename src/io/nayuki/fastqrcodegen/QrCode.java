@@ -297,7 +297,7 @@ public final class QrCode {
 		byte[] ecc = new byte[blockEccLen];  // Temporary storage per iteration
 		for (int i = 0, k = 0; i < numBlocks; i++) {
 			int datLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
-			rs.getRemainder(data, k, datLen, ecc, 0);
+			rs.getRemainder(data, k, datLen, ecc);
 			for (int j = 0, l = i; j < datLen; j++, k++, l += numBlocks) {  // Copy data
 				if (j == shortBlockDataLen)
 					l -= numShortBlocks;
