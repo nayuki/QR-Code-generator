@@ -197,9 +197,8 @@ public final class QrCode {
 	
 	
 	/**
-	 * Based on the specified number of border modules to add as padding, this returns a
-	 * string whose contents represents an SVG XML file that depicts this QR Code symbol.
-	 * Note that Unix newlines (\n) are always used, regardless of the platform.
+	 * Returns a string of SVG XML code representing an image of this QR Code symbol with the specified
+	 * number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return a string representing this QR Code as an SVG document
 	 * @throws IllegalArgumentException if the border is negative
@@ -259,7 +258,7 @@ public final class QrCode {
 			setModule(size - 1 - i, 8, (bits >>> i) & 1);
 		for (int i = 8; i < 15; i++)
 			setModule(8, size - 15 + i, (bits >>> i) & 1);
-		setModule(8, size - 8, 1);
+		setModule(8, size - 8, 1);  // Always black
 	}
 	
 	
