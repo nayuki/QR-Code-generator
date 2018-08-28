@@ -140,7 +140,7 @@ public final class QrCode {
 		modules = tpl.template.clone();  
 		
 		// Draw function patterns, draw all codewords, do masking
-		byte[] allCodewords = appendErrorCorrection(dataCodewords);
+		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(tpl.dataOutputBitIndexes, allCodewords);
 		this.mask = handleConstructorMasking(tpl.masks, mask);
 	}
@@ -279,7 +279,7 @@ public final class QrCode {
 	
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
-	private byte[] appendErrorCorrection(byte[] data) {
+	private byte[] addEccAndInterleave(byte[] data) {
 		if (data.length != getNumDataCodewords(version, errorCorrectionLevel))
 			throw new IllegalArgumentException();
 		
@@ -288,28 +288,23 @@ public final class QrCode {
 		int blockEccLen = ECC_CODEWORDS_PER_BLOCK[errorCorrectionLevel.ordinal()][version];
 		int rawCodewords = QrTemplate.getNumRawDataModules(version) / 8;
 		int numShortBlocks = numBlocks - rawCodewords % numBlocks;
-		int shortBlockLen = rawCodewords / numBlocks;
+		int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
 		
-		// Split data into blocks and append ECC to each block
-		byte[][] blocks = new byte[numBlocks][shortBlockLen + 1];
-		ReedSolomonGenerator rs = ReedSolomonGenerator.getInstance(blockEccLen);
-		for (int i = 0, k = 0; i < numBlocks; i++) {
-			int datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
-			System.arraycopy(data, k, blocks[i], 0, datLen);
-			rs.getRemainder(data, k, datLen, blocks[i], shortBlockLen + 1 - blockEccLen);
-			k += datLen;
-		}
-		
-		// Interleave (not concatenate) the bytes from every block into a single sequence
+		// Split data into blocks, calculate ECC, and interleave
+		// (not concatenate) the bytes into a single sequence
 		byte[] result = new byte[rawCodewords];
-		for (int i = 0, k = 0; i < blocks[0].length; i++) {
-			for (int j = 0; j < blocks.length; j++) {
-				// Skip the padding byte in short blocks
-				if (i != shortBlockLen - blockEccLen || j >= numShortBlocks) {
-					result[k] = blocks[j][i];
-					k++;
-				}
+		ReedSolomonGenerator rs = ReedSolomonGenerator.getInstance(blockEccLen);
+		byte[] ecc = new byte[blockEccLen];  // Temporary storage per iteration
+		for (int i = 0, k = 0; i < numBlocks; i++) {
+			int datLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
+			rs.getRemainder(data, k, datLen, ecc, 0);
+			for (int j = 0, l = i; j < datLen; j++, k++, l += numBlocks) {  // Copy data
+				if (j == shortBlockDataLen)
+					l -= numShortBlocks;
+				result[l] = data[k];
 			}
+			for (int j = 0, l = data.length + i; j < blockEccLen; j++, l += numBlocks)  // Copy ECC
+				result[l] = ecc[j];
 		}
 		return result;
 	}
