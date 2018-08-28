@@ -25,6 +25,7 @@ package io.nayuki.qrcodegen;
 
 import static io.nayuki.qrcodegen.QrSegment.Mode.ALPHANUMERIC;
 import static io.nayuki.qrcodegen.QrSegment.Mode.BYTE;
+import static io.nayuki.qrcodegen.QrSegment.Mode.KANJI;
 import static io.nayuki.qrcodegen.QrSegment.Mode.NUMERIC;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -42,10 +43,10 @@ public final class QrSegmentAdvanced {
 	/**
 	 * Returns a new mutable list of zero or more segments to represent the specified Unicode text string.
 	 * The resulting list optimally minimizes the total encoded bit length, subjected to the constraints given
-	 * by the specified {error correction level, minimum version number, maximum version number}, plus the additional
-	 * constraint that the segment modes {NUMERIC, ALPHANUMERIC, BYTE} can be used but KANJI cannot be used.
-	 * <p>This function can be viewed as a significantly more sophisticated and slower replacement
-	 * for {@link QrSegment#makeSegments(String)}, but requiring more input parameters in a way
+	 * by the specified {error correction level, minimum version number, maximum version number}.
+	 * <p>This function can utilize all four text encoding modes: numeric, alphanumeric, byte, and kanji.
+	 * This can be viewed as a significantly more sophisticated and slower replacement for
+	 * {@link QrSegment#makeSegments(String)}, but requiring more input parameters in a way
 	 * that overlaps with {@link QrCode#encodeSegments(List,QrCode.Ecc,int,int,int,boolean)}.</p>
 	 * @param text the text to be encoded, which can be any Unicode string
 	 * @param ecl the error correction level to use
@@ -83,102 +84,104 @@ public final class QrSegmentAdvanced {
 	private static List<QrSegment> makeSegmentsOptimally(String text, int version) {
 		if (text.length() == 0)
 			return new ArrayList<>();
-		byte[] data = text.getBytes(StandardCharsets.UTF_8);
-		int[][] bitCosts = computeBitCosts(data, version);
-		Mode[] charModes = computeCharacterModes(data, version, bitCosts);
-		return splitIntoSegments(data, charModes);
+		int[] codePoints = toCodePoints(text);
+		Mode[] charModes = computeCharacterModes(codePoints, version);
+		return splitIntoSegments(codePoints, charModes);
 	}
 	
 	
-	private static int[][] computeBitCosts(byte[] data, int version) {
-		// Segment header sizes, measured in 1/6 bits
-		int bytesCost   = (4 + BYTE        .numCharCountBits(version)) * 6;
-		int alphnumCost = (4 + ALPHANUMERIC.numCharCountBits(version)) * 6;
-		int numberCost  = (4 + NUMERIC     .numCharCountBits(version)) * 6;
-		
-		// result[mode][len] is the number of 1/6 bits to encode the first len characters of the text, ending in the mode
-		int[][] result = new int[3][data.length + 1];
-		Arrays.fill(result[1], Integer.MAX_VALUE / 2);
-		Arrays.fill(result[2], Integer.MAX_VALUE / 2);
-		result[0][0] = bytesCost;
-		result[1][0] = alphnumCost;
-		result[2][0] = numberCost;
-		
-		// Calculate the cost table using dynamic programming
-		for (int i = 0; i < data.length; i++) {
-			// Encode a character
-			int j = i + 1;
-			char c = (char)data[i];
-			result[0][j] = result[0][i] + 48;  // 8 bits per byte
-			if (isAlphanumeric(c))
-				result[1][j] = result[1][i] + 33;  // 5.5 bits per alphanumeric char
-			if (isNumeric(c))
-				result[2][j] = result[2][i] + 20;  // 3.33 bits per digit
-			
-			// Switch modes, rounding up fractional bits
-			result[0][j] = Math.min(roundUp6(Math.min(result[1][j], result[2][j])) + bytesCost  , result[0][j]);
-			result[1][j] = Math.min(roundUp6(Math.min(result[2][j], result[0][j])) + alphnumCost, result[1][j]);
-			result[2][j] = Math.min(roundUp6(Math.min(result[0][j], result[1][j])) + numberCost , result[2][j]);
-		}
-		return result;
-	}
-	
-	
-	private static Mode[] computeCharacterModes(byte[] data, int version, int[][] bitCosts) {
-		if (data.length == 0)
+	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
+		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
+		final Mode[] modeTypes = {BYTE, ALPHANUMERIC, NUMERIC, KANJI};  // Do not modify
+		final int numModes = modeTypes.length;
 		
 		// Segment header sizes, measured in 1/6 bits
-		int bytesCost   = (4 + BYTE        .numCharCountBits(version)) * 6;
-		int alphnumCost = (4 + ALPHANUMERIC.numCharCountBits(version)) * 6;
-		int numberCost  = (4 + NUMERIC     .numCharCountBits(version)) * 6;
+		final int[] headCosts = new int[numModes];
+		for (int i = 0; i < numModes; i++)
+			headCosts[i] = (4 + modeTypes[i].numCharCountBits(version)) * 6;
 		
-		// Infer the mode used for last character by taking the minimum
-		Mode curMode;
-		int end = bitCosts[0].length - 1;
-		if (bitCosts[0][end] <= Math.min(bitCosts[1][end], bitCosts[2][end]))
-			curMode = BYTE;
-		else if (bitCosts[1][end] <= bitCosts[2][end])
-			curMode = ALPHANUMERIC;
-		else
-			curMode = NUMERIC;
+		// charModes[i][j] represents the mode to encode the code point at
+		// index i such that the final segment ends in modeTypes[j] and the
+		// total number of bits is minimized over all possible choices
+		Mode[][] charModes = new Mode[codePoints.length][numModes];
 		
-		// Work backwards to calculate optimal encoding mode for each character
-		Mode[] result = new Mode[data.length];
-		result[data.length - 1] = curMode;
-		for (int i = data.length - 2; i >= 0; i--) {
-			char c = (char)data[i];
-			if (curMode == NUMERIC) {
-				if (isNumeric(c))
-					curMode = NUMERIC;
-				else if (isAlphanumeric(c) && roundUp6(bitCosts[1][i] + 33) + numberCost == bitCosts[2][i + 1])
-					curMode = ALPHANUMERIC;
+		// At the beginning of each iteration of the loop below,
+		// prevCosts[j] is the exact minimum number of 1/6 bits needed to
+		// encode the entire string prefix of length i, and end in modeTypes[j]
+		int[] prevCosts = headCosts.clone();
+		
+		// Calculate costs using dynamic programming
+		for (int i = 0; i < codePoints.length; i++) {
+			int c = codePoints[i];
+			int[] curCosts = new int[numModes];
+			{  // Always extend a bytes segment
+				int b;
+				if (c < 0x80)
+					b = 1;
+				else if (c < 0x800)
+					b = 2;
+				else if (c < 0x10000)
+					b = 3;
 				else
-					curMode = BYTE;
-			} else if (curMode == ALPHANUMERIC) {
-				if (isNumeric(c) && roundUp6(bitCosts[2][i] + 20) + alphnumCost == bitCosts[1][i + 1])
-					curMode = NUMERIC;
-				else if (isAlphanumeric(c))
-					curMode = ALPHANUMERIC;
-				else
-					curMode = BYTE;
-			} else if (curMode == BYTE) {
-				if (isNumeric(c) && roundUp6(bitCosts[2][i] + 20) + bytesCost == bitCosts[0][i + 1])
-					curMode = NUMERIC;
-				else if (isAlphanumeric(c) && roundUp6(bitCosts[1][i] + 33) + bytesCost == bitCosts[0][i + 1])
-					curMode = ALPHANUMERIC;
-				else
-					curMode = BYTE;
-			} else
-				throw new AssertionError();
-			result[i] = curMode;
+					b = 4;
+				curCosts[0] = prevCosts[0] + b * 8 * 6;
+				charModes[i][0] = modeTypes[0];
+			}
+			// Extend a segment if possible
+			if (isAlphanumeric(c)) {
+				curCosts[1] = prevCosts[1] + 33;  // 5.5 bits per alphanumeric char
+				charModes[i][1] = modeTypes[1];
+			}
+			if (isNumeric(c)) {
+				curCosts[2] = prevCosts[2] + 20;  // 3.33 bits per digit
+				charModes[i][2] = modeTypes[2];
+			}
+			if (isKanji(c)) {
+				curCosts[3] = prevCosts[3] + 104;  // 13 bits per Shift JIS char
+				charModes[i][3] = modeTypes[3];
+			}
+			
+			// Start new segment at the end to switch modes
+			for (int j = 0; j < numModes; j++) {  // To mode
+				for (int k = 0; k < numModes; k++) {  // From mode
+					int newCost = roundUp6(curCosts[k]) + headCosts[j];
+					if (charModes[i][k] != null && (charModes[i][j] == null || newCost < curCosts[j])) {
+						curCosts[j] = newCost;
+						charModes[i][j] = modeTypes[k];
+					}
+				}
+			}
+			
+			prevCosts = curCosts;
+		}
+		
+		// Find optimal ending mode
+		Mode curMode = null;
+		for (int i = 0, minCost = 0; i < numModes; i++) {
+			if (curMode == null || prevCosts[i] < minCost) {
+				minCost = prevCosts[i];
+				curMode = modeTypes[i];
+			}
+		}
+		
+		// Get optimal mode for each code point by tracing backwards
+		Mode[] result = new Mode[charModes.length];
+		for (int i = result.length - 1; i >= 0; i--) {
+			for (int j = 0; j < numModes; j++) {
+				if (modeTypes[j] == curMode) {
+					curMode = charModes[i][j];
+					result[i] = curMode;
+					break;
+				}
+			}
 		}
 		return result;
 	}
 	
 	
-	private static List<QrSegment> splitIntoSegments(byte[] data, Mode[] charModes) {
-		if (data.length == 0)
+	private static List<QrSegment> splitIntoSegments(int[] codePoints, Mode[] charModes) {
+		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
 		List<QrSegment> result = new ArrayList<>();
 		
@@ -186,24 +189,34 @@ public final class QrSegmentAdvanced {
 		Mode curMode = charModes[0];
 		int start = 0;
 		for (int i = 1; ; i++) {
-			if (i < data.length && charModes[i] == curMode)
+			if (i < codePoints.length && charModes[i] == curMode)
 				continue;
+			String s = new String(codePoints, start, i - start);
 			if (curMode == BYTE)
-				result.add(QrSegment.makeBytes(Arrays.copyOfRange(data, start, i)));
-			else {
-				String temp = new String(data, start, i - start, StandardCharsets.US_ASCII);
-				if (curMode == NUMERIC)
-					result.add(QrSegment.makeNumeric(temp));
-				else if (curMode == ALPHANUMERIC)
-					result.add(QrSegment.makeAlphanumeric(temp));
-				else
-					throw new AssertionError();
-			}
-			if (i >= data.length)
+				result.add(QrSegment.makeBytes(s.getBytes(StandardCharsets.UTF_8)));
+			else if (curMode == NUMERIC)
+				result.add(QrSegment.makeNumeric(s));
+			else if (curMode == ALPHANUMERIC)
+				result.add(QrSegment.makeAlphanumeric(s));
+			else if (curMode == KANJI)
+				result.add(makeKanji(s));
+			else
+				throw new AssertionError();
+			if (i >= codePoints.length)
 				return result;
 			curMode = charModes[i];
 			start = i;
 		}
+	}
+	
+	
+	private static int[] toCodePoints(String s) {
+		int[] result = s.codePoints().toArray();
+		for (int c : result) {
+			if (Character.isSurrogate((char)c))
+				throw new IllegalArgumentException("Invalid UTF-16 string");
+		}
+		return result;
 	}
 	
 	
