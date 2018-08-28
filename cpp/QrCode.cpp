@@ -520,7 +520,7 @@ int QrCode::getNumRawDataModules(int ver) {
 		int numAlign = ver / 7 + 2;
 		result -= (25 * numAlign - 10) * numAlign - 55;
 		if (ver >= 7)
-			result -= 18 * 2;  // Subtract version information
+			result -= 36;
 	}
 	return result;
 }

@@ -515,7 +515,7 @@ class QrCode(object):
 			numalign = ver // 7 + 2
 			result -= (25 * numalign - 10) * numalign - 55
 			if ver >= 7:
-				result -= 18 * 2  # Subtract version information
+				result -= 36
 		return result
 	
 	
