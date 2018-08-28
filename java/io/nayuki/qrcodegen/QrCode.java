@@ -297,13 +297,10 @@ public final class QrCode {
 				size + brd * 2))
 			.append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n")
 			.append("\t<path d=\"");
-		boolean head = true;
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
 				if (getModule(x, y)) {
-					if (head)
-						head = false;
-					else
+					if (x != 0 || y != 0)
 						sb.append(" ");
 					sb.append(String.format("M%d,%dh1v1h-1z", x + brd, y + brd));
 				}

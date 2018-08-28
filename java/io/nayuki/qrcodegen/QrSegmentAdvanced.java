@@ -57,7 +57,7 @@ public final class QrSegmentAdvanced {
 		// Check arguments
 		Objects.requireNonNull(text);
 		Objects.requireNonNull(ecl);
-		if (!(1 <= minVersion && minVersion <= maxVersion && maxVersion <= 40))
+		if (!(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION))
 			throw new IllegalArgumentException("Invalid value");
 		
 		// Iterate through version numbers, and make tentative segments
@@ -253,7 +253,7 @@ public final class QrSegmentAdvanced {
 				throw new IllegalArgumentException("String contains non-kanji-mode characters");
 			bb.appendBits(val, 13);
 		}
-		return new QrSegment(QrSegment.Mode.KANJI, text.length(), bb);
+		return new QrSegment(Mode.KANJI, text.length(), bb);
 	}
 	
 	

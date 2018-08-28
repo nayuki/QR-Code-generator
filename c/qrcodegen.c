@@ -61,7 +61,7 @@ testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[]
 
 testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
-testable int getNumRawDataModules(int version);
+testable int getNumRawDataModules(int ver);
 
 testable void calcReedSolomonGenerator(int degree, uint8_t result[]);
 testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
@@ -242,13 +242,13 @@ testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 // Returns the number of data bits that can be stored in a QR Code of the given version number, after
 // all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 // The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
-testable int getNumRawDataModules(int version) {
-	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	int result = (16 * version + 128) * version + 64;
-	if (version >= 2) {
-		int numAlign = version / 7 + 2;
+testable int getNumRawDataModules(int ver) {
+	assert(qrcodegen_VERSION_MIN <= ver && ver <= qrcodegen_VERSION_MAX);
+	int result = (16 * ver + 128) * ver + 64;
+	if (ver >= 2) {
+		int numAlign = ver / 7 + 2;
 		result -= (25 * numAlign - 10) * numAlign - 55;
-		if (version >= 7)
+		if (ver >= 7)
 			result -= 36;
 	}
 	return result;
