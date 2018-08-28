@@ -428,13 +428,13 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]) {
 	// Calculate error correction code and pack bits
 	assert(0 <= (int)mask && (int)mask <= 7);
-	int data = -1;  // Dummy value
+	int data;
 	switch (ecl) {
 		case qrcodegen_Ecc_LOW     :  data = 1;  break;
 		case qrcodegen_Ecc_MEDIUM  :  data = 0;  break;
 		case qrcodegen_Ecc_QUARTILE:  data = 3;  break;
 		case qrcodegen_Ecc_HIGH    :  data = 2;  break;
-		default:  assert(false);
+		default:  assert(false);  return;
 	}
 	data = data << 3 | (int)mask;  // ecl-derived value is uint2, mask is uint3
 	int rem = data;
@@ -529,7 +529,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qr
 		for (int x = 0; x < qrsize; x++) {
 			if (getModule(functionModules, x, y))
 				continue;
-			bool invert = false;  // Dummy value
+			bool invert;
 			switch ((int)mask) {
 				case 0:  invert = (x + y) % 2 == 0;                    break;
 				case 1:  invert = y % 2 == 0;                          break;
@@ -539,7 +539,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qr
 				case 5:  invert = x * y % 2 + x * y % 3 == 0;          break;
 				case 6:  invert = (x * y % 2 + x * y % 3) % 2 == 0;    break;
 				case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;  break;
-				default:  assert(false);
+				default:  assert(false);  return;
 			}
 			bool val = getModule(qrcode, x, y);
 			setModule(qrcode, x, y, val ^ invert);
@@ -922,14 +922,14 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	int bitLen = 0;
 	for (size_t i = 0; i < len; i++) {
 		const struct qrcodegen_Segment *seg = &segs[i];
-		unsigned int modeBits = 0;  // Dummy value
+		unsigned int modeBits;
 		switch (seg->mode) {
 			case qrcodegen_Mode_NUMERIC     :  modeBits = 0x1;  break;
 			case qrcodegen_Mode_ALPHANUMERIC:  modeBits = 0x2;  break;
 			case qrcodegen_Mode_BYTE        :  modeBits = 0x4;  break;
 			case qrcodegen_Mode_KANJI       :  modeBits = 0x8;  break;
 			case qrcodegen_Mode_ECI         :  modeBits = 0x7;  break;
-			default:  assert(false);
+			default:  assert(false);  return false;
 		}
 		appendBitsToBuffer(modeBits, 4, qrcode, &bitLen);
 		appendBitsToBuffer(seg->numChars, numCharCountBits(seg->mode, version), qrcode, &bitLen);
@@ -1011,11 +1011,11 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 // given mode at the given version number. The result is in the range [0, 16].
 static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
-	int i = -1;  // Dummy value
+	int i;
 	if      ( 1 <= version && version <=  9)  i = 0;
 	else if (10 <= version && version <= 26)  i = 1;
 	else if (27 <= version && version <= 40)  i = 2;
-	else  assert(false);
+	else { assert(false);  return -1; }  // Dummy value
 	
 	switch (mode) {
 		case qrcodegen_Mode_NUMERIC     : { static const int temp[] = {10, 12, 14}; return temp[i]; }
@@ -1023,7 +1023,6 @@ static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 		case qrcodegen_Mode_BYTE        : { static const int temp[] = { 8, 16, 16}; return temp[i]; }
 		case qrcodegen_Mode_KANJI       : { static const int temp[] = { 8, 10, 12}; return temp[i]; }
 		case qrcodegen_Mode_ECI         : return 0;
-		default:  assert(false);
+		default:  assert(false);  return -1;  // Dummy value
 	}
-	return -1;  // Dummy value
 }
