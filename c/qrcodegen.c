@@ -927,6 +927,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 		for (int j = 0; j < seg->bitLength; j++)
 			appendBitsToBuffer((seg->data[j >> 3] >> (7 - (j & 7))) & 1, 1, qrcode, &bitLen);
 	}
+	assert(bitLen == dataUsedBits);
 	
 	// Add terminator and pad up to a byte if applicable
 	int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;

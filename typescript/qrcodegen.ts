@@ -108,6 +108,8 @@ namespace qrcodegen {
 				seg.getBits().forEach(
 					(b: bit) => bb.push(b));
 			});
+			if (bb.length != dataUsedBits)
+				throw "Assertion error";
 			
 			// Add terminator and pad up to a byte if applicable
 			let dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;

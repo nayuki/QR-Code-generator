@@ -147,6 +147,7 @@ public final class QrCode {
 			bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
 			bb.appendData(seg.data);
 		}
+		assert bb.bitLength() == dataUsedBits;
 		
 		// Add terminator and pad up to a byte if applicable
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;

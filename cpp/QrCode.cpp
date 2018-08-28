@@ -93,6 +93,8 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		bb.appendBits(seg.getNumChars(), seg.getMode().numCharCountBits(version));
 		bb.insert(bb.end(), seg.getData().begin(), seg.getData().end());
 	}
+	if (bb.size() != static_cast<size_t>(dataUsedBits))
+		throw std::logic_error("Assertion error");
 	
 	// Add terminator and pad up to a byte if applicable
 	size_t dataCapacityBits = getNumDataCodewords(version, ecl) * 8;

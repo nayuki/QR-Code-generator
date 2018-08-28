@@ -121,6 +121,7 @@ class QrCode(object):
 			bb.append_bits(seg.get_mode().get_mode_bits(), 4)
 			bb.append_bits(seg.get_num_chars(), seg.get_mode().num_char_count_bits(version))
 			bb.extend(seg._bitdata)
+		assert len(bb) == datausedbits
 		
 		# Add terminator and pad up to a byte if applicable
 		datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8

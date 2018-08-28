@@ -563,6 +563,8 @@ var qrcodegen = new function() {
 				bb.push(bit);
 			});
 		});
+		if (bb.length != dataUsedBits)
+			throw "Assertion error";
 		
 		// Add terminator and pad up to a byte if applicable
 		var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;

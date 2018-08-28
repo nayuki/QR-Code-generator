@@ -136,6 +136,7 @@ impl QrCode {
 			bb.append_bits(seg.numchars as u32, seg.mode.num_char_count_bits(version));
 			bb.0.extend_from_slice(&seg.data);
 		}
+		assert_eq!(bb.0.len(), datausedbits);
 		
 		// Add terminator and pad up to a byte if applicable
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
