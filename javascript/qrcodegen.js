@@ -516,7 +516,7 @@ var qrcodegen = new function() {
 	/*---- Public static factory functions for QrCode ----*/
 	
 	/* 
-	 * Returns a QR Code symbol representing the specified Unicode text string at the specified error correction level.
+	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
 	 * Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
 	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
