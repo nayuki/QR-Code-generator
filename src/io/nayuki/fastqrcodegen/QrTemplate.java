@@ -159,7 +159,7 @@ final class QrTemplate {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field (which only has an effect for 7 <= version <= 40).
+	// based on this object's version field, iff 7 <= version <= 40.
 	private void drawVersion() {
 		if (version < 7)
 			return;
@@ -182,7 +182,8 @@ final class QrTemplate {
 	}
 	
 	
-	// Draws a 9*9 finder pattern including the border separator, with the center module at (x, y).
+	// Draws a 9*9 finder pattern including the border separator,
+	// with the center module at (x, y). Modules can be out of bounds.
 	private void drawFinderPattern(int x, int y) {
 		for (int i = -4; i <= 4; i++) {
 			for (int j = -4; j <= 4; j++) {
@@ -195,7 +196,8 @@ final class QrTemplate {
 	}
 	
 	
-	// Draws a 5*5 alignment pattern, with the center module at (x, y).
+	// Draws a 5*5 alignment pattern, with the center module
+	// at (x, y). All modules must be in bounds.
 	private void drawAlignmentPattern(int x, int y) {
 		for (int i = -2; i <= 2; i++) {
 			for (int j = -2; j <= 2; j++)
@@ -306,7 +308,7 @@ final class QrTemplate {
 			int numAlign = ver / 7 + 2;
 			result -= (25 * numAlign - 10) * numAlign - 55;
 			if (ver >= 7)
-				result -= 18 * 2;  // Subtract version information
+				result -= 18 * 2;
 		}
 		return result;
 	}

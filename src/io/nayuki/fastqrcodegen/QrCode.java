@@ -73,12 +73,12 @@ public final class QrCode {
 		assert dataUsedBits != -1;
 		
 		// Increase the error correction level while the data still fits in the current version number
-		for (Ecc newEcl : Ecc.values()) {
+		for (Ecc newEcl : Ecc.values()) {  // From low to high
 			if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
 				ecl = newEcl;
 		}
 		
-		// Create the data bit string by concatenating all segments
+		// Concatenate all segments to create the data bit string
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 		BitBuffer bb = new BitBuffer();
 		for (QrSegment seg : segs) {
@@ -91,7 +91,7 @@ public final class QrCode {
 		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength));
 		bb.appendBits(0, (8 - bb.bitLength % 8) % 8);
 		
-		// Pad with alternate bytes until data capacity is reached
+		// Pad with alternating bytes until data capacity is reached
 		for (int padByte = 0xEC; bb.bitLength < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bb.appendBits(padByte, 8);
 		assert bb.bitLength % 8 == 0;
@@ -174,7 +174,8 @@ public final class QrCode {
 	 * @param scale the module scale factor, which must be positive
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return an image representing this QR Code, with padding and scaling
-	 * @throws IllegalArgumentException if the scale or border is out of range
+	 * @throws IllegalArgumentException if the scale or border is out of range, or if
+	 * {scale, border, size} cause the image dimensions to exceed Integer.MAX_VALUE
 	 */
 	public BufferedImage toImage(int scale, int border) {
 		if (scale <= 0 || border < 0)
@@ -199,6 +200,7 @@ public final class QrCode {
 	 * Note that Unix newlines (\n) are always used, regardless of the platform.
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return a string representing this QR Code as an SVG document
+	 * @throws IllegalArgumentException if the border is negative
 	 */
 	public String toSvgString(int border) {
 		if (border < 0)
@@ -325,10 +327,11 @@ public final class QrCode {
 	}
 	
 	
-	// XORs the data modules in this QR Code with the given mask pattern. Due to XOR's mathematical
-	// properties, calling applyMask(m) twice with the same value is equivalent to no change at all.
-	// This means it is possible to apply a mask, undo it, and try another mask. Note that a final
-	// well-formed QR Code symbol needs exactly one mask applied (not zero, not two, etc.).
+	// XORs the codeword modules in this QR Code with the given mask pattern.
+	// The function modules must be marked and the codeword bits must be drawn
+	// before masking. Due to the arithmetic of XOR, calling applyMask() with
+	// the same mask value a second time will undo the mask. A final well-formed
+	// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
 	private void applyMask(int[] mask) {
 		if (mask.length != modules.length)
 			throw new IllegalArgumentException();
