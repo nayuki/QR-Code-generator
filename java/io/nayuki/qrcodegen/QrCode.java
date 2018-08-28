@@ -688,7 +688,7 @@ public final class QrCode {
 			result -= (numAlign - 2) * 2 * 20;  // Subtract alignment patterns that overlap with timing patterns
 			// The two lines above are equivalent to: result -= (25 * numAlign - 10) * numAlign - 55;
 			if (ver >= 7)
-				result -= 18 * 2;  // Subtract version information
+				result -= 6 * 3 * 2;  // Subtract version information
 		}
 		return result;
 	}

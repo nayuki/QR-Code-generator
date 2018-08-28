@@ -202,7 +202,7 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
 	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
 	int rawCodewords = getNumRawDataModules(version) / 8;
-	int dataLen = rawCodewords - blockEccLen * numBlocks;
+	int dataLen = getNumDataCodewords(version, ecl);
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
 	
@@ -384,12 +384,10 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	for (int i = 0; i < numAlign; i++) {
 		for (int j = 0; j < numAlign; j++) {
 			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
-				continue;  // Skip the three finder corners
-			else {
-				for (int k = -1; k <= 1; k++) {
-					for (int l = -1; l <= 1; l++)
-						setModule(qrcode, alignPatPos[i] + l, alignPatPos[j] + k, k == 0 && l == 0);
-				}
+				continue;  // Don't draw on the three finder corners
+			for (int k = -1; k <= 1; k++) {
+				for (int l = -1; l <= 1; l++)
+					setModule(qrcode, alignPatPos[i] + l, alignPatPos[j] + k, k == 0 && l == 0);
 			}
 		}
 	}
