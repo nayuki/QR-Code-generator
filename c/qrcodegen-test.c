@@ -125,10 +125,10 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 	calcReedSolomonGenerator(blockEccLen, generator);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
 		uint8_t *block = MALLOC(shortBlockLen + 1, uint8_t);
-		int blockDataLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
-		memcpy(block, &data[k], blockDataLen * sizeof(uint8_t));
-		calcReedSolomonRemainder(&data[k], blockDataLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
-		k += blockDataLen;
+		int datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
+		memcpy(block, &data[k], datLen * sizeof(uint8_t));
+		calcReedSolomonRemainder(&data[k], datLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
+		k += datLen;
 		blocks[i] = block;
 	}
 	free(generator);

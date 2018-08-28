@@ -210,9 +210,9 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	uint8_t generator[qrcodegen_REED_SOLOMON_DEGREE_MAX];
 	calcReedSolomonGenerator(blockEccLen, generator);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
-		int blockLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
-		calcReedSolomonRemainder(&data[k], blockLen, generator, blockEccLen, &data[dataLen + i * blockEccLen]);
-		k += blockLen;
+		int datLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
+		calcReedSolomonRemainder(&data[k], datLen, generator, blockEccLen, &data[dataLen + i * blockEccLen]);
+		k += datLen;
 	}
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
