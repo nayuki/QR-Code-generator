@@ -174,13 +174,10 @@ std::string QrCode::toSvgString(int border) const {
 	sb << (size + border * 2) << " " << (size + border * 2) << "\" stroke=\"none\">\n";
 	sb << "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n";
 	sb << "\t<path d=\"";
-	bool head = true;
 	for (int y = 0; y < size; y++) {
 		for (int x = 0; x < size; x++) {
 			if (getModule(x, y)) {
-				if (head)
-					head = false;
-				else
+				if (x != 0 || y != 0)
 					sb << " ";
 				sb << "M" << (x + border) << "," << (y + border) << "h1v1h-1z";
 			}

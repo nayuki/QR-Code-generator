@@ -252,13 +252,10 @@ impl QrCode {
 			"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {0} {0}\" stroke=\"none\">\n", dimension);
 		result += "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n";
 		result += "\t<path d=\"";
-		let mut head = true;
 		for y in 0 .. self.size {
 			for x in 0 .. self.size {
 				if self.get_module(x, y) {
-					if head {
-						head = false;
-					} else {
+					if x != 0 || y != 0 {
 						result += " ";
 					}
 					result += &format!("M{},{}h1v1h-1z", x + border, y + border);
