@@ -202,9 +202,6 @@ public final class QrSegment {
 	// many characters to fit its length field, or the total bits exceeds Integer.MAX_VALUE.
 	static int getTotalBits(List<QrSegment> segs, int version) {
 		Objects.requireNonNull(segs);
-		if (version < 1 || version > 40)
-			throw new IllegalArgumentException("Version number out of range");
-		
 		long result = 0;
 		for (QrSegment seg : segs) {
 			Objects.requireNonNull(seg);

@@ -636,8 +636,6 @@ var qrcodegen = new function() {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	QrCode.getNumDataCodewords = function(ver, ecl) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
-			throw "Version number out of range";
 		return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
 			QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] *
 			QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
@@ -816,8 +814,6 @@ var qrcodegen = new function() {
 	// (Package-private) Calculates and returns the number of bits needed to encode the given segments at the
 	// given version. The result is infinity if a segment has too many characters to fit its length field.
 	this.QrSegment.getTotalBits = function(segs, version) {
-		if (version < MIN_VERSION || version > MAX_VERSION)
-			throw "Version number out of range";
 		var result = 0;
 		for (var i = 0; i < segs.length; i++) {
 			var seg = segs[i];

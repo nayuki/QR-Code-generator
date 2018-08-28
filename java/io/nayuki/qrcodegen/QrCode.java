@@ -692,8 +692,6 @@ public final class QrCode {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	static int getNumDataCodewords(int ver, Ecc ecl) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
-			throw new IllegalArgumentException("Version number out of range");
 		return getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal()][ver]
 			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];

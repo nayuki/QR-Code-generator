@@ -522,8 +522,6 @@ class QrCode(object):
 		"""Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 		QR Code of the given version number and error correction level, with remainder bits discarded.
 		This stateless pure function could be implemented as a (40*4)-cell lookup table."""
-		if not (QrCode.MIN_VERSION <= ver <= QrCode.MAX_VERSION):
-			raise ValueError("Version number out of range")
 		return QrCode._get_num_raw_data_modules(ver) // 8 \
 			- QrCode._ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] \
 			* QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
@@ -703,8 +701,6 @@ class QrSegment(object):
 		"""Calculates the number of bits needed to encode the given segments at
 		the given version. Returns a non-negative number if successful. Otherwise
 		returns None if a segment has too many characters to fit its length field."""
-		if not (QrCode.MIN_VERSION <= version <= QrCode.MAX_VERSION):
-			raise ValueError("Version number out of range")
 		result = 0
 		for seg in segs:
 			ccbits = seg.get_mode().num_char_count_bits(version)

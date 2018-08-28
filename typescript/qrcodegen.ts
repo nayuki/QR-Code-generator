@@ -599,8 +599,6 @@ namespace qrcodegen {
 		// QR Code of the given version number and error correction level, with remainder bits discarded.
 		// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 		private static getNumDataCodewords(ver: int, ecl: QrCode.Ecc): int {
-			if (ver < QrCode.MIN_VERSION || ver > QrCode.MAX_VERSION)
-				throw "Version number out of range";
 			return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
 				QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] *
 				QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
@@ -772,8 +770,6 @@ namespace qrcodegen {
 		// (Package-private) Calculates and returns the number of bits needed to encode the given segments at
 		// the given version. The result is infinity if a segment has too many characters to fit its length field.
 		public static getTotalBits(segs: Array<QrSegment>, version: int): number {
-			if (version < QrCode.MIN_VERSION || version > QrCode.MAX_VERSION)
-				throw "Version number out of range";
 			let result: number = 0;
 			for (let i = 0; i < segs.length; i++) {
 				let seg: QrSegment = segs[i];

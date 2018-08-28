@@ -171,8 +171,6 @@ QrSegment::QrSegment(Mode md, int numCh, std::vector<bool> &&dt) :
 
 
 int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
-	if (version < 1 || version > 40)
-		throw std::domain_error("Version number out of range");
 	int result = 0;
 	for (const QrSegment &seg : segs) {
 		int ccbits = seg.mode.numCharCountBits(version);

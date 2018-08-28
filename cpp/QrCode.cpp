@@ -526,8 +526,6 @@ int QrCode::getNumRawDataModules(int ver) {
 
 
 int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
-	if (ver < MIN_VERSION || ver > MAX_VERSION)
-		throw std::domain_error("Version number out of range");
 	return getNumRawDataModules(ver) / 8
 		- ECC_CODEWORDS_PER_BLOCK[static_cast<int>(ecl)][ver]
 		* NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(ecl)][ver];

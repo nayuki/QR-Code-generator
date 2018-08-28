@@ -231,8 +231,7 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 // for the given version number and error correction level. The result is in the range [9, 2956].
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 	int v = version, e = (int)ecl;
-	assert(qrcodegen_VERSION_MIN <= v && v <= qrcodegen_VERSION_MAX
-		&& 0 <= e && e < 4);
+	assert(0 <= e && e < 4);
 	return getNumRawDataModules(v) / 8
 		- ECC_CODEWORDS_PER_BLOCK[e][v]
 		* NUM_ERROR_CORRECTION_BLOCKS[e][v];
@@ -977,7 +976,6 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 // many characters to fit its length field, or the total bits exceeds INT16_MAX.
 testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
 	assert(segs != NULL || len == 0);
-	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	long result = 0;
 	for (size_t i = 0; i < len; i++) {
 		int numChars  = segs[i].numChars;
