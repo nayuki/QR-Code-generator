@@ -204,11 +204,11 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	private static boolean isAlphanumeric(char c) {
+	private static boolean isAlphanumeric(int c) {
 		return isNumeric(c) || 'A' <= c && c <= 'Z' || " $%*+./:-".indexOf(c) != -1;
 	}
 	
-	private static boolean isNumeric(char c) {
+	private static boolean isNumeric(int c) {
 		return '0' <= c && c <= '9';
 	}
 	
@@ -265,8 +265,8 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	private static boolean isKanji(char c) {
-		return UNICODE_TO_QR_KANJI[c] != -1;
+	private static boolean isKanji(int c) {
+		return c < UNICODE_TO_QR_KANJI.length && UNICODE_TO_QR_KANJI[c] != -1;
 	}
 	
 	
