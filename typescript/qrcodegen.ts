@@ -85,8 +85,8 @@ namespace qrcodegen {
 			let dataUsedBits: int;
 			for (version = minVersion; ; version++) {
 				let dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-				let usedBits: number|null = QrSegment.getTotalBits(segs, version);
-				if (usedBits != null && usedBits <= dataCapacityBits) {
+				let usedBits: number = QrSegment.getTotalBits(segs, version);
+				if (usedBits <= dataCapacityBits) {
 					dataUsedBits = usedBits;
 					break;  // This version number is found to be suitable
 				}
@@ -774,16 +774,16 @@ namespace qrcodegen {
 		
 		
 		// Package-private helper function.
-		public static getTotalBits(segs: Array<QrSegment>, version: int): int|null {
+		public static getTotalBits(segs: Array<QrSegment>, version: int): number {
 			if (version < QrCode.MIN_VERSION || version > QrCode.MAX_VERSION)
 				throw "Version number out of range";
-			let result: int = 0;
+			let result: number = 0;
 			for (let i = 0; i < segs.length; i++) {
 				let seg: QrSegment = segs[i];
 				let ccbits: int = seg.mode.numCharCountBits(version);
 				// Fail if segment length value doesn't fit in the length field's bit-width
 				if (seg.numChars >= (1 << ccbits))
-					return null;
+					return Infinity;
 				result += 4 + ccbits + seg.getBits().length;
 			}
 			return result;

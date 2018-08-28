@@ -542,7 +542,7 @@ var qrcodegen = new function() {
 		for (version = minVersion; ; version++) {
 			var dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
 			dataUsedBits = qrcodegen.QrSegment.getTotalBits(segs, version);
-			if (dataUsedBits != null && dataUsedBits <= dataCapacityBits)
+			if (dataUsedBits <= dataCapacityBits)
 				break;  // This version number is found to be suitable
 			if (version >= maxVersion)  // All versions in the range could not fit the given data
 				throw "Data too long";
@@ -827,7 +827,7 @@ var qrcodegen = new function() {
 			var ccbits = seg.mode.numCharCountBits(version);
 			// Fail if segment length value doesn't fit in the length field's bit-width
 			if (seg.numChars >= (1 << ccbits))
-				return null;
+				return Infinity;
 			result += 4 + ccbits + seg.getBits().length;
 		}
 		return result;
