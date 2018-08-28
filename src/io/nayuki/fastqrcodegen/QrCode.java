@@ -79,22 +79,24 @@ public final class QrCode {
 		}
 		
 		// Concatenate all segments to create the data bit string
-		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 		BitBuffer bb = new BitBuffer();
 		for (QrSegment seg : segs) {
 			bb.appendBits(seg.mode.modeBits, 4);
 			bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
 			bb.appendBits(seg.data, seg.bitLength);
 		}
+		assert bb.bitLength == dataUsedBits;
 		
 		// Add terminator and pad up to a byte if applicable
+		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
+		assert bb.bitLength <= dataCapacityBits;
 		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength));
 		bb.appendBits(0, (8 - bb.bitLength % 8) % 8);
+		assert bb.bitLength % 8 == 0;
 		
 		// Pad with alternating bytes until data capacity is reached
 		for (int padByte = 0xEC; bb.bitLength < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bb.appendBits(padByte, 8);
-		assert bb.bitLength % 8 == 0;
 		
 		// Create the QR Code symbol
 		return new QrCode(version, ecl, bb.getBytes(), mask);
