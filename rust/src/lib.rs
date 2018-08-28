@@ -82,8 +82,9 @@ impl QrCode {
 	}
 	
 	
-	// Returns a QR Code symbol representing the given data segments at the given error correction
-	// level or higher. The smallest possible QR Code version is automatically chosen for the output.
+	// Returns a QR Code symbol representing the given segments at the given error correction level.
+	// The smallest possible QR Code version is automatically chosen for the output. The ECC level
+	// of the result may be higher than the ecl argument if it can be done without increasing the version.
 	// This function allows the user to create a custom sequence of segments that switches
 	// between modes (such as alphanumeric and binary) to encode text more efficiently.
 	// This function is considered to be lower level than simply encoding text or binary data.
@@ -93,7 +94,7 @@ impl QrCode {
 	}
 	
 	
-	// Returns a QR Code symbol representing the given data segments with the given encoding parameters.
+	// Returns a QR Code symbol representing the given segments with the given encoding parameters.
 	// The smallest possible QR Code version within the given range is automatically chosen for the output.
 	// This function allows the user to create a custom sequence of segments that switches
 	// between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -239,9 +240,8 @@ impl QrCode {
 	}
 	
 	
-	// Based on the given number of border modules to add as padding, this returns a
-	// string whose contents represents an SVG XML file that depicts this QR Code symbol.
-	// Note that Unix newlines (\n) are always used, regardless of the platform.
+	// Returns a string of SVG XML code representing an image of this QR Code symbol with the given
+	// number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
 	pub fn to_svg_string(&self, border: i32) -> String {
 		assert!(border >= 0, "Border must be non-negative");
 		let mut result = String::new();
@@ -468,8 +468,8 @@ impl QrCode {
 						*self.module_mut(x, y) = get_bit(data[i >> 3] as u32, 7 - ((i & 7) as i32));
 						i += 1;
 					}
-					// If there are any remainder bits (0 to 7), they are already
-					// set to 0/false/white when the grid of modules was initialized
+					// If this QR Code has any remainder bits (0 to 7), they were assigned as
+					// 0/false/white by the constructor and are left unchanged by this method
 				}
 			}
 			right -= 2;
@@ -826,9 +826,8 @@ impl ReedSolomonGenerator {
 
 /*---- QrSegment functionality ----*/
 
-// Represents a character string to be encoded in a QR Code symbol.
-// Each segment has a mode, and a sequence of characters that is already
-// encoded as a sequence of bits. Instances of this struct are immutable.
+// Represents a segment of character data, binary data, or control data
+// to be put into a QR Code symbol. Instances of this class are immutable.
 pub struct QrSegment {
 	
 	// The mode indicator for this segment.
@@ -942,7 +941,7 @@ impl QrSegment {
 	}
 	
 	
-	// Creates a new QR Code data segment with the given parameters and data.
+	// Creates a new QR Code segment with the given parameters and data.
 	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> Self {
 		Self {
 			mode: mode,

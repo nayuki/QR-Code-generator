@@ -90,7 +90,7 @@ class QrCode(object):
 	
 	@staticmethod
 	def encode_segments(segs, ecl, minversion=1, maxversion=40, mask=-1, boostecl=True):
-		"""Returns a QR Code symbol representing the given data segments with the given encoding parameters.
+		"""Returns a QR Code symbol representing the given segments with the given encoding parameters.
 		The smallest possible QR Code version within the given range is automatically chosen for the output.
 		This function allows the user to create a custom sequence of segments that switches
 		between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -223,8 +223,8 @@ class QrCode(object):
 	# ---- Public instance methods ----
 	
 	def to_svg_str(self, border):
-		"""Based on the given number of border modules to add as padding, this returns a
-		string whose contents represents an SVG XML file that depicts this QR Code symbol."""
+		"""Returns a string of SVG XML code representing an image of this QR Code symbol with the given
+		number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform."""
 		if border < 0:
 			raise ValueError("Border must be non-negative")
 		parts = []
@@ -403,8 +403,8 @@ class QrCode(object):
 					if not self._isfunction[y][x] and i < len(data) * 8:
 						self._modules[y][x] = _get_bit(data[i >> 3], 7 - (i & 7))
 						i += 1
-					# If there are any remainder bits (0 to 7), they are already
-					# set to 0/false/white when the grid of modules was initialized
+					# If this QR Code has any remainder bits (0 to 7), they were assigned as
+					# 0/false/white by the constructor and are left unchanged by this method
 		assert i == len(data) * 8
 	
 	
@@ -583,9 +583,8 @@ class QrCode(object):
 # ---- Data segment class ----
 
 class QrSegment(object):
-	"""Represents a character string to be encoded in a QR Code symbol. Each segment has
-	a mode, and a sequence of characters that is already encoded as a sequence of bits.
-	Instances of this class are immutable.
+	"""Represents a segment of character data, binary data, or control data
+	to be put into a QR Code symbol. Instances of this class are immutable.
 	This segment class imposes no length restrictions, but QR Codes have restrictions.
 	Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 	Any segment longer than this is meaningless for the purpose of generating QR Codes."""
@@ -676,6 +675,7 @@ class QrSegment(object):
 	# ---- Constructor ----
 	
 	def __init__(self, mode, numch, bitdata):
+		"""Creates a new QR Code segment with the given parameters and data."""
 		if numch < 0 or not isinstance(mode, QrSegment.Mode):
 			raise ValueError()
 		self._mode = mode
@@ -729,8 +729,8 @@ class QrSegment(object):
 		
 		# Private constructor
 		def __init__(self, modebits, charcounts):
-			self._modebits = modebits
-			self._charcounts = charcounts
+			self._modebits = modebits  # The mode indicator bits, which is a uint4 value (range 0 to 15)
+			self._charcounts = charcounts  # Three values for different version ranges
 		
 		# Package-private method
 		def get_mode_bits(self):

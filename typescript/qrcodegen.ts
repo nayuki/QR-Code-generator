@@ -67,7 +67,7 @@ namespace qrcodegen {
 		}
 		
 		
-		// Returns a QR Code symbol representing the given data segments with the given encoding parameters.
+		// Returns a QR Code symbol representing the given segments with the given encoding parameters.
 		// The smallest possible QR Code version within the given range is automatically chosen for the output.
 		// This function allows the user to create a custom sequence of segments that switches
 		// between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -231,9 +231,8 @@ namespace qrcodegen {
 		}
 		
 		
-		// Based on the given number of border modules to add as padding, this returns a
-		// string whose contents represents an SVG XML file that depicts this QR Code symbol.
-		// Note that Unix newlines (\n) are always used, regardless of the platform.
+		// Returns a string of SVG XML code representing an image of this QR Code symbol with the given
+		// number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
 		public toSvgString(border: int): string {
 			if (border < 0)
 				throw "Border must be non-negative";
@@ -439,8 +438,8 @@ namespace qrcodegen {
 							this.modules[y][x] = getBit(data[i >>> 3], 7 - (i & 7));
 							i++;
 						}
-						// If there are any remainder bits (0 to 7), they are already
-						// set to 0/false/white when the grid of modules was initialized
+						// If this QR Code has any remainder bits (0 to 7), they were assigned as
+						// 0/false/white by the constructor and are left unchanged by this method
 					}
 				}
 			}
@@ -650,9 +649,8 @@ namespace qrcodegen {
 	/*---- Data segment class ----*/
 	
 	/* 
-	 * A public class that represents a character string to be encoded in a QR Code symbol.
-	 * Each segment has a mode, and a sequence of characters that is already encoded as
-	 * a sequence of bits. Instances of this class are immutable.
+	 * Represents a segment of character data, binary data, or control data
+	 * to be put into a QR Code symbol. Instances of this class are immutable.
 	 * This segment class imposes no length restrictions, but QR Codes have restrictions.
 	 * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 	 * Any segment longer than this is meaningless for the purpose of generating QR Codes.
@@ -750,6 +748,7 @@ namespace qrcodegen {
 		
 		/*-- Constructor --*/
 		
+		// Creates a new QR Code segment with the given parameters and data.
 		public constructor(mode: QrSegment.Mode, numChars: int, bitData: Array<bit>) {
 			if (numChars < 0)
 				throw "Invalid argument";
@@ -987,9 +986,10 @@ namespace qrcodegen.QrSegment {
 		
 		/*-- Fields --*/
 		
-		// An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object.
+		// The mode indicator bits, which is a uint4 value (range 0 to 15).
 		public readonly modeBits: int;
 		
+		// Three values for different version ranges.
 		private readonly numBitsCharCount: [int,int,int];
 		
 		

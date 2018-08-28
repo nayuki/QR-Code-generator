@@ -77,7 +77,7 @@ class QrCode final {
 	
 	
 	/* 
-	 * Returns a QR Code symbol representing the given data segments with the given encoding parameters.
+	 * Returns a QR Code symbol representing the given segments with the given encoding parameters.
 	 * The smallest possible QR Code version within the given range is automatically chosen for the output.
 	 * This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -154,9 +154,8 @@ class QrCode final {
 	
 	
 	/* 
-	 * Based on the given number of border modules to add as padding, this returns a
-	 * string whose contents represents an SVG XML file that depicts this QR Code symbol.
-	 * Note that Unix newlines (\n) are always used, regardless of the platform.
+	 * Returns a string of SVG XML code representing an image of this QR Code symbol with the given
+	 * number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
 	 */
 	public: std::string toSvgString(int border) const;
 	

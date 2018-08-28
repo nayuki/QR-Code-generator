@@ -31,9 +31,8 @@ import java.util.regex.Pattern;
 
 
 /**
- * Represents a character string to be encoded in a QR Code symbol. Each segment has
- * a mode, and a sequence of characters that is already encoded as a sequence of bits.
- * Instances of this class are immutable.
+ * Represents a segment of character data, binary data, or control data
+ * to be put into a QR Code symbol. Instances of this class are immutable.
  * <p>This segment class imposes no length restrictions, but QR Codes have restrictions.
  * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
  * Any segment longer than this is meaningless for the purpose of generating QR Codes.</p>
@@ -169,7 +168,7 @@ public final class QrSegment {
 	/*---- Constructor ----*/
 	
 	/**
-	 * Constructs a QR Code data segment with the specified parameters and data.
+	 * Constructs a QR Code segment with the specified parameters and data.
 	 * @param md the mode, which is not {@code null}
 	 * @param numCh the data length in characters, which is non-negative
 	 * @param data the data bits of this segment, which is not {@code null}
@@ -247,9 +246,10 @@ public final class QrSegment {
 		
 		/*-- Fields --*/
 		
-		/** An unsigned 4-bit integer value (range 0 to 15) representing the mode indicator bits for this mode object. */
+		/** The mode indicator bits, which is a uint4 value (range 0 to 15). */
 		final int modeBits;
 		
+		/** Three values for different version ranges. */
 		private final int[] numBitsCharCount;
 		
 		

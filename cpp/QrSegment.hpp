@@ -31,9 +31,8 @@
 namespace qrcodegen {
 
 /* 
- * Represents a character string to be encoded in a QR Code symbol. Each segment has
- * a mode, and a sequence of characters that is already encoded as a sequence of bits.
- * Instances of this class are immutable.
+ * Represents a segment of character data, binary data, or control data
+ * to be put into a QR Code symbol. Instances of this class are immutable.
  * This segment class imposes no length restrictions, but QR Codes have restrictions.
  * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
  * Any segment longer than this is meaningless for the purpose of generating QR Codes.
@@ -58,8 +57,10 @@ class QrSegment final {
 		
 		/*-- Fields --*/
 		
+		// The mode indicator bits, which is a uint4 value (range 0 to 15).
 		private: int modeBits;
 		
+		// Three values for different version ranges.
 		private: int numBitsCharCount[3];
 		
 		
@@ -150,7 +151,7 @@ class QrSegment final {
 	/*---- Constructors ----*/
 	
 	/* 
-	 * Creates a new QR Code data segment with the given parameters and data.
+	 * Creates a new QR Code segment with the given parameters and data.
 	 */
 	public: QrSegment(Mode md, int numCh, const std::vector<bool> &dt);
 	

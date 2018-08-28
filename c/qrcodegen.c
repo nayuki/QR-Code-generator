@@ -494,8 +494,8 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 					setModule(qrcode, x, y, black);
 					i++;
 				}
-				// If there are any remainder bits (0 to 7), they are already
-				// set to 0/false/white when the grid of modules was initialized
+				// If this QR Code has any remainder bits (0 to 7), they were assigned as
+				// 0/false/white by the constructor and are left unchanged by this method
 			}
 		}
 	}

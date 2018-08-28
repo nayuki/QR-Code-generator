@@ -360,8 +360,8 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 					modules.at(y).at(x) = getBit(data.at(i >> 3), 7 - static_cast<int>(i & 7));
 					i++;
 				}
-				// If there are any remainder bits (0 to 7), they are already
-				// set to 0/false/white when the grid of modules was initialized
+				// If this QR Code has any remainder bits (0 to 7), they were assigned as
+				// 0/false/white by the constructor and are left unchanged by this method
 			}
 		}
 	}

@@ -73,10 +73,8 @@ enum qrcodegen_Mode {
 
 
 /* 
- * A segment of user/application data that a QR Code symbol can convey.
- * Each segment has a mode, a character count, and character/general data that is
- * already encoded as a sequence of bits. The maximum allowed bit length is 32767,
- * because even the largest QR Code (version 40) has only 31329 modules.
+ * Represents a segment of character data, binary data, or control data. The maximum allowed
+ * bit length is 32767, because even the largest QR Code (version 40) has only 31329 modules.
  */
 struct qrcodegen_Segment {
 	// The mode indicator for this segment.
@@ -219,9 +217,10 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]);
 
 
 /* 
- * Renders a QR Code symbol representing the given data segments at the given error correction
- * level or higher. The smallest possible QR Code version is automatically chosen for the output.
- * Returns true if QR Code creation succeeded, or false if the data is too long to fit in any version.
+ * Renders a QR Code symbol representing the given segments at the given error correction level.
+ * The smallest possible QR Code version is automatically chosen for the output. Returns true if
+ * QR Code creation succeeded, or false if the data is too long to fit in any version. The ECC level
+ * of the result may be higher than the ecl argument if it can be done without increasing the version.
  * This function allows the user to create a custom sequence of segments that switches
  * between modes (such as alphanumeric and binary) to encode text more efficiently.
  * This function is considered to be lower level than simply encoding text or binary data.
@@ -234,7 +233,7 @@ bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
 
 
 /* 
- * Renders a QR Code symbol representing the given data segments with the given encoding parameters.
+ * Renders a QR Code symbol representing the given segments with the given encoding parameters.
  * Returns true if QR Code creation succeeded, or false if the data is too long to fit in the range of versions.
  * The smallest possible QR Code version within the given range is automatically chosen for the output.
  * This function allows the user to create a custom sequence of segments that switches

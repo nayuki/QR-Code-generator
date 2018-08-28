@@ -81,8 +81,9 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a QR Code symbol representing the specified data segments at the specified error correction
-	 * level or higher. The smallest possible QR Code version is automatically chosen for the output.
+	 * Returns a QR Code symbol representing the specified segments at the specified error correction
+	 * level. The smallest possible QR Code version is automatically chosen for the output. The ECC level
+	 * of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
 	 * This function is considered to be lower level than simply encoding text or binary data.</p>
@@ -99,7 +100,7 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a QR Code symbol representing the specified data segments with the specified encoding parameters.
+	 * Returns a QR Code symbol representing the specified segments with the specified encoding parameters.
 	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -279,9 +280,8 @@ public final class QrCode {
 	
 	
 	/**
-	 * Based on the specified number of border modules to add as padding, this returns a
-	 * string whose contents represents an SVG XML file that depicts this QR Code symbol.
-	 * Note that Unix newlines (\n) are always used, regardless of the platform.
+	 * Returns a string of SVG XML code representing an image of this QR Code symbol with the specified
+	 * number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return a string representing this QR Code as an SVG document
 	 * @throws IllegalArgumentException if the border is negative
@@ -495,8 +495,8 @@ public final class QrCode {
 						modules[y][x] = getBit(data[i >>> 3], 7 - (i & 7));
 						i++;
 					}
-					// If there are any remainder bits (0 to 7), they are already
-					// set to 0/false/white when the grid of modules was initialized
+					// If this QR Code has any remainder bits (0 to 7), they were assigned as
+					// 0/false/white by the constructor and are left unchanged by this method
 				}
 			}
 		}
