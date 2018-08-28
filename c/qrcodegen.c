@@ -239,8 +239,11 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 // for the given version number and error correction level. The result is in the range [9, 2956].
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 	int v = version, e = (int)ecl;
-	assert(0 <= e && e < 4 && qrcodegen_VERSION_MIN <= v && v <= qrcodegen_VERSION_MAX);
-	return getNumRawDataModules(v) / 8 - ECC_CODEWORDS_PER_BLOCK[e][v] * NUM_ERROR_CORRECTION_BLOCKS[e][v];
+	assert(qrcodegen_VERSION_MIN <= v && v <= qrcodegen_VERSION_MAX
+		&& 0 <= e && e < 4);
+	return getNumRawDataModules(v) / 8
+		- ECC_CODEWORDS_PER_BLOCK[e][v]
+		* NUM_ERROR_CORRECTION_BLOCKS[e][v];
 }
 
 
@@ -987,9 +990,9 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int result = 0;
 	for (size_t i = 0; i < len; i++) {
-		int numChars = segs[i].numChars;
+		int numChars  = segs[i].numChars;
 		int bitLength = segs[i].bitLength;
-		assert(0 <= numChars && numChars <= INT16_MAX);
+		assert(0 <= numChars  && numChars  <= INT16_MAX);
 		assert(0 <= bitLength && bitLength <= INT16_MAX);
 		int ccbits = numCharCountBits(segs[i].mode, version);
 		assert(0 <= ccbits && ccbits <= 16);
