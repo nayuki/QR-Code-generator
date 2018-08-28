@@ -697,11 +697,12 @@ class QrSegment(object):
 		return list(self._bitdata)  # Make defensive copy
 	
 	
-	# Calculates the number of bits needed to encode the given segments at the given version.
-	# Returns a non-negative number if successful. Otherwise returns None if a segment has
-	# too many characters to fit its length field.
+	# Package-private function
 	@staticmethod
 	def get_total_bits(segs, version):
+		"""Calculates the number of bits needed to encode the given segments at
+		the given version. Returns a non-negative number if successful. Otherwise
+		returns None if a segment has too many characters to fit its length field."""
 		if not (QrCode.MIN_VERSION <= version <= QrCode.MAX_VERSION):
 			raise ValueError("Version number out of range")
 		result = 0

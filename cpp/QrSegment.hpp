@@ -172,9 +172,9 @@ class QrSegment final {
 	public: const std::vector<bool> &getData() const;
 	
 	
-	// Calculates the number of bits needed to encode the given segments at the given version.
-	// Returns a non-negative number if successful. Otherwise returns -1 if a segment has too
-	// many characters to fit its length field, or the total bits exceeds INT_MAX.
+	// (Package-private) Calculates the number of bits needed to encode the given segments at
+	// the given version. Returns a non-negative number if successful. Otherwise returns -1 if a
+	// segment has too many characters to fit its length field, or the total bits exceeds INT_MAX.
 	public: static int getTotalBits(const std::vector<QrSegment> &segs, int version);
 	
 	

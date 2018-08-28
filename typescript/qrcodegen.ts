@@ -769,8 +769,8 @@ namespace qrcodegen {
 		}
 		
 		
-		// Calculates and returns the number of bits needed to encode the given segments at the given version.
-		// The result is infinity if a segment has too many characters to fit its length field.
+		// (Package-private) Calculates and returns the number of bits needed to encode the given segments at
+		// the given version. The result is infinity if a segment has too many characters to fit its length field.
 		public static getTotalBits(segs: Array<QrSegment>, version: int): number {
 			if (version < QrCode.MIN_VERSION || version > QrCode.MAX_VERSION)
 				throw "Version number out of range";
