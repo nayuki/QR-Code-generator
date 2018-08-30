@@ -84,14 +84,14 @@ TypeScript language:
 
     // Simple operation
     let qr0: qrcodegen.QrCode = qrcodegen.QrCode.encodeText(
-        "Hello, world!", qrcodegen.QrCode_Ecc.MEDIUM);
+        "Hello, world!", qrcodegen.QrCode.Ecc.MEDIUM);
     let svg: string = qr0.toSvgString(4);
     
     // Manual operation
     let segs: Array<qrcodegen.QrSegment> =
         qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
     let qr1: qrcodegen.QrCode = qrcodegen.QrCode.encodeSegments(
-        segs, qrcodegen.QrCode_Ecc.HIGH, 5, 5, 2, false);
+        segs, qrcodegen.QrCode.Ecc.HIGH, 5, 5, 2, false);
     for (let y = 0; y < qr1.size; y++) {
         for (let x = 0; x < qr1.size; x++) {
             (... paint qr1.getModule(x, y) ...)
