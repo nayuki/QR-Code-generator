@@ -93,7 +93,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		bb.appendBits(seg.getNumChars(), seg.getMode().numCharCountBits(version));
 		bb.insert(bb.end(), seg.getData().begin(), seg.getData().end());
 	}
-	if (bb.size() != static_cast<size_t>(dataUsedBits))
+	if (bb.size() != static_cast<unsigned int>(dataUsedBits))
 		throw std::logic_error("Assertion error");
 	
 	// Add terminator and pad up to a byte if applicable
@@ -326,10 +326,10 @@ vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
 	vector<uint8_t> result;
-	for (int i = 0; static_cast<unsigned int>(i) < blocks.at(0).size(); i++) {
-		for (int j = 0; static_cast<unsigned int>(j) < blocks.size(); j++) {
+	for (size_t i = 0; i < blocks.at(0).size(); i++) {
+		for (size_t j = 0; j < blocks.size(); j++) {
 			// Skip the padding byte in short blocks
-			if (i != shortBlockLen - blockEccLen || j >= numShortBlocks)
+			if (i != static_cast<unsigned int>(shortBlockLen - blockEccLen) || j >= static_cast<unsigned int>(numShortBlocks))
 				result.push_back(blocks.at(j).at(i));
 		}
 	}
@@ -362,7 +362,7 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 			}
 		}
 	}
-	if (static_cast<unsigned int>(i) != data.size() * 8)
+	if (i != data.size() * 8)
 		throw std::logic_error("Assertion error");
 }
 
