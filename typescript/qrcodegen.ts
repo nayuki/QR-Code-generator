@@ -73,7 +73,7 @@ namespace qrcodegen {
 		// between modes (such as alphanumeric and binary) to encode text more efficiently.
 		// This function is considered to be lower level than simply encoding text or binary data.
 		public static encodeSegments(segs: Array<QrSegment>, ecl: QrCode.Ecc,
-				minVersion: int = 1, maxVersion: int = 1,
+				minVersion: int = 1, maxVersion: int = 40,
 				mask: int = -1, boostEcl: boolean = true): QrCode {
 			
 			if (!(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION)
