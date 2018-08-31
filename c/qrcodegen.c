@@ -117,8 +117,8 @@ testable const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
 };
 
 // For automatic mask pattern selection.
-static const int PENALTY_N1 = 3;
-static const int PENALTY_N2 = 3;
+static const int PENALTY_N1 =  3;
+static const int PENALTY_N2 =  3;
 static const int PENALTY_N3 = 40;
 static const int PENALTY_N4 = 10;
 

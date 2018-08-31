@@ -530,8 +530,8 @@ class QrCode(object):
 	# ---- Private tables of constants ----
 	
 	# For use in getPenaltyScore(), when evaluating which mask is best.
-	_PENALTY_N1 = 3
-	_PENALTY_N2 = 3
+	_PENALTY_N1 =  3
+	_PENALTY_N2 =  3
 	_PENALTY_N3 = 40
 	_PENALTY_N4 = 10
 	

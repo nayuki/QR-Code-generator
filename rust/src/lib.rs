@@ -681,8 +681,8 @@ pub const QrCode_MAX_VERSION: Version = Version(40);
 /*---- Private tables of constants ----*/
 
 // For use in get_penalty_score(), when evaluating which mask is best.
-const PENALTY_N1: i32 = 3;
-const PENALTY_N2: i32 = 3;
+const PENALTY_N1: i32 =  3;
+const PENALTY_N2: i32 =  3;
 const PENALTY_N3: i32 = 40;
 const PENALTY_N4: i32 = 10;
 

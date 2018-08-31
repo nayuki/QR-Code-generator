@@ -707,8 +707,8 @@ public final class QrCode {
 	/*---- Private tables of constants ----*/
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
-	private static final int PENALTY_N1 = 3;
-	private static final int PENALTY_N2 = 3;
+	private static final int PENALTY_N1 =  3;
+	private static final int PENALTY_N2 =  3;
 	private static final int PENALTY_N3 = 40;
 	private static final int PENALTY_N4 = 10;
 	

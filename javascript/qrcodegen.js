@@ -641,8 +641,8 @@ var qrcodegen = new function() {
 	/*---- Private tables of constants for QrCode ----*/
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
-	QrCode.PENALTY_N1 = 3;
-	QrCode.PENALTY_N2 = 3;
+	QrCode.PENALTY_N1 =  3;
+	QrCode.PENALTY_N2 =  3;
 	QrCode.PENALTY_N3 = 40;
 	QrCode.PENALTY_N4 = 10;
 	

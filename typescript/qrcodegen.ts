@@ -611,8 +611,8 @@ namespace qrcodegen {
 		
 		
 		// For use in getPenaltyScore(), when evaluating which mask is best.
-		private static readonly PENALTY_N1: int = 3;
-		private static readonly PENALTY_N2: int = 3;
+		private static readonly PENALTY_N1: int =  3;
+		private static readonly PENALTY_N2: int =  3;
 		private static readonly PENALTY_N3: int = 40;
 		private static readonly PENALTY_N4: int = 10;
 		

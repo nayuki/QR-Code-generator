@@ -536,8 +536,8 @@ bool QrCode::getBit(long x, int i) {
 
 /*---- Tables of constants ----*/
 
-const int QrCode::PENALTY_N1 = 3;
-const int QrCode::PENALTY_N2 = 3;
+const int QrCode::PENALTY_N1 =  3;
+const int QrCode::PENALTY_N2 =  3;
 const int QrCode::PENALTY_N3 = 40;
 const int QrCode::PENALTY_N4 = 10;
 
