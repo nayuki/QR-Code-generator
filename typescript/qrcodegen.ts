@@ -131,20 +131,9 @@ namespace qrcodegen {
 		
 		/*-- Fields --*/
 		
-		// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
-		public readonly version: int;
-		
 		// The width and height of this QR Code symbol, measured in modules.
 		// Always equal to version * 4 + 17, in the range 21 to 177.
 		public readonly size: int;
-		
-		// The error correction level used in this QR Code symbol.
-		public readonly errorCorrectionLevel: QrCode.Ecc;
-		
-		// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
-		// Note that even if the constructor was called with automatic masking requested
-		// (mask = -1), the resulting object will still have a mask value between 0 and 7.
-		public readonly mask: int;
 		
 		// The modules of this QR Code symbol (false = white, true = black).
 		private readonly modules: Array<Array<boolean>> = [];
@@ -153,15 +142,28 @@ namespace qrcodegen {
 		private readonly isFunction: Array<Array<boolean>> = [];
 		
 		
-		public constructor(datacodewords: Array<byte>, mask: int, version: int, errCorLvl: QrCode.Ecc) {
+		/*-- Constructor and fields --*/
+		
+		public constructor(
+				datacodewords: Array<byte>,
+				
+				// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
+				// Note that even if the constructor was called with automatic masking requested
+				// (mask = -1), the resulting object will still have a mask value between 0 and 7.
+				public readonly mask: int,
+				
+				// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
+				public readonly version: int,
+				
+				// The error correction level used in this QR Code symbol.
+				public readonly errorCorrectionLevel: QrCode.Ecc) {
+			
 			// Check arguments and handle simple scalar fields
 			if (mask < -1 || mask > 7)
 				throw "Mask value out of range";
 			if (version < QrCode.MIN_VERSION || version > QrCode.MAX_VERSION)
 				throw "Version value out of range";
-			this.version = version;
 			this.size = version * 4 + 17;
-			this.errorCorrectionLevel = errCorLvl;
 			
 			// Initialize both grids to be size*size arrays of Boolean false
 			let row: Array<boolean> = [];
@@ -733,25 +735,20 @@ namespace qrcodegen {
 		}
 		
 		
-		/*-- Fields --*/
-		
-		// The mode indicator for this segment.
-		public readonly mode: QrSegment.Mode;
-		
-		// The length of this segment's unencoded data, measured in characters. Always zero or positive.
-		public readonly numChars: int;
-		
-		private readonly bitData: Array<bit>;
-		
-		
-		/*-- Constructor --*/
+		/*-- Constructor and fields --*/
 		
 		// Creates a new QR Code segment with the given parameters and data.
-		public constructor(mode: QrSegment.Mode, numChars: int, bitData: Array<bit>) {
+		public constructor(
+				// The mode indicator for this segment.
+				public readonly mode: QrSegment.Mode,
+				
+				// The length of this segment's unencoded data, measured in characters. Always zero or positive.
+				public readonly numChars: int,
+				
+				private readonly bitData: Array<bit>) {
+			
 			if (numChars < 0)
 				throw "Invalid argument";
-			this.mode = mode;
-			this.numChars = numChars;
 			this.bitData = bitData.slice();  // Make defensive copy
 		}
 		
@@ -939,21 +936,13 @@ namespace qrcodegen.QrCode {
 		public static readonly HIGH     = new Ecc(3, 2);
 		
 		
-		/*-- Fields --*/
+		/*-- Constructor and fields --*/
 		
-		// In the range 0 to 3 (unsigned 2-bit integer).
-		public readonly ordinal: int;
-		
-		// (Package-private) In the range 0 to 3 (unsigned 2-bit integer).
-		public readonly formatBits: int;
-		
-		
-		/*-- Constructor --*/
-		
-		private constructor(ord: int, fb: int) {
-			this.ordinal = ord;
-			this.formatBits = fb;
-		}
+		private constructor(
+			// In the range 0 to 3 (unsigned 2-bit integer).
+			public readonly ordinal: int,
+			// (Package-private) In the range 0 to 3 (unsigned 2-bit integer).
+			public readonly formatBits: int) {}
 		
 	}
 }
@@ -981,21 +970,13 @@ namespace qrcodegen.QrSegment {
 		public static readonly ECI          = new Mode(0x7, [ 0,  0,  0]);
 		
 		
-		/*-- Fields --*/
+		/*-- Constructor and fields --*/
 		
-		// The mode indicator bits, which is a uint4 value (range 0 to 15).
-		public readonly modeBits: int;
-		
-		// Three values for different version ranges.
-		private readonly numBitsCharCount: [int,int,int];
-		
-		
-		/*-- Constructor --*/
-		
-		private constructor(mode: int, ccbits: [int,int,int]) {
-			this.modeBits = mode;
-			this.numBitsCharCount = ccbits;
-		}
+		private constructor(
+			// The mode indicator bits, which is a uint4 value (range 0 to 15).
+			public readonly modeBits: int,
+			// Three values for different version ranges.
+			private readonly numBitsCharCount: [int,int,int]) {}
 		
 		
 		/*-- Method --*/
