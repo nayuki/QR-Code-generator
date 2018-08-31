@@ -399,9 +399,7 @@ namespace qrcodegen {
 				let ecc: Array<byte> = rs.getRemainder(dat);
 				if (i < numShortBlocks)
 					dat.push(0);
-				ecc.forEach(
-					(b: byte) => dat.push(b));
-				blocks.push(dat);
+				blocks.push(dat.concat(ecc));
 			}
 			
 			// Interleave (not concatenate) the bytes from every block into a single sequence
@@ -770,8 +768,7 @@ namespace qrcodegen {
 		// the given version. The result is infinity if a segment has too many characters to fit its length field.
 		public static getTotalBits(segs: Array<QrSegment>, version: int): number {
 			let result: number = 0;
-			for (let i = 0; i < segs.length; i++) {
-				let seg: QrSegment = segs[i];
+			for (let seg of segs) {
 				let ccbits: int = seg.mode.numCharCountBits(version);
 				if (seg.numChars >= (1 << ccbits))
 					return Infinity;  // The segment's length doesn't fit the field's bit width

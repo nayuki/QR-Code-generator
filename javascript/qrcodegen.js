@@ -329,10 +329,7 @@ var qrcodegen = new function() {
 				var ecc = rs.getRemainder(dat);
 				if (i < numShortBlocks)
 					dat.push(0);
-				ecc.forEach(function(b) {
-					dat.push(b);
-				});
-				blocks.push(dat);
+				blocks.push(dat.concat(ecc));
 			}
 			
 			// Interleave (not concatenate) the bytes from every block into a single sequence
