@@ -738,12 +738,11 @@ var qrcodegen = new function() {
 		if (!this.NUMERIC_REGEX.test(digits))
 			throw "String contains non-numeric characters";
 		var bb = new BitBuffer();
-		var i;
-		for (i = 0; i + 3 <= digits.length; i += 3)  // Process groups of 3
-			bb.appendBits(parseInt(digits.substr(i, 3), 10), 10);
-		var rem = digits.length - i;
-		if (rem > 0)  // 1 or 2 digits remaining
-			bb.appendBits(parseInt(digits.substring(i), 10), rem * 3 + 1);
+		for (var i = 0; i < digits.length; ) {  // Consume up to 3 digits per iteration
+			var n = Math.min(digits.length - i, 3);
+			bb.appendBits(parseInt(digits.substr(i, n), 10), n * 3 + 1);
+			i += n;
+		}
 		return new this(this.Mode.NUMERIC, digits.length, bb);
 	};
 	

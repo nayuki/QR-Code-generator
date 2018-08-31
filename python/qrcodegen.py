@@ -611,11 +611,11 @@ class QrSegment(object):
 		if QrSegment.NUMERIC_REGEX.match(digits) is None:
 			raise ValueError("String contains non-numeric characters")
 		bb = _BitBuffer()
-		for i in range(0, len(digits) - 2, 3):  # Process groups of 3
-			bb.append_bits(int(digits[i : i + 3]), 10)
-		rem = len(digits) % 3
-		if rem > 0:  # 1 or 2 digits remaining
-			bb.append_bits(int(digits[-rem : ]), rem * 3 + 1)
+		i = 0
+		while i < len(digits):  # Consume up to 3 digits per iteration
+			n = min(len(digits) - i, 3)
+			bb.append_bits(int(digits[i : i + n]), n * 3 + 1)
+			i += n
 		return QrSegment(QrSegment.Mode.NUMERIC, len(digits), bb)
 	
 	

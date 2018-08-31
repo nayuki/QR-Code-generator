@@ -69,12 +69,11 @@ public final class QrSegment {
 			throw new IllegalArgumentException("String contains non-numeric characters");
 		
 		BitBuffer bb = new BitBuffer();
-		int i;
-		for (i = 0; i <= digits.length() - 3; i += 3)  // Process groups of 3
-			bb.appendBits(Integer.parseInt(digits.substring(i, i + 3)), 10);
-		int rem = digits.length() - i;
-		if (rem > 0)  // 1 or 2 digits remaining
-			bb.appendBits(Integer.parseInt(digits.substring(i)), rem * 3 + 1);
+		for (int i = 0; i < digits.length(); ) {  // Consume up to 3 digits per iteration
+			int n = Math.min(digits.length() - i, 3);
+			bb.appendBits(Integer.parseInt(digits.substring(i, i + n)), n * 3 + 1);
+			i += n;
+		}
 		return new QrSegment(Mode.NUMERIC, digits.length(), bb);
 	}
 	

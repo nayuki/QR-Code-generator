@@ -673,12 +673,11 @@ namespace qrcodegen {
 			if (!this.NUMERIC_REGEX.test(digits))
 				throw "String contains non-numeric characters";
 			let bb = new BitBuffer();
-			let i: int;
-			for (i = 0; i + 3 <= digits.length; i += 3)  // Process groups of 3
-				bb.appendBits(parseInt(digits.substr(i, 3), 10), 10);
-			let rem: int = digits.length - i;
-			if (rem > 0)  // 1 or 2 digits remaining
-				bb.appendBits(parseInt(digits.substring(i), 10), rem * 3 + 1);
+			for (let i = 0; i < digits.length; ) {  // Consume up to 3 digits per iteration
+				let n: int = Math.min(digits.length - i, 3);
+				bb.appendBits(parseInt(digits.substr(i, n), 10), n * 3 + 1);
+				i += n;
+			}
 			return new QrSegment(QrSegment.Mode.NUMERIC, digits.length, bb);
 		}
 		
