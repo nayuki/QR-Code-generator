@@ -527,16 +527,16 @@ namespace qrcodegen {
 			// Finder-like pattern in rows
 			for (let y = 0; y < this.size; y++) {
 				for (let x = 0, bits = 0; x < this.size; x++) {
-					bits = ((bits << 1) & 0x7FF) | (this.modules[y][x] ? 1 : 0);
-					if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+					bits = ((bits << 1) & 0b11111111111) | (this.modules[y][x] ? 1 : 0);
+					if (x >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
 						result += QrCode.PENALTY_N3;
 				}
 			}
 			// Finder-like pattern in columns
 			for (let x = 0; x < this.size; x++) {
 				for (let y = 0, bits = 0; y < this.size; y++) {
-					bits = ((bits << 1) & 0x7FF) | (this.modules[y][x] ? 1 : 0);
-					if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+					bits = ((bits << 1) & 0b11111111111) | (this.modules[y][x] ? 1 : 0);
+					if (y >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
 						result += QrCode.PENALTY_N3;
 				}
 			}

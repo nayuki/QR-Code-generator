@@ -608,16 +608,16 @@ public final class QrCode {
 		// Finder-like pattern in rows
 		for (int y = 0; y < size; y++) {
 			for (int x = 0, bits = 0; x < size; x++) {
-				bits = ((bits << 1) & 0x7FF) | (modules[y][x] ? 1 : 0);
-				if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+				bits = ((bits << 1) & 0b11111111111) | (modules[y][x] ? 1 : 0);
+				if (x >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
 					result += PENALTY_N3;
 			}
 		}
 		// Finder-like pattern in columns
 		for (int x = 0; x < size; x++) {
 			for (int y = 0, bits = 0; y < size; y++) {
-				bits = ((bits << 1) & 0x7FF) | (modules[y][x] ? 1 : 0);
-				if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
+				bits = ((bits << 1) & 0b11111111111) | (modules[y][x] ? 1 : 0);
+				if (y >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
 					result += PENALTY_N3;
 			}
 		}
