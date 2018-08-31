@@ -442,7 +442,7 @@ public final class QrCode {
 		
 		// Calculate parameter numbers
 		int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.ordinal()][version];
-		int blockEccLen = ECC_CODEWORDS_PER_BLOCK[errorCorrectionLevel.ordinal()][version];
+		int blockEccLen = ECC_CODEWORDS_PER_BLOCK  [errorCorrectionLevel.ordinal()][version];
 		int rawCodewords = getNumRawDataModules(version) / 8;
 		int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 		int shortBlockLen = rawCodewords / numBlocks;
@@ -693,7 +693,7 @@ public final class QrCode {
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	static int getNumDataCodewords(int ver, Ecc ecl) {
 		return getNumRawDataModules(ver) / 8
-			- ECC_CODEWORDS_PER_BLOCK[ecl.ordinal()][ver]
+			- ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal()][ver]
 			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
 	}
 	

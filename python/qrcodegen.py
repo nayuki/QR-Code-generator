@@ -356,7 +356,7 @@ class QrCode(object):
 		
 		# Calculate parameter numbers
 		numblocks = QrCode._NUM_ERROR_CORRECTION_BLOCKS[self._errcorlvl.ordinal][version]
-		blockecclen = QrCode._ECC_CODEWORDS_PER_BLOCK[self._errcorlvl.ordinal][version]
+		blockecclen = QrCode._ECC_CODEWORDS_PER_BLOCK  [self._errcorlvl.ordinal][version]
 		rawcodewords = QrCode._get_num_raw_data_modules(version) // 8
 		numshortblocks = numblocks - rawcodewords % numblocks
 		shortblocklen = rawcodewords // numblocks
@@ -523,7 +523,7 @@ class QrCode(object):
 		QR Code of the given version number and error correction level, with remainder bits discarded.
 		This stateless pure function could be implemented as a (40*4)-cell lookup table."""
 		return QrCode._get_num_raw_data_modules(ver) // 8 \
-			- QrCode._ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] \
+			- QrCode._ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal][ver] \
 			* QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
 	
 	

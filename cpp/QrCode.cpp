@@ -306,7 +306,7 @@ vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	
 	// Calculate parameter numbers
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(errorCorrectionLevel)][version];
-	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[static_cast<int>(errorCorrectionLevel)][version];
+	int blockEccLen = ECC_CODEWORDS_PER_BLOCK  [static_cast<int>(errorCorrectionLevel)][version];
 	int rawCodewords = getNumRawDataModules(version) / 8;
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockLen = rawCodewords / numBlocks;
@@ -524,7 +524,7 @@ int QrCode::getNumRawDataModules(int ver) {
 
 int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 	return getNumRawDataModules(ver) / 8
-		- ECC_CODEWORDS_PER_BLOCK[static_cast<int>(ecl)][ver]
+		- ECC_CODEWORDS_PER_BLOCK    [static_cast<int>(ecl)][ver]
 		* NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(ecl)][ver];
 }
 

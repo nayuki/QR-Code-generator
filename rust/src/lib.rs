@@ -410,7 +410,7 @@ impl QrCode {
 		
 		// Calculate parameter numbers
 		let numblocks: usize = QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, ver, ecl);
-		let blockecclen: usize = QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, ver, ecl);
+		let blockecclen: usize = QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK  , ver, ecl);
 		let rawcodewords: usize = QrCode::get_num_raw_data_modules(ver) / 8;
 		let numshortblocks: usize = numblocks - rawcodewords % numblocks;
 		let shortblocklen: usize = rawcodewords / numblocks;
@@ -659,7 +659,7 @@ impl QrCode {
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	fn get_num_data_codewords(ver: Version, ecl: QrCodeEcc) -> usize {
 		QrCode::get_num_raw_data_modules(ver) / 8
-			- QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK, ver, ecl)
+			- QrCode::table_get(&ECC_CODEWORDS_PER_BLOCK    , ver, ecl)
 			* QrCode::table_get(&NUM_ERROR_CORRECTION_BLOCKS, ver, ecl)
 	}
 	

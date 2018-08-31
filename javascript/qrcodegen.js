@@ -315,7 +315,7 @@ var qrcodegen = new function() {
 			
 			// Calculate parameter numbers
 			var numBlocks = QrCode.NUM_ERROR_CORRECTION_BLOCKS[errCorLvl.ordinal][version];
-			var blockEccLen = QrCode.ECC_CODEWORDS_PER_BLOCK[errCorLvl.ordinal][version];
+			var blockEccLen = QrCode.ECC_CODEWORDS_PER_BLOCK  [errCorLvl.ordinal][version];
 			var rawCodewords = Math.floor(QrCode.getNumRawDataModules(version) / 8);
 			var numShortBlocks = numBlocks - rawCodewords % numBlocks;
 			var shortBlockLen = Math.floor(rawCodewords / numBlocks);
@@ -633,7 +633,7 @@ var qrcodegen = new function() {
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	QrCode.getNumDataCodewords = function(ver, ecl) {
 		return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
-			QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] *
+			QrCode.ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal][ver] *
 			QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
 	};
 	

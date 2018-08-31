@@ -200,7 +200,7 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	// Calculate parameter numbers
 	assert(0 <= (int)ecl && (int)ecl < 4 && qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
-	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
+	int blockEccLen = ECC_CODEWORDS_PER_BLOCK  [(int)ecl][version];
 	int rawCodewords = getNumRawDataModules(version) / 8;
 	int dataLen = getNumDataCodewords(version, ecl);
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
@@ -233,7 +233,7 @@ testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl) {
 	int v = version, e = (int)ecl;
 	assert(0 <= e && e < 4);
 	return getNumRawDataModules(v) / 8
-		- ECC_CODEWORDS_PER_BLOCK[e][v]
+		- ECC_CODEWORDS_PER_BLOCK    [e][v]
 		* NUM_ERROR_CORRECTION_BLOCKS[e][v];
 }
 

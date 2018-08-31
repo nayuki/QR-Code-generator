@@ -385,7 +385,7 @@ namespace qrcodegen {
 			
 			// Calculate parameter numbers
 			let numBlocks: int = QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
-			let blockEccLen: int = QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver];
+			let blockEccLen: int = QrCode.ECC_CODEWORDS_PER_BLOCK  [ecl.ordinal][ver];
 			let rawCodewords: int = Math.floor(QrCode.getNumRawDataModules(ver) / 8);
 			let numShortBlocks: int = numBlocks - rawCodewords % numBlocks;
 			let shortBlockLen: int = Math.floor(rawCodewords / numBlocks);
@@ -597,7 +597,7 @@ namespace qrcodegen {
 		// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 		private static getNumDataCodewords(ver: int, ecl: QrCode.Ecc): int {
 			return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
-				QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] *
+				QrCode.ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal][ver] *
 				QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
 		}
 		
