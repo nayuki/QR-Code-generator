@@ -95,19 +95,19 @@ namespace qrcodegen {
 			}
 			
 			// Increase the error correction level while the data still fits in the current version number
-			[QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH].forEach((newEcl: QrCode.Ecc) => {  // From low to high
+			for (let newEcl of [QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH]) {  // From low to high
 				if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
 					ecl = newEcl;
-			});
+			}
 			
 			// Concatenate all segments to create the data bit string
 			let bb = new BitBuffer();
-			segs.forEach((seg: QrSegment) => {
+			for (let seg of segs) {
 				bb.appendBits(seg.mode.modeBits, 4);
 				bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-				seg.getBits().forEach(
-					(b: bit) => bb.push(b));
-			});
+				for (let b of seg.getBits())
+					bb.push(b);
+			}
 			if (bb.length != dataUsedBits)
 				throw "Assertion error";
 			
@@ -541,12 +541,12 @@ namespace qrcodegen {
 			
 			// Balance of black and white modules
 			let black: int = 0;
-			this.modules.forEach((row: Array<boolean>) => {
-				row.forEach((color: boolean) => {
+			for (let row of this.modules) {
+				for (let color of row) {
 					if (color)
 						black++;
-				});
-			});
+				}
+			}
 			let total: int = this.size * this.size;  // Note that size is odd, so black/total != 1/2
 			// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 			let k: int = Math.ceil(Math.abs(black * 20 - total * 10) / total) - 1;
@@ -660,8 +660,8 @@ namespace qrcodegen {
 		// Returns a segment representing the given binary data encoded in byte mode.
 		public static makeBytes(data: Array<byte>): QrSegment {
 			let bb = new BitBuffer();
-			data.forEach(
-				(b: byte) => bb.appendBits(b, 8));
+			for (let b of data)
+				bb.appendBits(b, 8);
 			return new QrSegment(QrSegment.Mode.BYTE, data.length, bb);
 		}
 		
@@ -857,12 +857,12 @@ namespace qrcodegen {
 		public getRemainder(data: Array<byte>): Array<byte> {
 			// Compute the remainder by performing polynomial division
 			let result: Array<byte> = this.coefficients.map(_ => 0);
-			data.forEach((b: byte) => {
+			for (let b of data) {
 				let factor: byte = b ^ (result.shift() as int);
 				result.push(0);
 				for (let i = 0; i < result.length; i++)
 					result[i] ^= ReedSolomonGenerator.multiply(this.coefficients[i], factor);
-			});
+			}
 			return result;
 		}
 		
