@@ -134,7 +134,7 @@ public final class QrSegmentAdvanced {
 				charModes[i][2] = modeTypes[2];
 			}
 			if (isKanji(c)) {
-				curCosts[3] = prevCosts[3] + 104;  // 13 bits per Shift JIS char
+				curCosts[3] = prevCosts[3] + 78;  // 13 bits per Shift JIS char
 				charModes[i][3] = modeTypes[3];
 			}
 			
