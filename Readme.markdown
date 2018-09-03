@@ -27,12 +27,12 @@ Manual parameters:
 * User can specify minimum and maximum version numbers allowed, then library will automatically choose smallest version in the range that fits the data
 * User can specify mask pattern manually, otherwise library will automatically evaluate all 8 masks and select the optimal one
 * User can specify absolute error correction level, or allow the library to boost it if it doesn't increase the version number
-* User can create a list of data segments manually and add ECI segments (all languages except C)
+* User can create a list of data segments manually and add ECI segments
 
 Optional advanced features (Java only):
 
 * Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes
-* Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general parts
+* Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts
 
 More information about QR Code technology and this library's design can be found on the project home page.
 
