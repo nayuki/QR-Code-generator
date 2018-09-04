@@ -30,7 +30,7 @@
 	
 	/*---- Functions called from HTML code ----*/
 	
-	myWindow.redrawQrCode = (): void => {
+	myWindow.redrawQrCode = function(): void {
 		// Show/hide rows based on bitmap/vector image output
 		const bitmapOutput: boolean = getInput("output-format-bitmap").checked;
 		const scaleRow : HTMLElement = getElem("scale-row");
@@ -137,7 +137,7 @@
 	}
 	
 	
-	myWindow.handleVersionMinMax = (which: "min"|"max"): void => {
+	myWindow.handleVersionMinMax = function(which: "min"|"max"): void {
 		const minElem: HTMLInputElement = getInput("version-min-input");
 		const maxElem: HTMLInputElement = getInput("version-max-input");
 		let minVal: number = parseInt(minElem.value, 10);
