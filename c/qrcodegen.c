@@ -329,7 +329,7 @@ testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	fillRectangle(0, qrsize - 8, 9, 8, qrcode);
 	
 	// Fill numerous alignment patterns
-	uint8_t alignPatPos[7] = {0};
+	uint8_t alignPatPos[7];
 	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
 	for (int i = 0; i < numAlign; i++) {
 		for (int j = 0; j < numAlign; j++) {
@@ -373,7 +373,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	}
 	
 	// Draw numerous alignment patterns
-	uint8_t alignPatPos[7] = {0};
+	uint8_t alignPatPos[7];
 	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
 	for (int i = 0; i < numAlign; i++) {
 		for (int j = 0; j < numAlign; j++) {
