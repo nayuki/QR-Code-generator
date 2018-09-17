@@ -28,6 +28,11 @@
 #include <stdint.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /*---- Enum and struct types----*/
 
 /* 
@@ -264,3 +269,8 @@ int qrcodegen_getSize(const uint8_t qrcode[]);
  * If the given coordinates are out of bounds, then false (white) is returned.
  */
 bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y);
+
+
+#ifdef __cplusplus
+}
+#endif
