@@ -30,12 +30,7 @@
 #ifndef QRCODEGEN_TEST
 	#define testable static  // Keep functions private
 #else
-	// Expose private functions
-	#ifndef __cplusplus
-		#define testable
-	#else  // Because in C++, const variables are treated as implicitly 'static'
-		#define testable extern
-	#endif
+	#define testable  // Expose private functions
 #endif
 
 
