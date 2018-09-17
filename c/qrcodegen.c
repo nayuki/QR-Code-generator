@@ -359,15 +359,15 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	}
 	
 	// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
-	for (int i = -4; i <= 4; i++) {
-		for (int j = -4; j <= 4; j++) {
-			int dist = abs(i);
-			if (abs(j) > dist)
-				dist = abs(j);
+	for (int dy = -4; dy <= 4; dy++) {
+		for (int dx = -4; dx <= 4; dx++) {
+			int dist = abs(dy);
+			if (abs(dx) > dist)
+				dist = abs(dx);
 			if (dist == 2 || dist == 4) {
-				setModuleBounded(qrcode, 3 + j, 3 + i, false);
-				setModuleBounded(qrcode, qrsize - 4 + j, 3 + i, false);
-				setModuleBounded(qrcode, 3 + j, qrsize - 4 + i, false);
+				setModuleBounded(qrcode, 3 + dx, 3 + dy, false);
+				setModuleBounded(qrcode, qrsize - 4 + dx, 3 + dy, false);
+				setModuleBounded(qrcode, 3 + dx, qrsize - 4 + dy, false);
 			}
 		}
 	}
@@ -379,9 +379,9 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 		for (int j = 0; j < numAlign; j++) {
 			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
 				continue;  // Don't draw on the three finder corners
-			for (int k = -1; k <= 1; k++) {
-				for (int l = -1; l <= 1; l++)
-					setModule(qrcode, alignPatPos[i] + l, alignPatPos[j] + k, k == 0 && l == 0);
+			for (int dy = -1; dy <= 1; dy++) {
+				for (int dx = -1; dx <= 1; dx++)
+					setModule(qrcode, alignPatPos[i] + dx, alignPatPos[j] + dy, dy == 0 && dx == 0);
 			}
 		}
 	}

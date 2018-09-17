@@ -276,10 +276,10 @@ var qrcodegen = new function() {
 		// Draws a 9*9 finder pattern including the border separator,
 		// with the center module at (x, y). Modules can be out of bounds.
 		function drawFinderPattern(x, y) {
-			for (var i = -4; i <= 4; i++) {
-				for (var j = -4; j <= 4; j++) {
-					var dist = Math.max(Math.abs(i), Math.abs(j));  // Chebyshev/infinity norm
-					var xx = x + j, yy = y + i;
+			for (var dy = -4; dy <= 4; dy++) {
+				for (var dx = -4; dx <= 4; dx++) {
+					var dist = Math.max(Math.abs(dy), Math.abs(dx));  // Chebyshev/infinity norm
+					var xx = x + dx, yy = y + dy;
 					if (0 <= xx && xx < size && 0 <= yy && yy < size)
 						setFunctionModule(xx, yy, dist != 2 && dist != 4);
 				}
@@ -290,9 +290,9 @@ var qrcodegen = new function() {
 		// Draws a 5*5 alignment pattern, with the center module
 		// at (x, y). All modules must be in bounds.
 		function drawAlignmentPattern(x, y) {
-			for (var i = -2; i <= 2; i++) {
-				for (var j = -2; j <= 2; j++)
-					setFunctionModule(x + j, y + i, Math.max(Math.abs(i), Math.abs(j)) != 1);
+			for (var dy = -2; dy <= 2; dy++) {
+				for (var dx = -2; dx <= 2; dx++)
+					setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dy), Math.abs(dx)) != 1);
 			}
 		}
 		

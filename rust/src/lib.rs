@@ -367,12 +367,12 @@ impl QrCode {
 	// Draws a 9*9 finder pattern including the border separator,
 	// with the center module at (x, y). Modules can be out of bounds.
 	fn draw_finder_pattern(&mut self, x: i32, y: i32) {
-		for i in -4 .. 5 {
-			for j in -4 .. 5 {
-				let xx: i32 = x + j;
-				let yy: i32 = y + i;
+		for dy in -4 .. 5 {
+			for dx in -4 .. 5 {
+				let xx: i32 = x + dx;
+				let yy: i32 = y + dy;
 				if 0 <= xx && xx < self.size && 0 <= yy && yy < self.size {
-					let dist: i32 = std::cmp::max(i.abs(), j.abs());  // Chebyshev/infinity norm
+					let dist: i32 = std::cmp::max(dy.abs(), dx.abs());  // Chebyshev/infinity norm
 					self.set_function_module(xx, yy, dist != 2 && dist != 4);
 				}
 			}
@@ -383,9 +383,9 @@ impl QrCode {
 	// Draws a 5*5 alignment pattern, with the center module
 	// at (x, y). All modules must be in bounds.
 	fn draw_alignment_pattern(&mut self, x: i32, y: i32) {
-		for i in -2 .. 3 {
-			for j in -2 .. 3 {
-				self.set_function_module(x + j, y + i, std::cmp::max(i.abs(), j.abs()) != 1);
+		for dy in -2 .. 3 {
+			for dx in -2 .. 3 {
+				self.set_function_module(x + dx, y + dy, std::cmp::max(dy.abs(), dx.abs()) != 1);
 			}
 		}
 	}

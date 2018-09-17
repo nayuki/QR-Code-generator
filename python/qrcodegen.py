@@ -322,20 +322,20 @@ class QrCode(object):
 	def _draw_finder_pattern(self, x, y):
 		"""Draws a 9*9 finder pattern including the border separator,
 		with the center module at (x, y). Modules can be out of bounds."""
-		for i in range(-4, 5):
-			for j in range(-4, 5):
-				xx, yy = x + j, y + i
+		for dy in range(-4, 5):
+			for dx in range(-4, 5):
+				xx, yy = x + dx, y + dy
 				if (0 <= xx < self._size) and (0 <= yy < self._size):
 					# Chebyshev/infinity norm
-					self._set_function_module(xx, yy, max(abs(i), abs(j)) not in (2, 4))
+					self._set_function_module(xx, yy, max(abs(dy), abs(dx)) not in (2, 4))
 	
 	
 	def _draw_alignment_pattern(self, x, y):
 		"""Draws a 5*5 alignment pattern, with the center module
 		at (x, y). All modules must be in bounds."""
-		for i in range(-2, 3):
-			for j in range(-2, 3):
-				self._set_function_module(x + j, y + i, max(abs(i), abs(j)) != 1)
+		for dy in range(-2, 3):
+			for dx in range(-2, 3):
+				self._set_function_module(x + dx, y + dy, max(abs(dy), abs(dx)) != 1)
 	
 	
 	def _set_function_module(self, x, y, isblack):

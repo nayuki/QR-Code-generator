@@ -270,10 +270,10 @@ void QrCode::drawVersion() {
 
 
 void QrCode::drawFinderPattern(int x, int y) {
-	for (int i = -4; i <= 4; i++) {
-		for (int j = -4; j <= 4; j++) {
-			int dist = std::max(std::abs(i), std::abs(j));  // Chebyshev/infinity norm
-			int xx = x + j, yy = y + i;
+	for (int dy = -4; dy <= 4; dy++) {
+		for (int dx = -4; dx <= 4; dx++) {
+			int dist = std::max(std::abs(dy), std::abs(dx));  // Chebyshev/infinity norm
+			int xx = x + dx, yy = y + dy;
 			if (0 <= xx && xx < size && 0 <= yy && yy < size)
 				setFunctionModule(xx, yy, dist != 2 && dist != 4);
 		}
@@ -282,9 +282,9 @@ void QrCode::drawFinderPattern(int x, int y) {
 
 
 void QrCode::drawAlignmentPattern(int x, int y) {
-	for (int i = -2; i <= 2; i++) {
-		for (int j = -2; j <= 2; j++)
-			setFunctionModule(x + j, y + i, std::max(std::abs(i), std::abs(j)) != 1);
+	for (int dy = -2; dy <= 2; dy++) {
+		for (int dx = -2; dx <= 2; dx++)
+			setFunctionModule(x + dx, y + dy, std::max(std::abs(dy), std::abs(dx)) != 1);
 	}
 }
 

@@ -345,11 +345,11 @@ namespace qrcodegen {
 		// Draws a 9*9 finder pattern including the border separator,
 		// with the center module at (x, y). Modules can be out of bounds.
 		private drawFinderPattern(x: int, y: int): void {
-			for (let i = -4; i <= 4; i++) {
-				for (let j = -4; j <= 4; j++) {
-					let dist: int = Math.max(Math.abs(i), Math.abs(j));  // Chebyshev/infinity norm
-					let xx: int = x + j;
-					let yy: int = y + i;
+			for (let dy = -4; dy <= 4; dy++) {
+				for (let dx = -4; dx <= 4; dx++) {
+					let dist: int = Math.max(Math.abs(dy), Math.abs(dx));  // Chebyshev/infinity norm
+					let xx: int = x + dx;
+					let yy: int = y + dy;
 					if (0 <= xx && xx < this.size && 0 <= yy && yy < this.size)
 						this.setFunctionModule(xx, yy, dist != 2 && dist != 4);
 				}
@@ -360,9 +360,9 @@ namespace qrcodegen {
 		// Draws a 5*5 alignment pattern, with the center module
 		// at (x, y). All modules must be in bounds.
 		private drawAlignmentPattern(x: int, y: int): void {
-			for (let i = -2; i <= 2; i++) {
-				for (let j = -2; j <= 2; j++)
-					this.setFunctionModule(x + j, y + i, Math.max(Math.abs(i), Math.abs(j)) != 1);
+			for (let dy = -2; dy <= 2; dy++) {
+				for (let dx = -2; dx <= 2; dx++)
+					this.setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dy), Math.abs(dx)) != 1);
 			}
 		}
 		
