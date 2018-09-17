@@ -34,12 +34,6 @@
 #include <string.h>
 #include "qrcodegen.h"
 
-#ifndef __cplusplus
-	#define MALLOC(num, type)  malloc((num) * sizeof(type))
-#else
-	#define MALLOC(num, type)  static_cast<type*>(malloc((num) * sizeof(type)))
-#endif
-
 
 int main(void) {
 	while (true) {
@@ -53,7 +47,7 @@ int main(void) {
 		
 		// Read data bytes
 		bool isAscii = true;
-		uint8_t *data = MALLOC(length, uint8_t);
+		uint8_t *data = malloc(length * sizeof(uint8_t));
 		if (data == NULL) {
 			perror("malloc");
 			return EXIT_FAILURE;
@@ -73,8 +67,8 @@ int main(void) {
 		
 		// Allocate memory for QR Code
 		int bufferLen = qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion);
-		uint8_t *qrcode     = MALLOC(bufferLen, uint8_t);
-		uint8_t *tempBuffer = MALLOC(bufferLen, uint8_t);
+		uint8_t *qrcode     = malloc(bufferLen * sizeof(uint8_t));
+		uint8_t *tempBuffer = malloc(bufferLen * sizeof(uint8_t));
 		if (qrcode == NULL || tempBuffer == NULL) {
 			perror("malloc");
 			return EXIT_FAILURE;
@@ -83,7 +77,7 @@ int main(void) {
 		// Try to make QR Code symbol
 		bool ok;
 		if (isAscii) {
-			char *text = MALLOC(length + 1, char);
+			char *text = malloc((length + 1) * sizeof(char));
 			for (int i = 0; i < length; i++)
 				text[i] = (char)data[i];
 			text[length] = '\0';

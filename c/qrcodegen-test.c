@@ -37,12 +37,6 @@
 
 #define ARRAY_LENGTH(name)  (sizeof(name) / sizeof(name[0]))
 
-#ifndef __cplusplus
-	#define MALLOC(num, type)  malloc((num) * sizeof(type))
-#else
-	#define MALLOC(num, type)  static_cast<type*>(malloc((num) * sizeof(type)))
-#endif
-
 
 // Global variables
 static int numTestCases = 0;
@@ -120,11 +114,11 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 	int shortBlockLen = rawCodewords / numBlocks;
 	
 	// Split data into blocks and append ECC to each block
-	uint8_t **blocks = MALLOC(numBlocks, uint8_t*);
-	uint8_t *generator = MALLOC(blockEccLen, uint8_t);
+	uint8_t **blocks = malloc(numBlocks * sizeof(uint8_t*));
+	uint8_t *generator = malloc(blockEccLen * sizeof(uint8_t));
 	calcReedSolomonGenerator(blockEccLen, generator);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
-		uint8_t *block = MALLOC(shortBlockLen + 1, uint8_t);
+		uint8_t *block = malloc((shortBlockLen + 1) * sizeof(uint8_t));
 		int datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
 		memcpy(block, &data[k], datLen * sizeof(uint8_t));
 		calcReedSolomonRemainder(&data[k], datLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
@@ -134,7 +128,7 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 	free(generator);
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
-	uint8_t *result = MALLOC(rawCodewords, uint8_t);
+	uint8_t *result = malloc(rawCodewords * sizeof(uint8_t));
 	for (int i = 0, k = 0; i < shortBlockLen + 1; i++) {
 		for (int j = 0; j < numBlocks; j++) {
 			// Skip the padding byte in short blocks
@@ -155,15 +149,15 @@ static void testAddEccAndInterleave(void) {
 	for (int version = 1; version <= 40; version++) {
 		for (int ecl = 0; ecl < 4; ecl++) {
 			int dataLen = getNumDataCodewords(version, (enum qrcodegen_Ecc)ecl);
-			uint8_t *pureData = MALLOC(dataLen, uint8_t);
+			uint8_t *pureData = malloc(dataLen * sizeof(uint8_t));
 			for (int i = 0; i < dataLen; i++)
 				pureData[i] = rand() % 256;
 			uint8_t *expectOutput = addEccAndInterleaveReference(pureData, version, (enum qrcodegen_Ecc)ecl);
 			
 			int dataAndEccLen = getNumRawDataModules(version) / 8;
-			uint8_t *paddedData = MALLOC(dataAndEccLen, uint8_t);
+			uint8_t *paddedData = malloc(dataAndEccLen * sizeof(uint8_t));
 			memcpy(paddedData, pureData, dataLen * sizeof(uint8_t));
-			uint8_t *actualOutput = MALLOC(dataAndEccLen, uint8_t);
+			uint8_t *actualOutput = malloc(dataAndEccLen * sizeof(uint8_t));
 			addEccAndInterleave(paddedData, version, (enum qrcodegen_Ecc)ecl, actualOutput);
 			
 			assert(memcmp(actualOutput, expectOutput, dataAndEccLen * sizeof(uint8_t)) == 0);
@@ -368,7 +362,7 @@ static void testFiniteFieldMultiply(void) {
 
 static void testInitializeFunctionModulesEtc(void) {
 	for (int ver = 1; ver <= 40; ver++) {
-		uint8_t *qrcode = MALLOC(qrcodegen_BUFFER_LEN_FOR_VERSION(ver), uint8_t);
+		uint8_t *qrcode = malloc(qrcodegen_BUFFER_LEN_FOR_VERSION(ver) * sizeof(uint8_t));
 		assert(qrcode != NULL);
 		initializeFunctionModules(ver, qrcode);
 		
