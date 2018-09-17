@@ -69,11 +69,11 @@ enum qrcodegen_Mask {
  * The mode field of a segment.
  */
 enum qrcodegen_Mode {
-	qrcodegen_Mode_NUMERIC,
-	qrcodegen_Mode_ALPHANUMERIC,
-	qrcodegen_Mode_BYTE,
-	qrcodegen_Mode_KANJI,
-	qrcodegen_Mode_ECI,
+	qrcodegen_Mode_NUMERIC      = 0x1,
+	qrcodegen_Mode_ALPHANUMERIC = 0x2,
+	qrcodegen_Mode_BYTE         = 0x4,
+	qrcodegen_Mode_KANJI        = 0x8,
+	qrcodegen_Mode_ECI          = 0x7,
 };
 
 

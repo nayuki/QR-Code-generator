@@ -912,16 +912,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	int bitLen = 0;
 	for (size_t i = 0; i < len; i++) {
 		const struct qrcodegen_Segment *seg = &segs[i];
-		unsigned int modeBits;
-		switch (seg->mode) {
-			case qrcodegen_Mode_NUMERIC     :  modeBits = 0x1;  break;
-			case qrcodegen_Mode_ALPHANUMERIC:  modeBits = 0x2;  break;
-			case qrcodegen_Mode_BYTE        :  modeBits = 0x4;  break;
-			case qrcodegen_Mode_KANJI       :  modeBits = 0x8;  break;
-			case qrcodegen_Mode_ECI         :  modeBits = 0x7;  break;
-			default:  assert(false);  return false;
-		}
-		appendBitsToBuffer(modeBits, 4, qrcode, &bitLen);
+		appendBitsToBuffer((int)seg->mode, 4, qrcode, &bitLen);
 		appendBitsToBuffer(seg->numChars, numCharCountBits(seg->mode, version), qrcode, &bitLen);
 		for (int j = 0; j < seg->bitLength; j++)
 			appendBitsToBuffer((seg->data[j >> 3] >> (7 - (j & 7))) & 1, 1, qrcode, &bitLen);
