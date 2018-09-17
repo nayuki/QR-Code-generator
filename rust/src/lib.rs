@@ -372,7 +372,7 @@ impl QrCode {
 				let xx: i32 = x + dx;
 				let yy: i32 = y + dy;
 				if 0 <= xx && xx < self.size && 0 <= yy && yy < self.size {
-					let dist: i32 = std::cmp::max(dy.abs(), dx.abs());  // Chebyshev/infinity norm
+					let dist: i32 = std::cmp::max(dx.abs(), dy.abs());  // Chebyshev/infinity norm
 					self.set_function_module(xx, yy, dist != 2 && dist != 4);
 				}
 			}
@@ -385,7 +385,7 @@ impl QrCode {
 	fn draw_alignment_pattern(&mut self, x: i32, y: i32) {
 		for dy in -2 .. 3 {
 			for dx in -2 .. 3 {
-				self.set_function_module(x + dx, y + dy, std::cmp::max(dy.abs(), dx.abs()) != 1);
+				self.set_function_module(x + dx, y + dy, std::cmp::max(dx.abs(), dy.abs()) != 1);
 			}
 		}
 	}

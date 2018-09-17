@@ -404,7 +404,7 @@ public final class QrCode {
 	private void drawFinderPattern(int x, int y) {
 		for (int dy = -4; dy <= 4; dy++) {
 			for (int dx = -4; dx <= 4; dx++) {
-				int dist = Math.max(Math.abs(dy), Math.abs(dx));  // Chebyshev/infinity norm
+				int dist = Math.max(Math.abs(dx), Math.abs(dy));  // Chebyshev/infinity norm
 				int xx = x + dx, yy = y + dy;
 				if (0 <= xx && xx < size && 0 <= yy && yy < size)
 					setFunctionModule(xx, yy, dist != 2 && dist != 4);
@@ -418,7 +418,7 @@ public final class QrCode {
 	private void drawAlignmentPattern(int x, int y) {
 		for (int dy = -2; dy <= 2; dy++) {
 			for (int dx = -2; dx <= 2; dx++)
-				setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dy), Math.abs(dx)) != 1);
+				setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) != 1);
 		}
 	}
 	

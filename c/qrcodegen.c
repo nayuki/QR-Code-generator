@@ -361,9 +361,9 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
 	for (int dy = -4; dy <= 4; dy++) {
 		for (int dx = -4; dx <= 4; dx++) {
-			int dist = abs(dy);
-			if (abs(dx) > dist)
-				dist = abs(dx);
+			int dist = abs(dx);
+			if (abs(dy) > dist)
+				dist = abs(dy);
 			if (dist == 2 || dist == 4) {
 				setModuleBounded(qrcode, 3 + dx, 3 + dy, false);
 				setModuleBounded(qrcode, qrsize - 4 + dx, 3 + dy, false);
@@ -381,7 +381,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 				continue;  // Don't draw on the three finder corners
 			for (int dy = -1; dy <= 1; dy++) {
 				for (int dx = -1; dx <= 1; dx++)
-					setModule(qrcode, alignPatPos[i] + dx, alignPatPos[j] + dy, dy == 0 && dx == 0);
+					setModule(qrcode, alignPatPos[i] + dx, alignPatPos[j] + dy, dx == 0 && dy == 0);
 			}
 		}
 	}

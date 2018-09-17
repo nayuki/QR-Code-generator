@@ -347,7 +347,7 @@ namespace qrcodegen {
 		private drawFinderPattern(x: int, y: int): void {
 			for (let dy = -4; dy <= 4; dy++) {
 				for (let dx = -4; dx <= 4; dx++) {
-					let dist: int = Math.max(Math.abs(dy), Math.abs(dx));  // Chebyshev/infinity norm
+					let dist: int = Math.max(Math.abs(dx), Math.abs(dy));  // Chebyshev/infinity norm
 					let xx: int = x + dx;
 					let yy: int = y + dy;
 					if (0 <= xx && xx < this.size && 0 <= yy && yy < this.size)
@@ -362,7 +362,7 @@ namespace qrcodegen {
 		private drawAlignmentPattern(x: int, y: int): void {
 			for (let dy = -2; dy <= 2; dy++) {
 				for (let dx = -2; dx <= 2; dx++)
-					this.setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dy), Math.abs(dx)) != 1);
+					this.setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) != 1);
 			}
 		}
 		

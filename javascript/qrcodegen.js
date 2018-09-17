@@ -278,7 +278,7 @@ var qrcodegen = new function() {
 		function drawFinderPattern(x, y) {
 			for (var dy = -4; dy <= 4; dy++) {
 				for (var dx = -4; dx <= 4; dx++) {
-					var dist = Math.max(Math.abs(dy), Math.abs(dx));  // Chebyshev/infinity norm
+					var dist = Math.max(Math.abs(dx), Math.abs(dy));  // Chebyshev/infinity norm
 					var xx = x + dx, yy = y + dy;
 					if (0 <= xx && xx < size && 0 <= yy && yy < size)
 						setFunctionModule(xx, yy, dist != 2 && dist != 4);
@@ -292,7 +292,7 @@ var qrcodegen = new function() {
 		function drawAlignmentPattern(x, y) {
 			for (var dy = -2; dy <= 2; dy++) {
 				for (var dx = -2; dx <= 2; dx++)
-					setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dy), Math.abs(dx)) != 1);
+					setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) != 1);
 			}
 		}
 		
