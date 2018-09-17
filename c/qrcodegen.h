@@ -105,7 +105,7 @@ struct qrcodegen_Segment {
 /*---- Macro constants and functions ----*/
 
 // The minimum and maximum defined QR Code version numbers for Model 2.
-#define qrcodegen_VERSION_MIN  1
+#define qrcodegen_VERSION_MIN   1
 #define qrcodegen_VERSION_MAX  40
 
 // Calculates the number of bytes needed to store any QR Code up to and including the given version number,
