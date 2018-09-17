@@ -470,7 +470,7 @@ namespace qrcodegen {
 						case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;                break;
 						default:  throw "Assertion error";
 					}
-					if (invert && !this.isFunction[y][x])
+					if (!this.isFunction[y][x] && invert)
 						this.modules[y][x] = !this.modules[y][x];
 				}
 			}

@@ -398,7 +398,8 @@ var qrcodegen = new function() {
 						case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;                break;
 						default:  throw "Assertion error";
 					}
-					modules[y][x] ^= invert & !isFunction[y][x];
+					if (!isFunction[y][x] && invert)
+						modules[y][x] = !modules[y][x];
 				}
 			}
 		}
