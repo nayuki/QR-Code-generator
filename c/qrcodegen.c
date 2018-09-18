@@ -714,48 +714,28 @@ size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars
 // - For ECI mode, numChars must be 0, and the worst-case number of bits is returned.
 //   An actual ECI segment can have shorter data. For non-ECI modes, the result is exact.
 testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars) {
-	const int LIMIT = INT16_MAX;  // Can be configured as high as INT_MAX
-	if (numChars > (unsigned int)LIMIT)
+	// All calculations are designed to avoid overflow on all platforms
+	if (numChars > (unsigned int)INT16_MAX)
 		return -1;
-	int n = (int)numChars;
-	
-	int result;
-	if (mode == qrcodegen_Mode_NUMERIC) {
-		// n * 3 + ceil(n / 3)
-		if (n > LIMIT / 3)
-			goto overflow;
-		result = n * 3;
-		int temp = n / 3 + (n % 3 > 0 ? 1 : 0);
-		if (temp > LIMIT - result)
-			goto overflow;
-		result += temp;
-	} else if (mode == qrcodegen_Mode_ALPHANUMERIC) {
-		// n * 5 + ceil(n / 2)
-		if (n > LIMIT / 5)
-			goto overflow;
-		result = n * 5;
-		int temp = n / 2 + n % 2;
-		if (temp > LIMIT - result)
-			goto overflow;
-		result += temp;
-	} else if (mode == qrcodegen_Mode_BYTE) {
-		if (n > LIMIT / 8)
-			goto overflow;
-		result = n * 8;
-	} else if (mode == qrcodegen_Mode_KANJI) {
-		if (n > LIMIT / 13)
-			goto overflow;
-		result = n * 13;
-	} else if (mode == qrcodegen_Mode_ECI && numChars == 0)
+	long result = (long)numChars;
+	if (mode == qrcodegen_Mode_NUMERIC)
+		result = (result * 10 + 2) / 3;  // ceil(10/3 * n)
+	else if (mode == qrcodegen_Mode_ALPHANUMERIC)
+		result = (result * 11 + 1) / 2;  // ceil(11/2 * n)
+	else if (mode == qrcodegen_Mode_BYTE)
+		result *= 8;
+	else if (mode == qrcodegen_Mode_KANJI)
+		result *= 13;
+	else if (mode == qrcodegen_Mode_ECI && numChars == 0)
 		result = 3 * 8;
-	else {
+	else {  // Invalid argument
 		assert(false);
 		return -1;
 	}
-	assert(0 <= result && result <= LIMIT);
-	return result;
-overflow:
-	return -1;
+	assert(result >= 0);
+	if (result > (unsigned int)INT16_MAX)
+		return -1;
+	return (int)result;
 }
 
 
