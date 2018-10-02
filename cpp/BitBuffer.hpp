@@ -49,7 +49,7 @@ class BitBuffer final : public std::vector<bool> {
 	
 	
 	// Appends the given number of low bits of the given value
-	// to this sequence. Requires 0 <= val < 2^len.
+	// to this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 	public: void appendBits(std::uint32_t val, int len);
 	
 };
