@@ -954,6 +954,7 @@ var qrcodegen = new function() {
 	 * This constructor creates an empty bit buffer (length 0).
 	 */
 	function BitBuffer() {
+		Array.call(this);
 		
 		// Packs this buffer's bits into bytes in big endian,
 		// padding with '0' bit values, and returns the new array.
@@ -978,5 +979,6 @@ var qrcodegen = new function() {
 	}
 	
 	BitBuffer.prototype = Object.create(Array.prototype);
+	BitBuffer.prototype.constructor = BitBuffer;
 	
 };
