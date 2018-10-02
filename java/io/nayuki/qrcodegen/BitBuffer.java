@@ -97,6 +97,7 @@ public final class BitBuffer implements Cloneable {
 	 * to this sequence. Requires 0 &le; val &lt; 2<sup>len</sup>.
 	 * @param val the value to append
 	 * @param len the number of low bits in the value to take
+	 * @throws IllegalArgumentException if the value or number of bits is out of range
 	 * @throws IllegalStateException if appending the data
 	 * would make bitLength exceed Integer.MAX_VALUE
 	 */
