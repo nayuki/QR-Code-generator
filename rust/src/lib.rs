@@ -641,10 +641,10 @@ impl QrCode {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	fn get_num_raw_data_modules(ver: Version) -> usize {
-		let ver = ver.value();
-		let mut result: usize = (16 * (ver as usize) + 128) * (ver as usize) + 64;
+		let ver = ver.value() as usize;
+		let mut result: usize = (16 * ver + 128) * ver + 64;
 		if ver >= 2 {
-			let numalign: usize = (ver as usize) / 7 + 2;
+			let numalign: usize = ver / 7 + 2;
 			result -= (25 * numalign - 10) * numalign - 55;
 			if ver >= 7 {
 				result -= 36;
@@ -858,7 +858,7 @@ impl QrSegment {
 	pub fn make_numeric(text: &[char]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3));
 		let mut accumdata: u32 = 0;
-		let mut accumcount: u32 = 0;
+		let mut accumcount: u8 = 0;
 		for c in text {
 			assert!('0' <= *c && *c <= '9', "String contains non-numeric characters");
 			accumdata = accumdata * 10 + ((*c as u32) - ('0' as u32));
@@ -870,7 +870,7 @@ impl QrSegment {
 			}
 		}
 		if accumcount > 0 {  // 1 or 2 digits remaining
-			bb.append_bits(accumdata, (accumcount as u8) * 3 + 1);
+			bb.append_bits(accumdata, accumcount * 3 + 1);
 		}
 		QrSegment::new(QrSegmentMode::Numeric, text.len(), bb.0)
 	}
