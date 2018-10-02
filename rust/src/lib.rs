@@ -28,6 +28,7 @@
 // provides static functions to create a QR Code from user-supplied textual or binary data.
 // This struct covers the QR Code model 2 specification, supporting all versions (sizes)
 // from 1 to 40, all 4 error correction levels, and only 3 character encoding modes.
+#[derive(Clone)]
 pub struct QrCode {
 	
 	// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
@@ -825,6 +826,7 @@ impl ReedSolomonGenerator {
 
 // Represents a segment of character data, binary data, or control data
 // to be put into a QR Code symbol. Instances of this class are immutable.
+#[derive(Clone)]
 pub struct QrSegment {
 	
 	// The mode indicator for this segment.
