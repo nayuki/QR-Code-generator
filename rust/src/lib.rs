@@ -1059,6 +1059,7 @@ impl QrSegmentMode {
 
 /*---- Bit buffer functionality ----*/
 
+// An appendable sequence of bits (0s and 1s).
 pub struct BitBuffer(pub Vec<bool>);
 
 

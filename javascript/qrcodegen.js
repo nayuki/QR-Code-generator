@@ -950,7 +950,7 @@ var qrcodegen = new function() {
 	
 	
 	/* 
-	 * A private helper class that represents an appendable sequence of bits.
+	 * A private helper class that represents an appendable sequence of bits (0s and 1s).
 	 * This constructor creates an empty bit buffer (length 0).
 	 */
 	function BitBuffer() {

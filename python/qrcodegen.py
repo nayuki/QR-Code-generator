@@ -811,7 +811,7 @@ class _ReedSolomonGenerator(object):
 
 
 class _BitBuffer(list):
-	"""An appendable sequence of bits (0's and 1's)."""
+	"""An appendable sequence of bits (0s and 1s)."""
 	
 	def get_bytes(self):
 		"""Packs this buffer's bits into bytes in big endian,

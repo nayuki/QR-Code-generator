@@ -884,7 +884,7 @@ namespace qrcodegen {
 	
 	
 	/* 
-	 * An appendable sequence of bits. The implicit constructor creates an empty bit buffer (length 0).
+	 * An appendable sequence of bits (0s and 1s). The implicit constructor creates an empty bit buffer (length 0).
 	 */
 	class BitBuffer extends Array<bit> {
 		
