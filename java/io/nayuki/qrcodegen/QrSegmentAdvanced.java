@@ -234,12 +234,12 @@ public final class QrSegmentAdvanced {
 	public static QrSegment makeKanji(String text) {
 		Objects.requireNonNull(text);
 		BitBuffer bb = new BitBuffer();
-		for (int i = 0; i < text.length(); i++) {
-			int val = UNICODE_TO_QR_KANJI[text.charAt(i)];
+		text.chars().forEachOrdered(c -> {
+			int val = UNICODE_TO_QR_KANJI[c];
 			if (val == -1)
 				throw new IllegalArgumentException("String contains non-kanji-mode characters");
 			bb.appendBits(val, 13);
-		}
+		});
 		return new QrSegment(Mode.KANJI, text.length(), bb);
 	}
 	
@@ -256,11 +256,8 @@ public final class QrSegmentAdvanced {
 	 */
 	public static boolean isEncodableAsKanji(String text) {
 		Objects.requireNonNull(text);
-		for (int i = 0; i < text.length(); i++) {
-			if (!isKanji(text.charAt(i)))
-				return false;
-		}
-		return true;
+		return text.chars().allMatch(
+			c -> isKanji((char)c));
 	}
 	
 	
