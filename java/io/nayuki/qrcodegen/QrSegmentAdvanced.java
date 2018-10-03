@@ -37,9 +37,9 @@ public final class QrSegmentAdvanced {
 	/*---- Optimal list of segments encoder ----*/
 	
 	/**
-	 * Returns a new mutable list of zero or more segments to represent the specified Unicode text string.
-	 * The resulting list optimally minimizes the total encoded bit length, subjected to the constraints given
-	 * by the specified {error correction level, minimum version number, maximum version number}.
+	 * Returns a list of zero or more segments to represent the specified Unicode text string.
+	 * The resulting list optimally minimizes the total encoded bit length, subjected to the constraints
+	 * in the specified {error correction level, minimum version number, maximum version number}.
 	 * <p>This function can utilize all four text encoding modes: numeric, alphanumeric, byte, and kanji.
 	 * This can be viewed as a significantly more sophisticated and slower replacement for
 	 * {@link QrSegment#makeSegments(String)}, but requiring more input parameters in a way
@@ -48,7 +48,7 @@ public final class QrSegmentAdvanced {
 	 * @param ecl the error correction level to use
 	 * @param minVersion the minimum allowed version of the QR symbol (at least 1)
 	 * @param maxVersion the maximum allowed version of the QR symbol (at most 40)
-	 * @return a list of segments containing the text, minimizing the bit length with respect to the constraints
+	 * @return a new mutable list of segments containing the text, minimizing the bit length with respect to the constraints
 	 * @throws NullPointerException if the data or error correction level is {@code null}
 	 * @throws IllegalArgumentException if 1 &le; minVersion &le; maxVersion &le; 40 is violated,
 	 * or if the data is too long to fit in a QR Code at maxVersion at the ECL
@@ -87,6 +87,7 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
+	// Returns an array representing the optimal mode per code point based on the given text and version.
 	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
@@ -112,16 +113,16 @@ public final class QrSegmentAdvanced {
 		for (int i = 0; i < codePoints.length; i++) {
 			int c = codePoints[i];
 			int[] curCosts = new int[numModes];
-			{  // Always extend a bytes segment
+			{  // Always extend a byte mode segment
 				curCosts[0] = prevCosts[0] + countUtf8Bytes(c) * 8 * 6;
 				charModes[i][0] = modeTypes[0];
 			}
 			// Extend a segment if possible
-			if (QrSegment.ALPHANUMERIC_CHARSET.indexOf(c) != -1) {
+			if (QrSegment.ALPHANUMERIC_CHARSET.indexOf(c) != -1) {  // Is alphanumeric
 				curCosts[1] = prevCosts[1] + 33;  // 5.5 bits per alphanumeric char
 				charModes[i][1] = modeTypes[1];
 			}
-			if ('0' <= c && c <= '9') {
+			if ('0' <= c && c <= '9') {  // Is numeric
 				curCosts[2] = prevCosts[2] + 20;  // 3.33 bits per digit
 				charModes[i][2] = modeTypes[2];
 			}
@@ -168,6 +169,8 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
+	// Returns a list of segments based on the given text and modes, such that
+	// consecutive code points in the same mode are put into the same segment.
 	private static List<QrSegment> splitIntoSegments(int[] codePoints, Mode[] charModes) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
@@ -198,6 +201,7 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
+	// Returns an array of Unicode code points (effectively UTF-32 / UCS-4) representing the given UTF-16 string.
 	private static int[] toCodePoints(String s) {
 		int[] result = s.codePoints().toArray();
 		for (int c : result) {
@@ -208,6 +212,7 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
+	// Returns the number of UTF-8 bytes needed to encode the given Unicode code point.
 	private static int countUtf8Bytes(int cp) {
 		if      (cp <        0) throw new IllegalArgumentException("Invalid code point");
 		else if (cp <     0x80) return 1;
