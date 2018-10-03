@@ -112,16 +112,7 @@ public final class QrSegmentAdvanced {
 			int c = codePoints[i];
 			int[] curCosts = new int[numModes];
 			{  // Always extend a bytes segment
-				int b;
-				if (c < 0x80)
-					b = 1;
-				else if (c < 0x800)
-					b = 2;
-				else if (c < 0x10000)
-					b = 3;
-				else
-					b = 4;
-				curCosts[0] = prevCosts[0] + b * 8 * 6;
+				curCosts[0] = prevCosts[0] + countUtf8Bytes(c) * 8 * 6;
 				charModes[i][0] = modeTypes[0];
 			}
 			// Extend a segment if possible
@@ -213,6 +204,16 @@ public final class QrSegmentAdvanced {
 				throw new IllegalArgumentException("Invalid UTF-16 string");
 		}
 		return result;
+	}
+	
+	
+	private static int countUtf8Bytes(int cp) {
+		if      (cp <        0) throw new IllegalArgumentException("Invalid code point");
+		else if (cp <     0x80) return 1;
+		else if (cp <    0x800) return 2;
+		else if (cp <  0x10000) return 3;
+		else if (cp < 0x110000) return 4;
+		else                    throw new IllegalArgumentException("Invalid code point");
 	}
 	
 	
