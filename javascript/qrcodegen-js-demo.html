@@ -56,7 +56,7 @@
 		<tbody>
 			<tr>
 				<td><strong>Text string:</strong></td>
-				<td style="width:100%"><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:100%; max-width:30em; height:5em; font-family:inherit" oninput="redrawQrCode();"></textarea></td>
+				<td style="width:100%"><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:100%; max-width:30em; height:5em; font-family:inherit"></textarea></td>
 			</tr>
 			<tr>
 				<td><strong>QR Code:</strong></td>
@@ -71,26 +71,26 @@
 			<tr>
 				<td><strong>Error correction:</strong></td>
 				<td>
-					<input type="radio" name="errcorlvl" id="errcorlvl-low" onchange="redrawQrCode();" checked="checked"><label for="errcorlvl-low">Low</label>
-					<input type="radio" name="errcorlvl" id="errcorlvl-medium" onchange="redrawQrCode();"><label for="errcorlvl-medium">Medium</label>
-					<input type="radio" name="errcorlvl" id="errcorlvl-quartile" onchange="redrawQrCode();"><label for="errcorlvl-quartile">Quartile</label>
-					<input type="radio" name="errcorlvl" id="errcorlvl-high" onchange="redrawQrCode();"><label for="errcorlvl-high">High</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-low" checked="checked"><label for="errcorlvl-low">Low</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-medium"><label for="errcorlvl-medium">Medium</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-quartile"><label for="errcorlvl-quartile">Quartile</label>
+					<input type="radio" name="errcorlvl" id="errcorlvl-high"><label for="errcorlvl-high">High</label>
 				</td>
 			</tr>
 			<tr>
 				<td>Output format:</td>
 				<td>
-					<input type="radio" name="output-format" id="output-format-bitmap" onchange="redrawQrCode();" checked="checked"><label for="output-format-bitmap">Bitmap</label>
-					<input type="radio" name="output-format" id="output-format-vector" onchange="redrawQrCode();"><label for="output-format-vector">Vector</label>
+					<input type="radio" name="output-format" id="output-format-bitmap" checked="checked"><label for="output-format-bitmap">Bitmap</label>
+					<input type="radio" name="output-format" id="output-format-vector"><label for="output-format-vector">Vector</label>
 				</td>
 			</tr>
 			<tr>
 				<td>Border:</td>
-				<td><input type="number" value="4" min="0" max="100" step="1" id="border-input" style="width:4em" oninput="redrawQrCode();"> modules</td>
+				<td><input type="number" value="4" min="0" max="100" step="1" id="border-input" style="width:4em"> modules</td>
 			</tr>
 			<tr id="scale-row">
 				<td>Scale:</td>
-				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em" oninput="redrawQrCode();"> pixels per module</td>
+				<td><input type="number" value="8" min="1" max="30" step="1" id="scale-input" style="width:4em"> pixels per module</td>
 			</tr>
 			<tr>
 				<td>Version range:</td>
@@ -101,11 +101,11 @@
 			</tr>
 			<tr>
 				<td>Mask pattern:</td>
-				<td><input type="number" value="-1" min="-1" max="7" step="1" id="mask-input" style="width:4em" oninput="redrawQrCode();"> (−1 for automatic, 0 to 7 for manual)</td>
+				<td><input type="number" value="-1" min="-1" max="7" step="1" id="mask-input" style="width:4em"> (−1 for automatic, 0 to 7 for manual)</td>
 			</tr>
 			<tr>
 				<td>Boost ECC:</td>
-				<td><input type="checkbox" checked="checked" id="boost-ecc-input" onchange="redrawQrCode();"><label for="boost-ecc-input">Increase <abbr title="error-correcting code">ECC</abbr> level within same version</label></td>
+				<td><input type="checkbox" checked="checked" id="boost-ecc-input"><label for="boost-ecc-input">Increase <abbr title="error-correcting code">ECC</abbr> level within same version</label></td>
 			</tr>
 			<tr>
 				<td>Statistics:</td>

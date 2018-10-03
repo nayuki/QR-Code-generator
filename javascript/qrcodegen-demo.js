@@ -24,6 +24,19 @@
 "use strict";
 
 
+function initialize() {
+	var elems = document.querySelectorAll("input[type=number], textarea");
+	for (var i = 0; i < elems.length; i++) {
+		if (elems[i].id.indexOf("version-") != 0)
+			elems[i].oninput = redrawQrCode;
+	}
+	elems = document.querySelectorAll("input[type=radio], input[type=checkbox]");
+	for (var i = 0; i < elems.length; i++)
+		elems[i].onchange = redrawQrCode;
+	redrawQrCode();
+}
+
+
 function redrawQrCode() {
 	// Show/hide rows based on bitmap/vector image output
 	var bitmapOutput = document.getElementById("output-format-bitmap").checked;
@@ -147,4 +160,4 @@ function handleVersionMinMax(which) {
 }
 
 
-redrawQrCode();
+initialize();

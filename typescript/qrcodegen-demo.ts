@@ -28,6 +28,19 @@
 	const myWindow = window as any;
 	
 	
+	function initialize(): void {
+		let elems = document.querySelectorAll("input[type=number], textarea");
+		for (let el of elems) {
+			if (!el.id.startsWith("version-"))
+				(el as any).oninput = myWindow.redrawQrCode;
+		}
+		elems = document.querySelectorAll("input[type=radio], input[type=checkbox]");
+		for (let el of elems)
+			(el as HTMLInputElement).onchange = myWindow.redrawQrCode;
+		myWindow.redrawQrCode();
+	}
+	
+	
 	/*---- Functions called from HTML code ----*/
 	
 	myWindow.redrawQrCode = function(): void {
@@ -176,5 +189,5 @@
 	
 	/*---- Initialization ----*/
 	
-	myWindow.redrawQrCode();
+	initialize();
 }
