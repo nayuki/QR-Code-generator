@@ -125,11 +125,11 @@ public final class QrSegmentAdvanced {
 				charModes[i][0] = modeTypes[0];
 			}
 			// Extend a segment if possible
-			if (isAlphanumeric(c)) {
+			if (QrSegment.ALPHANUMERIC_CHARSET.indexOf(c) != -1) {
 				curCosts[1] = prevCosts[1] + 33;  // 5.5 bits per alphanumeric char
 				charModes[i][1] = modeTypes[1];
 			}
-			if (isNumeric(c)) {
+			if ('0' <= c && c <= '9') {
 				curCosts[2] = prevCosts[2] + 20;  // 3.33 bits per digit
 				charModes[i][2] = modeTypes[2];
 			}
@@ -141,7 +141,7 @@ public final class QrSegmentAdvanced {
 			// Start new segment at the end to switch modes
 			for (int j = 0; j < numModes; j++) {  // To mode
 				for (int k = 0; k < numModes; k++) {  // From mode
-					int newCost = roundUp6(curCosts[k]) + headCosts[j];
+					int newCost = (curCosts[k] + 5) / 6 * 6 + headCosts[j];
 					if (charModes[i][k] != null && (charModes[i][j] == null || newCost < curCosts[j])) {
 						curCosts[j] = newCost;
 						charModes[i][j] = modeTypes[k];
@@ -213,20 +213,6 @@ public final class QrSegmentAdvanced {
 				throw new IllegalArgumentException("Invalid UTF-16 string");
 		}
 		return result;
-	}
-	
-	
-	private static boolean isAlphanumeric(int c) {
-		return isNumeric(c) || 'A' <= c && c <= 'Z' || " $%*+./:-".indexOf(c) != -1;
-	}
-	
-	private static boolean isNumeric(int c) {
-		return '0' <= c && c <= '9';
-	}
-	
-	
-	private static int roundUp6(int x) {
-		return (x + 5) / 6 * 6;
 	}
 	
 	
