@@ -39,8 +39,6 @@ namespace app {
 	}
 	
 	
-	/*---- Functions called from HTML code ----*/
-	
 	function redrawQrCode(): void {
 		// Show/hide rows based on bitmap/vector image output
 		const bitmapOutput: boolean = getInput("output-format-bitmap").checked;
@@ -165,9 +163,6 @@ namespace app {
 	}
 	
 	
-	
-	/*---- Private helper functions ----*/
-	
 	function getElem(id: string): HTMLElement {
 		const result: HTMLElement|null = document.getElementById(id);
 		if (result instanceof HTMLElement)
@@ -183,9 +178,6 @@ namespace app {
 		throw "Assertion error";
 	}
 	
-	
-	
-	/*---- Initialization ----*/
 	
 	initialize();
 }
