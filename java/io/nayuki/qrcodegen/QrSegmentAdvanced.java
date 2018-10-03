@@ -62,9 +62,11 @@ public final class QrSegmentAdvanced {
 		
 		// Iterate through version numbers, and make tentative segments
 		List<QrSegment> segs = null;
+		int[] codePoints = toCodePoints(text);
 		for (int version = minVersion; version <= maxVersion; version++) {
 			if (version == minVersion || version == 10 || version == 27)
-				segs = makeSegmentsOptimally(text, version);
+				segs = makeSegmentsOptimally(codePoints, version);
+			assert segs != null;
 			
 			// Check if the segments fit
 			int dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
@@ -77,10 +79,9 @@ public final class QrSegmentAdvanced {
 	
 	
 	// Returns a list of segments that is optimal for the given text at the given version number.
-	private static List<QrSegment> makeSegmentsOptimally(String text, int version) {
-		if (text.length() == 0)
+	private static List<QrSegment> makeSegmentsOptimally(int[] codePoints, int version) {
+		if (codePoints.length == 0)
 			return new ArrayList<>();
-		int[] codePoints = toCodePoints(text);
 		Mode[] charModes = computeCharacterModes(codePoints, version);
 		return splitIntoSegments(codePoints, charModes);
 	}
