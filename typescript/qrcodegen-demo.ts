@@ -24,26 +24,24 @@
 "use strict";
 
 
-{
-	const myWindow = window as any;
-	
+namespace app {
 	
 	function initialize(): void {
 		let elems = document.querySelectorAll("input[type=number], textarea");
 		for (let el of elems) {
 			if (!el.id.startsWith("version-"))
-				(el as any).oninput = myWindow.redrawQrCode;
+				(el as any).oninput = redrawQrCode;
 		}
 		elems = document.querySelectorAll("input[type=radio], input[type=checkbox]");
 		for (let el of elems)
-			(el as HTMLInputElement).onchange = myWindow.redrawQrCode;
-		myWindow.redrawQrCode();
+			(el as HTMLInputElement).onchange = redrawQrCode;
+		redrawQrCode();
 	}
 	
 	
 	/*---- Functions called from HTML code ----*/
 	
-	myWindow.redrawQrCode = function(): void {
+	function redrawQrCode(): void {
 		// Show/hide rows based on bitmap/vector image output
 		const bitmapOutput: boolean = getInput("output-format-bitmap").checked;
 		const scaleRow : HTMLElement = getElem("scale-row");
@@ -150,7 +148,7 @@
 	}
 	
 	
-	myWindow.handleVersionMinMax = function(which: "min"|"max"): void {
+	export function handleVersionMinMax(which: "min"|"max"): void {
 		const minElem: HTMLInputElement = getInput("version-min-input");
 		const maxElem: HTMLInputElement = getInput("version-max-input");
 		let minVal: number = parseInt(minElem.value, 10);
@@ -163,7 +161,7 @@
 			minVal = maxVal;
 		minElem.value = minVal.toString();
 		maxElem.value = maxVal.toString();
-		myWindow.redrawQrCode();
+		redrawQrCode();
 	}
 	
 	
