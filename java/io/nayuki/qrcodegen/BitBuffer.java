@@ -93,8 +93,8 @@ public final class BitBuffer implements Cloneable {
 	
 	
 	/**
-	 * Appends the specified number of low bits of the specified value
-	 * to this sequence. Requires 0 &le; val &lt; 2<sup>len</sup>.
+	 * Appends the specified number of low bits of the specified value to this
+	 * sequence. Requires 0 &le; len &le; 31 and 0 &le; val &lt; 2<sup>len</sup>.
 	 * @param val the value to append
 	 * @param len the number of low bits in the value to take
 	 * @throws IllegalArgumentException if the value or number of bits is out of range

@@ -901,8 +901,8 @@ namespace qrcodegen {
 		}
 		
 		
-		// Appends the given number of low bits of the given
-		// value to this sequence. Requires 0 <= val < 2^len.
+		// Appends the given number of low bits of the given value to
+		// this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 		public appendBits(val: int, len: int): void {
 			if (len < 0 || len > 31 || val >>> len != 0)
 				throw "Value out of range";

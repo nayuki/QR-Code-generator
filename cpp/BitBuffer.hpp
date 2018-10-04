@@ -48,8 +48,8 @@ class BitBuffer final : public std::vector<bool> {
 	public: std::vector<std::uint8_t> getBytes() const;
 	
 	
-	// Appends the given number of low bits of the given value
-	// to this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
+	// Appends the given number of low bits of the given value to
+	// this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 	public: void appendBits(std::uint32_t val, int len);
 	
 };

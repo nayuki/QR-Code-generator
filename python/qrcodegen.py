@@ -826,7 +826,7 @@ class _BitBuffer(list):
 	
 	def append_bits(self, val, n):
 		"""Appends the given number of low bits of the given value
-		to this sequence. Requires 0 <= val < 2^n."""
+		to this sequence. Requires n >= 0 and 0 <= val < 2^n."""
 		if n < 0 or val >> n != 0:
 			raise ValueError("Value out of range")
 		self.extend(((val >> i) & 1) for i in reversed(range(n)))

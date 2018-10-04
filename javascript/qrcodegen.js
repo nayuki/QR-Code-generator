@@ -970,8 +970,8 @@ var qrcodegen = new function() {
 			return result;
 		};
 		
-		// Appends the given number of low bits of the given value
-		// to this sequence. Requires 0 <= val < 2^len.
+		// Appends the given number of low bits of the given value to
+		// this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 		this.appendBits = function(val, len) {
 			if (len < 0 || len > 31 || val >>> len != 0)
 				throw "Value out of range";
