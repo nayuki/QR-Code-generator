@@ -604,19 +604,16 @@ namespace qrcodegen {
 		}
 		
 		
-		/*-- Constants --*/
+		/*-- Constants and tables --*/
 		
 		public static readonly MIN_VERSION: int =  1;
 		public static readonly MAX_VERSION: int = 40;
-		
 		
 		// For use in getPenaltyScore(), when evaluating which mask is best.
 		private static readonly PENALTY_N1: int =  3;
 		private static readonly PENALTY_N2: int =  3;
 		private static readonly PENALTY_N3: int = 40;
 		private static readonly PENALTY_N4: int = 10;
-		
-		/*-- Private tables of constants --*/
 		
 		private static readonly ECC_CODEWORDS_PER_BLOCK: Array<Array<int>> = [
 			// Version: (note that index 0 is for padding, and is set to an illegal value)

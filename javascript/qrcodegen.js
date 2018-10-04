@@ -599,14 +599,6 @@ var qrcodegen = new function() {
 	};
 	
 	
-	/*---- Public constants for QrCode ----*/
-	
-	var MIN_VERSION =  1;
-	var MAX_VERSION = 40;
-	Object.defineProperty(this.QrCode, "MIN_VERSION", {value:MIN_VERSION});
-	Object.defineProperty(this.QrCode, "MAX_VERSION", {value:MAX_VERSION});
-	
-	
 	/*---- Private static helper functions for QrCode ----*/
 	
 	var QrCode = {};  // Private object to assign properties to. Not the same object as 'this.QrCode'.
@@ -639,7 +631,12 @@ var qrcodegen = new function() {
 	};
 	
 	
-	/*---- Private tables of constants for QrCode ----*/
+	/*---- Constants and tables for QrCode ----*/
+	
+	var MIN_VERSION =  1;
+	var MAX_VERSION = 40;
+	Object.defineProperty(this.QrCode, "MIN_VERSION", {value:MIN_VERSION});
+	Object.defineProperty(this.QrCode, "MAX_VERSION", {value:MAX_VERSION});
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
 	QrCode.PENALTY_N1 =  3;

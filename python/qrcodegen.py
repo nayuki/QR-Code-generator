@@ -142,12 +142,6 @@ class QrCode(object):
 		return QrCode(bb.get_bytes(), mask, version, ecl)
 	
 	
-	# ---- Public constants ----
-	
-	MIN_VERSION =  1
-	MAX_VERSION = 40
-	
-	
 	# ---- Constructor ----
 	
 	def __init__(self, datacodewords, mask, version, errcorlvl):
@@ -529,7 +523,10 @@ class QrCode(object):
 			* QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
 	
 	
-	# ---- Private tables of constants ----
+	# ---- Constants and tables ----
+	
+	MIN_VERSION =  1
+	MAX_VERSION = 40
 	
 	# For use in getPenaltyScore(), when evaluating which mask is best.
 	_PENALTY_N1 =  3
