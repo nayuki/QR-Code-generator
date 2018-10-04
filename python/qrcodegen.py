@@ -733,7 +733,7 @@ class QrSegment(object):
 		# Private constructor
 		def __init__(self, modebits, charcounts):
 			self._modebits = modebits  # The mode indicator bits, which is a uint4 value (range 0 to 15)
-			self._charcounts = charcounts  # Three values for different version ranges
+			self._charcounts = charcounts  # Number of character count bits for three different version ranges
 		
 		# Package-private method
 		def get_mode_bits(self):
@@ -742,7 +742,8 @@ class QrSegment(object):
 		
 		# Package-private method
 		def num_char_count_bits(self, ver):
-			"""Returns the bit width of the segment character count field for this mode object at the given version number."""
+			"""Returns the bit width of the character count field for a segment in this mode
+			in a QR Code at the given version number. The result is in the range [0, 16]."""
 			return self._charcounts[(ver + 7) // 17]
 	
 	# Public constants. Create them outside the class.

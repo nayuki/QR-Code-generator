@@ -964,8 +964,8 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 }
 
 
-// Returns the bit width of the segment character count field for the
-// given mode at the given version number. The result is in the range [0, 16].
+// Returns the bit width of the character count field for a segment in the given mode
+// in a QR Code at the given version number. The result is in the range [0, 16].
 static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 	assert(qrcodegen_VERSION_MIN <= version && version <= qrcodegen_VERSION_MAX);
 	int i = (version + 7) / 17;

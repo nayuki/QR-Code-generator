@@ -856,7 +856,8 @@ var qrcodegen = new function() {
 		// (Package-private) The mode indicator bits, which is a uint4 value (range 0 to 15).
 		Object.defineProperty(this, "modeBits", {value:mode});
 		
-		// (Package-private) Returns the bit width of the segment character count field for this mode object at the given version number.
+		// (Package-private) Returns the bit width of the character count field for a segment in
+		// this mode in a QR Code at the given version number. The result is in the range [0, 16].
 		this.numCharCountBits = function(ver) {
 			return ccbits[Math.floor((ver + 7) / 17)];
 		};
