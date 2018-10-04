@@ -74,19 +74,19 @@ static void doBasicDemo() {
 // Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console.
 static void doVarietyDemo() {
 	// Numeric mode encoding (3.33 bits per digit)
-	const QrCode qr1 = QrCode::encodeText("314159265358979323846264338327950288419716939937510", QrCode::Ecc::MEDIUM);
-	printQr(qr1);
+	const QrCode qr0 = QrCode::encodeText("314159265358979323846264338327950288419716939937510", QrCode::Ecc::MEDIUM);
+	printQr(qr0);
 	
 	// Alphanumeric mode encoding (5.5 bits per character)
-	const QrCode qr2 = QrCode::encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", QrCode::Ecc::HIGH);
-	printQr(qr2);
+	const QrCode qr1 = QrCode::encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", QrCode::Ecc::HIGH);
+	printQr(qr1);
 	
 	// Unicode text as UTF-8
-	const QrCode qr3 = QrCode::encodeText("\xE3\x81\x93\xE3\x82\x93\xE3\x81\xAB\xE3\x81\xA1wa\xE3\x80\x81\xE4\xB8\x96\xE7\x95\x8C\xEF\xBC\x81\x20\xCE\xB1\xCE\xB2\xCE\xB3\xCE\xB4", QrCode::Ecc::QUARTILE);
-	printQr(qr3);
+	const QrCode qr2 = QrCode::encodeText("\xE3\x81\x93\xE3\x82\x93\xE3\x81\xAB\xE3\x81\xA1wa\xE3\x80\x81\xE4\xB8\x96\xE7\x95\x8C\xEF\xBC\x81\x20\xCE\xB1\xCE\xB2\xCE\xB3\xCE\xB4", QrCode::Ecc::QUARTILE);
+	printQr(qr2);
 	
 	// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
-	const QrCode qr4 = QrCode::encodeText(
+	const QrCode qr3 = QrCode::encodeText(
 		"Alice was beginning to get very tired of sitting by her sister on the bank, "
 		"and of having nothing to do: once or twice she had peeped into the book her sister was reading, "
 		"but it had no pictures or conversations in it, 'and what is the use of a book,' thought Alice "
@@ -94,7 +94,7 @@ static void doVarietyDemo() {
 		"for the hot day made her feel very sleepy and stupid), whether the pleasure of making a "
 		"daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly "
 		"a White Rabbit with pink eyes ran close by her.", QrCode::Ecc::HIGH);
-	printQr(qr4);
+	printQr(qr3);
 }
 
 
