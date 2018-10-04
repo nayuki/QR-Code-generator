@@ -829,14 +829,16 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
 	result.mode = qrcodegen_Mode_ECI;
 	result.numChars = 0;
 	result.bitLength = 0;
-	if (0 <= assignVal && assignVal < (1 << 7)) {
+	if (assignVal < 0)
+		assert(false);
+	else if (assignVal < (1 << 7)) {
 		memset(buf, 0, 1 * sizeof(buf[0]));
 		appendBitsToBuffer(assignVal, 8, buf, &result.bitLength);
-	} else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
+	} else if (assignVal < (1 << 14)) {
 		memset(buf, 0, 2 * sizeof(buf[0]));
 		appendBitsToBuffer(2, 2, buf, &result.bitLength);
 		appendBitsToBuffer(assignVal, 14, buf, &result.bitLength);
-	} else if ((1 << 14) <= assignVal && assignVal < 1000000L) {
+	} else if (assignVal < 1000000L) {
 		memset(buf, 0, 3 * sizeof(buf[0]));
 		appendBitsToBuffer(6, 3, buf, &result.bitLength);
 		appendBitsToBuffer(assignVal >> 10, 11, buf, &result.bitLength);

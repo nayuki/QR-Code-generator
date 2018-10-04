@@ -720,12 +720,14 @@ namespace qrcodegen {
 		// (ECI) designator with the given assignment value.
 		public static makeEci(assignVal: int): QrSegment {
 			let bb = new BitBuffer();
-			if (0 <= assignVal && assignVal < (1 << 7))
+			if (assignVal < 0)
+				throw "ECI assignment value out of range";
+			else if (assignVal < (1 << 7))
 				bb.appendBits(assignVal, 8);
-			else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
+			else if (assignVal < (1 << 14)) {
 				bb.appendBits(2, 2);
 				bb.appendBits(assignVal, 14);
-			} else if ((1 << 14) <= assignVal && assignVal < 1000000) {
+			} else if (assignVal < 1000000) {
 				bb.appendBits(6, 3);
 				bb.appendBits(assignVal, 21);
 			} else

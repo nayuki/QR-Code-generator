@@ -661,12 +661,14 @@ class QrSegment(object):
 		"""Returns a segment representing an Extended Channel Interpretation
 		(ECI) designator with the given assignment value."""
 		bb = _BitBuffer()
-		if 0 <= assignval < (1 << 7):
+		if assignval < 0:
+			raise ValueError("ECI assignment value out of range")
+		elif assignval < (1 << 7):
 			bb.append_bits(assignval, 8)
-		elif (1 << 7) <= assignval < (1 << 14):
+		elif assignval < (1 << 14):
 			bb.append_bits(2, 2)
 			bb.append_bits(assignval, 14)
-		elif (1 << 14) <= assignval < 1000000:
+		elif assignval < 1000000:
 			bb.append_bits(6, 3)
 			bb.append_bits(assignval, 21)
 		else:
