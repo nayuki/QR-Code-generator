@@ -47,7 +47,7 @@ fn main() {
 
 // Creates a single QR Code, then prints it to the console.
 fn do_basic_demo() {
-	let text: &'static str = "Hello, world!";  // User-supplied Unicode text
+	let text: &'static str = "Hello, world!";   // User-supplied Unicode text
 	let errcorlvl: QrCodeEcc = QrCodeEcc::Low;  // Error correction level
 	
 	// Make and print the QR Code symbol
