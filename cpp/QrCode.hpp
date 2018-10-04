@@ -34,8 +34,8 @@ namespace qrcodegen {
 /* 
  * Represents an immutable square grid of black and white cells for a QR Code symbol, and
  * provides static functions to create a QR Code from user-supplied textual or binary data.
- * This class covers the QR Code model 2 specification, supporting all versions (sizes)
- * from 1 to 40, all 4 error correction levels, and only 3 character encoding modes.
+ * This class covers the QR Code Model 2 specification, supporting all versions (sizes)
+ * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
  */
 class QrCode final {
 	

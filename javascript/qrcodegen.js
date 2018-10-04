@@ -61,9 +61,9 @@ var qrcodegen = new function() {
 	
 	/* 
 	 * A class that represents an immutable square grid of black and white cells for a QR Code symbol,
-	 * with associated static functions to create a QR Code from user-supplied textual or binary data.
-	 * This class covers the QR Code model 2 specification, supporting all versions (sizes)
-	 * from 1 to 40, all 4 error correction levels.
+	 * and provides static functions to create a QR Code from user-supplied textual or binary data.
+	 * This class covers the QR Code Model 2 specification, supporting all versions (sizes)
+	 * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
 	 * This constructor creates a new QR Code symbol with the given version number, error correction level, binary data array,
 	 * and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
 	 * that should not be invoked directly by the user. To go one level up, see the QrCode.encodeSegments() function.
