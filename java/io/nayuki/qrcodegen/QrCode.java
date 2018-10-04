@@ -37,7 +37,7 @@ import java.util.Objects;
  */
 public final class QrCode {
 	
-	/*---- Public static factory functions ----*/
+	/*---- Static factory functions (high level) ----*/
 	
 	/**
 	 * Returns a QR Code symbol representing the specified Unicode text string at the specified error correction level.
@@ -79,6 +79,8 @@ public final class QrCode {
 		return encodeSegments(Arrays.asList(seg), ecl);
 	}
 	
+	
+	/*---- Static factory functions (mid level) ----*/
 	
 	/**
 	 * Returns a QR Code symbol representing the specified segments at the specified error correction
@@ -192,7 +194,7 @@ public final class QrCode {
 	
 	
 	
-	/*---- Constructor ----*/
+	/*---- Constructor (low level) ----*/
 	
 	/**
 	 * Constructs a QR Code symbol with the specified version number, error correction level, binary data array, and mask number.

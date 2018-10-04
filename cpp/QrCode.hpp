@@ -55,7 +55,7 @@ class QrCode final {
 	
 	
 	
-	/*---- Public static factory functions ----*/
+	/*---- Static factory functions (high level) ----*/
 	
 	/* 
 	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
@@ -75,6 +75,8 @@ class QrCode final {
 	 */
 	public: static QrCode encodeBinary(const std::vector<std::uint8_t> &data, Ecc ecl);
 	
+	
+	/*---- Static factory functions (mid level) ----*/
 	
 	/* 
 	 * Returns a QR Code symbol representing the given segments with the given encoding parameters.
@@ -113,7 +115,7 @@ class QrCode final {
 	
 	
 	
-	/*---- Constructor ----*/
+	/*---- Constructor (low level) ----*/
 	
 	/* 
 	 * Creates a new QR Code symbol with the given version number, error correction level, binary data array,

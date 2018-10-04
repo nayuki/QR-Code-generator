@@ -66,7 +66,7 @@ class QrCode(object):
 	This class covers the QR Code Model 2 specification, supporting all versions (sizes)
 	from 1 to 40, all 4 error correction levels, and 4 character encoding modes."""
 	
-	# ---- Public static factory functions ----
+	# ---- Static factory functions (high level) ----
 	
 	@staticmethod
 	def encode_text(text, ecl):
@@ -89,6 +89,8 @@ class QrCode(object):
 			raise TypeError("Byte string/list expected")
 		return QrCode.encode_segments([QrSegment.make_bytes(data)], ecl)
 	
+	
+	# ---- Static factory functions (mid level) ----
 	
 	@staticmethod
 	def encode_segments(segs, ecl, minversion=1, maxversion=40, mask=-1, boostecl=True):
@@ -142,7 +144,7 @@ class QrCode(object):
 		return QrCode(bb.get_bytes(), mask, version, ecl)
 	
 	
-	# ---- Constructor ----
+	# ---- Constructor (low level) ----
 	
 	def __init__(self, datacodewords, mask, version, errcorlvl):
 		"""Creates a new QR Code symbol with the given version number, error correction level, binary data array,
@@ -588,7 +590,7 @@ class QrSegment(object):
 	Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 	Any segment longer than this is meaningless for the purpose of generating QR Codes."""
 	
-	# ---- Public static factory functions ----
+	# ---- Static factory functions (mid level) ----
 	
 	@staticmethod
 	def make_bytes(data):
@@ -673,7 +675,7 @@ class QrSegment(object):
 		return QrSegment(QrSegment.Mode.ECI, 0, bb)
 	
 	
-	# ---- Constructor ----
+	# ---- Constructor (low level) ----
 	
 	def __init__(self, mode, numch, bitdata):
 		"""Creates a new QR Code segment with the given parameters and data."""

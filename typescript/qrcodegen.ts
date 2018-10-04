@@ -44,7 +44,7 @@ namespace qrcodegen {
 	 */
 	export class QrCode {
 		
-		/*-- Public static factory functions --*/
+		/*-- Static factory functions (high level) --*/
 		
 		// Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 		// As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
@@ -66,6 +66,8 @@ namespace qrcodegen {
 			return QrCode.encodeSegments([seg], ecl);
 		}
 		
+		
+		/*-- Static factory functions (mid level) --*/
 		
 		// Returns a QR Code symbol representing the given segments with the given encoding parameters.
 		// The smallest possible QR Code version within the given range is automatically chosen for the output.
@@ -142,7 +144,7 @@ namespace qrcodegen {
 		private readonly isFunction: Array<Array<boolean>> = [];
 		
 		
-		/*-- Constructor and fields --*/
+		/*-- Constructor (low level) and fields --*/
 		
 		public constructor(
 				datacodewords: Array<byte>,
@@ -654,7 +656,7 @@ namespace qrcodegen {
 	 */
 	export class QrSegment {
 		
-		/*-- Static factory functions --*/
+		/*-- Static factory functions (mid level) --*/
 		
 		// Returns a segment representing the given binary data encoded in byte mode.
 		public static makeBytes(data: Array<byte>): QrSegment {
@@ -733,7 +735,7 @@ namespace qrcodegen {
 		}
 		
 		
-		/*-- Constructor and fields --*/
+		/*-- Constructor (low level) and fields --*/
 		
 		// Creates a new QR Code segment with the given parameters and data.
 		public constructor(

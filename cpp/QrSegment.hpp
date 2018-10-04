@@ -85,7 +85,7 @@ class QrSegment final {
 	
 	
 	
-	/*---- Public static factory functions ----*/
+	/*---- Static factory functions (mid level) ----*/
 	
 	/* 
 	 * Returns a segment representing the given binary data encoded in byte mode.
@@ -148,7 +148,7 @@ class QrSegment final {
 	private: std::vector<bool> data;
 	
 	
-	/*---- Constructors ----*/
+	/*---- Constructors (low level) ----*/
 	
 	/* 
 	 * Creates a new QR Code segment with the given parameters and data.

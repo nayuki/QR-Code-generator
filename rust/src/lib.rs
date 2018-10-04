@@ -57,7 +57,7 @@ pub struct QrCode {
 
 impl QrCode {
 	
-	/*---- Public static factory functions ----*/
+	/*---- Static factory functions (high level) ----*/
 	
 	// Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
 	// As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
@@ -82,6 +82,8 @@ impl QrCode {
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
+	
+	/*---- Static factory functions (mid level) ----*/
 	
 	// Returns a QR Code symbol representing the given segments at the given error correction level.
 	// The smallest possible QR Code version is automatically chosen for the output. The ECC level
@@ -167,7 +169,7 @@ impl QrCode {
 	}
 	
 	
-	/*---- Constructor ----*/
+	/*---- Constructor (low level) ----*/
 	
 	// Creates a new QR Code symbol with the given version number, error correction level,
 	// binary data array, and mask number. This is a cumbersome low-level constructor that
@@ -841,7 +843,7 @@ pub struct QrSegment {
 
 impl QrSegment {
 	
-	/*---- Static factory functions ----*/
+	/*---- Static factory functions (mid level) ----*/
 	
 	// Returns a segment representing the given binary data encoded in byte mode.
 	pub fn make_bytes(data: &[u8]) -> Self {
@@ -937,6 +939,8 @@ impl QrSegment {
 		QrSegment::new(QrSegmentMode::Eci, 0, bb.0)
 	}
 	
+	
+	/*---- Constructor (low level) ----*/
 	
 	// Creates a new QR Code segment with the given parameters and data.
 	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> Self {

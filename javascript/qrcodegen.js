@@ -70,7 +70,7 @@ var qrcodegen = new function() {
 	 */
 	this.QrCode = function(datacodewords, mask, version, errCorLvl) {
 		
-		/*---- Constructor ----*/
+		/*---- Constructor (low level) ----*/
 		
 		// Check arguments and handle simple scalar fields
 		if (mask < -1 || mask > 7)
@@ -510,7 +510,7 @@ var qrcodegen = new function() {
 	};
 	
 	
-	/*---- Public static factory functions for QrCode ----*/
+	/*---- Static factory functions (high level) for QrCode ----*/
 	
 	/* 
 	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
@@ -536,6 +536,8 @@ var qrcodegen = new function() {
 		return this.encodeSegments([seg], ecl);
 	};
 	
+	
+	/*---- Static factory functions (mid level) for QrCode ----*/
 	
 	/* 
 	 * Returns a QR Code symbol representing the given segments with the given encoding parameters.
@@ -698,6 +700,7 @@ var qrcodegen = new function() {
 	 * Any segment longer than this is meaningless for the purpose of generating QR Codes.
 	 */
 	this.QrSegment = function(mode, numChars, bitData) {
+		/*---- Constructor (low level) ----*/
 		if (numChars < 0 || !(mode instanceof Mode))
 			throw "Invalid argument";
 		bitData = bitData.slice();  // Make defensive copy
@@ -715,7 +718,7 @@ var qrcodegen = new function() {
 	};
 	
 	
-	/*---- Public static factory functions for QrSegment ----*/
+	/*---- Static factory functions (mid level) for QrSegment ----*/
 	
 	/* 
 	 * Returns a segment representing the given binary data encoded in byte mode.

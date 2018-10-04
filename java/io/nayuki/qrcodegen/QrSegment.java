@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  */
 public final class QrSegment {
 	
-	/*---- Static factory functions ----*/
+	/*---- Static factory functions (mid level) ----*/
 	
 	/**
 	 * Returns a segment representing the specified binary data encoded in byte mode.
@@ -166,7 +166,7 @@ public final class QrSegment {
 	final BitBuffer data;
 	
 	
-	/*---- Constructor ----*/
+	/*---- Constructor (low level) ----*/
 	
 	/**
 	 * Constructs a QR Code segment with the specified parameters and data.
