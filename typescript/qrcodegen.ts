@@ -799,13 +799,19 @@ namespace qrcodegen {
 		
 		/*-- Constants --*/
 		
-		// Can test whether a string is encodable in numeric mode (such as by using QrSegment.makeNumeric()).
+		// Describes precisely all strings that are encodable in numeric mode. To test
+		// whether a string s is encodable: let ok: boolean = NUMERIC_REGEX.test(s);
+		// A string is encodable iff each character is in the range 0 to 9.
 		public static readonly NUMERIC_REGEX: RegExp = /^[0-9]*$/;
 		
-		// Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
+		// Describes precisely all strings that are encodable in alphanumeric mode. To test
+		// whether a string s is encodable: let ok: boolean = ALPHANUMERIC_REGEX.test(s);
+		// A string is encodable iff each character is in the following set: 0 to 9, A to Z
+		// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 		public static readonly ALPHANUMERIC_REGEX: RegExp = /^[A-Z0-9 $%*+.\/:-]*$/;
 		
-		// The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string.
+		// The set of all legal characters in alphanumeric mode,
+		// where each character value maps to the index in the string.
 		private static readonly ALPHANUMERIC_CHARSET: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 		
 	}

@@ -222,13 +222,19 @@ public final class QrSegment {
 	
 	/*---- Constants ----*/
 	
-	/** Can test whether a string is encodable in numeric mode (such as by using {@link #makeNumeric(String)}). */
+	/** Describes precisely all strings that are encodable in numeric mode. To test whether a
+	 * string {@code s} is encodable: {@code boolean ok = NUMERIC_REGEX.matcher(s).matches();}.
+	 * A string is encodable iff each character is in the range 0 to 9. */
 	public static final Pattern NUMERIC_REGEX = Pattern.compile("[0-9]*");
 	
-	/** Can test whether a string is encodable in alphanumeric mode (such as by using {@link #makeAlphanumeric(String)}). */
+	/** Describes precisely all strings that are encodable in alphanumeric mode. To test whether a
+	 * string {@code s} is encodable: {@code boolean ok = ALPHANUMERIC_REGEX.matcher(s).matches();}.
+	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon. */
 	public static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[A-Z0-9 $%*+./:-]*");
 	
-	/** The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string. */
+	/** The set of all legal characters in alphanumeric mode, where
+	 * each character value maps to the index in the string. */
 	static final String ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 	
 	

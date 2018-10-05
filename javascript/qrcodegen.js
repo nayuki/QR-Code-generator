@@ -834,13 +834,19 @@ var qrcodegen = new function() {
 	
 	var QrSegment = {};  // Private object to assign properties to. Not the same object as 'this.QrSegment'.
 	
-	// (Public) Can test whether a string is encodable in numeric mode (such as by using QrSegment.makeNumeric()).
+	// (Public) Describes precisely all strings that are encodable in numeric mode.
+	// To test whether a string s is encodable: var ok = NUMERIC_REGEX.test(s);
+	// A string is encodable iff each character is in the range 0 to 9.
 	this.QrSegment.NUMERIC_REGEX = /^[0-9]*$/;
 	
-	// (Public) Can test whether a string is encodable in alphanumeric mode (such as by using QrSegment.makeAlphanumeric()).
+	// (Public) Describes precisely all strings that are encodable in alphanumeric mode.
+	// To test whether a string s is encodable: var ok = ALPHANUMERIC_REGEX.test(s);
+	// A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	this.QrSegment.ALPHANUMERIC_REGEX = /^[A-Z0-9 $%*+.\/:-]*$/;
 	
-	// (Private) The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string.
+	// (Private) The set of all legal characters in alphanumeric mode,
+	// where each character value maps to the index in the string.
 	QrSegment.ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 	
 	

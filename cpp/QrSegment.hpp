@@ -126,12 +126,15 @@ class QrSegment final {
 	
 	/* 
 	 * Tests whether the given string can be encoded as a segment in alphanumeric mode.
+	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 */
 	public: static bool isAlphanumeric(const char *text);
 	
 	
 	/* 
 	 * Tests whether the given string can be encoded as a segment in numeric mode.
+	 * A string is encodable iff each character is in the range 0 to 9.
 	 */
 	public: static bool isNumeric(const char *text);
 	
@@ -198,7 +201,8 @@ class QrSegment final {
 	
 	/*---- Private constant ----*/
 	
-	/* The set of all legal characters in alphanumeric mode, where each character value maps to the index in the string. */
+	/* The set of all legal characters in alphanumeric mode, where
+	 * each character value maps to the index in the string. */
 	private: static const char *ALPHANUMERIC_CHARSET;
 	
 };

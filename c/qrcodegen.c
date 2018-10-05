@@ -86,7 +86,8 @@ static int numCharCountBits(enum qrcodegen_Mode mode, int version);
 
 /*---- Private tables of constants ----*/
 
-// For checking text and encoding segments.
+// The set of all legal characters in alphanumeric mode, where each character
+// value maps to the index in the string. For checking text and encoding segments.
 static const char *ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
 // For generating error correction codes.

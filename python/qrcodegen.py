@@ -733,10 +733,16 @@ class QrSegment(object):
 	
 	# ---- Constants ----
 	
-	# (Public) Can test whether a string is encodable in numeric mode (such as by using make_numeric())
+	# (Public) Describes precisely all strings that are encodable in numeric mode.
+	# To test whether a string s is encodable: ok = NUMERIC_REGEX.fullmatch(s) is not None
+	# A string is encodable iff each character is in the range 0 to 9.
 	NUMERIC_REGEX = re.compile(r"[0-9]*\Z")
 	
-	# (Public) Can test whether a string is encodable in alphanumeric mode (such as by using make_alphanumeric())
+	# (Public) Describes precisely all strings that are encodable in alphanumeric mode.
+	# To test whether a string s is encodable: ok = ALPHANUMERIC_REGEX.fullmatch(s) is not None
+	# A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	# (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+
 	ALPHANUMERIC_REGEX = re.compile(r"[A-Z0-9 $%*+./:-]*\Z")
 	
 	# (Private) Dictionary of "0"->0, "A"->10, "$"->37, etc.
