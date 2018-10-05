@@ -167,11 +167,11 @@ class QrCode(object):
 		
 		# Initialize grids of modules
 		# The modules of this QR Code symbol (False = white, True = black). Immutable after constructor finishes
-		self._modules    = [[False] * self._size for _ in range(self._size)]
+		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all white
 		# Indicates function modules that are not subjected to masking. Discarded when constructor finishes
 		self._isfunction = [[False] * self._size for _ in range(self._size)]
 		
-		# Draw function patterns, draw all codewords
+		# Compute ECC, draw modules
 		self._draw_function_patterns()
 		allcodewords = self._add_ecc_and_interleave(datacodewords)
 		self._draw_codewords(allcodewords)

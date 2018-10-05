@@ -119,14 +119,14 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 		version(ver),
 		size(MIN_VERSION <= ver && ver <= MAX_VERSION ? ver * 4 + 17 : -1),  // Avoid signed overflow undefined behavior
 		errorCorrectionLevel(ecl),
-		modules   (size, vector<bool>(size)),  // Entirely white grid
+		modules   (size, vector<bool>(size)),  // Initially all white
 		isFunction(size, vector<bool>(size)) {
 	
 	// Check arguments
 	if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
 		throw std::domain_error("Value out of range");
 	
-	// Draw function patterns, draw all codewords, do masking
+	// Compute ECC, draw modules, do masking
 	drawFunctionPatterns();
 	const vector<uint8_t> allCodewords = addEccAndInterleave(dataCodewords);
 	drawCodewords(allCodewords);

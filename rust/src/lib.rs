@@ -186,11 +186,11 @@ impl QrCode {
 			size: size as i32,
 			mask: Mask::new(0),  // Dummy value
 			errorcorrectionlevel: ecl,
-			modules   : vec![false; size * size],  // Entirely white grid
+			modules   : vec![false; size * size],  // Initially all white
 			isfunction: vec![false; size * size],
 		};
 		
-		// Draw function patterns, draw all codewords, do masking
+		// Compute ECC, draw modules, do masking
 		result.draw_function_patterns();
 		let allcodewords: Vec<u8> = result.add_ecc_and_interleave(datacodewords);
 		result.draw_codewords(&allcodewords);

@@ -222,10 +222,10 @@ public final class QrCode {
 		// Initialize fields
 		version = ver;
 		size = ver * 4 + 17;
-		modules    = new boolean[size][size];  // Entirely white grid
+		modules    = new boolean[size][size];  // Initially all white
 		isFunction = new boolean[size][size];
 		
-		// Draw function patterns, draw all codewords, do masking
+		// Compute ECC, draw modules, do masking
 		drawFunctionPatterns();
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);

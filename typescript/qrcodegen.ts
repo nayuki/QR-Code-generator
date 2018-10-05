@@ -172,11 +172,11 @@ namespace qrcodegen {
 			for (let i = 0; i < this.size; i++)
 				row.push(false);
 			for (let i = 0; i < this.size; i++) {
-				this.modules   .push(row.slice());
+				this.modules   .push(row.slice());  // Initially all white
 				this.isFunction.push(row.slice());
 			}
 			
-			// Handle grid fields, draw function patterns, draw all codewords
+			// Compute ECC, draw modules
 			this.drawFunctionPatterns();
 			let allCodewords: Array<byte> = this.addEccAndInterleave(dataCodewords);
 			this.drawCodewords(allCodewords);
