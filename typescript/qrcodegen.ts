@@ -761,7 +761,7 @@ namespace qrcodegen {
 		
 		/*-- Methods --*/
 		
-		// Returns a copy of all bits, which is an array of 0s and 1s.
+		// Returns a new copy of the data bits of this segment.
 		public getBits(): Array<bit> {
 			return this.bitData.slice();  // Make defensive copy
 		}

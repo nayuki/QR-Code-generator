@@ -718,7 +718,7 @@ var qrcodegen = new function() {
 		// Always zero or positive. Not the same as the data's bit length.
 		Object.defineProperty(this, "numChars", {value:numChars});
 		
-		// Returns a copy of all bits, which is an array of 0s and 1s.
+		// Returns a new copy of the data bits of this segment.
 		this.getBits = function() {
 			return bitData.slice();  // Make defensive copy
 		};

@@ -962,19 +962,19 @@ impl QrSegment {
 	
 	/*---- Instance field getters ----*/
 	
-	// Returns the mode indicator for this segment.
+	// Returns the mode indicator of this segment.
 	pub fn mode(&self) -> QrSegmentMode {
 		self.mode
 	}
 	
 	
-	// Returns the length of this segment's unencoded data, measured in characters.
+	// Returns the character count field of this segment.
 	pub fn num_chars(&self) -> usize {
 		self.numchars
 	}
 	
 	
-	// Returns a view of the bits of this segment.
+	// Returns the data bits of this segment.
 	pub fn data(&self) -> &Vec<bool> {
 		&self.data
 	}

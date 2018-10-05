@@ -704,12 +704,15 @@ class QrSegment(object):
 	# ---- Accessor methods ----
 	
 	def get_mode(self):
+		"""Returns the mode field of this segment."""
 		return self._mode
 	
 	def get_num_chars(self):
+		"""Returns the character count field of this segment."""
 		return self._numchars
 	
 	def get_bits(self):
+		"""Returns a new copy of the data bits of this segment."""
 		return list(self._bitdata)  # Make defensive copy
 	
 	

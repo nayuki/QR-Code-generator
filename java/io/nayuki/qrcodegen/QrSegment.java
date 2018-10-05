@@ -193,7 +193,7 @@ public final class QrSegment {
 	/*---- Methods ----*/
 	
 	/**
-	 * Returns a copy of the data bits of this segment.
+	 * Returns the data bits of this segment.
 	 * @return the data bits of this segment (not {@code null})
 	 */
 	public BitBuffer getBits() {

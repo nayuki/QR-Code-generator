@@ -172,12 +172,21 @@ class QrSegment final {
 	
 	/*---- Methods ----*/
 	
+	/* 
+	 * Returns the mode field of this segment.
+	 */
 	public: Mode getMode() const;
 	
 	
+	/* 
+	 * Returns the character count field of this segment.
+	 */
 	public: int getNumChars() const;
 	
 	
+	/* 
+	 * Returns the data bits of this segment.
+	 */
 	public: const std::vector<bool> &getData() const;
 	
 	
