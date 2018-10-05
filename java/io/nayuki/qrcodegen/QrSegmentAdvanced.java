@@ -50,7 +50,7 @@ public final class QrSegmentAdvanced {
 	 * @param maxVersion the maximum allowed version of the QR symbol (at most 40)
 	 * @return a new mutable list of segments containing the text, minimizing the bit length with respect to the constraints
 	 * @throws NullPointerException if the data or error correction level is {@code null}
-	 * @throws IllegalArgumentException if 1 &le; minVersion &le; maxVersion &le; 40 is violated,
+	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated,
 	 * or if the data is too long to fit in a QR Code at maxVersion at the ECL
 	 */
 	public static List<QrSegment> makeSegmentsOptimally(String text, QrCode.Ecc ecl, int minVersion, int maxVersion) {

@@ -115,8 +115,8 @@ public final class QrCode {
 	 * @param boostEcl increases the error correction level if it can be done without increasing the version number
 	 * @return a QR Code representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
-	 * @throws IllegalArgumentException if 1 &le; minVersion &le; maxVersion &le; 40
-	 * is violated, or if mask &lt; &minus;1 or mask &gt; 7, or if the segments fail
+	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
+	 * is violated, or if mask &lt; &#x2212;1 or mask &gt; 7, or if the segments fail
 	 * to fit in the maxVersion QR Code at the ECL, which means they are too long
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
@@ -177,7 +177,7 @@ public final class QrCode {
 	public final int version;
 	
 	/** The width and height of this QR Code symbol, measured in modules.
-	 * Always equal to version &times; 4 + 17, in the range 21 to 177 (inclusive). */
+	 * Always equal to version &#xD7; 4 + 17, in the range 21 to 177 (inclusive). */
 	public final int size;
 	
 	/** The error correction level used in this QR Code symbol. Never {@code null}. */
@@ -207,7 +207,7 @@ public final class QrCode {
 	 * @param ver the version number to use, which must be in the range 1 to 40 (inclusive)
 	 * @param ecl the error correction level to use
 	 * @param dataCodewords the bytes representing segments to encode (without ECC)
-	 * @param mask the mask pattern to use, which is either &minus;1 for automatic choice or from 0 to 7 for fixed choice
+	 * @param mask the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice
 	 * @throws NullPointerException if the byte array or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the version or mask value is out of range,
 	 * or if the data is the wrong length for the specified version and error correction level
@@ -241,8 +241,8 @@ public final class QrCode {
 	 * Returns the color of the module (pixel) at the specified coordinates, which is either
 	 * false for white or true for black. The top left corner has the coordinates (x=0, y=0).
 	 * If the specified coordinates are out of bounds, then false (white) is returned.
-	 * @param x the x coordinate, where 0 is the left edge and size&minus;1 is the right edge
-	 * @param y the y coordinate, where 0 is the top edge and size&minus;1 is the bottom edge
+	 * @param x the x coordinate, where 0 is the left edge and size&#x2212;1 is the right edge
+	 * @param y the y coordinate, where 0 is the top edge and size&#x2212;1 is the bottom edge
 	 * @return the module's color, which is either false (white) or true (black)
 	 */
 	public boolean getModule(int x, int y) {

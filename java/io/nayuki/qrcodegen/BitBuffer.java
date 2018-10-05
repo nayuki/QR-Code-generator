@@ -68,7 +68,7 @@ public final class BitBuffer implements Cloneable {
 	 * Returns the bit at the specified index, yielding 0 or 1.
 	 * @param index the index to get the bit at
 	 * @return the bit at the specified index
-	 * @throws IndexOutOfBoundsException if index &lt; 0 or index &ge; bitLength
+	 * @throws IndexOutOfBoundsException if index &lt; 0 or index &#x2265; bitLength
 	 */
 	public int getBit(int index) {
 		if (index < 0 || index >= bitLength)
@@ -94,7 +94,7 @@ public final class BitBuffer implements Cloneable {
 	
 	/**
 	 * Appends the specified number of low bits of the specified value to this
-	 * sequence. Requires 0 &le; len &le; 31 and 0 &le; val &lt; 2<sup>len</sup>.
+	 * sequence. Requires 0 &#x2264; len &#x2264; 31 and 0 &#x2264; val &lt; 2<sup>len</sup>.
 	 * @param val the value to append
 	 * @param len the number of low bits in the value to take
 	 * @throws IllegalArgumentException if the value or number of bits is out of range
