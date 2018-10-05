@@ -229,7 +229,7 @@ public final class QrSegmentAdvanced {
 	/**
 	 * Returns a segment representing the specified string encoded in kanji mode.
 	 * <p>Note that broadly speaking, the set of encodable characters are {kanji used in Japan,
-	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.<br/>
+	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.<br>
 	 * Examples of non-encodable characters include {normal ASCII, half-width katakana, more extensive Chinese hanzi}.
 	 * @param text the text to be encoded, which must fall in the kanji mode subset of characters
 	 * @return a segment containing the data
@@ -253,7 +253,7 @@ public final class QrSegmentAdvanced {
 	/**
 	 * Tests whether the specified text string can be encoded as a segment in kanji mode.
 	 * <p>Note that broadly speaking, the set of encodable characters are {kanji used in Japan,
-	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.<br/>
+	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.<br>
 	 * Examples of non-encodable characters include {normal ASCII, half-width katakana, more extensive Chinese hanzi}.
 	 * @param text the string to test for encodability
 	 * @return {@code true} if and only if the string can be encoded in kanji mode

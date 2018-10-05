@@ -116,7 +116,7 @@ public final class QrCode {
 	 * @return a QR Code representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
 	 * @throws IllegalArgumentException if 1 &le; minVersion &le; maxVersion &le; 40
-	 * is violated, or if mask &lt; &minus;1 or mask > 7, or if the segments fail
+	 * is violated, or if mask &lt; &minus;1 or mask &gt; 7, or if the segments fail
 	 * to fit in the maxVersion QR Code at the ECL, which means they are too long
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
