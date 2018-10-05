@@ -400,4 +400,10 @@ public final class QrSegmentAdvanced {
 		}
 	}
 	
+	
+	
+	/*---- Miscellaneous ----*/
+	
+	private QrSegmentAdvanced() {}  // Not instantiable
+	
 }
