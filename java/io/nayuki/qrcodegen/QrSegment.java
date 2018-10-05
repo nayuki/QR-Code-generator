@@ -106,10 +106,10 @@ public final class QrSegment {
 	
 	
 	/**
-	 * Returns a new mutable list of zero or more segments to represent the specified Unicode text string.
+	 * Returns a list of zero or more segments to represent the specified Unicode text string.
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
 	 * @param text the text to be encoded, which can be any Unicode string
-	 * @return a list of segments containing the text
+	 * @return a new mutable list of segments containing the text
 	 * @throws NullPointerException if the text is {@code null}
 	 */
 	public static List<QrSegment> makeSegments(String text) {
@@ -159,7 +159,9 @@ public final class QrSegment {
 	/** The mode indicator for this segment. Never {@code null}. */
 	public final Mode mode;
 	
-	/** The length of this segment's unencoded data, measured in characters. Always zero or positive. */
+	/** The length of this segment's unencoded data, measured in characters for
+	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+	 * Always zero or positive. */
 	public final int numChars;
 	
 	/** The data bits of this segment. Accessed through {@link getBits()}. Not {@code null}. */
@@ -170,8 +172,10 @@ public final class QrSegment {
 	
 	/**
 	 * Constructs a QR Code segment with the specified parameters and data.
+	 * The character count (numCh) must agree with the mode and the bit buffer length,
+	 * but the constraint isn't checked. The specified bit buffer is cloned and stored.
 	 * @param md the mode, which is not {@code null}
-	 * @param numCh the data length in characters, which is non-negative
+	 * @param numCh the data length in characters or bytes, which is non-negative
 	 * @param data the data bits of this segment, which is not {@code null}
 	 * @throws NullPointerException if the mode or data is {@code null}
 	 * @throws IllegalArgumentException if the character count is negative

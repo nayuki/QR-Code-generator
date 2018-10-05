@@ -678,11 +678,18 @@ class QrSegment(object):
 	# ---- Constructor (low level) ----
 	
 	def __init__(self, mode, numch, bitdata):
-		"""Creates a new QR Code segment with the given parameters and data."""
+		"""Creates a new QR Code segment with the given parameters and data.
+		The character count (numch) must agree with the mode and the bit buffer length,
+		but the constraint isn't checked. The given bit buffer is cloned and stored."""
 		if numch < 0 or not isinstance(mode, QrSegment.Mode):
 			raise ValueError()
 		self._mode = mode
+		
+		# The length of this segment's unencoded data, measured in characters for
+		# numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+		# Always zero or positive.
 		self._numchars = numch
+		
 		self._bitdata = list(bitdata)  # Make defensive copy
 	
 	

@@ -738,11 +738,15 @@ namespace qrcodegen {
 		/*-- Constructor (low level) and fields --*/
 		
 		// Creates a new QR Code segment with the given parameters and data.
+		// The character count (numChars) must agree with the mode and the bit buffer length,
+		// but the constraint isn't checked. The given bit buffer is cloned and stored.
 		public constructor(
 				// The mode indicator for this segment.
 				public readonly mode: QrSegment.Mode,
 				
-				// The length of this segment's unencoded data, measured in characters. Always zero or positive.
+				// The length of this segment's unencoded data, measured in characters for
+				// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+				// Always zero or positive.
 				public readonly numChars: int,
 				
 				private readonly bitData: Array<bit>) {

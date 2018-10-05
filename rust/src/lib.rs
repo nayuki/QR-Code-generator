@@ -832,7 +832,8 @@ pub struct QrSegment {
 	// The mode indicator for this segment.
 	mode: QrSegmentMode,
 	
-	// The length of this segment's unencoded data, measured in characters.
+	// The length of this segment's unencoded data, measured in characters for
+	// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
 	numchars: usize,
 	
 	// The bits of this segment.
@@ -905,8 +906,8 @@ impl QrSegment {
 	}
 	
 	
-	// Returns a new mutable list of zero or more segments to represent the given Unicode text string.
-	// The result may use various segment modes and switch modes to optimize the length of the bit stream.
+	// Returns a list of zero or more segments to represent the given Unicode text string. The result
+	// may use various segment modes and switch modes to optimize the length of the bit stream.
 	pub fn make_segments(text: &[char]) -> Vec<Self> {
 		if text.is_empty() {
 			vec![]
@@ -943,6 +944,8 @@ impl QrSegment {
 	/*---- Constructor (low level) ----*/
 	
 	// Creates a new QR Code segment with the given parameters and data.
+	// The character count (numchars) must agree with the mode and
+	// the bit buffer length, but the constraint isn't checked.
 	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> Self {
 		Self {
 			mode: mode,

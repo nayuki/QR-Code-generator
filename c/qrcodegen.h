@@ -85,10 +85,9 @@ struct qrcodegen_Segment {
 	// The mode indicator for this segment.
 	enum qrcodegen_Mode mode;
 	
-	// The length of this segment's unencoded data. Always in the range [0, 32767].
-	// For numeric, alphanumeric, and kanji modes, this measures in Unicode code points.
-	// For byte mode, this measures in bytes (raw binary data, text in UTF-8, or other encodings).
-	// For ECI mode, this is always zero.
+	// The length of this segment's unencoded data, measured in characters for
+	// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+	// Always zero or positive.
 	int numChars;
 	
 	// The data bits of this segment, packed in bitwise big endian.
@@ -97,6 +96,7 @@ struct qrcodegen_Segment {
 	
 	// The number of valid data bits used in the buffer. Requires
 	// 0 <= bitLength <= 32767, and bitLength <= (capacity of data array) * 8.
+	// The character count (numChars) must agree with the mode and the bit buffer length.
 	int bitLength;
 };
 

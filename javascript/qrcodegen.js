@@ -698,6 +698,9 @@ var qrcodegen = new function() {
 	 * This segment class imposes no length restrictions, but QR Codes have restrictions.
 	 * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 	 * Any segment longer than this is meaningless for the purpose of generating QR Codes.
+	 * This constructor creates a QR Code segment with the given parameters and data.
+	 * The character count (numChars) must agree with the mode and the bit buffer length,
+	 * but the constraint isn't checked. The given bit buffer is cloned and stored.
 	 */
 	this.QrSegment = function(mode, numChars, bitData) {
 		/*---- Constructor (low level) ----*/
@@ -708,7 +711,9 @@ var qrcodegen = new function() {
 		// The mode indicator for this segment.
 		Object.defineProperty(this, "mode", {value:mode});
 		
-		// The length of this segment's unencoded data, measured in characters. Always zero or positive.
+		// The length of this segment's unencoded data, measured in characters for
+		// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+		// Always zero or positive.
 		Object.defineProperty(this, "numChars", {value:numChars});
 		
 		// Returns a copy of all bits, which is an array of 0s and 1s.

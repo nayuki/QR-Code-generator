@@ -109,8 +109,8 @@ class QrSegment final {
 	
 	
 	/* 
-	 * Returns a list of zero or more segments to represent the given text string.
-	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
+	 * Returns a list of zero or more segments to represent the given text string. The result
+	 * may use various segment modes and switch modes to optimize the length of the bit stream.
 	 */
 	public: static std::vector<QrSegment> makeSegments(const char *text);
 	
@@ -142,7 +142,9 @@ class QrSegment final {
 	/* The mode indicator for this segment. */
 	private: Mode mode;
 	
-	/* The length of this segment's unencoded data, measured in characters. Always zero or positive. */
+	/* The length of this segment's unencoded data, measured in characters for
+	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+	 * Always zero or positive. */
 	private: int numChars;
 	
 	/* The data bits of this segment. */
@@ -153,12 +155,16 @@ class QrSegment final {
 	
 	/* 
 	 * Creates a new QR Code segment with the given parameters and data.
+	 * The character count (numCh) must agree with the mode and the bit buffer length,
+	 * but the constraint isn't checked. The given bit buffer is copied and stored.
 	 */
 	public: QrSegment(Mode md, int numCh, const std::vector<bool> &dt);
 	
 	
 	/* 
 	 * Creates a new QR Code data segment with the given parameters and data.
+	 * The character count (numCh) must agree with the mode and the bit buffer length,
+	 * but the constraint isn't checked. The given bit buffer is moved and stored.
 	 */
 	public: QrSegment(Mode md, int numCh, std::vector<bool> &&dt);
 	
