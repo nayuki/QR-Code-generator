@@ -685,6 +685,8 @@ class QrSegment(object):
 			raise TypeError("QrSegment.Mode expected")
 		if numch < 0:
 			raise ValueError()
+		
+		# The mode indicator for this segment.
 		self._mode = mode
 		
 		# The length of this segment's unencoded data, measured in characters for
@@ -692,6 +694,7 @@ class QrSegment(object):
 		# Always zero or positive.
 		self._numchars = numch
 		
+		# The data bits of this segment. Accessed through get_bits().
 		self._bitdata = list(bitdata)  # Make defensive copy
 	
 	

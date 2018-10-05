@@ -162,7 +162,7 @@ class QrSegment final {
 	
 	
 	/* 
-	 * Creates a new QR Code data segment with the given parameters and data.
+	 * Creates a new QR Code segment with the given parameters and data.
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
 	 * but the constraint isn't checked. The given bit buffer is moved and stored.
 	 */
