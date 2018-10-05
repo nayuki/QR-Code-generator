@@ -40,7 +40,7 @@ public final class QrCode {
 	/*---- Static factory functions (high level) ----*/
 	
 	/**
-	 * Returns a QR Code symbol representing the specified Unicode text string at the specified error correction level.
+	 * Returns a QR Code representing the specified Unicode text string at the specified error correction level.
 	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
 	 * Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
 	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
@@ -61,7 +61,7 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a QR Code symbol representing the specified binary data string at the specified error correction level.
+	 * Returns a QR Code representing the specified binary data string at the specified error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
@@ -83,7 +83,7 @@ public final class QrCode {
 	/*---- Static factory functions (mid level) ----*/
 	
 	/**
-	 * Returns a QR Code symbol representing the specified segments at the specified error correction
+	 * Returns a QR Code representing the specified segments at the specified error correction
 	 * level. The smallest possible QR Code version is automatically chosen for the output. The ECC level
 	 * of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
@@ -102,7 +102,7 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a QR Code symbol representing the specified segments with the specified encoding parameters.
+	 * Returns a QR Code representing the specified segments with the specified encoding parameters.
 	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -163,7 +163,7 @@ public final class QrCode {
 		for (int padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bb.appendBits(padByte, 8);
 		
-		// Create the QR Code symbol
+		// Create the QR Code object
 		return new QrCode(version, ecl, bb.getBytes(), mask);
 	}
 	
@@ -173,24 +173,24 @@ public final class QrCode {
 	
 	// Public immutable scalar parameters:
 	
-	/** This QR Code symbol's version number, which is always between 1 and 40 (inclusive). */
+	/** This QR Code's version number, which is always between 1 and 40 (inclusive). */
 	public final int version;
 	
-	/** The width and height of this QR Code symbol, measured in modules.
+	/** The width and height of this QR Code, measured in modules.
 	 * Always equal to version &#xD7; 4 + 17, in the range 21 to 177 (inclusive). */
 	public final int size;
 	
-	/** The error correction level used in this QR Code symbol. Never {@code null}. */
+	/** The error correction level used in this QR Code. Never {@code null}. */
 	public final Ecc errorCorrectionLevel;
 	
-	/** The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
+	/** The mask pattern used in this QR Code, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 	 * Note that even if a constructor was called with automatic masking requested
 	 * (mask = -1), the resulting object will still have a mask value between 0 and 7. */
 	public final int mask;
 	
 	// Private grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code symbol (false = white, true = black). Immutable after constructor finishes.
+	// The modules of this QR Code (false = white, true = black). Immutable after constructor finishes.
 	private boolean[][] modules;
 	
 	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
@@ -201,7 +201,7 @@ public final class QrCode {
 	/*---- Constructor (low level) ----*/
 	
 	/**
-	 * Constructs a QR Code symbol with the specified version number, error correction level, binary data array, and mask number.
+	 * Constructs a QR Code with the specified version number, error correction level, binary data array, and mask number.
 	 * <p>This is a cumbersome low-level constructor that should not be invoked directly by the user.
 	 * To go one level up, see the {@link #encodeSegments(List,Ecc,int,int,int,boolean)} function.</p>
 	 * @param ver the version number to use, which must be in the range 1 to 40 (inclusive)
@@ -252,7 +252,7 @@ public final class QrCode {
 	
 	/**
 	 * Returns a new image object representing this QR Code, with the specified module scale and number
-	 * of border modules. For example, the arguments scale=10, border=4 means to pad the QR Code symbol
+	 * of border modules. For example, the arguments scale=10, border=4 means to pad the QR Code
 	 * with 4 white border modules on all four edges, then use 10*10 pixels to represent each module.
 	 * The resulting image only contains the hex colors 000000 and FFFFFF.
 	 * @param scale the module scale factor, which must be positive
@@ -279,7 +279,7 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a string of SVG XML code representing an image of this QR Code symbol with the specified
+	 * Returns a string of SVG XML code representing an image of this QR Code with the specified
 	 * number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return a string representing this QR Code as an SVG document
@@ -474,7 +474,7 @@ public final class QrCode {
 	
 	
 	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
-	// data area of this QR Code symbol. Function modules need to be marked off before this is called.
+	// data area of this QR Code. Function modules need to be marked off before this is called.
 	private void drawCodewords(byte[] data) {
 		Objects.requireNonNull(data);
 		if (data.length != getNumRawDataModules(version) / 8)
@@ -507,7 +507,7 @@ public final class QrCode {
 	// The function modules must be marked and the codeword bits must be drawn
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
-	// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
+	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 	private void applyMask(int mask) {
 		if (mask < 0 || mask > 7)
 			throw new IllegalArgumentException("Mask value out of range");
@@ -670,7 +670,7 @@ public final class QrCode {
 			throw new IllegalArgumentException("Version number out of range");
 		
 		int size = ver * 4 + 17;
-		int result = size * size;   // Number of modules in the whole QR symbol square
+		int result = size * size;   // Number of modules in the whole QR Code square
 		result -= 8 * 8 * 3;        // Subtract the three finders with separators
 		result -= 15 * 2 + 1;       // Subtract the format information and black module
 		result -= (size - 16) * 2;  // Subtract the timing patterns (excluding finders)

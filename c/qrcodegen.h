@@ -133,7 +133,7 @@ struct qrcodegen_Segment {
 /*---- Functions to generate QR Codes ----*/
 
 /* 
- * Encodes the given text string to a QR Code symbol, returning true if encoding succeeded.
+ * Encodes the given text string to a QR Code, returning true if encoding succeeded.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
  * - The input text must be encoded in UTF-8 and contain no NULs.
@@ -156,7 +156,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 
 
 /* 
- * Encodes the given binary data to a QR Code symbol, returning true if encoding succeeded.
+ * Encodes the given binary data to a QR Code, returning true if encoding succeeded.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
  * - The input array range dataAndTemp[0 : dataLen] should normally be
@@ -236,7 +236,7 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]);
 
 
 /* 
- * Renders a QR Code symbol representing the given segments at the given error correction level.
+ * Renders a QR Code representing the given segments at the given error correction level.
  * The smallest possible QR Code version is automatically chosen for the output. Returns true if
  * QR Code creation succeeded, or false if the data is too long to fit in any version. The ECC level
  * of the result may be higher than the ecl argument if it can be done without increasing the version.
@@ -252,7 +252,7 @@ bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
 
 
 /* 
- * Renders a QR Code symbol representing the given segments with the given encoding parameters.
+ * Renders a QR Code representing the given segments with the given encoding parameters.
  * Returns true if QR Code creation succeeded, or false if the data is too long to fit in the range of versions.
  * The smallest possible QR Code version within the given range is automatically chosen for the output.
  * This function allows the user to create a custom sequence of segments that switches

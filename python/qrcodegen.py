@@ -70,7 +70,7 @@ class QrCode(object):
 	
 	@staticmethod
 	def encode_text(text, ecl):
-		"""Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
+		"""Returns a QR Code representing the given Unicode text string at the given error correction level.
 		As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
 		Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
 		QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
@@ -81,7 +81,7 @@ class QrCode(object):
 	
 	@staticmethod
 	def encode_binary(data, ecl):
-		"""Returns a QR Code symbol representing the given binary data string at the given error correction level.
+		"""Returns a QR Code representing the given binary data string at the given error correction level.
 		This function always encodes using the binary segment mode, not any text mode. The maximum number of
 		bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 		The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version."""
@@ -94,7 +94,7 @@ class QrCode(object):
 	
 	@staticmethod
 	def encode_segments(segs, ecl, minversion=1, maxversion=40, mask=-1, boostecl=True):
-		"""Returns a QR Code symbol representing the given segments with the given encoding parameters.
+		"""Returns a QR Code representing the given segments with the given encoding parameters.
 		The smallest possible QR Code version within the given range is automatically chosen for the output.
 		This function allows the user to create a custom sequence of segments that switches
 		between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -140,14 +140,14 @@ class QrCode(object):
 				break
 			bb.append_bits(padbyte, 8)
 		
-		# Create the QR Code symbol
+		# Create the QR Code object
 		return QrCode(version, ecl, bb.get_bytes(), mask)
 	
 	
 	# ---- Constructor (low level) ----
 	
 	def __init__(self, version, errcorlvl, datacodewords, mask):
-		"""Creates a new QR Code symbol with the given version number, error correction level, binary data array,
+		"""Creates a new QR Code with the given version number, error correction level, binary data array,
 		and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
 		that should not be invoked directly by the user. To go one level up, see the QrCode.encode_segments() function."""
 		
@@ -163,7 +163,7 @@ class QrCode(object):
 		self._errcorlvl = errcorlvl
 		
 		# Initialize both grids to be size*size arrays of Boolean false
-		# The modules of this QR Code symbol (False = white, True = black). Immutable after constructor finishes
+		# The modules of this QR Code (False = white, True = black). Immutable after constructor finishes
 		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all white
 		# Indicates function modules that are not subjected to masking. Discarded when constructor finishes
 		self._isfunction = [[False] * self._size for _ in range(self._size)]
@@ -195,20 +195,20 @@ class QrCode(object):
 	# ---- Accessor methods ----
 	
 	def get_version(self):
-		"""Returns this QR Code symbol's version number, which is always between 1 and 40 (inclusive)."""
+		"""Returns this QR Code's version number, which is always between 1 and 40 (inclusive)."""
 		return self._version
 	
 	def get_size(self):
-		"""Returns the width and height of this QR Code symbol, measured in modules.
+		"""Returns the width and height of this QR Code, measured in modules.
 		Always equal to version * 4 + 17, in the range 21 to 177."""
 		return self._size
 	
 	def get_error_correction_level(self):
-		"""Returns the error correction level used in this QR Code symbol."""
+		"""Returns the error correction level used in this QR Code."""
 		return self._errcorlvl
 	
 	def get_mask(self):
-		"""Returns the mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
+		"""Returns the mask pattern used in this QR Code, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 		Note that even if a constructor was called with automatic masking requested
 		(mask = -1), the resulting object will still have a mask value between 0 and 7."""
 		return self._mask
@@ -223,7 +223,7 @@ class QrCode(object):
 	# ---- Public instance methods ----
 	
 	def to_svg_str(self, border):
-		"""Returns a string of SVG XML code representing an image of this QR Code symbol with the given
+		"""Returns a string of SVG XML code representing an image of this QR Code with the given
 		number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform."""
 		if border < 0:
 			raise ValueError("Border must be non-negative")
@@ -387,7 +387,7 @@ class QrCode(object):
 	
 	def _draw_codewords(self, data):
 		"""Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
-		data area of this QR Code symbol. Function modules need to be marked off before this is called."""
+		data area of this QR Code. Function modules need to be marked off before this is called."""
 		assert len(data) == QrCode._get_num_raw_data_modules(self._version) // 8
 		
 		i = 0  # Bit index into the data
@@ -413,7 +413,7 @@ class QrCode(object):
 		The function modules must be marked and the codeword bits must be drawn
 		before masking. Due to the arithmetic of XOR, calling applyMask() with
 		the same mask value a second time will undo the mask. A final well-formed
-		QR Code symbol needs exactly one (not zero, two, etc.) mask applied."""
+		QR Code needs exactly one (not zero, two, etc.) mask applied."""
 		if not (0 <= mask <= 7):
 			raise ValueError("Mask value out of range")
 		masker = QrCode._MASK_PATTERNS[mask]

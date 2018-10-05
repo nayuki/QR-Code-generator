@@ -109,7 +109,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	for (uint8_t padByte = 0xEC; bb.size() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 		bb.appendBits(padByte, 8);
 	
-	// Create the QR Code symbol
+	// Create the QR Code object
 	return QrCode(version, ecl, bb.getBytes(), mask);
 }
 

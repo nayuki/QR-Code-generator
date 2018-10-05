@@ -60,7 +60,7 @@ class QrCode final {
 	/*---- Static factory functions (high level) ----*/
 	
 	/* 
-	 * Returns a QR Code symbol representing the given Unicode text string at the given error correction level.
+	 * Returns a QR Code representing the given Unicode text string at the given error correction level.
 	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 2953 or fewer
 	 * UTF-8 code units (not Unicode code points) if the low error correction level is used. The smallest possible
 	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
@@ -70,7 +70,7 @@ class QrCode final {
 	
 	
 	/* 
-	 * Returns a QR Code symbol representing the given binary data string at the given error correction level.
+	 * Returns a QR Code representing the given binary data string at the given error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
@@ -81,7 +81,7 @@ class QrCode final {
 	/*---- Static factory functions (mid level) ----*/
 	
 	/* 
-	 * Returns a QR Code symbol representing the given segments with the given encoding parameters.
+	 * Returns a QR Code representing the given segments with the given encoding parameters.
 	 * The smallest possible QR Code version within the given range is automatically chosen for the output.
 	 * This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
@@ -96,24 +96,24 @@ class QrCode final {
 	
 	// Immutable scalar parameters:
 	
-	/* This QR Code symbol's version number, which is always between 1 and 40 (inclusive). */
+	/* This QR Code's version number, which is always between 1 and 40 (inclusive). */
 	private: int version;
 	
-	/* The width and height of this QR Code symbol, measured in modules.
+	/* The width and height of this QR Code, measured in modules.
 	 * Always equal to version * 4 + 17, in the range 21 to 177. */
 	private: int size;
 	
-	/* The error correction level used in this QR Code symbol. */
+	/* The error correction level used in this QR Code. */
 	private: Ecc errorCorrectionLevel;
 	
-	/* The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
+	/* The mask pattern used in this QR Code, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 	 * Note that even if a constructor was called with automatic masking requested
 	 * (mask = -1), the resulting object will still have a mask value between 0 and 7. */
 	private: int mask;
 	
 	// Private grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code symbol (false = white, true = black). Immutable after constructor finishes.
+	// The modules of this QR Code (false = white, true = black). Immutable after constructor finishes.
 	private: std::vector<std::vector<bool> > modules;
 	
 	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
@@ -124,7 +124,7 @@ class QrCode final {
 	/*---- Constructor (low level) ----*/
 	
 	/* 
-	 * Creates a new QR Code symbol with the given version number, error correction level, binary data array,
+	 * Creates a new QR Code with the given version number, error correction level, binary data array,
 	 * and mask number. This is a cumbersome low-level constructor that should not be invoked directly by the user.
 	 * To go one level up, see the encodeSegments() function.
 	 */
@@ -155,7 +155,7 @@ class QrCode final {
 	
 	
 	/* 
-	 * Returns a string of SVG XML code representing an image of this QR Code symbol with the given
+	 * Returns a string of SVG XML code representing an image of this QR Code with the given
 	 * number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
 	 */
 	public: std::string toSvgString(int border) const;
@@ -205,7 +205,7 @@ class QrCode final {
 	
 	
 	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
-	// data area of this QR Code symbol. Function modules need to be marked off before this is called.
+	// data area of this QR Code. Function modules need to be marked off before this is called.
 	private: void drawCodewords(const std::vector<std::uint8_t> &data);
 	
 	
@@ -213,7 +213,7 @@ class QrCode final {
 	// The function modules must be marked and the codeword bits must be drawn
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
-	// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
+	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 	private: void applyMask(int mask);
 	
 	
