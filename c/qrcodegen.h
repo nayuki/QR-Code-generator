@@ -84,12 +84,12 @@ enum qrcodegen_Mode {
  * bit length is 32767, because even the largest QR Code (version 40) has only 31329 modules.
  */
 struct qrcodegen_Segment {
-	// The mode indicator for this segment.
+	// The mode indicator of this segment.
 	enum qrcodegen_Mode mode;
 	
-	// The length of this segment's unencoded data, measured in characters for
+	// The length of this segment's unencoded data. Measured in characters for
 	// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-	// Always zero or positive.
+	// Always zero or positive. Not the same as the data's bit length.
 	int numChars;
 	
 	// The data bits of this segment, packed in bitwise big endian.

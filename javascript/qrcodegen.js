@@ -710,12 +710,12 @@ var qrcodegen = new function() {
 			throw "Invalid argument";
 		bitData = bitData.slice();  // Make defensive copy
 		
-		// The mode indicator for this segment.
+		// The mode indicator of this segment.
 		Object.defineProperty(this, "mode", {value:mode});
 		
-		// The length of this segment's unencoded data, measured in characters for
+		// The length of this segment's unencoded data. Measured in characters for
 		// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-		// Always zero or positive.
+		// Always zero or positive. Not the same as the data's bit length.
 		Object.defineProperty(this, "numChars", {value:numChars});
 		
 		// Returns a copy of all bits, which is an array of 0s and 1s.

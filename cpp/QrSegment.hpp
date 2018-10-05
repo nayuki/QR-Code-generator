@@ -139,15 +139,16 @@ class QrSegment final {
 	
 	/*---- Instance fields ----*/
 	
-	/* The mode indicator for this segment. */
+	/* The mode indicator of this segment. Accessed through getMode(). */
 	private: Mode mode;
 	
-	/* The length of this segment's unencoded data, measured in characters for
+	/* The length of this segment's unencoded data. Measured in characters for
 	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-	 * Always zero or positive. */
+	 * Always zero or positive. Not the same as the data's bit length.
+	 * Accessed through getNumChars(). */
 	private: int numChars;
 	
-	/* The data bits of this segment. */
+	/* The data bits of this segment. Accessed through getData(). */
 	private: std::vector<bool> data;
 	
 	

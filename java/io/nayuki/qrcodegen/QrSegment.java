@@ -156,15 +156,15 @@ public final class QrSegment {
 	
 	/*---- Instance fields ----*/
 	
-	/** The mode indicator for this segment. Never {@code null}. */
+	/** The mode indicator of this segment. Not {@code null}. */
 	public final Mode mode;
 	
-	/** The length of this segment's unencoded data, measured in characters for
+	/** The length of this segment's unencoded data. Measured in characters for
 	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-	 * Always zero or positive. */
+	 * Always zero or positive. Not the same as the data's bit length. */
 	public final int numChars;
 	
-	/** The data bits of this segment. Accessed through {@link getBits()}. Not {@code null}. */
+	/** The data bits of this segment. Not {@code null}. Accessed through {@link getBits()}. */
 	final BitBuffer data;
 	
 	

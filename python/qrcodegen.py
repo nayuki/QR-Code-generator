@@ -688,12 +688,13 @@ class QrSegment(object):
 		if numch < 0:
 			raise ValueError()
 		
-		# The mode indicator for this segment.
+		# The mode indicator of this segment. Accessed through get_mode().
 		self._mode = mode
 		
-		# The length of this segment's unencoded data, measured in characters for
+		# The length of this segment's unencoded data. Measured in characters for
 		# numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-		# Always zero or positive.
+		# Always zero or positive. Not the same as the data's bit length.
+		# Accessed through get_num_chars().
 		self._numchars = numch
 		
 		# The data bits of this segment. Accessed through get_bits().

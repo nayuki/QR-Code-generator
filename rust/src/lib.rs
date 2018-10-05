@@ -833,14 +833,15 @@ impl ReedSolomonGenerator {
 #[derive(Clone)]
 pub struct QrSegment {
 	
-	// The mode indicator for this segment.
+	// The mode indicator of this segment. Accessed through mode().
 	mode: QrSegmentMode,
 	
-	// The length of this segment's unencoded data, measured in characters for
+	// The length of this segment's unencoded data. Measured in characters for
 	// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+	// Not the same as the data's bit length. Accessed through num_chars().
 	numchars: usize,
 	
-	// The bits of this segment.
+	// The data bits of this segment. Accessed through data().
 	data: Vec<bool>,
 	
 }

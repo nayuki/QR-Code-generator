@@ -742,14 +742,15 @@ namespace qrcodegen {
 		// The character count (numChars) must agree with the mode and the bit buffer length,
 		// but the constraint isn't checked. The given bit buffer is cloned and stored.
 		public constructor(
-				// The mode indicator for this segment.
+				// The mode indicator of this segment.
 				public readonly mode: QrSegment.Mode,
 				
-				// The length of this segment's unencoded data, measured in characters for
+				// The length of this segment's unencoded data. Measured in characters for
 				// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-				// Always zero or positive.
+				// Always zero or positive. Not the same as the data's bit length.
 				public readonly numChars: int,
 				
+				// The data bits of this segment. Accessed through getBits().
 				private readonly bitData: Array<bit>) {
 			
 			if (numChars < 0)
