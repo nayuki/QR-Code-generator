@@ -32,6 +32,12 @@ import java.util.Objects;
 import io.nayuki.qrcodegen.QrSegment.Mode;
 
 
+/**
+ * Splits text into optimal segments and encodes kanji segments.
+ * Provides static functions only; not instantiable.
+ * @see QrSegment
+ * @see QrCode
+ */
 public final class QrSegmentAdvanced {
 	
 	/*---- Optimal list of segments encoder ----*/
@@ -40,18 +46,19 @@ public final class QrSegmentAdvanced {
 	 * Returns a list of zero or more segments to represent the specified Unicode text string.
 	 * The resulting list optimally minimizes the total encoded bit length, subjected to the constraints
 	 * in the specified {error correction level, minimum version number, maximum version number}.
-	 * <p>This function can utilize all four text encoding modes: numeric, alphanumeric, byte, and kanji.
-	 * This can be viewed as a significantly more sophisticated and slower replacement for
-	 * {@link QrSegment#makeSegments(String)}, but requiring more input parameters in a way
-	 * that overlaps with {@link QrCode#encodeSegments(List,QrCode.Ecc,int,int,int,boolean)}.</p>
-	 * @param text the text to be encoded, which can be any Unicode string
-	 * @param ecl the error correction level to use
-	 * @param minVersion the minimum allowed version of the QR symbol (at least 1)
-	 * @param maxVersion the maximum allowed version of the QR symbol (at most 40)
-	 * @return a new mutable list of segments containing the text, minimizing the bit length with respect to the constraints
-	 * @throws NullPointerException if the data or error correction level is {@code null}
-	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated,
-	 * or if the data is too long to fit in a QR Code at maxVersion at the ECL
+	 * <p>This function can utilize all four text encoding modes: numeric, alphanumeric, byte (UTF-8),
+	 * and kanji. This can be considered as a sophisticated but slower replacement for {@link
+	 * QrSegment#makeSegments(String)}. This requires more input parameters because it searches a
+	 * range of versions, like {@link QrCode#encodeSegments(List,QrCode.Ecc,int,int,int,boolean)}.</p>
+	 * @param text the text to be encoded (not {@code null}), which can be any Unicode string
+	 * @param ecl the error correction level to use (not {@code null})
+	 * @param minVersion the minimum allowed version of the QR Code symbol (at least 1)
+	 * @param maxVersion the maximum allowed version of the QR Code symbol (at most 40)
+	 * @return a new mutable list (not {@code null}) of segments (not {@code null})
+	 * containing the text, minimizing the bit length with respect to the constraints
+	 * @throws NullPointerException if the text or error correction level is {@code null}
+	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
+	 * is violated, or if the data is too long to fit in a QR Code at maxVersion at ECL
 	 */
 	public static List<QrSegment> makeSegmentsOptimally(String text, QrCode.Ecc ecl, int minVersion, int maxVersion) {
 		// Check arguments
@@ -78,7 +85,7 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns a list of segments that is optimal for the given text at the given version number.
+	// Returns a new list of segments that is optimal for the given text at the given version number.
 	private static List<QrSegment> makeSegmentsOptimally(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			return new ArrayList<>();
@@ -87,7 +94,7 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns an array representing the optimal mode per code point based on the given text and version.
+	// Returns a new array representing the optimal mode per code point based on the given text and version.
 	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
@@ -169,7 +176,7 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns a list of segments based on the given text and modes, such that
+	// Returns a new list of segments based on the given text and modes, such that
 	// consecutive code points in the same mode are put into the same segment.
 	private static List<QrSegment> splitIntoSegments(int[] codePoints, Mode[] charModes) {
 		if (codePoints.length == 0)
@@ -201,7 +208,8 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns an array of Unicode code points (effectively UTF-32 / UCS-4) representing the given UTF-16 string.
+	// Returns a new array of Unicode code points (effectively
+	// UTF-32 / UCS-4) representing the given UTF-16 string.
 	private static int[] toCodePoints(String s) {
 		int[] result = s.codePoints().toArray();
 		for (int c : result) {
@@ -227,14 +235,15 @@ public final class QrSegmentAdvanced {
 	/*---- Kanji mode segment encoder ----*/
 	
 	/**
-	 * Returns a segment representing the specified string encoded in kanji mode.
-	 * <p>Note that broadly speaking, the set of encodable characters are {kanji used in Japan,
-	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.<br>
-	 * Examples of non-encodable characters include {normal ASCII, half-width katakana, more extensive Chinese hanzi}.
-	 * @param text the text to be encoded, which must fall in the kanji mode subset of characters
-	 * @return a segment containing the data
+	 * Returns a segment representing the specified text string encoded in kanji mode.
+	 * Broadly speaking, the set of encodable characters are {kanji used in Japan,
+	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.
+	 * Examples of non-encodable characters include {ordinary ASCII, half-width katakana,
+	 * more extensive Chinese hanzi}.
+	 * @param text the text (not {@code null}), with only certain characters allowed
+	 * @return a segment (not {@code null}) containing the text
 	 * @throws NullPointerException if the string is {@code null}
-	 * @throws IllegalArgumentException if the string contains non-kanji-mode characters
+	 * @throws IllegalArgumentException if the string contains non-encodable characters
 	 * @see #isEncodableAsKanji(String)
 	 */
 	public static QrSegment makeKanji(String text) {
@@ -251,12 +260,13 @@ public final class QrSegmentAdvanced {
 	
 	
 	/**
-	 * Tests whether the specified text string can be encoded as a segment in kanji mode.
-	 * <p>Note that broadly speaking, the set of encodable characters are {kanji used in Japan,
-	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.<br>
-	 * Examples of non-encodable characters include {normal ASCII, half-width katakana, more extensive Chinese hanzi}.
-	 * @param text the string to test for encodability
-	 * @return {@code true} if and only if the string can be encoded in kanji mode
+	 * Tests whether the specified string can be encoded as a segment in kanji mode.
+	 * Broadly speaking, the set of encodable characters are {kanji used in Japan,
+	 * hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.
+	 * Examples of non-encodable characters include {ordinary ASCII, half-width katakana,
+	 * more extensive Chinese hanzi}.
+	 * @param text the string to test for encodability (not {@code null})
+	 * @return {@code true} iff each character is in the kanji mode character set
 	 * @throws NullPointerException if the string is {@code null}
 	 * @see #makeKanji(String)
 	 */
