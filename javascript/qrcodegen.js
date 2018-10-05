@@ -77,6 +77,8 @@ var qrcodegen = new function() {
 			throw "Version value out of range";
 		if (mask < -1 || mask > 7)
 			throw "Mask value out of range";
+		if (!(errCorLvl instanceof Ecc))
+			throw "QrCode.Ecc expected";
 		var size = version * 4 + 17;
 		
 		// Initialize both grids to be size*size arrays of Boolean false

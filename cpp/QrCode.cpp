@@ -120,8 +120,10 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 		errorCorrectionLevel(ecl),
 		modules   (size, vector<bool>(size)),  // Initially all white
 		isFunction(size, vector<bool>(size)) {
-	if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
-		throw std::domain_error("Value out of range");
+	if (ver < MIN_VERSION || ver > MAX_VERSION)
+		throw std::domain_error("Version value out of range");
+	if (mask < -1 || mask > 7)
+		throw std::domain_error("Mask value out of range");
 	size = ver * 4 + 17;
 	
 	// Compute ECC, draw modules, do masking

@@ -162,9 +162,6 @@ class QrCode(object):
 		self._size = version * 4 + 17
 		self._errcorlvl = errcorlvl
 		
-		if len(datacodewords) != QrCode._get_num_data_codewords(version, errcorlvl):
-			raise ValueError("Invalid array length")
-		
 		# Initialize both grids to be size*size arrays of Boolean false
 		# The modules of this QR Code symbol (False = white, True = black). Immutable after constructor finishes
 		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all white

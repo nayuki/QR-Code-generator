@@ -214,8 +214,10 @@ public final class QrCode {
 	 */
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
 		// Check arguments and initialize fields
-		if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
-			throw new IllegalArgumentException("Value out of range");
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
+			throw new IllegalArgumentException("Version value out of range");
+		if (mask < -1 || mask > 7)
+			throw new IllegalArgumentException("Mask value out of range");
 		version = ver;
 		size = ver * 4 + 17;
 		errorCorrectionLevel = Objects.requireNonNull(ecl);
