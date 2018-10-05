@@ -80,8 +80,15 @@ enum qrcodegen_Mode {
 
 
 /* 
- * Represents a segment of character data, binary data, or control data. The maximum allowed
- * bit length is 32767, because even the largest QR Code (version 40) has only 31329 modules.
+ * A segment of character/binary/control data in a QR Code symbol.
+ * The mid-level way to create a segment is to take the payload data
+ * and call a factory function such as qrcodegen_makeNumeric().
+ * The low-level way to create a segment is to custom-make the bit buffer
+ * and initialize a qrcodegen_Segment struct with appropriate values.
+ * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
+ * Any segment longer than this is meaningless for the purpose of generating QR Codes.
+ * Moreover, the maximum allowed bit length is 32767 because
+ * the largest QR Code (version 40) has 31329 modules.
  */
 struct qrcodegen_Segment {
 	// The mode indicator of this segment.
@@ -200,7 +207,9 @@ size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars
 
 
 /* 
- * Returns a segment representing the given binary data encoded in byte mode.
+ * Returns a segment representing the given binary data encoded in
+ * byte mode. All input byte arrays are acceptable. Any text string
+ * can be converted to UTF-8 bytes and encoded as a byte mode segment.
  */
 struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, uint8_t buf[]);
 

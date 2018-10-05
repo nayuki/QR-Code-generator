@@ -31,18 +31,27 @@ import java.util.regex.Pattern;
 
 
 /**
- * Represents a segment of character data, binary data, or control data
- * to be put into a QR Code symbol. Instances of this class are immutable.
+ * A segment of character/binary/control data in a QR Code symbol.
+ * Instances of this class are immutable.
+ * <p>The mid-level way to create a segment is to take the payload data and call a
+ * static factory function such as {@link QrSegment#makeNumeric(String)}. The low-level
+ * way to create a segment is to custom-make the bit buffer and call the {@link
+ * QrSegment#QrSegment(Mode,int,BitBuffer) constructor} with appropriate values.</p>
  * <p>This segment class imposes no length restrictions, but QR Codes have restrictions.
  * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
- * Any segment longer than this is meaningless for the purpose of generating QR Codes.</p>
+ * Any segment longer than this is meaningless for the purpose of generating QR Codes.
+ * This class can represent kanji mode segments, but provides no help in encoding them
+ * - see {@link QrSegmentAdvanced} for full kanji support.</p>
  */
 public final class QrSegment {
 	
 	/*---- Static factory functions (mid level) ----*/
 	
 	/**
-	 * Returns a segment representing the specified binary data encoded in byte mode.
+	 * Returns a segment representing the specified binary data
+	 * encoded in byte mode. All input byte arrays are acceptable.
+	 * <p>Any text string can be converted to UTF-8 bytes ({@code
+	 * s.getBytes(StandardCharsets.UTF_8)}) and encoded as a byte mode segment.</p>
 	 * @param data the binary data
 	 * @return a segment containing the data
 	 * @throws NullPointerException if the array is {@code null}
@@ -171,7 +180,7 @@ public final class QrSegment {
 	/*---- Constructor (low level) ----*/
 	
 	/**
-	 * Constructs a QR Code segment with the specified parameters and data.
+	 * Constructs a QR Code segment with the specified attributes and data.
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
 	 * but the constraint isn't checked. The specified bit buffer is cloned and stored.
 	 * @param md the mode, which is not {@code null}

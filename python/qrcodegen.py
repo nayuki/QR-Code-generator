@@ -586,8 +586,12 @@ class QrCode(object):
 # ---- Data segment class ----
 
 class QrSegment(object):
-	"""Represents a segment of character data, binary data, or control data
-	to be put into a QR Code symbol. Instances of this class are immutable.
+	"""A segment of character/binary/control data in a QR Code symbol.
+	Instances of this class are immutable.
+	The mid-level way to create a segment is to take the payload data
+	and call a static factory function such as QrSegment.make_numeric().
+	The low-level way to create a segment is to custom-make the bit buffer
+	and call the QrSegment() constructor with appropriate values.
 	This segment class imposes no length restrictions, but QR Codes have restrictions.
 	Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 	Any segment longer than this is meaningless for the purpose of generating QR Codes."""
@@ -596,7 +600,9 @@ class QrSegment(object):
 	
 	@staticmethod
 	def make_bytes(data):
-		"""Returns a segment representing the given binary data encoded in byte mode."""
+		"""Returns a segment representing the given binary data encoded in byte mode.
+		All input byte lists are acceptable. Any text string can be converted to
+		UTF-8 bytes (s.encode("UTF-8")) and encoded as a byte mode segment."""
 		py3 = sys.version_info.major >= 3
 		if (py3 and isinstance(data, str)) or (not py3 and isinstance(data, unicode)):
 			raise TypeError("Byte string/list expected")
@@ -680,7 +686,7 @@ class QrSegment(object):
 	# ---- Constructor (low level) ----
 	
 	def __init__(self, mode, numch, bitdata):
-		"""Creates a new QR Code segment with the given parameters and data.
+		"""Creates a new QR Code segment with the given attributes and data.
 		The character count (numch) must agree with the mode and the bit buffer length,
 		but the constraint isn't checked. The given bit buffer is cloned and stored."""
 		if not isinstance(mode, QrSegment.Mode):

@@ -828,8 +828,17 @@ impl ReedSolomonGenerator {
 
 /*---- QrSegment functionality ----*/
 
-// Represents a segment of character data, binary data, or control data
-// to be put into a QR Code symbol. Instances of this class are immutable.
+/* 
+ * A segment of character/binary/control data in a QR Code symbol.
+ * Instances of this struct are immutable.
+ * The mid-level way to create a segment is to take the payload data
+ * and call a static factory function such as QrSegment::make_numeric().
+ * The low-level way to create a segment is to custom-make the bit buffer
+ * and call the QrSegment::new() constructor with appropriate values.
+ * This segment struct imposes no length restrictions, but QR Codes have restrictions.
+ * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
+ * Any segment longer than this is meaningless for the purpose of generating QR Codes.
+ */
 #[derive(Clone)]
 pub struct QrSegment {
 	
@@ -851,7 +860,9 @@ impl QrSegment {
 	
 	/*---- Static factory functions (mid level) ----*/
 	
-	// Returns a segment representing the given binary data encoded in byte mode.
+	// Returns a segment representing the given binary data encoded in
+	// byte mode. All input byte slices are acceptable. Any text string
+	// can be converted to UTF-8 bytes and encoded as a byte mode segment.
 	pub fn make_bytes(data: &[u8]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
 		for b in data {
@@ -948,7 +959,7 @@ impl QrSegment {
 	
 	/*---- Constructor (low level) ----*/
 	
-	// Creates a new QR Code segment with the given parameters and data.
+	// Creates a new QR Code segment with the given attributes and data.
 	// The character count (numchars) must agree with the mode and
 	// the bit buffer length, but the constraint isn't checked.
 	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> Self {
