@@ -32,7 +32,7 @@
  *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
  *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
  *   - Constants int MIN_VERSION, MAX_VERSION
- *   - Constructor QrCode(list<int> datacodewords, int mask, int version, QrCode.Ecc ecl)
+ *   - Constructor QrCode(list<int> dataCodewords, int mask, int version, QrCode.Ecc ecl)
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
  *   - Method getModule(int x, int y) -> bool
@@ -68,7 +68,7 @@ var qrcodegen = new function() {
 	 * and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
 	 * that should not be invoked directly by the user. To go one level up, see the QrCode.encodeSegments() function.
 	 */
-	this.QrCode = function(datacodewords, mask, version, errCorLvl) {
+	this.QrCode = function(dataCodewords, mask, version, errCorLvl) {
 		
 		/*---- Constructor (low level) ----*/
 		
@@ -92,7 +92,7 @@ var qrcodegen = new function() {
 		
 		// Handle grid fields, draw function patterns, draw all codewords
 		drawFunctionPatterns();
-		var allCodewords = addEccAndInterleave(datacodewords);
+		var allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
 		
 		// Handle masking

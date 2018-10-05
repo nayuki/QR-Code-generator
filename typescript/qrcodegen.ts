@@ -147,7 +147,7 @@ namespace qrcodegen {
 		/*-- Constructor (low level) and fields --*/
 		
 		public constructor(
-				datacodewords: Array<byte>,
+				dataCodewords: Array<byte>,
 				
 				// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 				// Note that even if the constructor was called with automatic masking requested
@@ -178,7 +178,7 @@ namespace qrcodegen {
 			
 			// Handle grid fields, draw function patterns, draw all codewords
 			this.drawFunctionPatterns();
-			let allCodewords: Array<byte> = this.addEccAndInterleave(datacodewords);
+			let allCodewords: Array<byte> = this.addEccAndInterleave(dataCodewords);
 			this.drawCodewords(allCodewords);
 			
 			// Handle masking
