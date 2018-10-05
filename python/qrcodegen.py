@@ -569,17 +569,17 @@ class QrCode(object):
 	# ---- Public helper enumeration ----
 	
 	class Ecc(object):
-		"""Represents the error correction level used in a QR Code symbol."""
+		"""The error correction level in a QR Code symbol. Immutable."""
 		# Private constructor
 		def __init__(self, i, fb):
 			self.ordinal = i  # (Public) In the range 0 to 3 (unsigned 2-bit integer)
 			self.formatbits = fb  # (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
 	
 	# Public constants. Create them outside the class.
-	Ecc.LOW      = Ecc(0, 1)
-	Ecc.MEDIUM   = Ecc(1, 0)
-	Ecc.QUARTILE = Ecc(2, 3)
-	Ecc.HIGH     = Ecc(3, 2)
+	Ecc.LOW      = Ecc(0, 1)  # The QR Code can tolerate about  7% erroneous codewords
+	Ecc.MEDIUM   = Ecc(1, 0)  # The QR Code can tolerate about 15% erroneous codewords
+	Ecc.QUARTILE = Ecc(2, 3)  # The QR Code can tolerate about 25% erroneous codewords
+	Ecc.HIGH     = Ecc(3, 2)  # The QR Code can tolerate about 30% erroneous codewords
 
 
 
@@ -742,7 +742,7 @@ class QrSegment(object):
 	# ---- Public helper enumeration ----
 	
 	class Mode(object):
-		"""The mode field of a segment. Immutable."""
+		"""Describes how a segment's data bits are interpreted. Immutable."""
 		
 		# Private constructor
 		def __init__(self, modebits, charcounts):

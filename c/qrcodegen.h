@@ -36,13 +36,15 @@ extern "C" {
 /*---- Enum and struct types----*/
 
 /* 
- * The error correction level used in a QR Code symbol.
+ * The error correction level in a QR Code symbol.
  */
 enum qrcodegen_Ecc {
-	qrcodegen_Ecc_LOW = 0,
-	qrcodegen_Ecc_MEDIUM,
-	qrcodegen_Ecc_QUARTILE,
-	qrcodegen_Ecc_HIGH,
+	// Must be declared in ascending order of error protection
+	// so that an internal qrcodegen function works properly
+	qrcodegen_Ecc_LOW = 0 ,  // The QR Code can tolerate about  7% erroneous codewords
+	qrcodegen_Ecc_MEDIUM  ,  // The QR Code can tolerate about 15% erroneous codewords
+	qrcodegen_Ecc_QUARTILE,  // The QR Code can tolerate about 25% erroneous codewords
+	qrcodegen_Ecc_HIGH    ,  // The QR Code can tolerate about 30% erroneous codewords
 };
 
 
@@ -66,7 +68,7 @@ enum qrcodegen_Mask {
 
 
 /* 
- * The mode field of a segment.
+ * Describes how a segment's data bits are interpreted.
  */
 enum qrcodegen_Mode {
 	qrcodegen_Mode_NUMERIC      = 0x1,

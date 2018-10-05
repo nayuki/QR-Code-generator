@@ -714,13 +714,13 @@ static NUM_ERROR_CORRECTION_BLOCKS: [[i8; 41]; 4] = [
 
 /*---- QrCodeEcc functionality ----*/
 
-// Represents the error correction level used in a QR Code symbol. Immutable.
+// The error correction level in a QR Code symbol.
 #[derive(Clone, Copy)]
 pub enum QrCodeEcc {
-	Low,
-	Medium,
-	Quartile,
-	High,
+	Low     ,  // The QR Code can tolerate about  7% erroneous codewords
+	Medium  ,  // The QR Code can tolerate about 15% erroneous codewords
+	Quartile,  // The QR Code can tolerate about 25% erroneous codewords
+	High    ,  // The QR Code can tolerate about 30% erroneous codewords
 }
 
 
@@ -1024,7 +1024,7 @@ static ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6','7','8','
 
 /*---- QrSegmentMode functionality ----*/
 
-// The mode field of a segment. Immutable.
+// Describes how a segment's data bits are interpreted.
 #[derive(Clone, Copy)]
 pub enum QrSegmentMode {
 	Numeric,

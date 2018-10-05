@@ -236,7 +236,7 @@ public final class QrSegment {
 	/*---- Public helper enumeration ----*/
 	
 	/**
-	 * The mode field of a segment. Immutable. Provides methods to retrieve closely related values.
+	 * Describes how a segment's data bits are interpreted.
 	 */
 	public enum Mode {
 		

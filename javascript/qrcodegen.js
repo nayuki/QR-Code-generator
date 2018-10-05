@@ -671,14 +671,13 @@ var qrcodegen = new function() {
 	/*---- Public helper enumeration ----*/
 	
 	/* 
-	 * Represents the error correction level used in a QR Code symbol.
+	 * The error correction level in a QR Code symbol. Immutable.
 	 */
 	this.QrCode.Ecc = {
-		// Constants declared in ascending order of error protection
-		LOW     : new Ecc(0, 1),
-		MEDIUM  : new Ecc(1, 0),
-		QUARTILE: new Ecc(2, 3),
-		HIGH    : new Ecc(3, 2),
+		LOW     : new Ecc(0, 1),  // The QR Code can tolerate about  7% erroneous codewords
+		MEDIUM  : new Ecc(1, 0),  // The QR Code can tolerate about 15% erroneous codewords
+		QUARTILE: new Ecc(2, 3),  // The QR Code can tolerate about 25% erroneous codewords
+		HIGH    : new Ecc(3, 2),  // The QR Code can tolerate about 30% erroneous codewords
 	};
 	
 	
@@ -848,7 +847,7 @@ var qrcodegen = new function() {
 	/*---- Public helper enumeration ----*/
 	
 	/* 
-	 * Represents the mode field of a segment. Immutable.
+	 * Describes how a segment's data bits are interpreted. Immutable.
 	 */
 	this.QrSegment.Mode = {  // Constants
 		NUMERIC     : new Mode(0x1, [10, 12, 14]),
