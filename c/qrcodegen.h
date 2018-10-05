@@ -33,6 +33,22 @@ extern "C" {
 #endif
 
 
+/* 
+ * This library creates QR Code symbols, which is a type of two-dimension barcode.
+ * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
+ * A QR Code structure is an immutable square grid of black and white cells.
+ * The library provides functions to create a QR Code from text or binary data.
+ * The library covers the QR Code Model 2 specification, supporting all versions (sizes)
+ * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
+ * 
+ * Ways to create a QR Code object:
+ * - High level: Take the payload data and call qrcodegen_encodeText() or qrcodegen_encodeBinary().
+ * - Low level: Custom-make the list of segments and call
+ *   qrcodegen_encodeSegments() or qrcodegen_encodeSegmentsAdvanced().
+ * (Note that all ways require supplying the desired error correction level and various byte buffers.)
+ */
+
+
 /*---- Enum and struct types----*/
 
 /* 

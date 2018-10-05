@@ -32,10 +32,20 @@
 namespace qrcodegen {
 
 /* 
- * Represents an immutable square grid of black and white cells for a QR Code symbol, and
- * provides static functions to create a QR Code from user-supplied textual or binary data.
- * This class covers the QR Code Model 2 specification, supporting all versions (sizes)
+ * A QR Code symbol, which is a type of two-dimension barcode.
+ * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
+ * Instances of this class represent an immutable square grid of black and white cells.
+ * The class provides static factory functions to create a QR Code from text or binary data.
+ * The class covers the QR Code Model 2 specification, supporting all versions (sizes)
  * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
+ * 
+ * Ways to create a QR Code object:
+ * - High level: Take the payload data and call QrCode::encodeText() or QrCode::encodeBinary().
+ * - Mid level: Custom-make the list of segments and call QrCode::encodeSegments().
+ * - Low level: Custom-make the array of data codeword bytes (including
+ *   segment headers and final padding, excluding error correction codewords),
+ *   supply the appropriate version number, and call the QrCode() constructor.
+ * (Note that all ways require supplying the desired error correction level.)
  */
 class QrCode final {
 	
