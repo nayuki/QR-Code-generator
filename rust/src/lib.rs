@@ -186,7 +186,7 @@ impl QrCode {
 			size: size as i32,
 			mask: Mask::new(0),  // Dummy value
 			errorcorrectionlevel: ecl,
-			modules: vec![false; size * size],  // Entirely white grid
+			modules   : vec![false; size * size],  // Entirely white grid
 			isfunction: vec![false; size * size],
 		};
 		

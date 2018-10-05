@@ -138,7 +138,7 @@ namespace qrcodegen {
 		public readonly size: int;
 		
 		// The modules of this QR Code symbol (false = white, true = black). Immutable after constructor finishes.
-		private readonly modules: Array<Array<boolean>> = [];
+		private readonly modules   : Array<Array<boolean>> = [];
 		
 		// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
 		private readonly isFunction: Array<Array<boolean>> = [];
@@ -172,7 +172,7 @@ namespace qrcodegen {
 			for (let i = 0; i < this.size; i++)
 				row.push(false);
 			for (let i = 0; i < this.size; i++) {
-				this.modules.push(row.slice());
+				this.modules   .push(row.slice());
 				this.isFunction.push(row.slice());
 			}
 			

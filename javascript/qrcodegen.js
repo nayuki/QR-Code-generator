@@ -83,10 +83,10 @@ var qrcodegen = new function() {
 		var row = [];
 		for (var i = 0; i < size; i++)
 			row.push(false);
-		var modules = [];
+		var modules    = [];
 		var isFunction = [];
 		for (var i = 0; i < size; i++) {
-			modules.push(row.slice());
+			modules   .push(row.slice());
 			isFunction.push(row.slice());
 		}
 		

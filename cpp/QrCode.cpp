@@ -119,7 +119,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 		version(ver),
 		size(MIN_VERSION <= ver && ver <= MAX_VERSION ? ver * 4 + 17 : -1),  // Avoid signed overflow undefined behavior
 		errorCorrectionLevel(ecl),
-		modules(size, vector<bool>(size)),  // Entirely white grid
+		modules   (size, vector<bool>(size)),  // Entirely white grid
 		isFunction(size, vector<bool>(size)) {
 	
 	// Check arguments
