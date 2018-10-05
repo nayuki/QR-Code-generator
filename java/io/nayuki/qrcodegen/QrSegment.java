@@ -67,8 +67,8 @@ public final class QrSegment {
 	
 	/**
 	 * Returns a segment representing the specified string of decimal digits encoded in numeric mode.
-	 * @param digits a string consisting of digits from 0 to 9
-	 * @return a segment containing the data
+	 * @param digits the text, with only digits from 0 to 9 allowed
+	 * @return a segment containing the text
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-digit characters
 	 */
@@ -91,8 +91,8 @@ public final class QrSegment {
 	 * Returns a segment representing the specified text string encoded in alphanumeric mode.
 	 * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
 	 * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-	 * @param text a string of text, with only certain characters allowed
-	 * @return a segment containing the data
+	 * @param text the text, with only certain characters allowed
+	 * @return a segment containing the text
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-encodable characters
 	 */
@@ -183,9 +183,9 @@ public final class QrSegment {
 	 * Constructs a QR Code segment with the specified attributes and data.
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
 	 * but the constraint isn't checked. The specified bit buffer is cloned and stored.
-	 * @param md the mode, which is not {@code null}
+	 * @param md the mode (not {@code null})
 	 * @param numCh the data length in characters or bytes, which is non-negative
-	 * @param data the data bits of this segment, which is not {@code null}
+	 * @param data the data bits (not {@code null})
 	 * @throws NullPointerException if the mode or data is {@code null}
 	 * @throws IllegalArgumentException if the character count is negative
 	 */
@@ -203,7 +203,7 @@ public final class QrSegment {
 	
 	/**
 	 * Returns the data bits of this segment.
-	 * @return the data bits of this segment (not {@code null})
+	 * @return a new copy of the data bits (not {@code null})
 	 */
 	public BitBuffer getBits() {
 		return data.clone();  // Make defensive copy
@@ -233,13 +233,15 @@ public final class QrSegment {
 	
 	/** Describes precisely all strings that are encodable in numeric mode. To test whether a
 	 * string {@code s} is encodable: {@code boolean ok = NUMERIC_REGEX.matcher(s).matches();}.
-	 * A string is encodable iff each character is in the range 0 to 9. */
+	 * A string is encodable iff each character is in the range 0 to 9.
+	 * @see #makeNumeric(String) */
 	public static final Pattern NUMERIC_REGEX = Pattern.compile("[0-9]*");
 	
 	/** Describes precisely all strings that are encodable in alphanumeric mode. To test whether a
 	 * string {@code s} is encodable: {@code boolean ok = ALPHANUMERIC_REGEX.matcher(s).matches();}.
 	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
-	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon. */
+	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 * @see #makeAlphanumeric(String) */
 	public static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[A-Z0-9 $%*+./:-]*");
 	
 	/** The set of all legal characters in alphanumeric mode, where
