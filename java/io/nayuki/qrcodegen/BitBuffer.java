@@ -28,7 +28,7 @@ import java.util.Objects;
 
 
 /**
- * An appendable sequence of bits (0s and 1s).
+ * An appendable sequence of bits (0s and 1s). Mainly used by {@link QrSegment}.
  */
 public final class BitBuffer implements Cloneable {
 	
@@ -78,9 +78,9 @@ public final class BitBuffer implements Cloneable {
 	
 	
 	/**
-	 * Packs this buffer's bits into bytes in big endian,
-	 * padding with '0' bit values, and returns the new array.
-	 * @return this sequence as a new array of bytes (not {@code null})
+	 * Returns an array representing this buffer's bits packed into bytes in big endian. If the
+	 * bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'.
+	 * @return a new byte array (not {@code null}) representing this bit sequence
 	 */
 	public byte[] getBytes() {
 		byte[] result = new byte[(bitLength + 7) >>> 3];  // Round up to whole byte, won't overflow
@@ -93,10 +93,10 @@ public final class BitBuffer implements Cloneable {
 	
 	
 	/**
-	 * Appends the specified number of low bits of the specified value to this
-	 * sequence. Requires 0 &#x2264; len &#x2264; 31 and 0 &#x2264; val &lt; 2<sup>len</sup>.
+	 * Appends the specified number of low-order bits of the specified value to this
+	 * buffer. Requires 0 &#x2264; len &#x2264; 31 and 0 &#x2264; val &lt; 2<sup>len</sup>.
 	 * @param val the value to append
-	 * @param len the number of low bits in the value to take
+	 * @param len the number of low-order bits in the value to take
 	 * @throws IllegalArgumentException if the value or number of bits is out of range
 	 * @throws IllegalStateException if appending the data
 	 * would make bitLength exceed Integer.MAX_VALUE
@@ -112,7 +112,7 @@ public final class BitBuffer implements Cloneable {
 	
 	
 	/**
-	 * Appends the specified bit buffer to this bit buffer.
+	 * Appends the content of the specified bit buffer to this buffer.
 	 * @param bb the bit buffer whose data to append (not {@code null})
 	 * @throws NullPointerException if the bit buffer is {@code null}
 	 * @throws IllegalStateException if appending the data
@@ -128,8 +128,8 @@ public final class BitBuffer implements Cloneable {
 	
 	
 	/**
-	 * Returns a copy of this bit buffer object.
-	 * @return a copy of this bit buffer object
+	 * Returns a new copy of this buffer.
+	 * @return a new copy of this buffer (not {@code null})
 	 */
 	public BitBuffer clone() {
 		try {

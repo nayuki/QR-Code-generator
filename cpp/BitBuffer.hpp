@@ -30,7 +30,7 @@
 namespace qrcodegen {
 
 /* 
- * An appendable sequence of bits (0s and 1s).
+ * An appendable sequence of bits (0s and 1s). Mainly used by QrSegment.
  */
 class BitBuffer final : public std::vector<bool> {
 	
@@ -43,13 +43,13 @@ class BitBuffer final : public std::vector<bool> {
 	
 	/*---- Methods ----*/
 	
-	// Packs this buffer's bits into bytes in big endian,
-	// padding with '0' bit values, and returns the new vector.
+	// Returns a vector representing this buffer's bits packed into bytes in big endian. If the
+	// bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'.
 	public: std::vector<std::uint8_t> getBytes() const;
 	
 	
-	// Appends the given number of low bits of the given value to
-	// this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
+	// Appends the given number of low-order bits of the given value
+	// to this buffer. Requires 0 <= len <= 31 and val < 2^len.
 	public: void appendBits(std::uint32_t val, int len);
 	
 };

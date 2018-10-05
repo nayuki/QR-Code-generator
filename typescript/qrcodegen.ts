@@ -890,12 +890,13 @@ namespace qrcodegen {
 	
 	
 	/* 
-	 * An appendable sequence of bits (0s and 1s). The implicit constructor creates an empty bit buffer (length 0).
+	 * An appendable sequence of bits (0s and 1s). Mainly used by QrSegment.
+	 * The implicit constructor creates an empty bit buffer (length 0).
 	 */
 	class BitBuffer extends Array<bit> {
 		
-		// Packs this buffer's bits into bytes in big endian,
-		// padding with '0' bit values, and returns the new array.
+		// Returns a new array representing this buffer's bits packed into bytes in big endian. If the
+		// bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'.
 		public getBytes(): Array<byte> {
 			let result: Array<byte> = [];
 			while (result.length * 8 < this.length)
@@ -906,8 +907,8 @@ namespace qrcodegen {
 		}
 		
 		
-		// Appends the given number of low bits of the given value to
-		// this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
+		// Appends the given number of low-order bits of the given value
+		// to this buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 		public appendBits(val: int, len: int): void {
 			if (len < 0 || len > 31 || val >>> len != 0)
 				throw "Value out of range";

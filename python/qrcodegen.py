@@ -829,19 +829,19 @@ class _ReedSolomonGenerator(object):
 
 
 class _BitBuffer(list):
-	"""An appendable sequence of bits (0s and 1s)."""
+	"""An appendable sequence of bits (0s and 1s). Mainly used by QrSegment."""
 	
 	def get_bytes(self):
-		"""Packs this buffer's bits into bytes in big endian,
-		padding with '0' bit values, and returns the new list."""
+		"""Returns a new list representing this buffer's bits packed into bytes in big endian. If the
+		bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'."""
 		result = [0] * ((len(self) + 7) // 8)
 		for (i, bit) in enumerate(self):
 			result[i >> 3] |= bit << (7 - (i & 7))
 		return result
 	
 	def append_bits(self, val, n):
-		"""Appends the given number of low bits of the given value
-		to this sequence. Requires n >= 0 and 0 <= val < 2^n."""
+		"""Appends the given number of low-order bits of the given
+		value to this buffer. Requires n >= 0 and 0 <= val < 2^n."""
 		if n < 0 or val >> n != 0:
 			raise ValueError("Value out of range")
 		self.extend(((val >> i) & 1) for i in reversed(range(n)))

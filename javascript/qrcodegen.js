@@ -962,13 +962,13 @@ var qrcodegen = new function() {
 	
 	/* 
 	 * A private helper class that represents an appendable sequence of bits (0s and 1s).
-	 * This constructor creates an empty bit buffer (length 0).
+	 * Mainly used by QrSegment. This constructor creates an empty bit buffer (length 0).
 	 */
 	function BitBuffer() {
 		Array.call(this);
 		
-		// Packs this buffer's bits into bytes in big endian,
-		// padding with '0' bit values, and returns the new array.
+		// Returns a new array representing this buffer's bits packed into bytes in big endian. If the
+		// bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'.
 		this.getBytes = function() {
 			var result = [];
 			while (result.length * 8 < this.length)
@@ -979,8 +979,8 @@ var qrcodegen = new function() {
 			return result;
 		};
 		
-		// Appends the given number of low bits of the given value to
-		// this sequence. Requires 0 <= len <= 31 and 0 <= val < 2^len.
+		// Appends the given number of low-order bits of the given value
+		// to this buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 		this.appendBits = function(val, len) {
 			if (len < 0 || len > 31 || val >>> len != 0)
 				throw "Value out of range";
