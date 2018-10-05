@@ -223,7 +223,7 @@ class QrCode final {
 	
 	
 	
-	/*---- Private static helper functions ----*/
+	/*---- Private helper functions ----*/
 	
 	// Returns an ascending list of positions of alignment patterns for this version number.
 	// Each position is in the range [0,177), and are used on both the x and y axes.

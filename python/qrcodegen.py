@@ -482,7 +482,7 @@ class QrCode(object):
 		return result
 	
 	
-	# ---- Private static helper functions ----
+	# ---- Private helper functions ----
 	
 	def _get_alignment_pattern_positions(self):
 		"""Returns an ascending list of positions of alignment patterns for this version number.
