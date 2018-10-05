@@ -52,8 +52,8 @@ public final class QrSegment {
 	 * encoded in byte mode. All input byte arrays are acceptable.
 	 * <p>Any text string can be converted to UTF-8 bytes ({@code
 	 * s.getBytes(StandardCharsets.UTF_8)}) and encoded as a byte mode segment.</p>
-	 * @param data the binary data
-	 * @return a segment containing the data
+	 * @param data the binary data (not {@code null})
+	 * @return a segment (not {@code null}) containing the data
 	 * @throws NullPointerException if the array is {@code null}
 	 */
 	public static QrSegment makeBytes(byte[] data) {
@@ -67,8 +67,8 @@ public final class QrSegment {
 	
 	/**
 	 * Returns a segment representing the specified string of decimal digits encoded in numeric mode.
-	 * @param digits the text, with only digits from 0 to 9 allowed
-	 * @return a segment containing the text
+	 * @param digits the text (not {@code null}), with only digits from 0 to 9 allowed
+	 * @return a segment (not {@code null}) containing the text
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-digit characters
 	 */
@@ -91,8 +91,8 @@ public final class QrSegment {
 	 * Returns a segment representing the specified text string encoded in alphanumeric mode.
 	 * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
 	 * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-	 * @param text the text, with only certain characters allowed
-	 * @return a segment containing the text
+	 * @param text the text (not {@code null}), with only certain characters allowed
+	 * @return a segment (not {@code null}) containing the text
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-encodable characters
 	 */
@@ -118,7 +118,7 @@ public final class QrSegment {
 	 * Returns a list of zero or more segments to represent the specified Unicode text string.
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
 	 * @param text the text to be encoded, which can be any Unicode string
-	 * @return a new mutable list of segments containing the text
+	 * @return a new mutable list (not {@code null}) of segments (not {@code null}) containing the text
 	 * @throws NullPointerException if the text is {@code null}
 	 */
 	public static List<QrSegment> makeSegments(String text) {
@@ -141,7 +141,7 @@ public final class QrSegment {
 	 * Returns a segment representing an Extended Channel Interpretation
 	 * (ECI) designator with the specified assignment value.
 	 * @param assignVal the ECI assignment number (see the AIM ECI specification)
-	 * @return a segment containing the data
+	 * @return a segment (not {@code null}) containing the data
 	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)
 	 */
 	public static QrSegment makeEci(int assignVal) {
