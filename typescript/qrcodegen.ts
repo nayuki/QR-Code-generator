@@ -48,10 +48,6 @@ namespace qrcodegen {
 	 *   segment headers and final padding, excluding error correction codewords),
 	 *   supply the appropriate version number, and call the QrCode() constructor.
 	 * (Note that all ways require supplying the desired error correction level.)
-	 * 
-	 * This constructor creates a new QR Code with the given version number, error correction level, binary data array,
-	 * and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
-	 * that should not be invoked directly by the user. To go one level up, see the QrCode.encodeSegments() function.
 	 */
 	export class QrCode {
 		
@@ -157,6 +153,9 @@ namespace qrcodegen {
 		
 		/*-- Constructor (low level) and fields --*/
 		
+		// Creates a new QR Code with the given version number, error correction level, binary data array,
+		// and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
+		// that should not be invoked directly by the user. To go one level up, see the QrCode.encodeSegments() function.
 		public constructor(
 				// The version number of this QR Code, which is between 1 and 40 (inclusive).
 				// This determines the size of this barcode.
