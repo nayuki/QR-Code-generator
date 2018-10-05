@@ -95,7 +95,7 @@ var qrcodegen = new function() {
 		var allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
 		
-		// Handle masking
+		// Do masking
 		if (mask == -1) {  // Automatically choose best mask
 			var minPenalty = Infinity;
 			for (var i = 0; i < 8; i++) {
@@ -113,6 +113,7 @@ var qrcodegen = new function() {
 			throw "Assertion error";
 		drawFormatBits(mask);  // Overwrite old format bits
 		applyMask(mask);  // Apply the final choice of mask
+		
 		isFunction = null;
 		
 		

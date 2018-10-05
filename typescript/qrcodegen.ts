@@ -181,7 +181,7 @@ namespace qrcodegen {
 			let allCodewords: Array<byte> = this.addEccAndInterleave(dataCodewords);
 			this.drawCodewords(allCodewords);
 			
-			// Handle masking
+			// Do masking
 			if (mask == -1) {  // Automatically choose best mask
 				let minPenalty: int = 1000000000;
 				for (let i = 0; i < 8; i++) {
@@ -200,6 +200,7 @@ namespace qrcodegen {
 			this.mask = mask;
 			this.drawFormatBits(mask);  // Overwrite old format bits
 			this.applyMask(mask);  // Apply the final choice of mask
+			
 			this.isFunction = [];
 		}
 		

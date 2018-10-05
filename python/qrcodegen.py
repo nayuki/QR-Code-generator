@@ -176,7 +176,7 @@ class QrCode(object):
 		allcodewords = self._add_ecc_and_interleave(datacodewords)
 		self._draw_codewords(allcodewords)
 		
-		# Handle masking
+		# Do masking
 		if mask == -1:  # Automatically choose best mask
 			minpenalty = 1 << 32
 			for i in range(8):
@@ -191,6 +191,7 @@ class QrCode(object):
 		self._draw_format_bits(mask)  # Overwrite old format bits
 		self._apply_mask(mask)  # Apply the final choice of mask
 		self._mask = mask
+		
 		del self._isfunction
 	
 	
