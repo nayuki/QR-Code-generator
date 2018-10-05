@@ -133,8 +133,8 @@ namespace qrcodegen {
 		
 		/*-- Fields --*/
 		
-		// The width and height of this QR Code, measured in modules.
-		// Always equal to version * 4 + 17, in the range 21 to 177.
+		// The width and height of this QR Code, measured in modules, between
+		// 21 and 177 (inclusive). This is equal to version * 4 + 17.
 		public readonly size: int;
 		
 		// The modules of this QR Code (false = white, true = black). Immutable after constructor finishes.
@@ -147,7 +147,8 @@ namespace qrcodegen {
 		/*-- Constructor (low level) and fields --*/
 		
 		public constructor(
-				// This QR Code's version number, which is always between 1 and 40 (inclusive).
+				// The version number of this QR Code, which is between 1 and 40 (inclusive).
+				// This determines the size of this barcode.
 				public readonly version: int,
 				
 				// The error correction level used in this QR Code.
@@ -155,9 +156,9 @@ namespace qrcodegen {
 				
 				dataCodewords: Array<byte>,
 				
-				// The mask pattern used in this QR Code, in the range 0 to 7 (i.e. unsigned 3-bit integer).
-				// Note that even if the constructor was called with automatic masking requested
-				// (mask = -1), the resulting object will still have a mask value between 0 and 7.
+				// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
+				// Even if a QR Code is created with automatic masking requested (mask = -1),
+				// the resulting object still has a mask value between 0 and 7.
 				public readonly mask: int) {
 			
 			// Check scalar arguments
@@ -609,7 +610,9 @@ namespace qrcodegen {
 		
 		/*-- Constants and tables --*/
 		
+		// The minimum version number supported in the QR Code Model 2 standard.
 		public static readonly MIN_VERSION: int =  1;
+		// The maximum version number supported in the QR Code Model 2 standard.
 		public static readonly MAX_VERSION: int = 40;
 		
 		// For use in getPenaltyScore(), when evaluating which mask is best.

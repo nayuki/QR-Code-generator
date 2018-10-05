@@ -96,19 +96,20 @@ class QrCode final {
 	
 	// Immutable scalar parameters:
 	
-	/* This QR Code's version number, which is always between 1 and 40 (inclusive). */
+	/* The version number of this QR Code, which is between 1 and 40 (inclusive).
+	 * This determines the size of this barcode. */
 	private: int version;
 	
-	/* The width and height of this QR Code, measured in modules.
-	 * Always equal to version * 4 + 17, in the range 21 to 177. */
+	/* The width and height of this QR Code, measured in modules, between
+	 * 21 and 177 (inclusive). This is equal to version * 4 + 17. */
 	private: int size;
 	
 	/* The error correction level used in this QR Code. */
 	private: Ecc errorCorrectionLevel;
 	
-	/* The mask pattern used in this QR Code, in the range 0 to 7 (i.e. unsigned 3-bit integer).
-	 * Note that even if a constructor was called with automatic masking requested
-	 * (mask = -1), the resulting object will still have a mask value between 0 and 7. */
+	/* The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
+	 * Even if a QR Code is created with automatic masking requested (mask = -1),
+	 * the resulting object still has a mask value between 0 and 7. */
 	private: int mask;
 	
 	// Private grids of modules/pixels, with dimensions of size*size:
@@ -255,7 +256,10 @@ class QrCode final {
 	
 	/*---- Constants and tables ----*/
 	
+	// The minimum version number supported in the QR Code Model 2 standard.
 	public: static constexpr int MIN_VERSION =  1;
+	
+	// The maximum version number supported in the QR Code Model 2 standard.
 	public: static constexpr int MAX_VERSION = 40;
 	
 	

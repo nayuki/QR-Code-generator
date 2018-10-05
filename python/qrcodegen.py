@@ -158,8 +158,16 @@ class QrCode(object):
 			raise ValueError("Mask value out of range")
 		if not isinstance(errcorlvl, QrCode.Ecc):
 			raise TypeError("QrCode.Ecc expected")
+		
+		# The version number of this QR Code, which is between 1 and 40 (inclusive).
+		# This determines the size of this barcode.
 		self._version = version
+		
+		# The width and height of this QR Code, measured in modules, between
+		# 21 and 177 (inclusive). This is equal to version * 4 + 17.
 		self._size = version * 4 + 17
+		
+		# The error correction level used in this QR Code.
 		self._errcorlvl = errcorlvl
 		
 		# Initialize both grids to be size*size arrays of Boolean false
@@ -187,6 +195,10 @@ class QrCode(object):
 		assert 0 <= mask <= 7
 		self._draw_format_bits(mask)  # Overwrite old format bits
 		self._apply_mask(mask)  # Apply the final choice of mask
+		
+		# The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
+		# Even if a QR Code is created with automatic masking requested (mask = -1),
+		# the resulting object still has a mask value between 0 and 7.
 		self._mask = mask
 		
 		del self._isfunction
@@ -529,8 +541,8 @@ class QrCode(object):
 	
 	# ---- Constants and tables ----
 	
-	MIN_VERSION =  1
-	MAX_VERSION = 40
+	MIN_VERSION =  1  # The minimum version number supported in the QR Code Model 2 standard
+	MAX_VERSION = 40  # The maximum version number supported in the QR Code Model 2 standard
 	
 	# For use in getPenaltyScore(), when evaluating which mask is best.
 	_PENALTY_N1 =  3
