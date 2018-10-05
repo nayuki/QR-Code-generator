@@ -72,11 +72,11 @@ var qrcodegen = new function() {
 		
 		/*---- Constructor (low level) ----*/
 		
-		// Check arguments and handle simple scalar fields
-		if (mask < -1 || mask > 7)
-			throw "Mask value out of range";
+		// Check scalar arguments
 		if (version < MIN_VERSION || version > MAX_VERSION)
 			throw "Version value out of range";
+		if (mask < -1 || mask > 7)
+			throw "Mask value out of range";
 		var size = version * 4 + 17;
 		
 		// Initialize both grids to be size*size arrays of Boolean false

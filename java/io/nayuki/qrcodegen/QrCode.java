@@ -213,15 +213,13 @@ public final class QrCode {
 	 * or if the data is the wrong length for the specified version and error correction level
 	 */
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
-		// Check arguments
-		errorCorrectionLevel = Objects.requireNonNull(ecl);
-		Objects.requireNonNull(dataCodewords);
+		// Check arguments and initialize fields
 		if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Value out of range");
-		
-		// Initialize fields
 		version = ver;
 		size = ver * 4 + 17;
+		errorCorrectionLevel = Objects.requireNonNull(ecl);
+		Objects.requireNonNull(dataCodewords);
 		modules    = new boolean[size][size];  // Initially all white
 		isFunction = new boolean[size][size];
 		

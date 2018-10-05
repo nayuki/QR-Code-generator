@@ -151,21 +151,21 @@ class QrCode(object):
 		and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
 		that should not be invoked directly by the user. To go one level up, see the QrCode.encode_segments() function."""
 		
-		# Check arguments and handle simple scalar fields
-		if not (-1 <= mask <= 7):
-			raise ValueError("Mask value out of range")
+		# Check scalar arguments and set fields
 		if not (QrCode.MIN_VERSION <= version <= QrCode.MAX_VERSION):
 			raise ValueError("Version value out of range")
+		if not (-1 <= mask <= 7):
+			raise ValueError("Mask value out of range")
 		if not isinstance(errcorlvl, QrCode.Ecc):
 			raise TypeError("QrCode.Ecc expected")
 		self._version = version
-		self._errcorlvl = errcorlvl
 		self._size = version * 4 + 17
+		self._errcorlvl = errcorlvl
 		
 		if len(datacodewords) != QrCode._get_num_data_codewords(version, errcorlvl):
 			raise ValueError("Invalid array length")
 		
-		# Initialize grids of modules
+		# Initialize both grids to be size*size arrays of Boolean false
 		# The modules of this QR Code symbol (False = white, True = black). Immutable after constructor finishes
 		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all white
 		# Indicates function modules that are not subjected to masking. Discarded when constructor finishes

@@ -160,11 +160,11 @@ namespace qrcodegen {
 				// (mask = -1), the resulting object will still have a mask value between 0 and 7.
 				public readonly mask: int) {
 			
-			// Check arguments and handle simple scalar fields
-			if (mask < -1 || mask > 7)
-				throw "Mask value out of range";
+			// Check scalar arguments
 			if (version < QrCode.MIN_VERSION || version > QrCode.MAX_VERSION)
 				throw "Version value out of range";
+			if (mask < -1 || mask > 7)
+				throw "Mask value out of range";
 			this.size = version * 4 + 17;
 			
 			// Initialize both grids to be size*size arrays of Boolean false
