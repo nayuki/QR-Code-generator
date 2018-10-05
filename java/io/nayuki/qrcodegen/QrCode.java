@@ -171,7 +171,7 @@ public final class QrCode {
 	
 	/*---- Instance fields ----*/
 	
-	// Public immutable scalar parameters
+	// Public immutable scalar parameters:
 	
 	/** This QR Code symbol's version number, which is always between 1 and 40 (inclusive). */
 	public final int version;
@@ -188,9 +188,13 @@ public final class QrCode {
 	 * (mask = -1), the resulting object will still have a mask value between 0 and 7. */
 	public final int mask;
 	
-	// Private grids of modules/pixels (conceptually immutable)
-	private boolean[][] modules;     // The modules of this QR Code symbol (false = white, true = black)
-	private boolean[][] isFunction;  // Indicates function modules that are not subjected to masking
+	// Private grids of modules/pixels, with dimensions of size*size:
+	
+	// The modules of this QR Code symbol (false = white, true = black). Immutable after constructor finishes.
+	private boolean[][] modules;
+	
+	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
+	private boolean[][] isFunction;
 	
 	
 	

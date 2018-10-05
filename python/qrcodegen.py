@@ -164,9 +164,13 @@ class QrCode(object):
 		
 		if len(datacodewords) != QrCode._get_num_data_codewords(version, errcorlvl):
 			raise ValueError("Invalid array length")
+		
 		# Initialize grids of modules
-		self._modules    = [[False] * self._size for _ in range(self._size)]  # The modules of the QR symbol; start with entirely white grid
-		self._isfunction = [[False] * self._size for _ in range(self._size)]  # Indicates function modules that are not subjected to masking
+		# The modules of this QR Code symbol (False = white, True = black). Immutable after constructor finishes
+		self._modules    = [[False] * self._size for _ in range(self._size)]
+		# Indicates function modules that are not subjected to masking. Discarded when constructor finishes
+		self._isfunction = [[False] * self._size for _ in range(self._size)]
+		
 		# Draw function patterns, draw all codewords
 		self._draw_function_patterns()
 		allcodewords = self._add_ecc_and_interleave(datacodewords)

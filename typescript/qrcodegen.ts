@@ -137,10 +137,10 @@ namespace qrcodegen {
 		// Always equal to version * 4 + 17, in the range 21 to 177.
 		public readonly size: int;
 		
-		// The modules of this QR Code symbol (false = white, true = black).
+		// The modules of this QR Code symbol (false = white, true = black). Immutable after constructor finishes.
 		private readonly modules: Array<Array<boolean>> = [];
 		
-		// Indicates function modules that are not subjected to masking.
+		// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
 		private readonly isFunction: Array<Array<boolean>> = [];
 		
 		

@@ -31,6 +31,8 @@
 #[derive(Clone)]
 pub struct QrCode {
 	
+	// Scalar parameters:
+	
 	// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
 	version: Version,
 	
@@ -46,10 +48,12 @@ pub struct QrCode {
 	// (mask = -1), the resulting object will still have a mask value between 0 and 7.
 	mask: Mask,
 	
-	// The modules of this QR Code symbol (false = white, true = black)
+	// Grids of modules/pixels, with dimensions of size*size:
+	
+	// The modules of this QR Code symbol (false = white, true = black). Immutable after constructor finishes.
 	modules: Vec<bool>,
 	
-	// Indicates function modules that are not subjected to masking
+	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
 	isfunction: Vec<bool>,
 	
 }

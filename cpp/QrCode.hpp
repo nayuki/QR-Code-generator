@@ -92,7 +92,7 @@ class QrCode final {
 	
 	/*---- Instance fields ----*/
 	
-	// Immutable scalar parameters
+	// Immutable scalar parameters:
 	
 	/* This QR Code symbol's version number, which is always between 1 and 40 (inclusive). */
 	private: int version;
@@ -109,9 +109,13 @@ class QrCode final {
 	 * (mask = -1), the resulting object will still have a mask value between 0 and 7. */
 	private: int mask;
 	
-	// Private grids of modules/pixels (conceptually immutable)
-	private: std::vector<std::vector<bool> > modules;     // The modules of this QR Code symbol (false = white, true = black)
-	private: std::vector<std::vector<bool> > isFunction;  // Indicates function modules that are not subjected to masking
+	// Private grids of modules/pixels, with dimensions of size*size:
+	
+	// The modules of this QR Code symbol (false = white, true = black). Immutable after constructor finishes.
+	private: std::vector<std::vector<bool> > modules;
+	
+	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
+	private: std::vector<std::vector<bool> > isFunction;
 	
 	
 	
