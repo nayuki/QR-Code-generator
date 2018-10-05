@@ -681,7 +681,9 @@ class QrSegment(object):
 		"""Creates a new QR Code segment with the given parameters and data.
 		The character count (numch) must agree with the mode and the bit buffer length,
 		but the constraint isn't checked. The given bit buffer is cloned and stored."""
-		if numch < 0 or not isinstance(mode, QrSegment.Mode):
+		if not isinstance(mode, QrSegment.Mode):
+			raise TypeError("QrSegment.Mode expected")
+		if numch < 0:
 			raise ValueError()
 		self._mode = mode
 		

@@ -144,7 +144,7 @@ public final class QrSegment {
 		else if (assignVal < (1 << 14)) {
 			bb.appendBits(2, 2);
 			bb.appendBits(assignVal, 14);
-		} else if (assignVal < 1000000) {
+		} else if (assignVal < 1_000_000) {
 			bb.appendBits(6, 3);
 			bb.appendBits(assignVal, 21);
 		} else
