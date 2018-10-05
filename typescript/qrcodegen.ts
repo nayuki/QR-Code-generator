@@ -127,7 +127,7 @@ namespace qrcodegen {
 				bb.appendBits(padByte, 8);
 			
 			// Create the QR Code symbol
-			return new QrCode(bb.getBytes(), mask, version, ecl);
+			return new QrCode(version, ecl, bb.getBytes(), mask);
 		}
 		
 		
@@ -147,18 +147,18 @@ namespace qrcodegen {
 		/*-- Constructor (low level) and fields --*/
 		
 		public constructor(
+				// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
+				public readonly version: int,
+				
+				// The error correction level used in this QR Code symbol.
+				public readonly errorCorrectionLevel: QrCode.Ecc,
+				
 				dataCodewords: Array<byte>,
 				
 				// The mask pattern used in this QR Code symbol, in the range 0 to 7 (i.e. unsigned 3-bit integer).
 				// Note that even if the constructor was called with automatic masking requested
 				// (mask = -1), the resulting object will still have a mask value between 0 and 7.
-				public readonly mask: int,
-				
-				// This QR Code symbol's version number, which is always between 1 and 40 (inclusive).
-				public readonly version: int,
-				
-				// The error correction level used in this QR Code symbol.
-				public readonly errorCorrectionLevel: QrCode.Ecc) {
+				public readonly mask: int) {
 			
 			// Check arguments and handle simple scalar fields
 			if (mask < -1 || mask > 7)

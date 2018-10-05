@@ -32,7 +32,7 @@ This module "qrcodegen", public members:
   - Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
         int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
   - Constants int MIN_VERSION, MAX_VERSION
-  - Constructor QrCode(bytes datacodewords, int mask, int version, QrCode.Ecc ecl)
+  - Constructor QrCode(int version, QrCode.Ecc ecl, bytes datacodewords, int mask)
   - Method get_version() -> int
   - Method get_size() -> int
   - Method get_error_correction_level() -> QrCode.Ecc
@@ -141,12 +141,12 @@ class QrCode(object):
 			bb.append_bits(padbyte, 8)
 		
 		# Create the QR Code symbol
-		return QrCode(bb.get_bytes(), mask, version, ecl)
+		return QrCode(version, ecl, bb.get_bytes(), mask)
 	
 	
 	# ---- Constructor (low level) ----
 	
-	def __init__(self, datacodewords, mask, version, errcorlvl):
+	def __init__(self, version, errcorlvl, datacodewords, mask):
 		"""Creates a new QR Code symbol with the given version number, error correction level, binary data array,
 		and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
 		that should not be invoked directly by the user. To go one level up, see the QrCode.encode_segments() function."""

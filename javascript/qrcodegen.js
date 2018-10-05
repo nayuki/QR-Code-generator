@@ -32,7 +32,7 @@
  *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
  *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
  *   - Constants int MIN_VERSION, MAX_VERSION
- *   - Constructor QrCode(list<int> dataCodewords, int mask, int version, QrCode.Ecc ecl)
+ *   - Constructor QrCode(int version, QrCode.Ecc ecl, list<int> dataCodewords, int mask)
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
  *   - Method getModule(int x, int y) -> bool
@@ -68,7 +68,7 @@ var qrcodegen = new function() {
 	 * and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
 	 * that should not be invoked directly by the user. To go one level up, see the QrCode.encodeSegments() function.
 	 */
-	this.QrCode = function(dataCodewords, mask, version, errCorLvl) {
+	this.QrCode = function(version, errCorLvl, dataCodewords, mask) {
 		
 		/*---- Constructor (low level) ----*/
 		
@@ -597,7 +597,7 @@ var qrcodegen = new function() {
 			bb.appendBits(padByte, 8);
 		
 		// Create the QR Code symbol
-		return new this(bb.getBytes(), mask, version, ecl);
+		return new this(version, ecl, bb.getBytes(), mask);
 	};
 	
 	
