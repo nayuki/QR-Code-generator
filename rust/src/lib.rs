@@ -37,7 +37,7 @@ pub struct QrCode {
 	version: Version,
 	
 	// The width and height of this QR Code symbol, measured in modules.
-	// Always equal to version &times; 4 + 17, in the range 21 to 177.
+	// Always equal to version * 4 + 17, in the range 21 to 177.
 	size: i32,
 	
 	// The error correction level used in this QR Code symbol.
