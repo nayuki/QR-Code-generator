@@ -60,9 +60,9 @@ public final class QrCode {
 	 * Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
 	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
 	 * ecl argument if it can be done without increasing the version.
-	 * @param text the text to be encoded, which can be any Unicode string
-	 * @param ecl the error correction level to use (boostable)
-	 * @return a QR Code representing the text
+	 * @param text the text to be encoded (not {@code null}), which can be any Unicode string
+	 * @param ecl the error correction level to use (not {@code null}) (boostable)
+	 * @return a QR Code (not {@code null}) representing the text
 	 * @throws NullPointerException if the text or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the text fails to fit in the
 	 * largest version QR Code at the ECL, which means it is too long
@@ -80,9 +80,9 @@ public final class QrCode {
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
-	 * @param data the binary data to encode
-	 * @param ecl the error correction level to use (boostable)
-	 * @return a QR Code representing the data
+	 * @param data the binary data to encode (not {@code null})
+	 * @param ecl the error correction level to use (not {@code null}) (boostable)
+	 * @return a QR Code (not {@code null}) representing the data
 	 * @throws NullPointerException if the data or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the data fails to fit in the
 	 * largest version QR Code at the ECL, which means it is too long
@@ -106,8 +106,8 @@ public final class QrCode {
 	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
 	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
-	 * @param ecl the error correction level to use (boostable)
-	 * @return a QR Code representing the segments
+	 * @param ecl the error correction level to use (not {@code null}) (boostable)
+	 * @return a QR Code (not {@code null}) representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
 	 * @throws IllegalArgumentException if the segments fail to fit in the
 	 * largest version QR Code at the ECL, which means they are too long
@@ -129,12 +129,12 @@ public final class QrCode {
 	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
 	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
-	 * @param ecl the error correction level to use (boostable)
+	 * @param ecl the error correction level to use (not {@code null}) (boostable)
 	 * @param minVersion the minimum allowed version of the QR Code (at least 1)
 	 * @param maxVersion the maximum allowed version of the QR Code (at most 40)
 	 * @param mask the mask number to use (between 0 and 7 (inclusive)), or &#x2212;1 for automatic mask
 	 * @param boostEcl increases the ECC level as long as it doesn't increase the version number
-	 * @return a QR Code representing the segments
+	 * @return a QR Code (not {@code null}) representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
 	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
 	 * or &#x2212;1 &#x2264; mask &#x2264; 7 is violated; or if the segments fail to
