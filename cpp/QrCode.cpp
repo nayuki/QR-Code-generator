@@ -122,14 +122,14 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask) :
 		// Initialize fields and check arguments
 		version(ver),
-		errorCorrectionLevel(ecl),
-		modules   (size, vector<bool>(size)),  // Initially all white
-		isFunction(size, vector<bool>(size)) {
+		errorCorrectionLevel(ecl) {
 	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw std::domain_error("Version value out of range");
 	if (mask < -1 || mask > 7)
 		throw std::domain_error("Mask value out of range");
 	size = ver * 4 + 17;
+	modules    = vector<vector<bool> >(size, vector<bool>(size));  // Initially all white
+	isFunction = vector<vector<bool> >(size, vector<bool>(size));
 	
 	// Compute ECC, draw modules, do masking
 	drawFunctionPatterns();
