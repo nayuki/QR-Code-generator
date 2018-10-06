@@ -779,7 +779,7 @@ impl QrCodeEcc {
 
 // Computes the Reed-Solomon error correction codewords for a sequence of data codewords
 // at a given degree. Objects are immutable, and the state only depends on the degree.
-// This class exists because each data block in a QR Code shares the same the divisor polynomial.
+// This struct and impl exist because each data block in a QR Code shares the same the divisor polynomial.
 struct ReedSolomonGenerator {
 	
 	// Coefficients of the divisor polynomial, stored from highest to lowest power, excluding the leading term which

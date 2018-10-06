@@ -32,7 +32,7 @@
  *   - Function encodeSegments(list<QrSegment> segs, QrCode.Ecc ecl,
  *         int minVersion=1, int maxVersion=40, mask=-1, boostEcl=true) -> QrCode
  *   - Constants int MIN_VERSION, MAX_VERSION
- *   - Constructor QrCode(int version, QrCode.Ecc ecl, list<int> dataCodewords, int mask)
+ *   - Constructor QrCode(int version, QrCode.Ecc ecl, list<byte> dataCodewords, int mask)
  *   - Fields int version, size, mask
  *   - Field QrCode.Ecc errorCorrectionLevel
  *   - Method getModule(int x, int y) -> bool
@@ -42,7 +42,7 @@
  *     - Constants LOW, MEDIUM, QUARTILE, HIGH
  *     - Field int ordinal
  * - Class QrSegment:
- *   - Function makeBytes(list<int> data) -> QrSegment
+ *   - Function makeBytes(list<byte> data) -> QrSegment
  *   - Function makeNumeric(str data) -> QrSegment
  *   - Function makeAlphanumeric(str data) -> QrSegment
  *   - Function makeSegments(str text) -> list<QrSegment>
