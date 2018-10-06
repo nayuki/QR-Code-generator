@@ -75,9 +75,10 @@ var qrcodegen = new function() {
 	 *   supply the appropriate version number, and call the QrCode() constructor.
 	 * (Note that all ways require supplying the desired error correction level.)
 	 * 
-	 * This constructor creates a new QR Code with the given version number, error correction level, binary data array,
-	 * and mask number. mask = -1 is for automatic choice, or 0 to 7 for fixed choice. This is a cumbersome low-level constructor
-	 * that should not be invoked directly by the user. To go one level up, see the QrCode.encodeSegments() function.
+	 * This constructor creates a new QR Code with the given version number,
+	 * error correction level, data codeword bytes, and mask number.
+	 * This is a low-level API that most users should not use directly.
+	 * A mid-level API is the encodeSegments() function.
 	 */
 	this.QrCode = function(version, errCorLvl, dataCodewords, mask) {
 		
@@ -541,7 +542,7 @@ var qrcodegen = new function() {
 	
 	
 	/* 
-	 * Returns a QR Code representing the given binary data string at the given error correction level.
+	 * Returns a QR Code representing the given binary data at the given error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
@@ -556,10 +557,14 @@ var qrcodegen = new function() {
 	
 	/* 
 	 * Returns a QR Code representing the given segments with the given encoding parameters.
-	 * The smallest possible QR Code version within the given range is automatically chosen for the output.
+	 * The smallest possible QR Code version within the given range is automatically
+	 * chosen for the output. Iff boostEcl is true, then the ECC level of the result
+	 * may be higher than the ecl argument if it can be done without increasing the
+	 * version. The mask number is either between 0 to 7 (inclusive) to force that
+	 * mask, or -1 to automatically choose an appropriate mask (which may be slow).
 	 * This function allows the user to create a custom sequence of segments that switches
-	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
-	 * This function is considered to be lower level than simply encoding text or binary data.
+	 * between modes (such as alphanumeric and byte) to encode text in less space.
+	 * This is a mid-level API; the high-level API is encodeText() and encodeBinary().
 	 */
 	this.QrCode.encodeSegments = function(segs, ecl, minVersion, maxVersion, mask, boostEcl) {
 		if (minVersion == undefined) minVersion = MIN_VERSION;

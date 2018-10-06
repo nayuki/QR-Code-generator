@@ -75,7 +75,7 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a QR Code representing the specified binary data string at the specified error correction level.
+	 * Returns a QR Code representing the specified binary data at the specified error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
@@ -101,8 +101,9 @@ public final class QrCode {
 	 * level. The smallest possible QR Code version is automatically chosen for the output. The ECC level
 	 * of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
-	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
-	 * This function is considered to be lower level than simply encoding text or binary data.</p>
+	 * between modes (such as alphanumeric and byte) to encode text in less space.
+	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
+	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
 	 * @param ecl the error correction level to use (will be boosted)
 	 * @return a QR Code representing the segments
@@ -117,10 +118,15 @@ public final class QrCode {
 	
 	/**
 	 * Returns a QR Code representing the specified segments with the specified encoding parameters.
-	 * The smallest possible QR Code version within the specified range is automatically chosen for the output.
+	 * The smallest possible QR Code version within the specified range is automatically
+	 * chosen for the output. Iff boostEcl is {@code true}, then the ECC level of the
+	 * result may be higher than the ecl argument if it can be done without increasing
+	 * the version. The mask number is either between 0 to 7 (inclusive) to force that
+	 * mask, or &#x2212;1 to automatically choose an appropriate mask (which may be slow).
 	 * <p>This function allows the user to create a custom sequence of segments that switches
-	 * between modes (such as alphanumeric and binary) to encode text more efficiently.
-	 * This function is considered to be lower level than simply encoding text or binary data.</p>
+	 * between modes (such as alphanumeric and byte) to encode text in less space.
+	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
+	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
 	 * @param ecl the error correction level to use (may be boosted)
 	 * @param minVersion the minimum allowed version of the QR symbol (at least 1)
@@ -216,9 +222,10 @@ public final class QrCode {
 	/*---- Constructor (low level) ----*/
 	
 	/**
-	 * Constructs a QR Code with the specified version number, error correction level, binary data array, and mask number.
-	 * <p>This is a cumbersome low-level constructor that should not be invoked directly by the user.
-	 * To go one level up, see the {@link #encodeSegments(List,Ecc,int,int,int,boolean)} function.</p>
+	 * Constructs a QR Code with the specified version number,
+	 * error correction level, data codeword bytes, and mask number.
+	 * <p>This is a low-level API that most users should not use directly. A mid-level
+	 * API is the {@link #encodeSegments(List,Ecc,int,int,int,boolean)} function.</p>
 	 * @param ver the version number to use, which must be in the range 1 to 40 (inclusive)
 	 * @param ecl the error correction level to use
 	 * @param dataCodewords the bytes representing segments to encode (without ECC)

@@ -256,8 +256,8 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]);
  * QR Code creation succeeded, or false if the data is too long to fit in any version. The ECC level
  * of the result may be higher than the ecl argument if it can be done without increasing the version.
  * This function allows the user to create a custom sequence of segments that switches
- * between modes (such as alphanumeric and binary) to encode text more efficiently.
- * This function is considered to be lower level than simply encoding text or binary data.
+ * between modes (such as alphanumeric and byte) to encode text in less space.
+ * This is a low-level API; the high-level API is qrcodegen_encodeText() and qrcodegen_encodeBinary().
  * To save memory, the segments' data buffers can alias/overlap tempBuffer, and will
  * result in them being clobbered, but the QR Code output will still be correct.
  * But the qrcode array must not overlap tempBuffer or any segment's data buffer.
@@ -269,10 +269,14 @@ bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
 /* 
  * Renders a QR Code representing the given segments with the given encoding parameters.
  * Returns true if QR Code creation succeeded, or false if the data is too long to fit in the range of versions.
- * The smallest possible QR Code version within the given range is automatically chosen for the output.
+ * The smallest possible QR Code version within the given range is automatically
+ * chosen for the output. Iff boostEcl is true, then the ECC level of the result
+ * may be higher than the ecl argument if it can be done without increasing the
+ * version. The mask number is either between 0 to 7 (inclusive) to force that
+ * mask, or -1 to automatically choose an appropriate mask (which may be slow).
  * This function allows the user to create a custom sequence of segments that switches
- * between modes (such as alphanumeric and binary) to encode text more efficiently.
- * This function is considered to be lower level than simply encoding text or binary data.
+ * between modes (such as alphanumeric and byte) to encode text in less space.
+ * This is a low-level API; the high-level API is qrcodegen_encodeText() and qrcodegen_encodeBinary().
  * To save memory, the segments' data buffers can alias/overlap tempBuffer, and will
  * result in them being clobbered, but the QR Code output will still be correct.
  * But the qrcode array must not overlap tempBuffer or any segment's data buffer.

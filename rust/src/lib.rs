@@ -90,7 +90,7 @@ impl QrCode {
 	}
 	
 	
-	// Returns a QR Code representing the given binary data string at the given error correction level.
+	// Returns a QR Code representing the given binary data at the given error correction level.
 	// This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
@@ -107,8 +107,8 @@ impl QrCode {
 	// The smallest possible QR Code version is automatically chosen for the output. The ECC level
 	// of the result may be higher than the ecl argument if it can be done without increasing the version.
 	// This function allows the user to create a custom sequence of segments that switches
-	// between modes (such as alphanumeric and binary) to encode text more efficiently.
-	// This function is considered to be lower level than simply encoding text or binary data.
+	// between modes (such as alphanumeric and byte) to encode text in less space.
+	// This is a mid-level API; the high-level API is encode_text() and encode_binary().
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<Self> {
 		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
@@ -116,10 +116,14 @@ impl QrCode {
 	
 	
 	// Returns a QR Code representing the given segments with the given encoding parameters.
-	// The smallest possible QR Code version within the given range is automatically chosen for the output.
+	// The smallest possible QR Code version within the given range is automatically
+	// chosen for the output. Iff boostecl is true, then the ECC level of the result
+	// may be higher than the ecl argument if it can be done without increasing the
+	// version. The mask number is either between 0 to 7 (inclusive) to force that
+	// mask, or -1 to automatically choose an appropriate mask (which may be slow).
 	// This function allows the user to create a custom sequence of segments that switches
-	// between modes (such as alphanumeric and binary) to encode text more efficiently.
-	// This function is considered to be lower level than simply encoding text or binary data.
+	// between modes (such as alphanumeric and byte) to encode text in less space.
+	// This is a mid-level API; the high-level API is encodeText() and encodeBinary().
 	// Returns a wrapped QrCode if successful, or None if the data is too long to fit
 	// in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
@@ -189,9 +193,10 @@ impl QrCode {
 	
 	/*---- Constructor (low level) ----*/
 	
-	// Creates a new QR Code with the given version number, error correction level,
-	// binary data array, and mask number. This is a cumbersome low-level constructor that
-	// should not be invoked directly by the user. To go one level up, see the encode_segments() function.
+	// Creates a new QR Code with the given version number,
+	// error correction level, data codeword bytes, and mask number.
+	// This is a low-level API that most users should not use directly.
+	// A mid-level API is the encode_segments() function.
 	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<Mask>) -> Self {
 		// Initialize fields
 		let size: usize = (ver.value() as usize) * 4 + 17;
