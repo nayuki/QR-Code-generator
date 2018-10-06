@@ -808,7 +808,7 @@ namespace qrcodegen {
 				let ccbits: int = seg.mode.numCharCountBits(version);
 				if (seg.numChars >= (1 << ccbits))
 					return Infinity;  // The segment's length doesn't fit the field's bit width
-				result += 4 + ccbits + seg.getBits().length;
+				result += 4 + ccbits + seg.bitData.length;
 			}
 			return result;
 		}

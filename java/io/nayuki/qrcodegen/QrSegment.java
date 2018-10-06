@@ -173,7 +173,7 @@ public final class QrSegment {
 	 * Always zero or positive. Not the same as the data's bit length. */
 	public final int numChars;
 	
-	/** The data bits of this segment. Not {@code null}. Accessed through {@link getBits()}. */
+	/** The data bits of this segment. Not {@code null}. Accessed through {@link #getBits()}. */
 	final BitBuffer data;
 	
 	
