@@ -109,8 +109,13 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	for (uint8_t padByte = 0xEC; bb.size() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 		bb.appendBits(padByte, 8);
 	
+	// Pack bits into bytes in big endian
+	vector<uint8_t> dataCodewords(bb.size() / 8);
+	for (size_t i = 0; i < bb.size(); i++)
+		dataCodewords[i >> 3] |= (bb.at(i) ? 1 : 0) << (7 - (i & 7));
+	
 	// Create the QR Code object
-	return QrCode(version, ecl, bb.getBytes(), mask);
+	return QrCode(version, ecl, dataCodewords, mask);
 }
 
 

@@ -154,8 +154,13 @@ class QrCode(object):
 				break
 			bb.append_bits(padbyte, 8)
 		
+		# Pack bits into bytes in big endian
+		datacodewords = [0] * (len(bb) // 8)
+		for (i, bit) in enumerate(bb):
+			datacodewords[i >> 3] |= bit << (7 - (i & 7))
+		
 		# Create the QR Code object
-		return QrCode(version, ecl, bb.get_bytes(), mask)
+		return QrCode(version, ecl, datacodewords, mask)
 	
 	
 	# ---- Constructor (low level) ----
@@ -871,14 +876,6 @@ class _ReedSolomonGenerator(object):
 
 class _BitBuffer(list):
 	"""An appendable sequence of bits (0s and 1s). Mainly used by QrSegment."""
-	
-	def get_bytes(self):
-		"""Returns a new list representing this buffer's bits packed into bytes in big endian. If the
-		bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'."""
-		result = [0] * ((len(self) + 7) // 8)
-		for (i, bit) in enumerate(self):
-			result[i >> 3] |= bit << (7 - (i & 7))
-		return result
 	
 	def append_bits(self, val, n):
 		"""Appends the given number of low-order bits of the given

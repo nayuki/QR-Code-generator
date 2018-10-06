@@ -78,21 +78,6 @@ public final class BitBuffer implements Cloneable {
 	
 	
 	/**
-	 * Returns an array representing this buffer's bits packed into bytes in big endian. If the
-	 * bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'.
-	 * @return a new byte array (not {@code null}) representing this bit sequence
-	 */
-	public byte[] getBytes() {
-		byte[] result = new byte[(bitLength + 7) >>> 3];  // Round up to whole byte, won't overflow
-		for (int i = 0; i < bitLength; i++) {
-			if (data.get(i))
-				result[i >>> 3] |= 1 << (7 - (i & 7));
-		}
-		return result;
-	}
-	
-	
-	/**
 	 * Appends the specified number of low-order bits of the specified value to this
 	 * buffer. Requires 0 &#x2264; len &#x2264; 31 and 0 &#x2264; val &lt; 2<sup>len</sup>.
 	 * @param val the value to append

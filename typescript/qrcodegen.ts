@@ -137,8 +137,15 @@ namespace qrcodegen {
 			for (let padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 				bb.appendBits(padByte, 8);
 			
+			// Pack bits into bytes in big endian
+			let dataCodewords: Array<byte> = [];
+			while (dataCodewords.length * 8 < bb.length)
+				dataCodewords.push(0);
+			bb.forEach((b: bit, i: int) =>
+				dataCodewords[i >>> 3] |= b << (7 - (i & 7)));
+			
 			// Create the QR Code object
-			return new QrCode(version, ecl, bb.getBytes(), mask);
+			return new QrCode(version, ecl, dataCodewords, mask);
 		}
 		
 		
@@ -927,18 +934,6 @@ namespace qrcodegen {
 	 * The implicit constructor creates an empty bit buffer (length 0).
 	 */
 	class BitBuffer extends Array<bit> {
-		
-		// Returns a new array representing this buffer's bits packed into bytes in big endian. If the
-		// bit length isn't a multiple of 8, then the remaining bits of the final byte are all '0'.
-		public getBytes(): Array<byte> {
-			let result: Array<byte> = [];
-			while (result.length * 8 < this.length)
-				result.push(0);
-			this.forEach((b: bit, i: int) =>
-				result[i >>> 3] |= b << (7 - (i & 7)));
-			return result;
-		}
-		
 		
 		// Appends the given number of low-order bits of the given value
 		// to this buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.

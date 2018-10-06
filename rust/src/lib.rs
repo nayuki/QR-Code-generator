@@ -182,13 +182,14 @@ impl QrCode {
 			bb.append_bits(*padbyte, 8);
 		}
 		
-		let mut bytes = vec![0u8; bb.0.len() / 8];
+		// Pack bits into bytes in big endian
+		let mut datacodewords = vec![0u8; bb.0.len() / 8];
 		for (i, bit) in bb.0.iter().enumerate() {
-			bytes[i >> 3] |= (*bit as u8) << (7 - (i & 7));
+			datacodewords[i >> 3] |= (*bit as u8) << (7 - (i & 7));
 		}
 		
 		// Create the QR Code object
-		Some(QrCode::encode_codewords(version, ecl, &bytes, mask))
+		Some(QrCode::encode_codewords(version, ecl, &datacodewords, mask))
 	}
 	
 	

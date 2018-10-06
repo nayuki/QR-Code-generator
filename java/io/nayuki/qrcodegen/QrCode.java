@@ -184,8 +184,13 @@ public final class QrCode {
 		for (int padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bb.appendBits(padByte, 8);
 		
+		// Pack bits into bytes in big endian
+		byte[] dataCodewords = new byte[bb.bitLength() / 8];
+		for (int i = 0; i < bb.bitLength(); i++)
+			dataCodewords[i >>> 3] |= bb.getBit(i) << (7 - (i & 7));
+		
 		// Create the QR Code object
-		return new QrCode(version, ecl, bb.getBytes(), mask);
+		return new QrCode(version, ecl, dataCodewords, mask);
 	}
 	
 	
