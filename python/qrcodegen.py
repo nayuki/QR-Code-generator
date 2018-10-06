@@ -223,22 +223,19 @@ class QrCode(object):
 	# ---- Accessor methods ----
 	
 	def get_version(self):
-		"""Returns this QR Code's version number, which is always between 1 and 40 (inclusive)."""
+		"""Returns this QR Code's version number, in the range [1, 40]."""
 		return self._version
 	
 	def get_size(self):
-		"""Returns the width and height of this QR Code, measured in modules.
-		Always equal to version * 4 + 17, in the range 21 to 177."""
+		"""Returns this QR Code's size, in the range [21, 177]."""
 		return self._size
 	
 	def get_error_correction_level(self):
-		"""Returns the error correction level used in this QR Code."""
+		"""Returns this QR Code's error correction level."""
 		return self._errcorlvl
 	
 	def get_mask(self):
-		"""Returns the mask pattern used in this QR Code, in the range 0 to 7 (i.e. unsigned 3-bit integer).
-		Note that even if a constructor was called with automatic masking requested
-		(mask = -1), the resulting object will still have a mask value between 0 and 7."""
+		"""Returns this QR Code's mask, in the range [0, 7]."""
 		return self._mask
 	
 	def get_module(self, x, y):

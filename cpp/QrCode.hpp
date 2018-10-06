@@ -151,15 +151,27 @@ class QrCode final {
 	
 	/*---- Public instance methods ----*/
 	
+	/* 
+	 * Returns this QR Code's version, in the range [1, 40].
+	 */
 	public: int getVersion() const;
 	
 	
+	/* 
+	 * Returns this QR Code's size, in the range [21, 177].
+	 */
 	public: int getSize() const;
 	
 	
+	/* 
+	 * Returns this QR Code's error correction level.
+	 */
 	public: Ecc getErrorCorrectionLevel() const;
 	
 	
+	/* 
+	 * Returns this QR Code's mask, in the range [0, 7].
+	 */
 	public: int getMask() const;
 	
 	
