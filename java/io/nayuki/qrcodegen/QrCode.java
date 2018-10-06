@@ -260,9 +260,9 @@ public final class QrCode {
 	/*---- Public instance methods ----*/
 	
 	/**
-	 * Returns the color of the module (pixel) at the specified coordinates, which is either
-	 * false for white or true for black. The top left corner has the coordinates (x=0, y=0).
-	 * If the specified coordinates are out of bounds, then false (white) is returned.
+	 * Returns the color of the module (pixel) at the specified coordinates, which is {@code false}
+	 * for white or {@code true} for black. The top left corner has the coordinates (x=0, y=0).
+	 * If the specified coordinates are out of bounds, then {@code false} (white) is returned.
 	 * @param x the x coordinate, where 0 is the left edge and size&#x2212;1 is the right edge
 	 * @param y the y coordinate, where 0 is the top edge and size&#x2212;1 is the bottom edge
 	 * @return the module's color, which is either false (white) or true (black)
@@ -273,9 +273,9 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a new image object representing this QR Code, with the specified module scale and number
-	 * of border modules. For example, the arguments scale=10, border=4 means to pad the QR Code
-	 * with 4 white border modules on all four edges, then use 10*10 pixels to represent each module.
+	 * Returns a raster image depicting this QR Code, with the specified module scale and border modules.
+	 * <p>For example, toImage(scale=10, border=4) means to pad the QR Code with 4 white
+	 * border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
 	 * The resulting image only contains the hex colors 000000 and FFFFFF.
 	 * @param scale the module scale factor, which must be positive
 	 * @param border the number of border modules to add, which must be non-negative
@@ -301,8 +301,8 @@ public final class QrCode {
 	
 	
 	/**
-	 * Returns a string of SVG XML code representing an image of this QR Code with the specified
-	 * number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
+	 * Returns a string of SVG code for an image depicting this QR Code, with the specified number
+	 * of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 	 * @param border the number of border modules to add, which must be non-negative
 	 * @return a string representing this QR Code as an SVG document
 	 * @throws IllegalArgumentException if the border is negative

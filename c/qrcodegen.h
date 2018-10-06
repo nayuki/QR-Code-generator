@@ -297,8 +297,8 @@ int qrcodegen_getSize(const uint8_t qrcode[]);
 
 
 /* 
- * Returns the color of the module (pixel) at the given coordinates, which is either
- * false for white or true for black. The top left corner has the coordinates (x=0, y=0).
+ * Returns the color of the module (pixel) at the given coordinates, which is false
+ * for white or true for black. The top left corner has the coordinates (x=0, y=0).
  * If the given coordinates are out of bounds, then false (white) is returned.
  */
 bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y);

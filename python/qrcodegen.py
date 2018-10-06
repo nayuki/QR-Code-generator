@@ -241,8 +241,8 @@ class QrCode(object):
 		return self._mask
 	
 	def get_module(self, x, y):
-		"""Returns the color of the module (pixel) at the given coordinates, which is either
-		False for white or True for black. The top left corner has the coordinates (x=0, y=0).
+		"""Returns the color of the module (pixel) at the given coordinates, which is False
+		for white or True for black. The top left corner has the coordinates (x=0, y=0).
 		If the given coordinates are out of bounds, then False (white) is returned."""
 		return (0 <= x < self._size) and (0 <= y < self._size) and self._modules[y][x]
 	
@@ -250,8 +250,8 @@ class QrCode(object):
 	# ---- Public instance methods ----
 	
 	def to_svg_str(self, border):
-		"""Returns a string of SVG XML code representing an image of this QR Code with the given
-		number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform."""
+		"""Returns a string of SVG code for an image depicting this QR Code, with the given number
+		of border modules. The string always uses Unix newlines (\n), regardless of the platform."""
 		if border < 0:
 			raise ValueError("Border must be non-negative")
 		parts = []

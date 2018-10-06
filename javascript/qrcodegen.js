@@ -152,8 +152,8 @@ var qrcodegen = new function() {
 		
 		/*---- Accessor methods ----*/
 		
-		// (Public) Returns the color of the module (pixel) at the given coordinates, which is either
-		// false for white or true for black. The top left corner has the coordinates (x=0, y=0).
+		// Returns the color of the module (pixel) at the given coordinates, which is false
+		// for white or true for black. The top left corner has the coordinates (x=0, y=0).
 		// If the given coordinates are out of bounds, then false (white) is returned.
 		this.getModule = function(x, y) {
 			return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
@@ -162,9 +162,10 @@ var qrcodegen = new function() {
 		
 		/*---- Public instance methods ----*/
 		
-		// Draws this QR Code with the given module scale and number of modules onto the given HTML canvas element.
-		// The canvas will be resized to a width and height of (this.size + border * 2) * scale. The painted image will be purely
-		// black and white with no transparent regions. The scale must be a positive integer, and the border must be a non-negative integer.
+		// Draws this QR Code, with the given module scale and border modules, onto the given HTML
+		// canvas element. The canvas's width and height is resized to (this.size + border * 2) * scale.
+		// The drawn image is be purely black and white, and fully opaque.
+		// The scale must be a positive integer and the border must be a non-negative integer.
 		this.drawCanvas = function(scale, border, canvas) {
 			if (scale <= 0 || border < 0)
 				throw "Value out of range";
@@ -180,8 +181,8 @@ var qrcodegen = new function() {
 			}
 		};
 		
-		// Returns a string of SVG XML code representing an image of this QR Code with the given
-		// number of border modules. Note that Unix newlines (\n) are always used, regardless of the platform.
+		// Returns a string of SVG code for an image depicting this QR Code, with the given number
+		// of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 		this.toSvgString = function(border) {
 			if (border < 0)
 				throw "Border must be non-negative";
