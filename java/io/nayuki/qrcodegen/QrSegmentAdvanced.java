@@ -52,8 +52,8 @@ public final class QrSegmentAdvanced {
 	 * range of versions, like {@link QrCode#encodeSegments(List,QrCode.Ecc,int,int,int,boolean)}.</p>
 	 * @param text the text to be encoded (not {@code null}), which can be any Unicode string
 	 * @param ecl the error correction level to use (not {@code null})
-	 * @param minVersion the minimum allowed version of the QR Code symbol (at least 1)
-	 * @param maxVersion the maximum allowed version of the QR Code symbol (at most 40)
+	 * @param minVersion the minimum allowed version of the QR Code (at least 1)
+	 * @param maxVersion the maximum allowed version of the QR Code (at most 40)
 	 * @return a new mutable list (not {@code null}) of segments (not {@code null})
 	 * containing the text, minimizing the bit length with respect to the constraints
 	 * @throws NullPointerException if the text or error correction level is {@code null}

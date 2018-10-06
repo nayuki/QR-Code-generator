@@ -48,6 +48,7 @@ import java.util.Objects;
  *     and call the {@link QrCode#QrCode(int,Ecc,byte[],int) constructor}.</p></li>
  * </ul>
  * <p>(Note that all ways require supplying the desired error correction level.)</p>
+ * @see QrSegment
  */
 public final class QrCode {
 	
@@ -60,7 +61,7 @@ public final class QrCode {
 	 * QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
 	 * ecl argument if it can be done without increasing the version.
 	 * @param text the text to be encoded, which can be any Unicode string
-	 * @param ecl the error correction level to use (will be boosted)
+	 * @param ecl the error correction level to use (boostable)
 	 * @return a QR Code representing the text
 	 * @throws NullPointerException if the text or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the text fails to fit in the
@@ -80,8 +81,8 @@ public final class QrCode {
 	 * bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	 * The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 * @param data the binary data to encode
-	 * @param ecl the error correction level to use (will be boosted)
-	 * @return a QR Code representing the binary data
+	 * @param ecl the error correction level to use (boostable)
+	 * @return a QR Code representing the data
 	 * @throws NullPointerException if the data or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the data fails to fit in the
 	 * largest version QR Code at the ECL, which means it is too long
@@ -105,7 +106,7 @@ public final class QrCode {
 	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
 	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
-	 * @param ecl the error correction level to use (will be boosted)
+	 * @param ecl the error correction level to use (boostable)
 	 * @return a QR Code representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
 	 * @throws IllegalArgumentException if the segments fail to fit in the
@@ -128,16 +129,16 @@ public final class QrCode {
 	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
 	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
-	 * @param ecl the error correction level to use (may be boosted)
-	 * @param minVersion the minimum allowed version of the QR symbol (at least 1)
-	 * @param maxVersion the maximum allowed version of the QR symbol (at most 40)
-	 * @param mask the mask pattern to use, which is either -1 for automatic choice or from 0 to 7 for fixed choice
-	 * @param boostEcl increases the error correction level if it can be done without increasing the version number
+	 * @param ecl the error correction level to use (boostable)
+	 * @param minVersion the minimum allowed version of the QR Code (at least 1)
+	 * @param maxVersion the maximum allowed version of the QR Code (at most 40)
+	 * @param mask the mask number to use (between 0 and 7 (inclusive)), or &#x2212;1 for automatic mask
+	 * @param boostEcl increases the ECC level as long as it doesn't increase the version number
 	 * @return a QR Code representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
 	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
-	 * is violated, or if mask &lt; &#x2212;1 or mask &gt; 7, or if the segments fail
-	 * to fit in the maxVersion QR Code at the ECL, which means they are too long
+	 * or &#x2212;1 &#x2264; mask &#x2264; 7 is violated; or if the segments fail to
+	 * fit in the maxVersion QR Code at the ECL, which means they are too long
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
 		Objects.requireNonNull(segs);
@@ -265,7 +266,8 @@ public final class QrCode {
 	 * If the specified coordinates are out of bounds, then {@code false} (white) is returned.
 	 * @param x the x coordinate, where 0 is the left edge and size&#x2212;1 is the right edge
 	 * @param y the y coordinate, where 0 is the top edge and size&#x2212;1 is the bottom edge
-	 * @return the module's color, which is either false (white) or true (black)
+	 * @return {@code true} if the coordinates are in bounds and the module
+	 * at that location is black, or {@code false} (white) otherwise
 	 */
 	public boolean getModule(int x, int y) {
 		return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
@@ -277,9 +279,9 @@ public final class QrCode {
 	 * <p>For example, toImage(scale=10, border=4) means to pad the QR Code with 4 white
 	 * border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
 	 * The resulting image only contains the hex colors 000000 and FFFFFF.
-	 * @param scale the module scale factor, which must be positive
+	 * @param scale the side length (measured in pixels, must be positive) of each module
 	 * @param border the number of border modules to add, which must be non-negative
-	 * @return an image representing this QR Code, with padding and scaling
+	 * @return a new image representing this QR Code, with padding and scaling
 	 * @throws IllegalArgumentException if the scale or border is out of range, or if
 	 * {scale, border, size} cause the image dimensions to exceed Integer.MAX_VALUE
 	 */
@@ -304,7 +306,7 @@ public final class QrCode {
 	 * Returns a string of SVG code for an image depicting this QR Code, with the specified number
 	 * of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 	 * @param border the number of border modules to add, which must be non-negative
-	 * @return a string representing this QR Code as an SVG document
+	 * @return a string representing this QR Code as an SVG XML document
 	 * @throws IllegalArgumentException if the border is negative
 	 */
 	public String toSvgString(int border) {
