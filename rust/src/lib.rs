@@ -64,7 +64,8 @@ pub struct QrCode {
 	
 	// Grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code (false = white, true = black). Immutable after constructor finishes.
+	// The modules of this QR Code (false = white, true = black).
+	// Immutable after constructor finishes. Accessed through get_module().
 	modules: Vec<bool>,
 	
 	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.

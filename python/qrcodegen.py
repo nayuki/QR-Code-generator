@@ -186,7 +186,8 @@ class QrCode(object):
 		self._errcorlvl = errcorlvl
 		
 		# Initialize both grids to be size*size arrays of Boolean false
-		# The modules of this QR Code (False = white, True = black). Immutable after constructor finishes
+		# The modules of this QR Code (False = white, True = black).
+		# Immutable after constructor finishes. Accessed through get_module().
 		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all white
 		# Indicates function modules that are not subjected to masking. Discarded when constructor finishes
 		self._isfunction = [[False] * self._size for _ in range(self._size)]

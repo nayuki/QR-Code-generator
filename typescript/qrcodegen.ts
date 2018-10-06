@@ -148,7 +148,8 @@ namespace qrcodegen {
 		// 21 and 177 (inclusive). This is equal to version * 4 + 17.
 		public readonly size: int;
 		
-		// The modules of this QR Code (false = white, true = black). Immutable after constructor finishes.
+		// The modules of this QR Code (false = white, true = black).
+		// Immutable after constructor finishes. Accessed through getModule().
 		private readonly modules   : Array<Array<boolean>> = [];
 		
 		// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
