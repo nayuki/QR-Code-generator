@@ -51,7 +51,7 @@ This module "qrcodegen", public members:
   - Constructor QrSegment(QrSegment.Mode mode, int numch, list<int> bitdata)
   - Method get_mode() -> QrSegment.Mode
   - Method get_num_chars() -> int
-  - Method get_bits() -> list<int>
+  - Method get_data() -> list<int>
   - Constants regex NUMERIC_REGEX, ALPHANUMERIC_REGEX
   - Enum Mode:
     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI, ECI
@@ -733,7 +733,7 @@ class QrSegment(object):
 		# Accessed through get_num_chars().
 		self._numchars = numch
 		
-		# The data bits of this segment. Accessed through get_bits().
+		# The data bits of this segment. Accessed through get_data().
 		self._bitdata = list(bitdata)  # Make defensive copy
 	
 	
@@ -747,7 +747,7 @@ class QrSegment(object):
 		"""Returns the character count field of this segment."""
 		return self._numchars
 	
-	def get_bits(self):
+	def get_data(self):
 		"""Returns a new copy of the data bits of this segment."""
 		return list(self._bitdata)  # Make defensive copy
 	

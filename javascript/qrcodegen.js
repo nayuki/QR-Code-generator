@@ -50,7 +50,7 @@
  *   - Constructor QrSegment(QrSegment.Mode mode, int numChars, list<int> bitData)
  *   - Field QrSegment.Mode mode
  *   - Field int numChars
- *   - Method getBits() -> list<int>
+ *   - Method getData() -> list<int>
  *   - Constants RegExp NUMERIC_REGEX, ALPHANUMERIC_REGEX
  *   - Enum Mode:
  *     - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI, ECI
@@ -597,7 +597,7 @@ var qrcodegen = new function() {
 		segs.forEach(function(seg) {
 			bb.appendBits(seg.mode.modeBits, 4);
 			bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-			seg.getBits().forEach(function(bit) {
+			seg.getData().forEach(function(bit) {
 				bb.push(bit);
 			});
 		});
@@ -738,6 +738,8 @@ var qrcodegen = new function() {
 		/*---- Constructor (low level) ----*/
 		if (numChars < 0 || !(mode instanceof Mode))
 			throw "Invalid argument";
+		
+		// The data bits of this segment. Accessed through getData().
 		bitData = bitData.slice();  // Make defensive copy
 		
 		// The mode indicator of this segment.
@@ -749,7 +751,7 @@ var qrcodegen = new function() {
 		Object.defineProperty(this, "numChars", {value:numChars});
 		
 		// Returns a new copy of the data bits of this segment.
-		this.getBits = function() {
+		this.getData = function() {
 			return bitData.slice();  // Make defensive copy
 		};
 	};
@@ -856,7 +858,7 @@ var qrcodegen = new function() {
 			var ccbits = seg.mode.numCharCountBits(version);
 			if (seg.numChars >= (1 << ccbits))
 				return Infinity;  // The segment's length doesn't fit the field's bit width
-			result += 4 + ccbits + seg.getBits().length;
+			result += 4 + ccbits + seg.getData().length;
 		}
 		return result;
 	};

@@ -173,7 +173,7 @@ public final class QrSegment {
 	 * Always zero or positive. Not the same as the data's bit length. */
 	public final int numChars;
 	
-	/** The data bits of this segment. Not {@code null}. Accessed through {@link #getBits()}. */
+	/** The data bits of this segment. Not {@code null}. Accessed through {@link #getData()}. */
 	final BitBuffer data;
 	
 	
@@ -205,7 +205,7 @@ public final class QrSegment {
 	 * Returns the data bits of this segment.
 	 * @return a new copy of the data bits (not {@code null})
 	 */
-	public BitBuffer getBits() {
+	public BitBuffer getData() {
 		return data.clone();  // Make defensive copy
 	}
 	

@@ -118,7 +118,7 @@ namespace qrcodegen {
 			for (let seg of segs) {
 				bb.appendBits(seg.mode.modeBits, 4);
 				bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-				for (let b of seg.getBits())
+				for (let b of seg.getData())
 					bb.push(b);
 			}
 			if (bb.length != dataUsedBits)
@@ -783,7 +783,7 @@ namespace qrcodegen {
 				// Always zero or positive. Not the same as the data's bit length.
 				public readonly numChars: int,
 				
-				// The data bits of this segment. Accessed through getBits().
+				// The data bits of this segment. Accessed through getData().
 				private readonly bitData: Array<bit>) {
 			
 			if (numChars < 0)
@@ -795,7 +795,7 @@ namespace qrcodegen {
 		/*-- Methods --*/
 		
 		// Returns a new copy of the data bits of this segment.
-		public getBits(): Array<bit> {
+		public getData(): Array<bit> {
 			return this.bitData.slice();  // Make defensive copy
 		}
 		
