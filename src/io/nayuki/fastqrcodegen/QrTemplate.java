@@ -90,7 +90,7 @@ final class QrTemplate {
 	final int[][] masks;
 	final int[] dataOutputBitIndexes;
 	
-	private int[] isFunction;  // Discarded at end of constructor
+	private int[] isFunction;  // Discarded when constructor finishes
 	
 	
 	private QrTemplate(int ver) {
@@ -125,6 +125,7 @@ final class QrTemplate {
 		int numAlign = alignPatPos.length;
 		for (int i = 0; i < numAlign; i++) {
 			for (int j = 0; j < numAlign; j++) {
+				// Don't draw on the three finder corners
 				if (!(i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0))
 					drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
 			}
@@ -262,6 +263,8 @@ final class QrTemplate {
 	}
 	
 	
+	// Marks the module at the given coordinates as a function module.
+	// Also either sets that module black or keeps its color unchanged.
 	private void darkenFunctionModule(int x, int y, int enable) {
 		assert 0 <= x && x < size;
 		assert 0 <= y && y < size;
