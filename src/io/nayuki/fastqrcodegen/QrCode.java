@@ -559,7 +559,7 @@ public final class QrCode {
 	
 	
 	// Returns 0 or 1 based on the i'th bit of x.
-	private static int getBit(int x, int i) {
+	static int getBit(int x, int i) {
 		return (x >>> i) & 1;
 	}
 	

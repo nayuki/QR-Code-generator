@@ -173,7 +173,7 @@ final class QrTemplate {
 		
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
-			int bit = (bits >>> i) & 1;
+			int bit = QrCode.getBit(bits, i);
 			int a = size - 11 + i % 3;
 			int b = i / 3;
 			darkenFunctionModule(a, b, bit);
@@ -260,7 +260,7 @@ final class QrTemplate {
 		assert 0 <= x && x < size;
 		assert 0 <= y && y < size;
 		int i = y * size + x;
-		return (grid[i >>> 5] >>> i) & 1;
+		return QrCode.getBit(grid[i >>> 5], i);
 	}
 	
 	
