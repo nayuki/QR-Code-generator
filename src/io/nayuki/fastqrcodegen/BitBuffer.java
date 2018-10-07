@@ -92,7 +92,7 @@ final class BitBuffer {
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
-		if (Integer.MAX_VALUE - bitLength < len)
+		if (len > Integer.MAX_VALUE - bitLength)
 			throw new IllegalStateException("Maximum length reached");
 		
 		if (bitLength + len + 1 > data.length << 5)
@@ -118,12 +118,14 @@ final class BitBuffer {
 		Objects.requireNonNull(vals);
 		if (len == 0)
 			return;
-		if (len < 0 || len > vals.length * 32)
+		if (len < 0 || len > vals.length * 32L)
 			throw new IllegalArgumentException("Value out of range");
 		int wholeWords = len / 32;
 		int tailBits = len % 32;
 		if (tailBits > 0 && vals[wholeWords] << tailBits != 0)
 			throw new IllegalArgumentException("Last word must have low bits clear");
+		if (len > Integer.MAX_VALUE - bitLength)
+			throw new IllegalStateException("Maximum length reached");
 		
 		while (bitLength + len > data.length * 32)
 			data = Arrays.copyOf(data, data.length * 2);

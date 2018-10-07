@@ -57,6 +57,8 @@ public final class QrSegment {
 	 */
 	public static QrSegment makeBytes(byte[] data) {
 		Objects.requireNonNull(data);
+		if (data.length * 8L > Integer.MAX_VALUE)
+			throw new IllegalArgumentException("Data too long");
 		int[] bits = new int[(data.length + 3) / 4];
 		for (int i = 0; i < data.length; i++)
 			bits[i >>> 2] |= (data[i] & 0xFF) << (~i << 3);
@@ -243,7 +245,7 @@ public final class QrSegment {
 	public QrSegment(Mode md, int numCh, int[] data, int bitLen) {
 		mode = Objects.requireNonNull(md);
 		this.data = Objects.requireNonNull(data);
-		if (numCh < 0 || bitLen < 0 || bitLen > data.length * 32)
+		if (numCh < 0 || bitLen < 0 || bitLen > data.length * 32L)
 			throw new IllegalArgumentException("Invalid value");
 		numChars = numCh;
 		bitLength = bitLen;
