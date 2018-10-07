@@ -27,6 +27,9 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
+/**
+ * An appendable sequence of bits (0s and 1s). Mainly used by {@link QrSegment}.
+ */
 final class BitBuffer {
 	
 	/*---- Fields ----*/
@@ -39,6 +42,9 @@ final class BitBuffer {
 	
 	/*---- Constructor ----*/
 	
+	/**
+	 * Constructs an empty bit buffer (length 0).
+	 */
 	public BitBuffer() {
 		data = new int[64];
 		bitLength = 0;
@@ -48,6 +54,10 @@ final class BitBuffer {
 	
 	/*---- Methods ----*/
 	
+	/**
+	 * Returns the length of this sequence, which is a non-negative value.
+	 * @return the length of this sequence
+	 */
 	public int getBit(int index) {
 		if (index < 0 || index >= bitLength)
 			throw new IndexOutOfBoundsException();
@@ -65,6 +75,15 @@ final class BitBuffer {
 	}
 	
 	
+	/**
+	 * Appends the specified number of low-order bits of the specified value to this
+	 * buffer. Requires 0 &#x2264; len &#x2264; 31 and 0 &#x2264; val &lt; 2<sup>len</sup>.
+	 * @param val the value to append
+	 * @param len the number of low-order bits in the value to take
+	 * @throws IllegalArgumentException if the value or number of bits is out of range
+	 * @throws IllegalStateException if appending the data
+	 * would make bitLength exceed Integer.MAX_VALUE
+	 */
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");

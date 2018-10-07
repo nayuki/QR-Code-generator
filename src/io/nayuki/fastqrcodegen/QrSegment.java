@@ -32,8 +32,17 @@ import java.util.Objects;
 
 public final class QrSegment {
 	
-	/*---- Static factory functions ----*/
+	/*---- Static factory functions (mid level) ----*/
 	
+	/**
+	 * Returns a segment representing the specified binary data
+	 * encoded in byte mode. All input byte arrays are acceptable.
+	 * <p>Any text string can be converted to UTF-8 bytes ({@code
+	 * s.getBytes(StandardCharsets.UTF_8)}) and encoded as a byte mode segment.</p>
+	 * @param data the binary data (not {@code null})
+	 * @return a segment (not {@code null}) containing the data
+	 * @throws NullPointerException if the array is {@code null}
+	 */
 	public static QrSegment makeBytes(byte[] data) {
 		Objects.requireNonNull(data);
 		int[] bits = new int[(data.length + 3) / 4];
@@ -43,6 +52,13 @@ public final class QrSegment {
 	}
 	
 	
+	/**
+	 * Returns a segment representing the specified string of decimal digits encoded in numeric mode.
+	 * @param digits the text (not {@code null}), with only digits from 0 to 9 allowed
+	 * @return a segment (not {@code null}) containing the text
+	 * @throws NullPointerException if the string is {@code null}
+	 * @throws IllegalArgumentException if the string contains non-digit characters
+	 */
 	public static QrSegment makeNumeric(String digits) {
 		Objects.requireNonNull(digits);
 		BitBuffer bb = new BitBuffer();
@@ -66,6 +82,15 @@ public final class QrSegment {
 	}
 	
 	
+	/**
+	 * Returns a segment representing the specified text string encoded in alphanumeric mode.
+	 * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
+	 * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 * @param text the text (not {@code null}), with only certain characters allowed
+	 * @return a segment (not {@code null}) containing the text
+	 * @throws NullPointerException if the string is {@code null}
+	 * @throws IllegalArgumentException if the string contains non-encodable characters
+	 */
 	public static QrSegment makeAlphanumeric(String text) {
 		Objects.requireNonNull(text);
 		BitBuffer bb = new BitBuffer();
@@ -89,6 +114,13 @@ public final class QrSegment {
 	}
 	
 	
+	/**
+	 * Returns a list of zero or more segments to represent the specified Unicode text string.
+	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
+	 * @param text the text to be encoded, which can be any Unicode string
+	 * @return a new mutable list (not {@code null}) of segments (not {@code null}) containing the text
+	 * @throws NullPointerException if the text is {@code null}
+	 */
 	public static List<QrSegment> makeSegments(String text) {
 		Objects.requireNonNull(text);
 		
@@ -105,6 +137,13 @@ public final class QrSegment {
 	}
 	
 	
+	/**
+	 * Returns a segment representing an Extended Channel Interpretation
+	 * (ECI) designator with the specified assignment value.
+	 * @param assignVal the ECI assignment number (see the AIM ECI specification)
+	 * @return a segment (not {@code null}) containing the data
+	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)
+	 */
 	public static QrSegment makeEci(int assignVal) {
 		BitBuffer bb = new BitBuffer();
 		if (0 <= assignVal && assignVal < (1 << 7))
@@ -144,17 +183,32 @@ public final class QrSegment {
 	
 	/*---- Instance fields ----*/
 	
+	/** The mode indicator of this segment. Not {@code null}. */
 	public final Mode mode;
 	
+	/** The length of this segment's unencoded data. Measured in characters for
+	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+	 * Always zero or positive. Not the same as the data's bit length. */
 	public final int numChars;
 	
+	// The data bits of this segment. Not null. Accessed through getData().
 	final int[] data;
 	
 	final int bitLength;
 	
 	
-	/*---- Constructor ----*/
+	/*---- Constructor (low level) ----*/
 	
+	/**
+	 * Constructs a QR Code segment with the specified attributes and data.
+	 * The character count (numCh) must agree with the mode and the bit buffer length,
+	 * but the constraint isn't checked. The specified bit buffer is cloned and stored.
+	 * @param md the mode (not {@code null})
+	 * @param numCh the data length in characters or bytes, which is non-negative
+	 * @param data the data bits (not {@code null})
+	 * @throws NullPointerException if the mode or data is {@code null}
+	 * @throws IllegalArgumentException if the character count is negative
+	 */
 	public QrSegment(Mode md, int numCh, int[] data, int bitLen) {
 		mode = Objects.requireNonNull(md);
 		this.data = Objects.requireNonNull(data);
@@ -204,6 +258,9 @@ public final class QrSegment {
 	
 	/*---- Public helper enumeration ----*/
 	
+	/**
+	 * Describes how a segment's data bits are interpreted.
+	 */
 	public enum Mode {
 		
 		/*-- Constants --*/
@@ -217,8 +274,10 @@ public final class QrSegment {
 		
 		/*-- Fields --*/
 		
+		// The mode indicator bits, which is a uint4 value (range 0 to 15).
 		final int modeBits;
 		
+		// Number of character count bits for three different version ranges.
 		private final int[] numBitsCharCount;
 		
 		
@@ -232,6 +291,8 @@ public final class QrSegment {
 		
 		/*-- Method --*/
 		
+		// Returns the bit width of the character count field for a segment in this mode
+		// in a QR Code at the given version number. The result is in the range [0, 16].
 		int numCharCountBits(int ver) {
 			return numBitsCharCount[(ver + 7) / 17];
 		}
