@@ -185,10 +185,10 @@ final class QrTemplate {
 	// Draws a 9*9 finder pattern including the border separator,
 	// with the center module at (x, y). Modules can be out of bounds.
 	private void drawFinderPattern(int x, int y) {
-		for (int i = -4; i <= 4; i++) {
-			for (int j = -4; j <= 4; j++) {
-				int dist = Math.max(Math.abs(i), Math.abs(j));  // Chebyshev/infinity norm
-				int xx = x + j, yy = y + i;
+		for (int dy = -4; dy <= 4; dy++) {
+			for (int dx = -4; dx <= 4; dx++) {
+				int dist = Math.max(Math.abs(dx), Math.abs(dy));  // Chebyshev/infinity norm
+				int xx = x + dx, yy = y + dy;
 				if (0 <= xx && xx < size && 0 <= yy && yy < size)
 					darkenFunctionModule(xx, yy, (dist != 2 && dist != 4) ? 1 : 0);
 			}
@@ -199,9 +199,9 @@ final class QrTemplate {
 	// Draws a 5*5 alignment pattern, with the center module
 	// at (x, y). All modules must be in bounds.
 	private void drawAlignmentPattern(int x, int y) {
-		for (int i = -2; i <= 2; i++) {
-			for (int j = -2; j <= 2; j++)
-				darkenFunctionModule(x + j, y + i, (Math.max(Math.abs(i), Math.abs(j)) != 1) ? 1 : 0);
+		for (int dy = -2; dy <= 2; dy++) {
+			for (int dx = -2; dx <= 2; dx++)
+				darkenFunctionModule(x + dx, y + dy, (Math.max(Math.abs(dx), Math.abs(dy)) != 1) ? 1 : 0);
 		}
 	}
 	
