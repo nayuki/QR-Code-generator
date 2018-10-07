@@ -65,6 +65,11 @@ final class BitBuffer {
 	}
 	
 	
+	/**
+	 * Returns an array representing this buffer's bits packed into bytes
+	 * in big endian. The current bit length must be a multiple of 8.
+	 * @return a new byte array (not {@code null}) representing this bit sequence
+	 */
 	public byte[] getBytes() {
 		if (bitLength % 8 != 0)
 			throw new IllegalStateException("Data is not a whole number of bytes");

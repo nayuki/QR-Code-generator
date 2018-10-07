@@ -30,6 +30,18 @@ import java.util.List;
 import java.util.Objects;
 
 
+/**
+ * A segment of character/binary/control data in a QR Code symbol.
+ * Instances of this class are immutable.
+ * <p>The mid-level way to create a segment is to take the payload data and call a
+ * static factory function such as {@link QrSegment#makeNumeric(String)}. The low-level
+ * way to create a segment is to custom-make the bit buffer and call the {@link
+ * QrSegment#QrSegment(Mode,int,int[],int) constructor} with appropriate values.</p>
+ * <p>This segment class imposes no length restrictions, but QR Codes have restrictions.
+ * Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
+ * Any segment longer than this is meaningless for the purpose of generating QR Codes.
+ * This class can represent kanji mode segments, but provides no help in encoding them.</p>
+ */
 public final class QrSegment {
 	
 	/*---- Static factory functions (mid level) ----*/
@@ -162,6 +174,14 @@ public final class QrSegment {
 	}
 	
 	
+	/**
+	 * Tests whether the specified string can be encoded as a segment in numeric mode.
+	 * A string is encodable iff each character is in the range 0 to 9.
+	 * @param text the string to test for encodability (not {@code null})
+	 * @return {@code true} iff each character is in the range 0 to 9.
+	 * @throws NullPointerException if the string is {@code null}
+	 * @see #makeNumeric(String)
+	 */
 	public static boolean isNumeric(String text) {
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
@@ -172,6 +192,15 @@ public final class QrSegment {
 	}
 	
 	
+	/**
+	 * Tests whether the specified string can be encoded as a segment in alphanumeric mode.
+	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 * @param text the string to test for encodability (not {@code null})
+	 * @return {@code true} iff each character is in the alphanumeric mode character set
+	 * @throws NullPointerException if the string is {@code null}
+	 * @see #makeAlphanumeric(String)
+	 */
 	public static boolean isAlphanumeric(String text) {
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);

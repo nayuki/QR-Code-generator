@@ -208,6 +208,7 @@ public final class QrCode {
 	 * &#x2212;1), the resulting object still has a mask value between 0 and 7. */
 	public final int mask;
 	
+	// The modules of this QR Code. Immutable after constructor finishes. Accessed through getModule().
 	private final int[] modules;
 	
 	
@@ -363,6 +364,8 @@ public final class QrCode {
 	}
 	
 	
+	// Sets the module at the given coordinates to the given color.
+	// Only used by the constructor. Coordinates must be in bounds.
 	private void setModule(int x, int y, int black) {
 		assert 0 <= x && x < size;
 		assert 0 <= y && y < size;
