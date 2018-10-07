@@ -57,11 +57,11 @@ public final class QrCodeGeneratorDemo {
 		
 		QrCode qr = QrCode.encodeText(text, errCorLvl);  // Make the QR Code symbol
 		
-		BufferedImage img = qr.toImage(10, 4);          // Convert to bitmap image
-		File imgFile = new File("hello-world-QR.png");  // File path for output
-		ImageIO.write(img, "png", imgFile);             // Write image to file
+		BufferedImage img = qr.toImage(10, 4);           // Convert to bitmap image
+		File imgFile = new File("hello-world-QR.png");   // File path for output
+		ImageIO.write(img, "png", imgFile);              // Write image to file
 		
-		String svg = qr.toSvgString(4);  // Convert to SVG XML code
+		String svg = qr.toSvgString(4);                  // Convert to SVG XML code
 		Files.write(new File("hello-world-QR.svg").toPath(),
 			svg.getBytes(StandardCharsets.UTF_8));
 	}
