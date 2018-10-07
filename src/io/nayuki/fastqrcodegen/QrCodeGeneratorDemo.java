@@ -62,7 +62,8 @@ public final class QrCodeGeneratorDemo {
 		ImageIO.write(img, "png", imgFile);              // Write image to file
 		
 		String svg = qr.toSvgString(4);                  // Convert to SVG XML code
-		Files.write(new File("hello-world-QR.svg").toPath(),
+		File svgFile = new File("hello-world-QR.svg");   // File path for output
+		Files.write(svgFile.toPath(),                    // Write image to file
 			svg.getBytes(StandardCharsets.UTF_8));
 	}
 	
