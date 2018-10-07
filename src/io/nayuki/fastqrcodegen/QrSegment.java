@@ -227,6 +227,7 @@ public final class QrSegment {
 	// The data bits of this segment. Not null. Accessed through getData().
 	final int[] data;
 	
+	// Requires 0 <= bitLength <= data.length * 32.
 	final int bitLength;
 	
 	
@@ -239,6 +240,7 @@ public final class QrSegment {
 	 * @param md the mode (not {@code null})
 	 * @param numCh the data length in characters or bytes, which is non-negative
 	 * @param data the data bits (not {@code null})
+	 * @param bitLen the number of valid prefix bits in the data array
 	 * @throws NullPointerException if the mode or data is {@code null}
 	 * @throws IllegalArgumentException if the character count is negative
 	 */

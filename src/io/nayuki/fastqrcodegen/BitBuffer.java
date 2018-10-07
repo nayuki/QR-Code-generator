@@ -114,6 +114,14 @@ final class BitBuffer {
 	}
 	
 	
+	/**
+	 * Appends the specified sequence of bits to this buffer.
+	 * Requires 0 &#x2264; len &#x2264; 32 &#xD7; vals.length.
+	 * @param vals the sequence of bits to append (not {@code null})
+	 * @param len the number of prefix bits to read from the array
+	 * @throws IllegalStateException if appending the data
+	 * would make bitLength exceed Integer.MAX_VALUE
+	 */
 	public void appendBits(int[] vals, int len) {
 		Objects.requireNonNull(vals);
 		if (len == 0)
