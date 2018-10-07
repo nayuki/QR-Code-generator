@@ -128,20 +128,20 @@ public final class QrCode {
 	/*---- Constructor ----*/
 	
 	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
-		// Check arguments
-		errorCorrectionLevel = Objects.requireNonNull(ecl);
-		if (ver < MIN_VERSION || ver > MAX_VERSION || mask < -1 || mask > 7)
-			throw new IllegalArgumentException("Value out of range");
-		Objects.requireNonNull(dataCodewords);
-		
-		// Initialize fields
+		// Check arguments and initialize fields
+		if (ver < MIN_VERSION || ver > MAX_VERSION)
+			throw new IllegalArgumentException("Version value out of range");
+		if (mask < -1 || mask > 7)
+			throw new IllegalArgumentException("Mask value out of range");
 		version = ver;
 		size = ver * 4 + 17;
+		errorCorrectionLevel = Objects.requireNonNull(ecl);
+		Objects.requireNonNull(dataCodewords);
 		
 		QrTemplate tpl = QrTemplate.getInstance(ver);
 		modules = tpl.template.clone();  
 		
-		// Draw function patterns, draw all codewords, do masking
+		// Compute ECC, draw modules, do masking
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(tpl.dataOutputBitIndexes, allCodewords);
 		this.mask = handleConstructorMasking(tpl.masks, mask);
