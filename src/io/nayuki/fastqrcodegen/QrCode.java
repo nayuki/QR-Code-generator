@@ -139,7 +139,7 @@ public final class QrCode {
 		Objects.requireNonNull(dataCodewords);
 		
 		QrTemplate tpl = QrTemplate.getInstance(ver);
-		modules = tpl.template.clone();  
+		modules = tpl.template.clone();
 		
 		// Compute ECC, draw modules, do masking
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
@@ -241,7 +241,7 @@ public final class QrCode {
 		int rem = data;
 		for (int i = 0; i < 10; i++)
 			rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
-		int bits  = (data << 10 | rem) ^ 0x5412;  // uint15
+		int bits = (data << 10 | rem) ^ 0x5412;  // uint15
 		assert bits >>> 15 == 0;
 		
 		// Draw first copy
