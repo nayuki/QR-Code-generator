@@ -173,7 +173,7 @@ public final class QrSegment {
 	 * Always zero or positive. Not the same as the data's bit length. */
 	public final int numChars;
 	
-	/** The data bits of this segment. Not {@code null}. Accessed through {@link #getData()}. */
+	// The data bits of this segment. Not null. Accessed through getData().
 	final BitBuffer data;
 	
 	
@@ -244,8 +244,8 @@ public final class QrSegment {
 	 * @see #makeAlphanumeric(String) */
 	public static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[A-Z0-9 $%*+./:-]*");
 	
-	/** The set of all legal characters in alphanumeric mode, where
-	 * each character value maps to the index in the string. */
+	// The set of all legal characters in alphanumeric mode, where
+	// each character value maps to the index in the string.
 	static final String ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 	
 	
@@ -268,10 +268,10 @@ public final class QrSegment {
 		
 		/*-- Fields --*/
 		
-		/** The mode indicator bits, which is a uint4 value (range 0 to 15). */
+		// The mode indicator bits, which is a uint4 value (range 0 to 15).
 		final int modeBits;
 		
-		/** Number of character count bits for three different version ranges. */
+		// Number of character count bits for three different version ranges.
 		private final int[] numBitsCharCount;
 		
 		
@@ -285,12 +285,8 @@ public final class QrSegment {
 		
 		/*-- Method --*/
 		
-		/**
-		 * Returns the bit width of the character count field for a segment
-		 * in this mode in a QR Code at the specified version number.
-		 * @param ver the version number, which is between 1 to 40 (inclusive)
-		 * @return the number of bits for the character count, which is between 0 to 16 (inclusive)
-		 */
+		// Returns the bit width of the character count field for a segment in this mode
+		// in a QR Code at the given version number. The result is in the range [0, 16].
 		int numCharCountBits(int ver) {
 			assert QrCode.MIN_VERSION <= ver && ver <= QrCode.MAX_VERSION;
 			return numBitsCharCount[(ver + 7) / 17];
