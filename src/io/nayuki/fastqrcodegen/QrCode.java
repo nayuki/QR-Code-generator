@@ -104,13 +104,6 @@ public final class QrCode {
 	
 	
 	
-	/*---- Public constants ----*/
-	
-	public static final int MIN_VERSION =  1;
-	public static final int MAX_VERSION = 40;
-	
-	
-	
 	/*---- Instance fields ----*/
 	
 	public final int version;
@@ -459,7 +452,11 @@ public final class QrCode {
 	}
 	
 	
-	/*---- Private tables of constants ----*/
+	/*---- Constants and tables ----*/
+	
+	public static final int MIN_VERSION =  1;
+	public static final int MAX_VERSION = 40;
+	
 	
 	// For use in getPenaltyScore(), when evaluating which mask is best.
 	private static final int PENALTY_N1 =  3;
