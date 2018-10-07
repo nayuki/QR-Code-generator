@@ -125,9 +125,7 @@ final class QrTemplate {
 		int numAlign = alignPatPos.length;
 		for (int i = 0; i < numAlign; i++) {
 			for (int j = 0; j < numAlign; j++) {
-				if (i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0)
-					continue;  // Skip the three finder corners
-				else
+				if (!(i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0))
 					drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
 			}
 		}
@@ -201,7 +199,7 @@ final class QrTemplate {
 	private void drawAlignmentPattern(int x, int y) {
 		for (int dy = -2; dy <= 2; dy++) {
 			for (int dx = -2; dx <= 2; dx++)
-				darkenFunctionModule(x + dx, y + dy, (Math.max(Math.abs(dx), Math.abs(dy)) != 1) ? 1 : 0);
+				darkenFunctionModule(x + dx, y + dy, Math.abs(Math.max(Math.abs(dx), Math.abs(dy)) - 1));
 		}
 	}
 	
