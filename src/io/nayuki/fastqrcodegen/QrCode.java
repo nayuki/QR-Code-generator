@@ -162,7 +162,7 @@ public final class QrCode {
 	public boolean getModule(int x, int y) {
 		if (0 <= x && x < size && 0 <= y && y < size) {
 			int i = y * size + x;
-			return ((modules[i >>> 5] >>> i) & 1) != 0;
+			return getBit(modules[i >>> 5], i) != 0;
 		} else
 			return false;
 	}
@@ -246,18 +246,18 @@ public final class QrCode {
 		
 		// Draw first copy
 		for (int i = 0; i <= 5; i++)
-			setModule(8, i, (bits >>> i) & 1);
-		setModule(8, 7, (bits >>> 6) & 1);
-		setModule(8, 8, (bits >>> 7) & 1);
-		setModule(7, 8, (bits >>> 8) & 1);
+			setModule(8, i, getBit(bits, i));
+		setModule(8, 7, getBit(bits, 6));
+		setModule(8, 8, getBit(bits, 7));
+		setModule(7, 8, getBit(bits, 8));
 		for (int i = 9; i < 15; i++)
-			setModule(14 - i, 8, (bits >>> i) & 1);
+			setModule(14 - i, 8, getBit(bits, i));
 		
 		// Draw second copy
 		for (int i = 0; i <= 7; i++)
-			setModule(size - 1 - i, 8, (bits >>> i) & 1);
+			setModule(size - 1 - i, 8, getBit(bits, i));
 		for (int i = 8; i < 15; i++)
-			setModule(8, size - 15 + i, (bits >>> i) & 1);
+			setModule(8, size - 15 + i, getBit(bits, i));
 		setModule(8, size - 8, 1);  // Always black
 	}
 	
@@ -319,7 +319,7 @@ public final class QrCode {
 			throw new IllegalArgumentException();
 		for (int i = 0; i < dataOutputBitIndexes.length; i++) {
 			int j = dataOutputBitIndexes[i];
-			int bit = (allCodewords[i >>> 3] >>> (~i & 7)) & 1;
+			int bit = getBit(allCodewords[i >>> 3], ~i & 7);
 			modules[j >>> 5] |= bit << j;
 		}
 	}
@@ -377,7 +377,7 @@ public final class QrCode {
 			for (int x = 0; x < size; x++, index++, downIndex++) {
 				
 				// Adjacent modules having same color
-				int bit = (modules[index >>> 5] >>> index) & 1;
+				int bit = getBit(modules[index >>> 5], index);
 				if (bit != runColor) {
 					runColor = bit;
 					runLen = 1;
@@ -392,7 +392,7 @@ public final class QrCode {
 				black += bit;
 				bits = ((bits & 0b1111111111) << 1) | bit;
 				if (downIndex < end) {
-					downBits = ((downBits & 1) << 1) | ((modules[downIndex >>> 5] >>> downIndex) & 1);
+					downBits = ((downBits & 1) << 1) | getBit(modules[downIndex >>> 5], downIndex);
 					// 2*2 blocks of modules having same color
 					if (x >= 1 && (downBits == 0 || downBits == 3) && downBits == (bits & 3))
 						result += PENALTY_N2;
@@ -412,7 +412,7 @@ public final class QrCode {
 			for (int y = 0, index = x; y < size; y++, index += size) {
 				
 				// Adjacent modules having same color
-				int bit = (modules[index >>> 5] >>> index) & 1;
+				int bit = getBit(modules[index >>> 5], index);
 				if (bit != runColor) {
 					runColor = bit;
 					runLen = 1;
@@ -450,6 +450,12 @@ public final class QrCode {
 		return QrTemplate.getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal()][ver]
 			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
+	}
+	
+	
+	// Returns 0 or 1 based on the i'th bit of x.
+	private static int getBit(int x, int i) {
+		return (x >>> i) & 1;
 	}
 	
 	
