@@ -146,12 +146,14 @@ public final class QrSegment {
 	 */
 	public static QrSegment makeEci(int assignVal) {
 		BitBuffer bb = new BitBuffer();
-		if (0 <= assignVal && assignVal < (1 << 7))
+		if (assignVal < 0)
+			throw new IllegalArgumentException("ECI assignment value out of range");
+		else if (assignVal < (1 << 7))
 			bb.appendBits(assignVal, 8);
-		else if ((1 << 7) <= assignVal && assignVal < (1 << 14)) {
+		else if (assignVal < (1 << 14)) {
 			bb.appendBits(2, 2);
 			bb.appendBits(assignVal, 14);
-		} else if ((1 << 14) <= assignVal && assignVal < 1000000) {
+		} else if (assignVal < 1_000_000) {
 			bb.appendBits(6, 3);
 			bb.appendBits(assignVal, 21);
 		} else
@@ -284,7 +286,7 @@ public final class QrSegment {
 		/*-- Constructor --*/
 		
 		private Mode(int mode, int... ccbits) {
-			this.modeBits = mode;
+			modeBits = mode;
 			numBitsCharCount = ccbits;
 		}
 		
@@ -294,6 +296,7 @@ public final class QrSegment {
 		// Returns the bit width of the character count field for a segment in this mode
 		// in a QR Code at the given version number. The result is in the range [0, 16].
 		int numCharCountBits(int ver) {
+			assert QrCode.MIN_VERSION <= ver && ver <= QrCode.MAX_VERSION;
 			return numBitsCharCount[(ver + 7) / 17];
 		}
 		

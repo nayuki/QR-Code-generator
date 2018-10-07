@@ -87,6 +87,8 @@ final class BitBuffer {
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
+		if (Integer.MAX_VALUE - bitLength < len)
+			throw new IllegalStateException("Maximum length reached");
 		
 		if (bitLength + len + 1 > data.length << 5)
 			data = Arrays.copyOf(data, data.length * 2);
