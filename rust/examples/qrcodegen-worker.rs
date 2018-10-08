@@ -102,10 +102,7 @@ fn read_int() -> i16 {
 	let mut chrs: Vec<char> = line.chars().collect();
 	assert_eq!(chrs.pop().unwrap(), '\n');
 	let line: String = chrs.iter().cloned().collect();
-	match line.parse::<i16>() {
-		Ok(x) => x,
-		Err(_) => panic!("Invalid number"),
-	}
+	line.parse::<i16>().expect("Invalid number")
 }
 
 

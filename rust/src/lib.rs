@@ -927,10 +927,8 @@ impl QrSegment {
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text {
-			let i = match ALPHANUMERIC_CHARSET.iter().position(|x| *x == *c) {
-				None => panic!("String contains unencodable characters in alphanumeric mode"),
-				Some(j) => j,
-			};
+			let i = ALPHANUMERIC_CHARSET.iter().position(|x| *x == *c)
+				.expect("String contains unencodable characters in alphanumeric mode");
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
 			if accumcount == 2 {
