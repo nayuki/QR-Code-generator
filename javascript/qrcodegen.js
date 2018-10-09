@@ -513,7 +513,7 @@ var qrcodegen = new function() {
 				var step = (version == 32) ? 26 :
 					Math.ceil((size - 13) / (numAlign*2 - 2)) * 2;
 				var result = [6];
-				for (var i = 0, pos = size - 7; i < numAlign - 1; i++, pos -= step)
+				for (var pos = size - 7; result.length < numAlign; pos -= step)
 					result.splice(1, 0, pos);
 				return result;
 			}

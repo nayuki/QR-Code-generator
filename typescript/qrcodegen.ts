@@ -598,7 +598,7 @@ namespace qrcodegen {
 				let step: int = (this.version == 32) ? 26 :
 					Math.ceil((this.size - 13) / (numAlign*2 - 2)) * 2;
 				let result: Array<int> = [6];
-				for (let i = 0, pos = this.size - 7; i < numAlign - 1; i++, pos -= step)
+				for (let pos = this.size - 7; result.length < numAlign; pos -= step)
 					result.splice(1, 0, pos);
 				return result;
 			}
