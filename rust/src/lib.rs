@@ -761,13 +761,13 @@ static NUM_ERROR_CORRECTION_BLOCKS: [[i8; 41]; 4] = [
 /// The error correction level in a QR Code symbol.
 #[derive(Clone, Copy)]
 pub enum QrCodeEcc {
-	/// The QR Code can tolerate about  7% erroneous codewords
+	/// The QR Code can tolerate about  7% erroneous codewords.
 	Low     ,
-	/// The QR Code can tolerate about 15% erroneous codewords
+	/// The QR Code can tolerate about 15% erroneous codewords.
 	Medium  ,
-	/// The QR Code can tolerate about 25% erroneous codewords
+	/// The QR Code can tolerate about 25% erroneous codewords.
 	Quartile,
-	/// The QR Code can tolerate about 30% erroneous codewords
+	/// The QR Code can tolerate about 30% erroneous codewords.
 	High    ,
 }
 
