@@ -85,7 +85,9 @@ impl QrCode {
 	/// As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
 	/// code points (not UTF-8 code units) if the low error correction level is used. The smallest possible
 	/// QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
-	/// the ecl argument if it can be done without increasing the version. Returns a wrapped QrCode if successful,
+	/// the ecl argument if it can be done without increasing the version.
+	/// 
+	/// Returns a wrapped QrCode if successful,
 	/// or None if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Option<Self> {
 		let chrs: Vec<char> = text.chars().collect();
@@ -99,6 +101,7 @@ impl QrCode {
 	/// This function always encodes using the binary segment mode, not any text mode. The maximum number of
 	/// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	/// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
+	/// 
 	/// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Option<Self> {
 		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
@@ -116,6 +119,7 @@ impl QrCode {
 	/// This function allows the user to create a custom sequence of segments that switches
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
 	/// This is a mid-level API; the high-level API is encode_text() and encode_binary().
+	/// 
 	/// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<Self> {
 		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
@@ -133,6 +137,7 @@ impl QrCode {
 	/// This function allows the user to create a custom sequence of segments that switches
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
 	/// This is a mid-level API; the high-level API is encodeText() and encodeBinary().
+	/// 
 	/// Returns a wrapped QrCode if successful, or None if the data is too long to fit
 	/// in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
@@ -945,7 +950,9 @@ impl QrSegment {
 	/// Returns a segment representing the given text string encoded in alphanumeric mode.
 	/// 
 	/// The characters allowed are: 0 to 9, A to Z (uppercase only), space, dollar, percent, asterisk,
-	/// plus, hyphen, period, slash, colon. Panics if the string contains non-encodable characters.
+	/// plus, hyphen, period, slash, colon.
+	/// 
+	/// Panics if the string contains non-encodable characters.
 	pub fn make_alphanumeric(text: &[char]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
 		let mut accumdata: u32 = 0;
