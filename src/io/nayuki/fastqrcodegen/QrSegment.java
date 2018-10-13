@@ -276,7 +276,7 @@ public final class QrSegment {
 	
 	/*---- Constants ----*/
 	
-	private static final int[] ALPHANUMERIC_MAP;
+	static final int[] ALPHANUMERIC_MAP;
 	
 	static {
 		final String ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";

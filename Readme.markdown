@@ -20,6 +20,8 @@ Core features:
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
 * Output formats: Raw modules/pixels of the QR symbol, SVG XML string, `BufferedImage` raster bitmap
 * Encodes numeric and special-alphanumeric text in less space than general text
+* Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes
+* Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts
 * Open source code under the permissive MIT License
 
 Manual parameters:
