@@ -396,7 +396,7 @@ public final class QrCode {
 			setFunctionModule(14 - i, 8, getBit(bits, i));
 		
 		// Draw second copy
-		for (int i = 0; i <= 7; i++)
+		for (int i = 0; i < 8; i++)
 			setFunctionModule(size - 1 - i, 8, getBit(bits, i));
 		for (int i = 8; i < 15; i++)
 			setFunctionModule(8, size - 15 + i, getBit(bits, i));

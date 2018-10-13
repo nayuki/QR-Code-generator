@@ -337,7 +337,7 @@ namespace qrcodegen {
 				this.setFunctionModule(14 - i, 8, getBit(bits, i));
 			
 			// Draw second copy
-			for (let i = 0; i <= 7; i++)
+			for (let i = 0; i < 8; i++)
 				this.setFunctionModule(this.size - 1 - i, 8, getBit(bits, i));
 			for (let i = 8; i < 15; i++)
 				this.setFunctionModule(8, this.size - 15 + i, getBit(bits, i));

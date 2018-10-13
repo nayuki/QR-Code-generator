@@ -528,7 +528,7 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 	
 	// Draw second copy
 	int qrsize = qrcodegen_getSize(qrcode);
-	for (int i = 0; i <= 7; i++)
+	for (int i = 0; i < 8; i++)
 		setModule(qrcode, qrsize - 1 - i, 8, getBit(bits, i));
 	for (int i = 8; i < 15; i++)
 		setModule(qrcode, 8, qrsize - 15 + i, getBit(bits, i));
