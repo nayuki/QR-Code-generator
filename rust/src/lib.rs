@@ -35,12 +35,12 @@
 /// 
 /// Ways to create a QR Code object:
 /// 
-/// - High level: Take the payload data and call QrCode::encode_text() or QrCode::encode_binary().
+/// - High level: Take the payload data and call `QrCode::encode_text()` or `QrCode::encode_binary()`.
 /// - Mid level: Custom-make the list of segments and call
-///   QrCode.encode_segments() or QrCode.encode_segments_advanced().
+///   `QrCode.encode_segments()` or `QrCode.encode_segments_advanced()`.
 /// - Low level: Custom-make the array of data codeword bytes (including segment
 ///   headers and final padding, excluding error correction codewords), supply the
-///   appropriate version number, and call the QrCode::encode_codewords() constructor.
+///   appropriate version number, and call the `QrCode::encode_codewords()` constructor.
 /// 
 /// (Note that all ways require supplying the desired error correction level.)
 #[derive(Clone)]
@@ -87,8 +87,8 @@ impl QrCode {
 	/// QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
 	/// the ecl argument if it can be done without increasing the version.
 	/// 
-	/// Returns a wrapped QrCode if successful,
-	/// or None if the data is too long to fit in any version at the given ECC level.
+	/// Returns a wrapped `QrCode` if successful,
+	/// or `None` if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Option<Self> {
 		let chrs: Vec<char> = text.chars().collect();
 		let segs: Vec<QrSegment> = QrSegment::make_segments(&chrs);
@@ -102,7 +102,7 @@ impl QrCode {
 	/// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	/// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	/// 
-	/// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
+	/// Returns a wrapped `QrCode` if successful, or `None` if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Option<Self> {
 		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
 		QrCode::encode_segments(&segs, ecl)
@@ -118,9 +118,9 @@ impl QrCode {
 	/// 
 	/// This function allows the user to create a custom sequence of segments that switches
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
-	/// This is a mid-level API; the high-level API is encode_text() and encode_binary().
+	/// This is a mid-level API; the high-level API is `encode_text()` and `encode_binary()`.
 	/// 
-	/// Returns a wrapped QrCode if successful, or None if the data is too long to fit in any version at the given ECC level.
+	/// Returns a wrapped `QrCode` if successful, or `None` if the data is too long to fit in any version at the given ECC level.
 	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<Self> {
 		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
 	}
@@ -129,16 +129,16 @@ impl QrCode {
 	/// Returns a QR Code representing the given segments with the given encoding parameters.
 	/// 
 	/// The smallest possible QR Code version within the given range is automatically
-	/// chosen for the output. Iff boostecl is true, then the ECC level of the result
+	/// chosen for the output. Iff boostecl is `true`, then the ECC level of the result
 	/// may be higher than the ecl argument if it can be done without increasing the
 	/// version. The mask number is either between 0 to 7 (inclusive) to force that
 	/// mask, or -1 to automatically choose an appropriate mask (which may be slow).
 	/// 
 	/// This function allows the user to create a custom sequence of segments that switches
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
-	/// This is a mid-level API; the high-level API is encodeText() and encodeBinary().
+	/// This is a mid-level API; the high-level API is `encodeText()` and `encodeBinary()`.
 	/// 
-	/// Returns a wrapped QrCode if successful, or None if the data is too long to fit
+	/// Returns a wrapped `QrCode` if successful, or `None` if the data is too long to fit
 	/// in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
 			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Option<Self> {
@@ -212,7 +212,7 @@ impl QrCode {
 	/// error correction level, data codeword bytes, and mask number.
 	/// 
 	/// This is a low-level API that most users should not use directly.
-	/// A mid-level API is the encode_segments() function.
+	/// A mid-level API is the `encode_segments()` function.
 	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<Mask>) -> Self {
 		// Initialize fields
 		let size: usize = (ver.value() as usize) * 4 + 17;
@@ -262,11 +262,11 @@ impl QrCode {
 	}
 	
 	
-	/// Returns the color of the module (pixel) at the given coordinates, which is false
-	/// for white or true for black.
+	/// Returns the color of the module (pixel) at the given coordinates, which is `false`
+	/// for white or `true` for black.
 	/// 
 	/// The top left corner has the coordinates (x=0, y=0).
-	/// If the given coordinates are out of bounds, then false (white) is returned.
+	/// If the given coordinates are out of bounds, then `false` (white) is returned.
 	pub fn get_module(&self, x: i32, y: i32) -> bool {
 		0 <= x && x < self.size && 0 <= y && y < self.size && self.module(x, y)
 	}
@@ -879,9 +879,9 @@ impl ReedSolomonGenerator {
 /// Instances of this struct are immutable.
 /// 
 /// The mid-level way to create a segment is to take the payload data
-/// and call a static factory function such as QrSegment::make_numeric().
+/// and call a static factory function such as `QrSegment::make_numeric()`.
 /// The low-level way to create a segment is to custom-make the bit buffer
-/// and call the QrSegment::new() constructor with appropriate values.
+/// and call the `QrSegment::new()` constructor with appropriate values.
 /// 
 /// This segment struct imposes no length restrictions, but QR Codes have restrictions.
 /// Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
@@ -1151,7 +1151,7 @@ impl BitBuffer {
 	/// Appends the given number of low-order bits of the given value
 	/// to this buffer.
 	/// 
-	/// Requires len <= 31 and val < 2^len.
+	/// Requires len &#x2264; 31 and val &lt; 2<sup>len</sup>.
 	pub fn append_bits(&mut self, val: u32, len: u8) {
 		assert!(len <= 31 && (val >> len) == 0, "Value out of range");
 		self.0.extend((0 .. len as i32).rev().map(|i| get_bit(val, i)));  // Append bit by bit
