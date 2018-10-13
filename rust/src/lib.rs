@@ -27,18 +27,21 @@
 /// A QR Code symbol, which is a type of two-dimension barcode.
 /// 
 /// Invented by Denso Wave and described in the ISO/IEC 18004 standard.
+/// 
 /// Instances of this struct represent an immutable square grid of black and white cells.
 /// The impl provides static factory functions to create a QR Code from text or binary data.
 /// The struct and impl cover the QR Code Model 2 specification, supporting all versions
 /// (sizes) from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
 /// 
 /// Ways to create a QR Code object:
+/// 
 /// - High level: Take the payload data and call QrCode::encode_text() or QrCode::encode_binary().
 /// - Mid level: Custom-make the list of segments and call
 ///   QrCode.encode_segments() or QrCode.encode_segments_advanced().
 /// - Low level: Custom-make the array of data codeword bytes (including segment
 ///   headers and final padding, excluding error correction codewords), supply the
 ///   appropriate version number, and call the QrCode::encode_codewords() constructor.
+/// 
 /// (Note that all ways require supplying the desired error correction level.)
 #[derive(Clone)]
 pub struct QrCode {
@@ -109,6 +112,7 @@ impl QrCode {
 	/// 
 	/// The smallest possible QR Code version is automatically chosen for the output. The ECC level
 	/// of the result may be higher than the ecl argument if it can be done without increasing the version.
+	/// 
 	/// This function allows the user to create a custom sequence of segments that switches
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
 	/// This is a mid-level API; the high-level API is encode_text() and encode_binary().
@@ -125,6 +129,7 @@ impl QrCode {
 	/// may be higher than the ecl argument if it can be done without increasing the
 	/// version. The mask number is either between 0 to 7 (inclusive) to force that
 	/// mask, or -1 to automatically choose an appropriate mask (which may be slow).
+	/// 
 	/// This function allows the user to create a custom sequence of segments that switches
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
 	/// This is a mid-level API; the high-level API is encodeText() and encodeBinary().
@@ -867,10 +872,12 @@ impl ReedSolomonGenerator {
 /// A segment of character/binary/control data in a QR Code symbol.
 /// 
 /// Instances of this struct are immutable.
+/// 
 /// The mid-level way to create a segment is to take the payload data
 /// and call a static factory function such as QrSegment::make_numeric().
 /// The low-level way to create a segment is to custom-make the bit buffer
 /// and call the QrSegment::new() constructor with appropriate values.
+/// 
 /// This segment struct imposes no length restrictions, but QR Codes have restrictions.
 /// Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 /// Any segment longer than this is meaningless for the purpose of generating QR Codes.
@@ -898,7 +905,9 @@ impl QrSegment {
 	/// Returns a segment representing the given binary data encoded in
 	/// byte mode.
 	/// 
-	/// All input byte slices are acceptable. Any text string
+	/// All input byte slices are acceptable.
+	/// 
+	/// Any text string
 	/// can be converted to UTF-8 bytes and encoded as a byte mode segment.
 	pub fn make_bytes(data: &[u8]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
