@@ -37,7 +37,7 @@
 /// 
 /// - High level: Take the payload data and call `QrCode::encode_text()` or `QrCode::encode_binary()`.
 /// - Mid level: Custom-make the list of segments and call
-///   `QrCode.encode_segments()` or `QrCode.encode_segments_advanced()`.
+///   `QrCode::encode_segments()` or `QrCode::encode_segments_advanced()`.
 /// - Low level: Custom-make the array of data codeword bytes (including segment
 ///   headers and final padding, excluding error correction codewords), supply the
 ///   appropriate version number, and call the `QrCode::encode_codewords()` constructor.
@@ -132,11 +132,11 @@ impl QrCode {
 	/// chosen for the output. Iff boostecl is `true`, then the ECC level of the result
 	/// may be higher than the ecl argument if it can be done without increasing the
 	/// version. The mask number is either between 0 to 7 (inclusive) to force that
-	/// mask, or -1 to automatically choose an appropriate mask (which may be slow).
+	/// mask, or `None` to automatically choose an appropriate mask (which may be slow).
 	/// 
 	/// This function allows the user to create a custom sequence of segments that switches
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
-	/// This is a mid-level API; the high-level API is `encodeText()` and `encodeBinary()`.
+	/// This is a mid-level API; the high-level API is `encode_text()` and `encode_binary()`.
 	/// 
 	/// Returns a wrapped `QrCode` if successful, or `None` if the data is too long to fit
 	/// in any version in the given range at the given ECC level.
