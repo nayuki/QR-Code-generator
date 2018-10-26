@@ -888,3 +888,17 @@ class _BitBuffer(list):
 def _get_bit(x, i):
 	"""Returns true iff the i'th bit of x is set to 1."""
 	return (x >> i) & 1 != 0
+
+
+
+class DataTooLongError(ValueError):
+	"""Raised when the supplied data does not fit any QR Code version. Ways to handle this exception include:
+	- Decrease the error correction level if it was greater than Ecc.LOW.
+	- If the encode_segments() function was called with a maxversion argument, then increase
+	  it if it was less than QrCode.MAX_VERSION. (This advice does not apply to the other
+	  factory functions because they search all versions up to QrCode.MAX_VERSION.)
+	- Split the text data into better or optimal segments in order to reduce the number of bits required.
+	- Change the text or binary data to be shorter.
+	- Change the text to fit the character set of a particular segment mode (e.g. alphanumeric).
+	- Propagate the error upward to the caller/user."""
+	pass

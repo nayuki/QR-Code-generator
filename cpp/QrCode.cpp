@@ -617,4 +617,8 @@ uint8_t QrCode::ReedSolomonGenerator::multiply(uint8_t x, uint8_t y) {
 	return static_cast<uint8_t>(z);
 }
 
+
+data_too_long::data_too_long(const std::string &msg) :
+	std::length_error(msg) {}
+
 }
