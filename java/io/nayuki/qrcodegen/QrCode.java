@@ -598,8 +598,9 @@ public final class QrCode {
 		// Adjacent modules in row having same color
 		for (int y = 0; y < size; y++) {
 			boolean color = false;
-			for (int x = 0, runX = 0; x < size; x++) {
-				if (x == 0 || modules[y][x] != color) {
+			int runX = 0;
+			for (int x = 0; x < size; x++) {
+				if (modules[y][x] != color) {
 					color = modules[y][x];
 					runX = 1;
 				} else {
@@ -614,8 +615,9 @@ public final class QrCode {
 		// Adjacent modules in column having same color
 		for (int x = 0; x < size; x++) {
 			boolean color = false;
-			for (int y = 0, runY = 0; y < size; y++) {
-				if (y == 0 || modules[y][x] != color) {
+			int runY = 0;
+			for (int y = 0; y < size; y++) {
+				if (modules[y][x] != color) {
 					color = modules[y][x];
 					runY = 1;
 				} else {
