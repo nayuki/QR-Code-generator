@@ -1189,7 +1189,7 @@ impl QrSegmentMode {
 	
 	// Returns the bit width of the character count field for a segment in this mode
 	// in a QR Code at the given version number. The result is in the range [0, 16].
-	pub fn num_char_count_bits(&self, ver: Version) -> u8 {
+	fn num_char_count_bits(&self, ver: Version) -> u8 {
 		use QrSegmentMode::*;
 		(match *self {
 			Numeric      => [10, 12, 14],
