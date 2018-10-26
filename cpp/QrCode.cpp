@@ -428,8 +428,9 @@ int QrCode::handleConstructorMasking(int mask) {
 long QrCode::getPenaltyScore() const {
 	long result = 0;
 	
-	// Adjacent modules in row having same color
+	// Adjacent modules in row having same color, and finder-like patterns
 	for (int y = 0; y < size; y++) {
+		std::deque<int> runHistory(7, 0);
 		bool color = false;
 		int runX = 0;
 		for (int x = 0; x < size; x++) {
@@ -440,13 +441,22 @@ long QrCode::getPenaltyScore() const {
 				else if (runX > 5)
 					result++;
 			} else {
+				addRunToHistory(runX, runHistory);
+				if (!color && hasFinderLikePattern(runHistory))
+					result += PENALTY_N3;
 				color = module(x, y);
 				runX = 1;
 			}
 		}
+		addRunToHistory(runX, runHistory);
+		if (color)
+			addRunToHistory(0, runHistory);  // Dummy run of white
+		if (hasFinderLikePattern(runHistory))
+			result += PENALTY_N3;
 	}
-	// Adjacent modules in column having same color
+	// Adjacent modules in column having same color, and finder-like patterns
 	for (int x = 0; x < size; x++) {
+		std::deque<int> runHistory(7, 0);
 		bool color = false;
 		int runY = 0;
 		for (int y = 0; y < size; y++) {
@@ -457,10 +467,18 @@ long QrCode::getPenaltyScore() const {
 				else if (runY > 5)
 					result++;
 			} else {
+				addRunToHistory(runY, runHistory);
+				if (!color && hasFinderLikePattern(runHistory))
+					result += PENALTY_N3;
 				color = module(x, y);
 				runY = 1;
 			}
 		}
+		addRunToHistory(runY, runHistory);
+		if (color)
+			addRunToHistory(0, runHistory);  // Dummy run of white
+		if (hasFinderLikePattern(runHistory))
+			result += PENALTY_N3;
 	}
 	
 	// 2*2 blocks of modules having same color
@@ -471,23 +489,6 @@ long QrCode::getPenaltyScore() const {
 			      color == module(x, y + 1) &&
 			      color == module(x + 1, y + 1))
 				result += PENALTY_N2;
-		}
-	}
-	
-	// Finder-like pattern in rows
-	for (int y = 0; y < size; y++) {
-		for (int x = 0, bits = 0; x < size; x++) {
-			bits = ((bits << 1) & 0x7FF) | (module(x, y) ? 1 : 0);
-			if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
-				result += PENALTY_N3;
-		}
-	}
-	// Finder-like pattern in columns
-	for (int x = 0; x < size; x++) {
-		for (int y = 0, bits = 0; y < size; y++) {
-			bits = ((bits << 1) & 0x7FF) | (module(x, y) ? 1 : 0);
-			if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
-				result += PENALTY_N3;
 		}
 	}
 	
@@ -541,6 +542,19 @@ int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 	return getNumRawDataModules(ver) / 8
 		- ECC_CODEWORDS_PER_BLOCK    [static_cast<int>(ecl)][ver]
 		* NUM_ERROR_CORRECTION_BLOCKS[static_cast<int>(ecl)][ver];
+}
+
+
+void QrCode::addRunToHistory(int run, std::deque<int> &history) {
+	history.pop_back();
+	history.push_front(run);
+}
+
+
+bool QrCode::hasFinderLikePattern(const std::deque<int> &runHistory) {
+	int n = runHistory.at(1);
+	return n > 0 && runHistory.at(2) == n && runHistory.at(4) == n && runHistory.at(5) == n
+		&& runHistory.at(3) == n * 3 && std::max(runHistory.at(0), runHistory.at(6)) >= n * 4;
 }
 
 

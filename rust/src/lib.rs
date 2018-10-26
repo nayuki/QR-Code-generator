@@ -645,8 +645,9 @@ impl QrCode {
 		let mut result: i32 = 0;
 		let size: i32 = self.size;
 		
-		// Adjacent modules in row having same color
+		// Adjacent modules in row having same color, and finder-like patterns
 		for y in 0 .. size {
+			let mut runhistory = RunHistory::new();
 			let mut color = false;
 			let mut runx: i32 = 0;
 			for x in 0 .. size {
@@ -658,13 +659,25 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
+					runhistory.add_run(runx);
+					if !color && runhistory.has_finder_like_pattern() {
+						result += PENALTY_N3;
+					}
 					color = self.module(x, y);
 					runx = 1;
 				}
 			}
+			runhistory.add_run(runx);
+			if color {
+				runhistory.add_run(0);  // Dummy run of white
+			}
+			if runhistory.has_finder_like_pattern() {
+				result += PENALTY_N3;
+			}
 		}
-		// Adjacent modules in column having same color
+		// Adjacent modules in column having same color, and finder-like patterns
 		for x in 0 .. size {
+			let mut runhistory = RunHistory::new();
 			let mut color = false;
 			let mut runy: i32 = 0;
 			for y in 0 .. size {
@@ -676,9 +689,20 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
+					runhistory.add_run(runy);
+					if !color && runhistory.has_finder_like_pattern() {
+						result += PENALTY_N3;
+					}
 					color = self.module(x, y);
 					runy = 1;
 				}
+			}
+			runhistory.add_run(runy);
+			if color {
+				runhistory.add_run(0);  // Dummy run of white
+			}
+			if runhistory.has_finder_like_pattern() {
+				result += PENALTY_N3;
 			}
 		}
 		
@@ -690,27 +714,6 @@ impl QrCode {
 				   color == self.module(x, y + 1) &&
 				   color == self.module(x + 1, y + 1) {
 					result += PENALTY_N2;
-				}
-			}
-		}
-		
-		// Finder-like pattern in rows
-		for y in 0 .. size {
-			let mut bits: u32 = 0;
-			for x in 0 .. size {
-				bits = ((bits << 1) & 0x7FF) | (self.module(x, y) as u32);
-				if x >= 10 && (bits == 0x05D || bits == 0x5D0) {  // Needs 11 bits accumulated
-					result += PENALTY_N3;
-				}
-			}
-		}
-		// Finder-like pattern in columns
-		for x in 0 .. size {
-			let mut bits: u32 = 0;
-			for y in 0 .. size {
-				bits = ((bits << 1) & 0x7FF) | (self.module(x, y) as u32);
-				if y >= 10 && (bits == 0x05D || bits == 0x5D0) {  // Needs 11 bits accumulated
-					result += PENALTY_N3;
 				}
 			}
 		}
@@ -933,6 +936,41 @@ impl ReedSolomonGenerator {
 			z ^= ((y >> i) & 1) * x;
 		}
 		z
+	}
+	
+}
+
+
+
+/*---- RunHistory functionality ----*/
+
+struct RunHistory(std::collections::VecDeque<i32>);
+
+
+impl RunHistory {
+	
+	fn new() -> Self {
+		let mut temp = std::collections::VecDeque::<i32>::new();
+		temp.resize(7, 0);
+		RunHistory(temp)
+	}
+	
+	
+	// Inserts the given value to the front of this array, which shifts over the existing
+	// values and deletes the last value. A helper function for get_penalty_score().
+	fn add_run(&mut self, run: i32) {
+		self.0.pop_back();
+		self.0.push_front(run);
+	}
+	
+	
+	// Tests whether this run history has the pattern of ratio 1:1:3:1:1 in the middle, and
+	// surrounded by at least 4 on either or both ends. A helper function for get_penalty_score().
+	// Must only be called immediately after a run of white modules has ended.
+	fn has_finder_like_pattern(&self) -> bool {
+		let n = self.0[1];
+		n > 0 && self.0[2] == n && self.0[4] == n && self.0[5] == n
+			&& self.0[3] == n * 3 && std::cmp::max(self.0[0], self.0[6]) >= n * 4
 	}
 	
 }

@@ -427,8 +427,9 @@ var qrcodegen = new function() {
 		function getPenaltyScore() {
 			var result = 0;
 			
-			// Adjacent modules in row having same color
+			// Adjacent modules in row having same color, and finder-like patterns
 			for (var y = 0; y < size; y++) {
+				var runHistory = [0,0,0,0,0,0,0];
 				var color = false;
 				var runX = 0;
 				for (var x = 0; x < size; x++) {
@@ -439,13 +440,22 @@ var qrcodegen = new function() {
 						else if (runX > 5)
 							result++;
 					} else {
+						QrCode.addRunToHistory(runX, runHistory);
+						if (!color && QrCode.hasFinderLikePattern(runHistory))
+							result += QrCode.PENALTY_N3;
 						color = modules[y][x];
 						runX = 1;
 					}
 				}
+				QrCode.addRunToHistory(runX, runHistory);
+				if (color)
+					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
+				if (QrCode.hasFinderLikePattern(runHistory))
+					result += QrCode.PENALTY_N3;
 			}
-			// Adjacent modules in column having same color
+			// Adjacent modules in column having same color, and finder-like patterns
 			for (var x = 0; x < size; x++) {
+				var runHistory = [0,0,0,0,0,0,0];
 				var color = false;
 				var runY = 0;
 				for (var y = 0; y < size; y++) {
@@ -456,10 +466,18 @@ var qrcodegen = new function() {
 						else if (runY > 5)
 							result++;
 					} else {
+						QrCode.addRunToHistory(runY, runHistory);
+						if (!color && QrCode.hasFinderLikePattern(runHistory))
+							result += QrCode.PENALTY_N3;
 						color = modules[y][x];
 						runY = 1;
 					}
 				}
+				QrCode.addRunToHistory(runY, runHistory);
+				if (color)
+					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
+				if (QrCode.hasFinderLikePattern(runHistory))
+					result += QrCode.PENALTY_N3;
 			}
 			
 			// 2*2 blocks of modules having same color
@@ -470,23 +488,6 @@ var qrcodegen = new function() {
 					      color == modules[y + 1][x] &&
 					      color == modules[y + 1][x + 1])
 						result += QrCode.PENALTY_N2;
-				}
-			}
-			
-			// Finder-like pattern in rows
-			for (var y = 0; y < size; y++) {
-				for (var x = 0, bits = 0; x < size; x++) {
-					bits = ((bits << 1) & 0x7FF) | (modules[y][x] ? 1 : 0);
-					if (x >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
-						result += QrCode.PENALTY_N3;
-				}
-			}
-			// Finder-like pattern in columns
-			for (var x = 0; x < size; x++) {
-				for (var y = 0, bits = 0; y < size; y++) {
-					bits = ((bits << 1) & 0x7FF) | (modules[y][x] ? 1 : 0);
-					if (y >= 10 && (bits == 0x05D || bits == 0x5D0))  // Needs 11 bits accumulated
-						result += QrCode.PENALTY_N3;
 				}
 			}
 			
@@ -663,6 +664,24 @@ var qrcodegen = new function() {
 		return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
 			QrCode.ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal][ver] *
 			QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+	};
+	
+	
+	// Inserts the given value to the front of the given array, which shifts over the
+	// existing values and deletes the last value. A helper function for getPenaltyScore().
+	QrCode.addRunToHistory = function(run, history) {
+		history.pop();
+		history.unshift(run);
+	};
+	
+	
+	// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
+	// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
+	// Must only be called immediately after a run of white modules has ended.
+	QrCode.hasFinderLikePattern = function(runHistory) {
+		var n = runHistory[1];
+		return n > 0 && runHistory[2] == n && runHistory[4] == n && runHistory[5] == n
+			&& runHistory[3] == n * 3 && Math.max(runHistory[0], runHistory[6]) >= n * 4;
 	};
 	
 	

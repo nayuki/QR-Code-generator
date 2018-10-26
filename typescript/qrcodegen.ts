@@ -510,8 +510,9 @@ namespace qrcodegen {
 		private getPenaltyScore(): int {
 			let result: int = 0;
 			
-			// Adjacent modules in row having same color
+			// Adjacent modules in row having same color, and finder-like patterns
 			for (let y = 0; y < this.size; y++) {
+				let runHistory = [0,0,0,0,0,0,0];
 				let color = false;
 				let runX = 0;
 				for (let x = 0; x < this.size; x++) {
@@ -522,13 +523,22 @@ namespace qrcodegen {
 						else if (runX > 5)
 							result++;
 					} else {
+						QrCode.addRunToHistory(runX, runHistory);
+						if (!color && QrCode.hasFinderLikePattern(runHistory))
+							result += QrCode.PENALTY_N3;
 						color = this.modules[y][x];
 						runX = 1;
 					}
 				}
+				QrCode.addRunToHistory(runX, runHistory);
+				if (color)
+					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
+				if (QrCode.hasFinderLikePattern(runHistory))
+					result += QrCode.PENALTY_N3;
 			}
-			// Adjacent modules in column having same color
+			// Adjacent modules in column having same color, and finder-like patterns
 			for (let x = 0; x < this.size; x++) {
+				let runHistory = [0,0,0,0,0,0,0];
 				let color = false;
 				let runY = 0;
 				for (let y = 0; y < this.size; y++) {
@@ -539,10 +549,18 @@ namespace qrcodegen {
 						else if (runY > 5)
 							result++;
 					} else {
+						QrCode.addRunToHistory(runY, runHistory);
+						if (!color && QrCode.hasFinderLikePattern(runHistory))
+							result += QrCode.PENALTY_N3;
 						color = this.modules[y][x];
 						runY = 1;
 					}
 				}
+				QrCode.addRunToHistory(runY, runHistory);
+				if (color)
+					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
+				if (QrCode.hasFinderLikePattern(runHistory))
+					result += QrCode.PENALTY_N3;
 			}
 			
 			// 2*2 blocks of modules having same color
@@ -553,23 +571,6 @@ namespace qrcodegen {
 					      color == this.modules[y + 1][x] &&
 					      color == this.modules[y + 1][x + 1])
 						result += QrCode.PENALTY_N2;
-				}
-			}
-			
-			// Finder-like pattern in rows
-			for (let y = 0; y < this.size; y++) {
-				for (let x = 0, bits = 0; x < this.size; x++) {
-					bits = ((bits << 1) & 0b11111111111) | (this.modules[y][x] ? 1 : 0);
-					if (x >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
-						result += QrCode.PENALTY_N3;
-				}
-			}
-			// Finder-like pattern in columns
-			for (let x = 0; x < this.size; x++) {
-				for (let y = 0, bits = 0; y < this.size; y++) {
-					bits = ((bits << 1) & 0b11111111111) | (this.modules[y][x] ? 1 : 0);
-					if (y >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
-						result += QrCode.PENALTY_N3;
 				}
 			}
 			
@@ -633,6 +634,24 @@ namespace qrcodegen {
 			return Math.floor(QrCode.getNumRawDataModules(ver) / 8) -
 				QrCode.ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal][ver] *
 				QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+		}
+		
+		
+		// Inserts the given value to the front of the given array, which shifts over the
+		// existing values and deletes the last value. A helper function for getPenaltyScore().
+		private static addRunToHistory(run: int, history: Array<int>): void {
+			history.pop();
+			history.unshift(run);
+		}
+		
+		
+		// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
+		// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
+		// Must only be called immediately after a run of white modules has ended.
+		private static hasFinderLikePattern(runHistory: Array<int>): boolean {
+			const n: int = runHistory[1];
+			return n > 0 && runHistory[2] == n && runHistory[4] == n && runHistory[5] == n
+				&& runHistory[3] == n * 3 && Math.max(runHistory[0], runHistory[6]) >= n * 4;
 		}
 		
 		

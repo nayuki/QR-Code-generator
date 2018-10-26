@@ -595,8 +595,9 @@ public final class QrCode {
 	private int getPenaltyScore() {
 		int result = 0;
 		
-		// Adjacent modules in row having same color
+		// Adjacent modules in row having same color, and finder-like patterns
 		for (int y = 0; y < size; y++) {
+			int[] runHistory = new int[7];
 			boolean color = false;
 			int runX = 0;
 			for (int x = 0; x < size; x++) {
@@ -607,13 +608,22 @@ public final class QrCode {
 					else if (runX > 5)
 						result++;
 				} else {
+					addRunToHistory(runX, runHistory);
+					if (!color && hasFinderLikePattern(runHistory))
+						result += PENALTY_N3;
 					color = modules[y][x];
 					runX = 1;
 				}
 			}
+			addRunToHistory(runX, runHistory);
+			if (color)
+				addRunToHistory(0, runHistory);  // Dummy run of white
+			if (hasFinderLikePattern(runHistory))
+				result += PENALTY_N3;
 		}
-		// Adjacent modules in column having same color
+		// Adjacent modules in column having same color, and finder-like patterns
 		for (int x = 0; x < size; x++) {
+			int[] runHistory = new int[7];
 			boolean color = false;
 			int runY = 0;
 			for (int y = 0; y < size; y++) {
@@ -624,10 +634,18 @@ public final class QrCode {
 					else if (runY > 5)
 						result++;
 				} else {
+					addRunToHistory(runY, runHistory);
+					if (!color && hasFinderLikePattern(runHistory))
+						result += PENALTY_N3;
 					color = modules[y][x];
 					runY = 1;
 				}
 			}
+			addRunToHistory(runY, runHistory);
+			if (color)
+				addRunToHistory(0, runHistory);  // Dummy run of white
+			if (hasFinderLikePattern(runHistory))
+				result += PENALTY_N3;
 		}
 		
 		// 2*2 blocks of modules having same color
@@ -638,23 +656,6 @@ public final class QrCode {
 				      color == modules[y + 1][x] &&
 				      color == modules[y + 1][x + 1])
 					result += PENALTY_N2;
-			}
-		}
-		
-		// Finder-like pattern in rows
-		for (int y = 0; y < size; y++) {
-			for (int x = 0, bits = 0; x < size; x++) {
-				bits = ((bits << 1) & 0b11111111111) | (modules[y][x] ? 1 : 0);
-				if (x >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
-					result += PENALTY_N3;
-			}
-		}
-		// Finder-like pattern in columns
-		for (int x = 0; x < size; x++) {
-			for (int y = 0, bits = 0; y < size; y++) {
-				bits = ((bits << 1) & 0b11111111111) | (modules[y][x] ? 1 : 0);
-				if (y >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))  // Needs 11 bits accumulated
-					result += PENALTY_N3;
 			}
 		}
 		
@@ -731,6 +732,24 @@ public final class QrCode {
 		return getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal()][ver]
 			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
+	}
+	
+	
+	// Inserts the given value to the front of the given array, which shifts over the
+	// existing values and deletes the last value. A helper function for getPenaltyScore().
+	private static void addRunToHistory(int run, int[] history) {
+		System.arraycopy(history, 0, history, 1, history.length - 1);
+		history[0] = run;
+	}
+	
+	
+	// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
+	// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
+	// Must only be called immediately after a run of white modules has ended.
+	private static boolean hasFinderLikePattern(int[] runHistory) {
+		int n = runHistory[1];
+		return n > 0 && runHistory[2] == n && runHistory[4] == n && runHistory[5] == n
+			&& runHistory[3] == n * 3 && Math.max(runHistory[0], runHistory[6]) >= n * 4;
 	}
 	
 	

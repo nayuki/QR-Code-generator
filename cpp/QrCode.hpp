@@ -24,6 +24,7 @@
 #pragma once
 
 #include <cstdint>
+#include <deque>
 #include <string>
 #include <vector>
 #include "QrSegment.hpp"
@@ -276,6 +277,17 @@ class QrCode final {
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
 	private: static int getNumDataCodewords(int ver, Ecc ecl);
+	
+	
+	// Inserts the given value to the front of the given array, which shifts over the
+	// existing values and deletes the last value. A helper function for getPenaltyScore().
+	private: static void addRunToHistory(int run, std::deque<int> &history);
+	
+	
+	// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
+	// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
+	// Must only be called immediately after a run of white modules has ended.
+	private: static bool hasFinderLikePattern(const std::deque<int> &runHistory);
 	
 	
 	// Returns true iff the i'th bit of x is set to 1.

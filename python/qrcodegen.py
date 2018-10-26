@@ -21,7 +21,7 @@
 #   Software.
 # 
 
-import itertools, re, sys
+import collections, itertools, re, sys
 
 
 """
@@ -462,8 +462,9 @@ class QrCode(object):
 		size = self._size
 		modules = self._modules
 		
-		# Adjacent modules in row having same color
+		# Adjacent modules in row having same color, and finder-like patterns
 		for y in range(size):
+			runhistory = collections.deque([0] * 7, 7)
 			color = False
 			runx = 0
 			for x in range(size):
@@ -474,10 +475,19 @@ class QrCode(object):
 					elif runx > 5:
 						result += 1
 				else:
+					runhistory.appendleft(runx)
+					if not color and QrCode.has_finder_like_pattern(runhistory):
+						result += QrCode._PENALTY_N3
 					color = modules[y][x]
 					runx = 1
-		# Adjacent modules in column having same color
+			runhistory.appendleft(runx)
+			if color:
+				runhistory.appendleft(0)  # Dummy run of white
+			if QrCode.has_finder_like_pattern(runhistory):
+				result += QrCode._PENALTY_N3
+		# Adjacent modules in column having same color, and finder-like patterns
 		for x in range(size):
+			runhistory = collections.deque([0] * 7, 7)
 			color = False
 			runy = 0
 			for y in range(size):
@@ -488,29 +498,22 @@ class QrCode(object):
 					elif runy > 5:
 						result += 1
 				else:
+					runhistory.appendleft(runy)
+					if not color and QrCode.has_finder_like_pattern(runhistory):
+						result += QrCode._PENALTY_N3
 					color = modules[y][x]
 					runy = 1
+			runhistory.appendleft(runy)
+			if color:
+				runhistory.appendleft(0)  # Dummy run of white
+			if QrCode.has_finder_like_pattern(runhistory):
+				result += QrCode._PENALTY_N3
 		
 		# 2*2 blocks of modules having same color
 		for y in range(size - 1):
 			for x in range(size - 1):
 				if modules[y][x] == modules[y][x + 1] == modules[y + 1][x] == modules[y + 1][x + 1]:
 					result += QrCode._PENALTY_N2
-		
-		# Finder-like pattern in rows
-		for y in range(size):
-			bits = 0
-			for x in range(size):
-				bits = ((bits << 1) & 0x7FF) | (1 if modules[y][x] else 0)
-				if x >= 10 and bits in (0x05D, 0x5D0):  # Needs 11 bits accumulated
-					result += QrCode._PENALTY_N3
-		# Finder-like pattern in columns
-		for x in range(size):
-			bits = 0
-			for y in range(size):
-				bits = ((bits << 1) & 0x7FF) | (1 if modules[y][x] else 0)
-				if y >= 10 and bits in (0x05D, 0x5D0):  # Needs 11 bits accumulated
-					result += QrCode._PENALTY_N3
 		
 		# Balance of black and white modules
 		black = sum((1 if cell else 0) for row in modules for cell in row)
@@ -562,6 +565,13 @@ class QrCode(object):
 		return QrCode._get_num_raw_data_modules(ver) // 8 \
 			- QrCode._ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal][ver] \
 			* QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
+	
+	
+	@staticmethod
+	def has_finder_like_pattern(runhistory):
+		n = runhistory[1]
+		return n > 0 and n == runhistory[2] == runhistory[4] == runhistory[5] \
+			and runhistory[3] == n * 3 and max(runhistory[0], runhistory[6]) >= n * 4
 	
 	
 	# ---- Constants and tables ----
