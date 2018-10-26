@@ -429,9 +429,9 @@ var qrcodegen = new function() {
 			
 			// Adjacent modules in row having same color
 			for (var y = 0; y < size; y++) {
-				for (var x = 0, runX, colorX; x < size; x++) {
-					if (x == 0 || modules[y][x] != colorX) {
-						colorX = modules[y][x];
+				for (var x = 0, runX, color; x < size; x++) {
+					if (x == 0 || modules[y][x] != color) {
+						color = modules[y][x];
 						runX = 1;
 					} else {
 						runX++;
@@ -444,9 +444,9 @@ var qrcodegen = new function() {
 			}
 			// Adjacent modules in column having same color
 			for (var x = 0; x < size; x++) {
-				for (var y = 0, runY, colorY; y < size; y++) {
-					if (y == 0 || modules[y][x] != colorY) {
-						colorY = modules[y][x];
+				for (var y = 0, runY, color; y < size; y++) {
+					if (y == 0 || modules[y][x] != color) {
+						color = modules[y][x];
 						runY = 1;
 					} else {
 						runY++;

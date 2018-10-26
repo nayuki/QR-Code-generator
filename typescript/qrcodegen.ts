@@ -512,9 +512,9 @@ namespace qrcodegen {
 			
 			// Adjacent modules in row having same color
 			for (let y = 0; y < this.size; y++) {
-				for (let x = 0, runX = 0, colorX = false; x < this.size; x++) {
-					if (x == 0 || this.modules[y][x] != colorX) {
-						colorX = this.modules[y][x];
+				for (let x = 0, runX = 0, color = false; x < this.size; x++) {
+					if (x == 0 || this.modules[y][x] != color) {
+						color = this.modules[y][x];
 						runX = 1;
 					} else {
 						runX++;
@@ -527,9 +527,9 @@ namespace qrcodegen {
 			}
 			// Adjacent modules in column having same color
 			for (let x = 0; x < this.size; x++) {
-				for (let y = 0, runY = 0, colorY = false; y < this.size; y++) {
-					if (y == 0 || this.modules[y][x] != colorY) {
-						colorY = this.modules[y][x];
+				for (let y = 0, runY = 0, color = false; y < this.size; y++) {
+					if (y == 0 || this.modules[y][x] != color) {
+						color = this.modules[y][x];
 						runY = 1;
 					} else {
 						runY++;

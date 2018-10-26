@@ -647,11 +647,11 @@ impl QrCode {
 		
 		// Adjacent modules in row having same color
 		for y in 0 .. size {
-			let mut colorx = false;
+			let mut color = false;
 			let mut runx: i32 = 0;
 			for x in 0 .. size {
-				if x == 0 || self.module(x, y) != colorx {
-					colorx = self.module(x, y);
+				if x == 0 || self.module(x, y) != color {
+					color = self.module(x, y);
 					runx = 1;
 				} else {
 					runx += 1;
@@ -665,11 +665,11 @@ impl QrCode {
 		}
 		// Adjacent modules in column having same color
 		for x in 0 .. size {
-			let mut colory = false;
+			let mut color = false;
 			let mut runy: i32 = 0;
 			for y in 0 .. size {
-				if y == 0 || self.module(x, y) != colory {
-					colory = self.module(x, y);
+				if y == 0 || self.module(x, y) != color {
+					color = self.module(x, y);
 					runy = 1;
 				} else {
 					runy += 1;

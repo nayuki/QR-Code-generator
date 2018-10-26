@@ -632,10 +632,10 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	
 	// Adjacent modules in row having same color
 	for (int y = 0; y < qrsize; y++) {
-		bool colorX = false;
+		bool color = false;
 		for (int x = 0, runX = -1; x < qrsize; x++) {
-			if (x == 0 || getModule(qrcode, x, y) != colorX) {
-				colorX = getModule(qrcode, x, y);
+			if (x == 0 || getModule(qrcode, x, y) != color) {
+				color = getModule(qrcode, x, y);
 				runX = 1;
 			} else {
 				runX++;
@@ -648,10 +648,10 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	}
 	// Adjacent modules in column having same color
 	for (int x = 0; x < qrsize; x++) {
-		bool colorY = false;
+		bool color = false;
 		for (int y = 0, runY = -1; y < qrsize; y++) {
-			if (y == 0 || getModule(qrcode, x, y) != colorY) {
-				colorY = getModule(qrcode, x, y);
+			if (y == 0 || getModule(qrcode, x, y) != color) {
+				color = getModule(qrcode, x, y);
 				runY = 1;
 			} else {
 				runY++;
