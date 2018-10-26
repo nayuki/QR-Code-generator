@@ -432,15 +432,15 @@ var qrcodegen = new function() {
 				var color = false;
 				var runX = 0;
 				for (var x = 0; x < size; x++) {
-					if (modules[y][x] != color) {
-						color = modules[y][x];
-						runX = 1;
-					} else {
+					if (modules[y][x] == color) {
 						runX++;
 						if (runX == 5)
 							result += QrCode.PENALTY_N1;
 						else if (runX > 5)
 							result++;
+					} else {
+						color = modules[y][x];
+						runX = 1;
 					}
 				}
 			}
@@ -449,15 +449,15 @@ var qrcodegen = new function() {
 				var color = false;
 				var runY = 0;
 				for (var y = 0; y < size; y++) {
-					if (modules[y][x] != color) {
-						color = modules[y][x];
-						runY = 1;
-					} else {
+					if (modules[y][x] == color) {
 						runY++;
 						if (runY == 5)
 							result += QrCode.PENALTY_N1;
 						else if (runY > 5)
 							result++;
+					} else {
+						color = modules[y][x];
+						runY = 1;
 					}
 				}
 			}

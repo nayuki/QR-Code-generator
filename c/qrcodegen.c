@@ -635,15 +635,15 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 		bool color = false;
 		int runX = 0;
 		for (int x = 0; x < qrsize; x++) {
-			if (getModule(qrcode, x, y) != color) {
-				color = getModule(qrcode, x, y);
-				runX = 1;
-			} else {
+			if (getModule(qrcode, x, y) == color) {
 				runX++;
 				if (runX == 5)
 					result += PENALTY_N1;
 				else if (runX > 5)
 					result++;
+			} else {
+				color = getModule(qrcode, x, y);
+				runX = 1;
 			}
 		}
 	}
@@ -652,15 +652,15 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 		bool color = false;
 		int runY = 0;
 		for (int y = 0; y < qrsize; y++) {
-			if (getModule(qrcode, x, y) != color) {
-				color = getModule(qrcode, x, y);
-				runY = 1;
-			} else {
+			if (getModule(qrcode, x, y) == color) {
 				runY++;
 				if (runY == 5)
 					result += PENALTY_N1;
 				else if (runY > 5)
 					result++;
+			} else {
+				color = getModule(qrcode, x, y);
+				runY = 1;
 			}
 		}
 	}

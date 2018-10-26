@@ -433,15 +433,15 @@ long QrCode::getPenaltyScore() const {
 		bool color = false;
 		int runX = 0;
 		for (int x = 0; x < size; x++) {
-			if (module(x, y) != color) {
-				color = module(x, y);
-				runX = 1;
-			} else {
+			if (module(x, y) == color) {
 				runX++;
 				if (runX == 5)
 					result += PENALTY_N1;
 				else if (runX > 5)
 					result++;
+			} else {
+				color = module(x, y);
+				runX = 1;
 			}
 		}
 	}
@@ -450,15 +450,15 @@ long QrCode::getPenaltyScore() const {
 		bool color = false;
 		int runY = 0;
 		for (int y = 0; y < size; y++) {
-			if (module(x, y) != color) {
-				color = module(x, y);
-				runY = 1;
-			} else {
+			if (module(x, y) == color) {
 				runY++;
 				if (runY == 5)
 					result += PENALTY_N1;
 				else if (runY > 5)
 					result++;
+			} else {
+				color = module(x, y);
+				runY = 1;
 			}
 		}
 	}

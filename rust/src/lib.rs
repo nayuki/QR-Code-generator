@@ -650,16 +650,16 @@ impl QrCode {
 			let mut color = false;
 			let mut runx: i32 = 0;
 			for x in 0 .. size {
-				if self.module(x, y) != color {
-					color = self.module(x, y);
-					runx = 1;
-				} else {
+				if self.module(x, y) == color {
 					runx += 1;
 					if runx == 5 {
 						result += PENALTY_N1;
 					} else if runx > 5 {
 						result += 1;
 					}
+				} else {
+					color = self.module(x, y);
+					runx = 1;
 				}
 			}
 		}
@@ -668,16 +668,16 @@ impl QrCode {
 			let mut color = false;
 			let mut runy: i32 = 0;
 			for y in 0 .. size {
-				if self.module(x, y) != color {
-					color = self.module(x, y);
-					runy = 1;
-				} else {
+				if self.module(x, y) == color {
 					runy += 1;
 					if runy == 5 {
 						result += PENALTY_N1;
 					} else if runy > 5 {
 						result += 1;
 					}
+				} else {
+					color = self.module(x, y);
+					runy = 1;
 				}
 			}
 		}

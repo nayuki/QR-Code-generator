@@ -515,15 +515,15 @@ namespace qrcodegen {
 				let color = false;
 				let runX = 0;
 				for (let x = 0; x < this.size; x++) {
-					if (this.modules[y][x] != color) {
-						color = this.modules[y][x];
-						runX = 1;
-					} else {
+					if (this.modules[y][x] == color) {
 						runX++;
 						if (runX == 5)
 							result += QrCode.PENALTY_N1;
 						else if (runX > 5)
 							result++;
+					} else {
+						color = this.modules[y][x];
+						runX = 1;
 					}
 				}
 			}
@@ -532,15 +532,15 @@ namespace qrcodegen {
 				let color = false;
 				let runY = 0;
 				for (let y = 0; y < this.size; y++) {
-					if (this.modules[y][x] != color) {
-						color = this.modules[y][x];
-						runY = 1;
-					} else {
+					if (this.modules[y][x] == color) {
 						runY++;
 						if (runY == 5)
 							result += QrCode.PENALTY_N1;
 						else if (runY > 5)
 							result++;
+					} else {
+						color = this.modules[y][x];
+						runY = 1;
 					}
 				}
 			}

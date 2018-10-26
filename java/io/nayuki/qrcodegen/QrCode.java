@@ -600,15 +600,15 @@ public final class QrCode {
 			boolean color = false;
 			int runX = 0;
 			for (int x = 0; x < size; x++) {
-				if (modules[y][x] != color) {
-					color = modules[y][x];
-					runX = 1;
-				} else {
+				if (modules[y][x] == color) {
 					runX++;
 					if (runX == 5)
 						result += PENALTY_N1;
 					else if (runX > 5)
 						result++;
+				} else {
+					color = modules[y][x];
+					runX = 1;
 				}
 			}
 		}
@@ -617,15 +617,15 @@ public final class QrCode {
 			boolean color = false;
 			int runY = 0;
 			for (int y = 0; y < size; y++) {
-				if (modules[y][x] != color) {
-					color = modules[y][x];
-					runY = 1;
-				} else {
+				if (modules[y][x] == color) {
 					runY++;
 					if (runY == 5)
 						result += PENALTY_N1;
 					else if (runY > 5)
 						result++;
+				} else {
+					color = modules[y][x];
+					runY = 1;
 				}
 			}
 		}
