@@ -79,7 +79,7 @@ fn main() {
 		match QrCode::encode_segments_advanced(&segs, ECC_LEVELS[errcorlvl as usize],
 				Version::new(minversion as u8), Version::new(maxversion as u8), msk, boostecl != 0) {
 		
-			Some(qr) => {
+			Ok(qr) => {
 				// Print grid of modules
 				println!("{}", qr.version().value());
 				for y in 0 .. qr.size() {
@@ -88,7 +88,7 @@ fn main() {
 					}
 				}
 			},
-			None => println!("-1"),
+			Err(_) => println!("-1"),
 		}
 		use std::io::Write;
 		std::io::stdout().flush().unwrap();

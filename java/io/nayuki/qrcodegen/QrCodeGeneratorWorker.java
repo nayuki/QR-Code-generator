@@ -91,9 +91,7 @@ public final class QrCodeGeneratorWorker {
 					System.out.println(qr.getModule(x, y) ? 1 : 0);
 			}
 			
-		} catch (IllegalArgumentException e) {
-			if (!e.getMessage().equals("Data too long"))
-				throw e;
+		} catch (DataTooLongException e) {
 			System.out.println(-1);
 		}
 		System.out.flush();

@@ -91,11 +91,7 @@ int main() {
 					std::cout << (qr.getModule(x, y) ? 1 : 0) << std::endl;
 			}
 			
-		} catch (const std::length_error &ex) {
-			if (strcmp(ex.what(), "Data too long") != 0) {
-				std::cerr << ex.what() << std::endl;
-				return EXIT_FAILURE;
-			}
+		} catch (const qrcodegen::data_too_long &ex) {
 			std::cout << -1 << std::endl;
 		}
 		std::cout << std::flush;
