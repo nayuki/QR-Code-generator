@@ -124,7 +124,10 @@ class QrCode(object):
 			if datausedbits is not None and datausedbits <= datacapacitybits:
 				break  # This version number is found to be suitable
 			if version >= maxversion:  # All versions in the range could not fit the given data
-				raise ValueError("Data too long")
+				msg = "Segment too long"
+				if datausedbits is not None:
+					msg = "Data length = {} bits, Max capacity = {} bits".format(datausedbits, datacapacitybits)
+				raise DataTooLongError(msg)
 		if datausedbits is None:
 			raise AssertionError()
 		

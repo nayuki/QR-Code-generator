@@ -146,9 +146,9 @@ impl QrCode {
 	/// QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
 	/// the ecl argument if it can be done without increasing the version.
 	/// 
-	/// Returns a wrapped `QrCode` if successful, or `None` if the
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
-	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Option<Self> {
+	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Result<Self,DataTooLong> {
 		let chrs: Vec<char> = text.chars().collect();
 		let segs: Vec<QrSegment> = QrSegment::make_segments(&chrs);
 		QrCode::encode_segments(&segs, ecl)
@@ -161,9 +161,9 @@ impl QrCode {
 	/// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 	/// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 	/// 
-	/// Returns a wrapped `QrCode` if successful, or `None` if the
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
-	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Option<Self> {
+	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Result<Self,DataTooLong> {
 		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
 		QrCode::encode_segments(&segs, ecl)
 	}
@@ -180,9 +180,9 @@ impl QrCode {
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
 	/// This is a mid-level API; the high-level API is `encode_text()` and `encode_binary()`.
 	/// 
-	/// Returns a wrapped `QrCode` if successful, or `None` if the
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
-	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Option<Self> {
+	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Result<Self,DataTooLong> {
 		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
 	}
 	
@@ -199,10 +199,10 @@ impl QrCode {
 	/// between modes (such as alphanumeric and byte) to encode text in less space.
 	/// This is a mid-level API; the high-level API is `encode_text()` and `encode_binary()`.
 	/// 
-	/// Returns a wrapped `QrCode` if successful, or `None` if the data is too
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the data is too
 	/// long to fit in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
-			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Option<Self> {
+			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Result<Self,DataTooLong> {
 		assert!(minversion.value() <= maxversion.value(), "Invalid value");
 		
 		// Find the minimal version number to use
@@ -211,14 +211,20 @@ impl QrCode {
 		loop {
 			// Number of data bits available
 			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
-			if let Some(n) = QrSegment::get_total_bits(segs, version) {
+			let dataused: Option<usize> = QrSegment::get_total_bits(segs, version);
+			if let Some(n) = dataused {
 				if n <= datacapacitybits {
 					datausedbits = n;
 					break;  // This version number is found to be suitable
 				}
 			}
 			if version.value() >= maxversion.value() {  // All versions in the range could not fit the given data
-				return None;
+				let msg: String = match dataused {
+					None => String::from("Segment too long"),
+					Some(n) => format!("Data length = {} bits, Max capacity = {} bits",
+						n, datacapacitybits),
+				};
+				return Err(DataTooLong(msg));
 			}
 			version = Version::new(version.value() + 1);
 		}
@@ -263,7 +269,7 @@ impl QrCode {
 		}
 		
 		// Create the QR Code object
-		Some(QrCode::encode_codewords(version, ecl, &datacodewords, mask))
+		Ok(QrCode::encode_codewords(version, ecl, &datacodewords, mask))
 	}
 	
 	

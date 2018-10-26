@@ -74,8 +74,16 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		dataUsedBits = QrSegment::getTotalBits(segs, version);
 		if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
 			break;  // This version number is found to be suitable
-		if (version >= maxVersion)  // All versions in the range could not fit the given data
-			throw std::length_error("Data too long");
+		if (version >= maxVersion) {  // All versions in the range could not fit the given data
+			std::ostringstream sb;
+			if (dataUsedBits == -1)
+				sb << "Segment too long";
+			else {
+				sb << "Data length = " << dataUsedBits << " bits, ";
+				sb << "Max capacity = " << dataCapacityBits << " bits";
+			}
+			throw data_too_long(sb.str());
+		}
 	}
 	if (dataUsedBits == -1)
 		throw std::logic_error("Assertion error");
