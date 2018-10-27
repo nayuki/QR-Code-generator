@@ -28,9 +28,10 @@ package io.nayuki.qrcodegen;
  * Thrown when the supplied data does not fit any QR Code version. Ways to handle this exception include:
  * <ul>
  *   <li><p>Decrease the error correction level if it was greater than {@code Ecc.LOW}.</p></li>
- *   <li><p>If the advanced {@code encodeSegments()} function with 6 arguments was called, then increase the
- *     maxVersion argument if it was less than {@link QrCode#MAX_VERSION}. (This advice does not apply to the
- *     other factory functions because they search all versions up to {@code QrCode.MAX_VERSION}.)</p></li>
+ *   <li><p>If the advanced {@code encodeSegments()} function with 6 arguments or the
+ *     {@code makeSegmentsOptimally()} function was called, then increase the maxVersion argument
+ *     if it was less than {@link QrCode#MAX_VERSION}. (This advice does not apply to the other
+ *     factory functions because they search all versions up to {@code QrCode.MAX_VERSION}.)</p></li>
  *   <li><p>Split the text data into better or optimal segments in order to reduce the number of
  *     bits required. (See {@link QrSegmentAdvanced#makeSegmentsOptimally(String,QrCode.Ecc,int,int)
  *     QrSegmentAdvanced.makeSegmentsOptimally()}.)</p></li>
@@ -42,6 +43,7 @@ package io.nayuki.qrcodegen;
  * @see QrCode#encodeBinary(byte[], QrCode.Ecc)
  * @see QrCode#encodeSegments(java.util.List, QrCode.Ecc)
  * @see QrCode#encodeSegments(java.util.List, QrCode.Ecc, int, int, int, boolean)
+ * @see QrSegmentAdvanced#makeSegmentsOptimally(String, io.nayuki.qrcodegen.QrCode.Ecc, int, int)
  */
 public class DataTooLongException extends IllegalArgumentException {
 	

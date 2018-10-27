@@ -57,8 +57,8 @@ public final class QrSegmentAdvanced {
 	 * @return a new mutable list (not {@code null}) of segments (not {@code null})
 	 * containing the text, minimizing the bit length with respect to the constraints
 	 * @throws NullPointerException if the text or error correction level is {@code null}
-	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
-	 * is violated, or if the data is too long to fit in a QR Code at maxVersion at ECL
+	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated
+	 * @throws DataTooLongException if the text fails to fit in the maxVersion QR Code at the ECL
 	 */
 	public static List<QrSegment> makeSegmentsOptimally(String text, QrCode.Ecc ecl, int minVersion, int maxVersion) {
 		// Check arguments
@@ -70,7 +70,7 @@ public final class QrSegmentAdvanced {
 		// Iterate through version numbers, and make tentative segments
 		List<QrSegment> segs = null;
 		int[] codePoints = toCodePoints(text);
-		for (int version = minVersion; version <= maxVersion; version++) {
+		for (int version = minVersion; ; version++) {
 			if (version == minVersion || version == 10 || version == 27)
 				segs = makeSegmentsOptimally(codePoints, version);
 			assert segs != null;
@@ -79,9 +79,14 @@ public final class QrSegmentAdvanced {
 			int dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
 			int dataUsedBits = QrSegment.getTotalBits(segs, version);
 			if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
-				return segs;
+				return segs;  // This version number is found to be suitable
+			if (version >= maxVersion) {  // All versions in the range could not fit the given text
+				String msg = "Segment too long";
+				if (dataUsedBits != -1)
+					msg = String.format("Data length = %d bits, Max capacity = %d bits", dataUsedBits, dataCapacityBits);
+				throw new DataTooLongException(msg);
+			}
 		}
-		throw new IllegalArgumentException("Data too long");
 	}
 	
 	
