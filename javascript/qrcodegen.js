@@ -805,7 +805,7 @@ var qrcodegen = new function() {
 		var bb = new BitBuffer();
 		for (var i = 0; i < digits.length; ) {  // Consume up to 3 digits per iteration
 			var n = Math.min(digits.length - i, 3);
-			bb.appendBits(parseInt(digits.substr(i, n), 10), n * 3 + 1);
+			bb.appendBits(parseInt(digits.substring(i, i + n), 10), n * 3 + 1);
 			i += n;
 		}
 		return new this(this.Mode.NUMERIC, digits.length, bb);
@@ -945,7 +945,7 @@ var qrcodegen = new function() {
 			if (str.charAt(i) != "%")
 				result.push(str.charCodeAt(i));
 			else {
-				result.push(parseInt(str.substr(i + 1, 2), 16));
+				result.push(parseInt(str.substring(i + 1, i + 3), 16));
 				i += 2;
 			}
 		}
