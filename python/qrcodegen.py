@@ -870,8 +870,8 @@ class _ReedSolomonGenerator(object):
 		for b in data:
 			factor = b ^ result.pop(0)
 			result.append(0)
-			for i in range(len(result)):
-				result[i] ^= _ReedSolomonGenerator._multiply(self.coefficients[i], factor)
+			for (i, coef) in enumerate(self.coefficients):
+				result[i] ^= _ReedSolomonGenerator._multiply(coef, factor)
 		return result
 	
 	

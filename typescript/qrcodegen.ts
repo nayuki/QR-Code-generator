@@ -925,8 +925,8 @@ namespace qrcodegen {
 			for (const b of data) {
 				const factor: byte = b ^ (result.shift() as int);
 				result.push(0);
-				for (let i = 0; i < result.length; i++)
-					result[i] ^= ReedSolomonGenerator.multiply(this.coefficients[i], factor);
+				this.coefficients.forEach((coef, i) =>
+					result[i] ^= ReedSolomonGenerator.multiply(coef, factor));
 			}
 			return result;
 		}

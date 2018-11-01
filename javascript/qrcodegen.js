@@ -997,8 +997,9 @@ var qrcodegen = new function() {
 			data.forEach(function(b) {
 				var factor = b ^ result.shift();
 				result.push(0);
-				for (var i = 0; i < result.length; i++)
-					result[i] ^= ReedSolomonGenerator.multiply(coefficients[i], factor);
+				coefficients.forEach(function(coef, i) {
+					result[i] ^= ReedSolomonGenerator.multiply(coef, factor);
+				});
 			});
 			return result;
 		};
