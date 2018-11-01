@@ -59,7 +59,7 @@ namespace qrcodegen {
 		// QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
 		// ecl argument if it can be done without increasing the version.
 		public static encodeText(text: string, ecl: QrCode.Ecc): QrCode {
-			let segs: Array<QrSegment> = qrcodegen.QrSegment.makeSegments(text);
+			const segs: Array<QrSegment> = qrcodegen.QrSegment.makeSegments(text);
 			return QrCode.encodeSegments(segs, ecl);
 		}
 		
@@ -69,7 +69,7 @@ namespace qrcodegen {
 		// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 		// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
 		public static encodeBinary(data: Array<byte>, ecl: QrCode.Ecc): QrCode {
-			let seg: QrSegment = qrcodegen.QrSegment.makeBytes(data);
+			const seg: QrSegment = qrcodegen.QrSegment.makeBytes(data);
 			return QrCode.encodeSegments([seg], ecl);
 		}
 		
@@ -97,8 +97,8 @@ namespace qrcodegen {
 			let version: int;
 			let dataUsedBits: int;
 			for (version = minVersion; ; version++) {
-				let dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-				let usedBits: number = QrSegment.getTotalBits(segs, version);
+				const dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
+				const usedBits: number = QrSegment.getTotalBits(segs, version);
 				if (usedBits <= dataCapacityBits) {
 					dataUsedBits = usedBits;
 					break;  // This version number is found to be suitable
@@ -108,24 +108,24 @@ namespace qrcodegen {
 			}
 			
 			// Increase the error correction level while the data still fits in the current version number
-			for (let newEcl of [QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH]) {  // From low to high
+			for (const newEcl of [QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH]) {  // From low to high
 				if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
 					ecl = newEcl;
 			}
 			
 			// Concatenate all segments to create the data bit string
 			let bb = new BitBuffer();
-			for (let seg of segs) {
+			for (const seg of segs) {
 				bb.appendBits(seg.mode.modeBits, 4);
 				bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-				for (let b of seg.getData())
+				for (const b of seg.getData())
 					bb.push(b);
 			}
 			if (bb.length != dataUsedBits)
 				throw "Assertion error";
 			
 			// Add terminator and pad up to a byte if applicable
-			let dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;
+			const dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;
 			if (bb.length > dataCapacityBits)
 				throw "Assertion error";
 			bb.appendBits(0, Math.min(4, dataCapacityBits - bb.length));
@@ -202,7 +202,7 @@ namespace qrcodegen {
 			
 			// Compute ECC, draw modules
 			this.drawFunctionPatterns();
-			let allCodewords: Array<byte> = this.addEccAndInterleave(dataCodewords);
+			const allCodewords: Array<byte> = this.addEccAndInterleave(dataCodewords);
 			this.drawCodewords(allCodewords);
 			
 			// Do masking
@@ -211,7 +211,7 @@ namespace qrcodegen {
 				for (let i = 0; i < 8; i++) {
 					this.drawFormatBits(i);
 					this.applyMask(i);
-					let penalty: int = this.getPenaltyScore();
+					const penalty: int = this.getPenaltyScore();
 					if (penalty < minPenalty) {
 						mask = i;
 						minPenalty = penalty;
@@ -248,7 +248,7 @@ namespace qrcodegen {
 		public drawCanvas(scale: int, border: int, canvas: HTMLCanvasElement): void {
 			if (scale <= 0 || border < 0)
 				throw "Value out of range";
-			let width: int = (this.size + border * 2) * scale;
+			const width: int = (this.size + border * 2) * scale;
 			canvas.width = width;
 			canvas.height = width;
 			let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -299,8 +299,8 @@ namespace qrcodegen {
 			this.drawFinderPattern(3, this.size - 4);
 			
 			// Draw numerous alignment patterns
-			let alignPatPos: Array<int> = this.getAlignmentPatternPositions();
-			let numAlign: int = alignPatPos.length;
+			const alignPatPos: Array<int> = this.getAlignmentPatternPositions();
+			const numAlign: int = alignPatPos.length;
 			for (let i = 0; i < numAlign; i++) {
 				for (let j = 0; j < numAlign; j++) {
 					// Don't draw on the three finder corners
@@ -361,9 +361,9 @@ namespace qrcodegen {
 			
 			// Draw two copies
 			for (let i = 0; i < 18; i++) {
-				let bt: boolean = getBit(bits, i);
-				let a: int = this.size - 11 + i % 3;
-				let b: int = Math.floor(i / 3);
+				const bt: boolean = getBit(bits, i);
+				const a: int = this.size - 11 + i % 3;
+				const b: int = Math.floor(i / 3);
 				this.setFunctionModule(a, b, bt);
 				this.setFunctionModule(b, a, bt);
 			}
@@ -375,9 +375,9 @@ namespace qrcodegen {
 		private drawFinderPattern(x: int, y: int): void {
 			for (let dy = -4; dy <= 4; dy++) {
 				for (let dx = -4; dx <= 4; dx++) {
-					let dist: int = Math.max(Math.abs(dx), Math.abs(dy));  // Chebyshev/infinity norm
-					let xx: int = x + dx;
-					let yy: int = y + dy;
+					const dist: int = Math.max(Math.abs(dx), Math.abs(dy));  // Chebyshev/infinity norm
+					const xx: int = x + dx;
+					const yy: int = y + dy;
 					if (0 <= xx && xx < this.size && 0 <= yy && yy < this.size)
 						this.setFunctionModule(xx, yy, dist != 2 && dist != 4);
 				}
@@ -414,19 +414,19 @@ namespace qrcodegen {
 				throw "Invalid argument";
 			
 			// Calculate parameter numbers
-			let numBlocks: int = QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
-			let blockEccLen: int = QrCode.ECC_CODEWORDS_PER_BLOCK  [ecl.ordinal][ver];
-			let rawCodewords: int = Math.floor(QrCode.getNumRawDataModules(ver) / 8);
-			let numShortBlocks: int = numBlocks - rawCodewords % numBlocks;
-			let shortBlockLen: int = Math.floor(rawCodewords / numBlocks);
+			const numBlocks: int = QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+			const blockEccLen: int = QrCode.ECC_CODEWORDS_PER_BLOCK  [ecl.ordinal][ver];
+			const rawCodewords: int = Math.floor(QrCode.getNumRawDataModules(ver) / 8);
+			const numShortBlocks: int = numBlocks - rawCodewords % numBlocks;
+			const shortBlockLen: int = Math.floor(rawCodewords / numBlocks);
 			
 			// Split data into blocks and append ECC to each block
 			let blocks: Array<Array<byte>> = [];
-			let rs = new ReedSolomonGenerator(blockEccLen);
+			const rs = new ReedSolomonGenerator(blockEccLen);
 			for (let i = 0, k = 0; i < numBlocks; i++) {
 				let dat: Array<byte> = data.slice(k, k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1));
 				k += dat.length;
-				let ecc: Array<byte> = rs.getRemainder(dat);
+				const ecc: Array<byte> = rs.getRemainder(dat);
 				if (i < numShortBlocks)
 					dat.push(0);
 				blocks.push(dat.concat(ecc));
@@ -459,9 +459,9 @@ namespace qrcodegen {
 					right = 5;
 				for (let vert = 0; vert < this.size; vert++) {  // Vertical counter
 					for (let j = 0; j < 2; j++) {
-						let x: int = right - j;  // Actual x coordinate
-						let upward: boolean = ((right + 1) & 2) == 0;
-						let y: int = upward ? this.size - 1 - vert : vert;  // Actual y coordinate
+						const x: int = right - j;  // Actual x coordinate
+						const upward: boolean = ((right + 1) & 2) == 0;
+						const y: int = upward ? this.size - 1 - vert : vert;  // Actual y coordinate
 						if (!this.isFunction[y][x] && i < data.length * 8) {
 							this.modules[y][x] = getBit(data[i >>> 3], 7 - (i & 7));
 							i++;
@@ -566,7 +566,7 @@ namespace qrcodegen {
 			// 2*2 blocks of modules having same color
 			for (let y = 0; y < this.size - 1; y++) {
 				for (let x = 0; x < this.size - 1; x++) {
-					let color: boolean = this.modules[y][x];
+					const color: boolean = this.modules[y][x];
 					if (  color == this.modules[y][x + 1] &&
 					      color == this.modules[y + 1][x] &&
 					      color == this.modules[y + 1][x + 1])
@@ -576,15 +576,15 @@ namespace qrcodegen {
 			
 			// Balance of black and white modules
 			let black: int = 0;
-			for (let row of this.modules) {
-				for (let color of row) {
+			for (const row of this.modules) {
+				for (const color of row) {
 					if (color)
 						black++;
 				}
 			}
-			let total: int = this.size * this.size;  // Note that size is odd, so black/total != 1/2
+			const total: int = this.size * this.size;  // Note that size is odd, so black/total != 1/2
 			// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
-			let k: int = Math.ceil(Math.abs(black * 20 - total * 10) / total) - 1;
+			const k: int = Math.ceil(Math.abs(black * 20 - total * 10) / total) - 1;
 			result += k * QrCode.PENALTY_N4;
 			return result;
 		}
@@ -599,8 +599,8 @@ namespace qrcodegen {
 			if (this.version == 1)
 				return [];
 			else {
-				let numAlign: int = Math.floor(this.version / 7) + 2;
-				let step: int = (this.version == 32) ? 26 :
+				const numAlign: int = Math.floor(this.version / 7) + 2;
+				const step: int = (this.version == 32) ? 26 :
 					Math.ceil((this.size - 13) / (numAlign*2 - 2)) * 2;
 				let result: Array<int> = [6];
 				for (let pos = this.size - 7; result.length < numAlign; pos -= step)
@@ -618,7 +618,7 @@ namespace qrcodegen {
 				throw "Version number out of range";
 			let result: int = (16 * ver + 128) * ver + 64;
 			if (ver >= 2) {
-				let numAlign: int = Math.floor(ver / 7) + 2;
+				const numAlign: int = Math.floor(ver / 7) + 2;
 				result -= (25 * numAlign - 10) * numAlign - 55;
 				if (ver >= 7)
 					result -= 36;
@@ -718,7 +718,7 @@ namespace qrcodegen {
 		// can be converted to UTF-8 bytes and encoded as a byte mode segment.
 		public static makeBytes(data: Array<byte>): QrSegment {
 			let bb = new BitBuffer();
-			for (let b of data)
+			for (const b of data)
 				bb.appendBits(b, 8);
 			return new QrSegment(QrSegment.Mode.BYTE, data.length, bb);
 		}
@@ -730,7 +730,7 @@ namespace qrcodegen {
 				throw "String contains non-numeric characters";
 			let bb = new BitBuffer();
 			for (let i = 0; i < digits.length; ) {  // Consume up to 3 digits per iteration
-				let n: int = Math.min(digits.length - i, 3);
+				const n: int = Math.min(digits.length - i, 3);
 				bb.appendBits(parseInt(digits.substr(i, n), 10), n * 3 + 1);
 				i += n;
 			}
@@ -827,8 +827,8 @@ namespace qrcodegen {
 		// the given version. The result is infinity if a segment has too many characters to fit its length field.
 		public static getTotalBits(segs: Array<QrSegment>, version: int): number {
 			let result: number = 0;
-			for (let seg of segs) {
-				let ccbits: int = seg.mode.numCharCountBits(version);
+			for (const seg of segs) {
+				const ccbits: int = seg.mode.numCharCountBits(version);
 				if (seg.numChars >= (1 << ccbits))
 					return Infinity;  // The segment's length doesn't fit the field's bit width
 				result += 4 + ccbits + seg.bitData.length;
@@ -922,8 +922,8 @@ namespace qrcodegen {
 		public getRemainder(data: Array<byte>): Array<byte> {
 			// Compute the remainder by performing polynomial division
 			let result: Array<byte> = this.coefficients.map(_ => 0);
-			for (let b of data) {
-				let factor: byte = b ^ (result.shift() as int);
+			for (const b of data) {
+				const factor: byte = b ^ (result.shift() as int);
 				result.push(0);
 				for (let i = 0; i < result.length; i++)
 					result[i] ^= ReedSolomonGenerator.multiply(this.coefficients[i], factor);
