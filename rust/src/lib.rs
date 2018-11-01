@@ -102,6 +102,9 @@
 ///   appropriate version number, and call the `QrCode::encode_codewords()` constructor.
 /// 
 /// (Note that all ways require supplying the desired error correction level.)
+
+pub mod qr_segment_advanced;
+
 #[derive(Clone)]
 pub struct QrCode {
 	
@@ -1199,7 +1202,7 @@ static ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6','7','8','
 /*---- QrSegmentMode functionality ----*/
 
 /// Describes how a segment's data bits are interpreted.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum QrSegmentMode {
 	Numeric,
 	Alphanumeric,
