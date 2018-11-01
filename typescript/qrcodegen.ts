@@ -361,11 +361,11 @@ namespace qrcodegen {
 			
 			// Draw two copies
 			for (let i = 0; i < 18; i++) {
-				const bt: boolean = getBit(bits, i);
+				const color: boolean = getBit(bits, i);
 				const a: int = this.size - 11 + i % 3;
 				const b: int = Math.floor(i / 3);
-				this.setFunctionModule(a, b, bt);
-				this.setFunctionModule(b, a, bt);
+				this.setFunctionModule(a, b, color);
+				this.setFunctionModule(b, a, color);
 			}
 		}
 		
@@ -923,7 +923,7 @@ namespace qrcodegen {
 			// Compute the remainder by performing polynomial division
 			let result: Array<byte> = this.coefficients.map(_ => 0);
 			for (const b of data) {
-				const factor: byte = b ^ (result.shift() as int);
+				const factor: byte = b ^ (result.shift() as byte);
 				result.push(0);
 				this.coefficients.forEach((coef, i) =>
 					result[i] ^= ReedSolomonGenerator.multiply(coef, factor));
