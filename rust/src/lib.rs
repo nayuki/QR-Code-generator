@@ -280,7 +280,7 @@ impl QrCode {
 	/// 
 	/// This is a low-level API that most users should not use directly.
 	/// A mid-level API is the `encode_segments()` function.
-	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mask: Option<Mask>) -> Self {
+	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mut mask: Option<Mask>) -> Self {
 		// Initialize fields
 		let size: usize = (ver.value() as usize) * 4 + 17;
 		let mut result = Self {
@@ -292,11 +292,31 @@ impl QrCode {
 			isfunction: vec![false; size * size],
 		};
 		
-		// Compute ECC, draw modules, do masking
+		// Compute ECC, draw modules
 		result.draw_function_patterns();
 		let allcodewords: Vec<u8> = result.add_ecc_and_interleave(datacodewords);
 		result.draw_codewords(&allcodewords);
-		result.handle_constructor_masking(mask);
+		
+		// Do masking
+		if mask.is_none() {  // Automatically choose best mask
+			let mut minpenalty: i32 = std::i32::MAX;
+			for i in 0u8 .. 8 {
+				let newmask = Mask::new(i);
+				result.draw_format_bits(newmask);
+				result.apply_mask(newmask);
+				let penalty: i32 = result.get_penalty_score();
+				if penalty < minpenalty {
+					mask = Some(newmask);
+					minpenalty = penalty;
+				}
+				result.apply_mask(newmask);  // Undoes the mask due to XOR
+			}
+		}
+		let mask: Mask = mask.unwrap();
+		result.mask = mask;
+		result.draw_format_bits(mask);  // Overwrite old format bits
+		result.apply_mask(mask);  // Apply the final choice of mask
+		
 		result.isfunction.clear();
 		result.isfunction.shrink_to_fit();
 		result
@@ -611,31 +631,6 @@ impl QrCode {
 				*self.module_mut(x, y) ^= invert & !self.isfunction[(y * self.size + x) as usize];
 			}
 		}
-	}
-	
-	
-	// A messy helper function for the constructors. This QR Code must be in an unmasked state when this
-	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
-	// This method applies and returns the actual mask chosen, from 0 to 7.
-	fn handle_constructor_masking(&mut self, mut mask: Option<Mask>) {
-		if mask.is_none() {  // Automatically choose best mask
-			let mut minpenalty: i32 = std::i32::MAX;
-			for i in 0u8 .. 8 {
-				let newmask = Mask::new(i);
-				self.draw_format_bits(newmask);
-				self.apply_mask(newmask);
-				let penalty: i32 = self.get_penalty_score();
-				if penalty < minpenalty {
-					mask = Some(newmask);
-					minpenalty = penalty;
-				}
-				self.apply_mask(newmask);  // Undoes the mask due to XOR
-			}
-		}
-		let msk: Mask = mask.unwrap();
-		self.draw_format_bits(msk);  // Overwrite old format bits
-		self.apply_mask(msk);  // Apply the final choice of mask
-		self.mask = msk;
 	}
 	
 	
