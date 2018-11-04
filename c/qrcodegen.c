@@ -73,7 +73,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask);
 static long getPenaltyScore(const uint8_t qrcode[]);
 static void addRunToHistory(unsigned char run, unsigned char history[7]);
-static bool hasFinderLikePattern(unsigned char runHistory[7]);
+static bool hasFinderLikePattern(const unsigned char runHistory[7]);
 
 testable bool getModule(const uint8_t qrcode[], int x, int y);
 testable void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
@@ -723,7 +723,7 @@ static void addRunToHistory(unsigned char run, unsigned char history[7]) {
 // Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
 // surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
 // Must only be called immediately after a run of white modules has ended.
-static bool hasFinderLikePattern(unsigned char runHistory[7]) {
+static bool hasFinderLikePattern(const unsigned char runHistory[7]) {
 	unsigned char n = runHistory[1];
 	// The maximum QR Code size is 177, hence the run length n <= 177.
 	// Arithmetic is promoted to int, so n*4 will not overflow.
