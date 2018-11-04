@@ -139,11 +139,31 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	modules    = vector<vector<bool> >(size, vector<bool>(size));  // Initially all white
 	isFunction = vector<vector<bool> >(size, vector<bool>(size));
 	
-	// Compute ECC, draw modules, do masking
+	// Compute ECC, draw modules
 	drawFunctionPatterns();
 	const vector<uint8_t> allCodewords = addEccAndInterleave(dataCodewords);
 	drawCodewords(allCodewords);
-	this->mask = handleConstructorMasking(mask);
+	
+	// Do masking
+	if (mask == -1) {  // Automatically choose best mask
+		long minPenalty = LONG_MAX;
+		for (int i = 0; i < 8; i++) {
+			drawFormatBits(i);
+			applyMask(i);
+			long penalty = getPenaltyScore();
+			if (penalty < minPenalty) {
+				mask = i;
+				minPenalty = penalty;
+			}
+			applyMask(i);  // Undoes the mask due to XOR
+		}
+	}
+	if (mask < 0 || mask > 7)
+		throw std::logic_error("Assertion error");
+	this->mask = mask;
+	drawFormatBits(mask);  // Overwrite old format bits
+	applyMask(mask);  // Apply the final choice of mask
+	
 	isFunction.clear();
 	isFunction.shrink_to_fit();
 }
@@ -400,28 +420,6 @@ void QrCode::applyMask(int mask) {
 			modules.at(y).at(x) = modules.at(y).at(x) ^ (invert & !isFunction.at(y).at(x));
 		}
 	}
-}
-
-
-int QrCode::handleConstructorMasking(int mask) {
-	if (mask == -1) {  // Automatically choose best mask
-		long minPenalty = LONG_MAX;
-		for (int i = 0; i < 8; i++) {
-			drawFormatBits(i);
-			applyMask(i);
-			long penalty = getPenaltyScore();
-			if (penalty < minPenalty) {
-				mask = i;
-				minPenalty = penalty;
-			}
-			applyMask(i);  // Undoes the mask due to XOR
-		}
-	}
-	if (mask < 0 || mask > 7)
-		throw std::logic_error("Assertion error");
-	drawFormatBits(mask);  // Overwrite old format bits
-	applyMask(mask);  // Apply the final choice of mask
-	return mask;  // The caller shall assign this value to the final-declared field
 }
 
 

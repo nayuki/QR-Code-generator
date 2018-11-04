@@ -247,12 +247,6 @@ class QrCode final {
 	private: void applyMask(int mask);
 	
 	
-	// A messy helper function for the constructors. This QR Code must be in an unmasked state when this
-	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
-	// This method applies and returns the actual mask chosen, from 0 to 7.
-	private: int handleConstructorMasking(int mask);
-	
-	
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
 	private: long getPenaltyScore() const;
