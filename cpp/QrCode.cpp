@@ -148,8 +148,8 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	if (mask == -1) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
-			drawFormatBits(i);
 			applyMask(i);
+			drawFormatBits(i);
 			long penalty = getPenaltyScore();
 			if (penalty < minPenalty) {
 				mask = i;
@@ -161,8 +161,8 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	if (mask < 0 || mask > 7)
 		throw std::logic_error("Assertion error");
 	this->mask = mask;
-	drawFormatBits(mask);  // Overwrite old format bits
 	applyMask(mask);  // Apply the final choice of mask
+	drawFormatBits(mask);  // Overwrite old format bits
 	
 	isFunction.clear();
 	isFunction.shrink_to_fit();

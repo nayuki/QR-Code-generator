@@ -209,8 +209,8 @@ namespace qrcodegen {
 			if (mask == -1) {  // Automatically choose best mask
 				let minPenalty: int = 1000000000;
 				for (let i = 0; i < 8; i++) {
-					this.drawFormatBits(i);
 					this.applyMask(i);
+					this.drawFormatBits(i);
 					const penalty: int = this.getPenaltyScore();
 					if (penalty < minPenalty) {
 						mask = i;
@@ -222,8 +222,8 @@ namespace qrcodegen {
 			if (mask < 0 || mask > 7)
 				throw "Assertion error";
 			this.mask = mask;
-			this.drawFormatBits(mask);  // Overwrite old format bits
 			this.applyMask(mask);  // Apply the final choice of mask
+			this.drawFormatBits(mask);  // Overwrite old format bits
 			
 			this.isFunction = [];
 		}

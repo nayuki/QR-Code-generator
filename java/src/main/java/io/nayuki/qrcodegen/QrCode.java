@@ -573,8 +573,8 @@ public final class QrCode {
 		if (mask == -1) {  // Automatically choose best mask
 			int minPenalty = Integer.MAX_VALUE;
 			for (int i = 0; i < 8; i++) {
-				drawFormatBits(i);
 				applyMask(i);
+				drawFormatBits(i);
 				int penalty = getPenaltyScore();
 				if (penalty < minPenalty) {
 					mask = i;
@@ -584,8 +584,8 @@ public final class QrCode {
 			}
 		}
 		assert 0 <= mask && mask <= 7;
-		drawFormatBits(mask);  // Overwrite old format bits
 		applyMask(mask);  // Apply the final choice of mask
+		drawFormatBits(mask);  // Overwrite old format bits
 		return mask;  // The caller shall assign this value to the final-declared field
 	}
 	

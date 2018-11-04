@@ -209,16 +209,16 @@ class QrCode(object):
 		if mask == -1:  # Automatically choose best mask
 			minpenalty = 1 << 32
 			for i in range(8):
-				self._draw_format_bits(i)
 				self._apply_mask(i)
+				self._draw_format_bits(i)
 				penalty = self._get_penalty_score()
 				if penalty < minpenalty:
 					mask = i
 					minpenalty = penalty
 				self._apply_mask(i)  # Undoes the mask due to XOR
 		assert 0 <= mask <= 7
-		self._draw_format_bits(mask)  # Overwrite old format bits
 		self._apply_mask(mask)  # Apply the final choice of mask
+		self._draw_format_bits(mask)  # Overwrite old format bits
 		
 		# The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
 		# Even if a QR Code is created with automatic masking requested (mask = -1),

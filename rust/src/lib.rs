@@ -302,8 +302,8 @@ impl QrCode {
 			let mut minpenalty: i32 = std::i32::MAX;
 			for i in 0u8 .. 8 {
 				let newmask = Mask::new(i);
-				result.draw_format_bits(newmask);
 				result.apply_mask(newmask);
+				result.draw_format_bits(newmask);
 				let penalty: i32 = result.get_penalty_score();
 				if penalty < minpenalty {
 					mask = Some(newmask);
@@ -314,8 +314,8 @@ impl QrCode {
 		}
 		let mask: Mask = mask.unwrap();
 		result.mask = mask;
-		result.draw_format_bits(mask);  // Overwrite old format bits
 		result.apply_mask(mask);  // Apply the final choice of mask
+		result.draw_format_bits(mask);  // Overwrite old format bits
 		
 		result.isfunction.clear();
 		result.isfunction.shrink_to_fit();

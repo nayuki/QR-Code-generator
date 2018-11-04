@@ -113,8 +113,8 @@ var qrcodegen = new function() {
 		if (mask == -1) {  // Automatically choose best mask
 			var minPenalty = Infinity;
 			for (var i = 0; i < 8; i++) {
-				drawFormatBits(i);
 				applyMask(i);
+				drawFormatBits(i);
 				var penalty = getPenaltyScore();
 				if (penalty < minPenalty) {
 					mask = i;
@@ -125,8 +125,8 @@ var qrcodegen = new function() {
 		}
 		if (mask < 0 || mask > 7)
 			throw "Assertion error";
-		drawFormatBits(mask);  // Overwrite old format bits
 		applyMask(mask);  // Apply the final choice of mask
+		drawFormatBits(mask);  // Overwrite old format bits
 		
 		isFunction = null;
 		

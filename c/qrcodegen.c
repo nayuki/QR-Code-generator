@@ -264,8 +264,8 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
 			enum qrcodegen_Mask msk = (enum qrcodegen_Mask)i;
-			drawFormatBits(ecl, msk, qrcode);
 			applyMask(tempBuffer, qrcode, msk);
+			drawFormatBits(ecl, msk, qrcode);
 			long penalty = getPenaltyScore(qrcode);
 			if (penalty < minPenalty) {
 				mask = msk;
@@ -275,8 +275,8 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 		}
 	}
 	assert(0 <= (int)mask && (int)mask <= 7);
-	drawFormatBits(ecl, mask, qrcode);
 	applyMask(tempBuffer, qrcode, mask);
+	drawFormatBits(ecl, mask, qrcode);
 	return true;
 }
 
