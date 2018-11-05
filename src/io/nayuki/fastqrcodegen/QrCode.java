@@ -197,6 +197,8 @@ public final class QrCode {
 	
 	/*---- Instance fields ----*/
 	
+	// Public immutable scalar parameters:
+	
 	/** The version number of this QR Code, which is between 1 and 40 (inclusive).
 	 * This determines the size of this barcode. */
 	public final int version;
@@ -212,6 +214,8 @@ public final class QrCode {
 	 * <p>Even if a QR Code is created with automatic masking requested (mask =
 	 * &#x2212;1), the resulting object still has a mask value between 0 and 7. */
 	public final int mask;
+	
+	// Private grid of modules/pixels:
 	
 	// The modules of this QR Code. Immutable after constructor finishes. Accessed through getModule().
 	private final int[] modules;

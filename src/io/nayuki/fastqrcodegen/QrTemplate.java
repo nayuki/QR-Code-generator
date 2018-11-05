@@ -90,7 +90,8 @@ final class QrTemplate {
 	final int[][] masks;
 	final int[] dataOutputBitIndexes;
 	
-	private int[] isFunction;  // Discarded when constructor finishes
+	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
+	private int[] isFunction;
 	
 	
 	private QrTemplate(int ver) {
@@ -274,8 +275,6 @@ final class QrTemplate {
 		isFunction[i >>> 5] |= 1 << i;
 	}
 	
-	
-	/*---- Private static helper functions ----*/
 	
 	// Returns an ascending list of positions of alignment patterns for this version number.
 	// Each position is in the range [0,177), and are used on both the x and y axes.
