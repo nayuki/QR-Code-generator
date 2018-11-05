@@ -485,11 +485,11 @@ public final class QrCode {
 		
 		// Iterate over adjacent pairs of rows
 		for (int index = 0, downIndex = size, end = size * size; index < end; ) {
-			int curRow = 0;
-			int nextRow = 0;
 			Arrays.fill(runHistory, 0);
 			int color = 0;
 			int runX = 0;
+			int curRow = 0;
+			int nextRow = 0;
 			for (int x = 0; x < size; x++, index++, downIndex++) {
 				int c = getBit(modules[index >>> 5], index);
 				if (c == color) {
@@ -589,7 +589,7 @@ public final class QrCode {
 	}
 	
 	
-	// Returns 0 or 1 based on the i'th bit of x.
+	// Returns 0 or 1 based on the (i mod 32)'th bit of x.
 	static int getBit(int x, int i) {
 		return (x >>> i) & 1;
 	}
