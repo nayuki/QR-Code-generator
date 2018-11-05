@@ -492,15 +492,15 @@ public final class QrCode {
 				
 				// Adjacent modules having same color
 				int c = getBit(modules[index >>> 5], index);
-				if (c != color) {
-					color = c;
-					runX = 1;
-				} else {
+				if (c == color) {
 					runX++;
 					if (runX == 5)
 						result += PENALTY_N1;
 					else if (runX > 5)
 						result++;
+				} else {
+					color = c;
+					runX = 1;
 				}
 				
 				black += c;
@@ -527,15 +527,15 @@ public final class QrCode {
 				
 				// Adjacent modules having same color
 				int c = getBit(modules[index >>> 5], index);
-				if (c != color) {
-					color = c;
-					runY = 1;
-				} else {
+				if (c == color) {
 					runY++;
 					if (runY == 5)
 						result += PENALTY_N1;
 					else if (runY > 5)
 						result++;
+				} else {
+					color = c;
+					runY = 1;
 				}
 				
 				// Finder-like pattern
