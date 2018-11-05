@@ -64,7 +64,7 @@ public final class QrCode {
 	 * @param ecl the error correction level to use (not {@code null}) (boostable)
 	 * @return a QR Code (not {@code null}) representing the text
 	 * @throws NullPointerException if the text or error correction level is {@code null}
-	 * @throws IllegalArgumentException if the text fails to fit in the
+	 * @throws DataTooLongException if the text fails to fit in the
 	 * largest version QR Code at the ECL, which means it is too long
 	 */
 	public static QrCode encodeText(String text, Ecc ecl) {
@@ -84,7 +84,7 @@ public final class QrCode {
 	 * @param ecl the error correction level to use (not {@code null}) (boostable)
 	 * @return a QR Code (not {@code null}) representing the data
 	 * @throws NullPointerException if the data or error correction level is {@code null}
-	 * @throws IllegalArgumentException if the data fails to fit in the
+	 * @throws DataTooLongException if the data fails to fit in the
 	 * largest version QR Code at the ECL, which means it is too long
 	 */
 	public static QrCode encodeBinary(byte[] data, Ecc ecl) {
@@ -109,7 +109,7 @@ public final class QrCode {
 	 * @param ecl the error correction level to use (not {@code null}) (boostable)
 	 * @return a QR Code (not {@code null}) representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
-	 * @throws IllegalArgumentException if the segments fail to fit in the
+	 * @throws DataTooLongException if the segments fail to fit in the
 	 * largest version QR Code at the ECL, which means they are too long
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl) {
@@ -137,8 +137,9 @@ public final class QrCode {
 	 * @return a QR Code (not {@code null}) representing the segments
 	 * @throws NullPointerException if the list of segments, any segment, or the error correction level is {@code null}
 	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
-	 * or &#x2212;1 &#x2264; mask &#x2264; 7 is violated; or if the segments fail to
-	 * fit in the maxVersion QR Code at the ECL, which means they are too long
+	 * or &#x2212;1 &#x2264; mask &#x2264; 7 is violated
+	 * @throws DataTooLongException if the segments fail to fit in
+	 * the maxVersion QR Code at the ECL, which means they are too long
 	 */
 	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
 		Objects.requireNonNull(segs);
@@ -153,8 +154,12 @@ public final class QrCode {
 			dataUsedBits = QrSegment.getTotalBits(segs, version);
 			if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
 				break;  // This version number is found to be suitable
-			if (version >= maxVersion)  // All versions in the range could not fit the given data
-				throw new IllegalArgumentException("Data too long");
+			if (version >= maxVersion) {  // All versions in the range could not fit the given data
+				String msg = "Segment too long";
+				if (dataUsedBits != -1)
+					msg = String.format("Data length = %d bits, Max capacity = %d bits", dataUsedBits, dataCapacityBits);
+				throw new DataTooLongException(msg);
+			}
 		}
 		assert dataUsedBits != -1;
 		
