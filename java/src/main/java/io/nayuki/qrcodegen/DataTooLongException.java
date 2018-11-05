@@ -43,7 +43,7 @@ package io.nayuki.qrcodegen;
  * @see QrCode#encodeBinary(byte[], QrCode.Ecc)
  * @see QrCode#encodeSegments(java.util.List, QrCode.Ecc)
  * @see QrCode#encodeSegments(java.util.List, QrCode.Ecc, int, int, int, boolean)
- * @see QrSegmentAdvanced#makeSegmentsOptimally(String, io.nayuki.qrcodegen.QrCode.Ecc, int, int)
+ * @see QrSegmentAdvanced#makeSegmentsOptimally(String, QrCode.Ecc, int, int)
  */
 public class DataTooLongException extends IllegalArgumentException {
 	
