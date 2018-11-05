@@ -149,7 +149,7 @@ final class QrTemplate {
 			darkenFunctionModule(14 - i, 8, 0);
 		
 		// Draw second copy
-		for (int i = 0; i <= 7; i++)
+		for (int i = 0; i < 8; i++)
 			darkenFunctionModule(size - 1 - i, 8, 0);
 		for (int i = 8; i < 15; i++)
 			darkenFunctionModule(8, size - 15 + i, 0);
