@@ -506,11 +506,11 @@ public final class QrCode {
 					runX = 1;
 				}
 				black += c;
-				curRow = ((curRow & 0b1111111111) << 1) | c;
 				if (downIndex < end) {
-					nextRow = ((nextRow & 1) << 1) | getBit(modules[downIndex >>> 5], downIndex);
+					curRow = ((curRow << 1) | c) & 3;
+					nextRow = ((nextRow << 1) | getBit(modules[downIndex >>> 5], downIndex)) & 3;
 					// 2*2 blocks of modules having same color
-					if (x >= 1 && (nextRow == 0 || nextRow == 3) && nextRow == (curRow & 3))
+					if (x >= 1 && (curRow == 0 || curRow == 3) && curRow == nextRow)
 						result += PENALTY_N2;
 				}
 			}
