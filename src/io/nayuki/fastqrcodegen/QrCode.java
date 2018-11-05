@@ -484,36 +484,36 @@ public final class QrCode {
 		
 		// Iterate over adjacent pairs of rows
 		for (int index = 0, downIndex = size, end = size * size; index < end; ) {
-			int bits = 0;
-			int downBits = 0;
-			int runColor = 0;
-			int runLen = 0;
+			int curRow = 0;
+			int nextRow = 0;
+			int color = 0;
+			int runX = 0;
 			for (int x = 0; x < size; x++, index++, downIndex++) {
 				
 				// Adjacent modules having same color
-				int bit = getBit(modules[index >>> 5], index);
-				if (bit != runColor) {
-					runColor = bit;
-					runLen = 1;
+				int c = getBit(modules[index >>> 5], index);
+				if (c != color) {
+					color = c;
+					runX = 1;
 				} else {
-					runLen++;
-					if (runLen == 5)
+					runX++;
+					if (runX == 5)
 						result += PENALTY_N1;
-					else if (runLen > 5)
+					else if (runX > 5)
 						result++;
 				}
 				
-				black += bit;
-				bits = ((bits & 0b1111111111) << 1) | bit;
+				black += c;
+				curRow = ((curRow & 0b1111111111) << 1) | c;
 				if (downIndex < end) {
-					downBits = ((downBits & 1) << 1) | getBit(modules[downIndex >>> 5], downIndex);
+					nextRow = ((nextRow & 1) << 1) | getBit(modules[downIndex >>> 5], downIndex);
 					// 2*2 blocks of modules having same color
-					if (x >= 1 && (downBits == 0 || downBits == 3) && downBits == (bits & 3))
+					if (x >= 1 && (nextRow == 0 || nextRow == 3) && nextRow == (curRow & 3))
 						result += PENALTY_N2;
 				}
 				
 				// Finder-like pattern
-				if (x >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))
+				if (x >= 10 && (curRow == 0b00001011101 || curRow == 0b10111010000))
 					result += PENALTY_N3;
 			}
 		}
@@ -521,25 +521,25 @@ public final class QrCode {
 		// Iterate over single columns
 		for (int x = 0; x < size; x++) {
 			int bits = 0;
-			int runColor = 0;
-			int runLen = 0;
+			int color = 0;
+			int runY = 0;
 			for (int y = 0, index = x; y < size; y++, index += size) {
 				
 				// Adjacent modules having same color
-				int bit = getBit(modules[index >>> 5], index);
-				if (bit != runColor) {
-					runColor = bit;
-					runLen = 1;
+				int c = getBit(modules[index >>> 5], index);
+				if (c != color) {
+					color = c;
+					runY = 1;
 				} else {
-					runLen++;
-					if (runLen == 5)
+					runY++;
+					if (runY == 5)
 						result += PENALTY_N1;
-					else if (runLen > 5)
+					else if (runY > 5)
 						result++;
 				}
 				
 				// Finder-like pattern
-				bits = ((bits & 0b1111111111) << 1) | bit;
+				bits = ((bits & 0b1111111111) << 1) | c;
 				if (y >= 10 && (bits == 0b00001011101 || bits == 0b10111010000))
 					result += PENALTY_N3;
 			}
