@@ -125,7 +125,8 @@ fn compute_character_modes(code_points: &[char], version: Version) -> Vec<QrSegm
 
     let mut cur_mode = cur_mode.unwrap();
 
-    let mut result = vec![QrSegmentMode::Byte; char_modes.len()];
+    let mut result = Vec::with_capacity(char_modes.len());
+    unsafe { result.set_len(char_modes.len()); }
 
     // Get optimal mode for each code point by tracing backwards
     for i in (0..char_modes.len()).rev() {
