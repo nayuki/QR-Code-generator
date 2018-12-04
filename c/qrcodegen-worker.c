@@ -78,6 +78,10 @@ int main(void) {
 		bool ok;
 		if (isAscii) {
 			char *text = malloc((length + 1) * sizeof(char));
+			if (text == NULL) {
+				perror("malloc");
+				return EXIT_FAILURE;
+			}
 			for (int i = 0; i < length; i++)
 				text[i] = (char)data[i];
 			text[length] = '\0';
