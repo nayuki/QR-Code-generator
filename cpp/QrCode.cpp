@@ -26,7 +26,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <sstream>
-#include <stdexcept>
 #include <utility>
 #include "BitBuffer.hpp"
 #include "QrCode.hpp"

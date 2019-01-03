@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <deque>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include "QrSegment.hpp"
