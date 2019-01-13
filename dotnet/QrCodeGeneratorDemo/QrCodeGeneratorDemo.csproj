@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <RootNamespace>Io.Nayuki.QrCodeGen.Demo</RootNamespace>
+    <PackageId>Io.Nayuki.QrCodeGen.Demo</PackageId>
+    <Version>1.4.1</Version>
+    <Authors>Project Nayuki</Authors>
+    <Product>QR Code Generator for .NET</Product>
+    <Description>Demo application for QR Code Generation</Description>
+    <Copyright>Copyright (c) Project Nayuki. (MIT License)</Copyright>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://www.nayuki.io/page/qr-code-generator-library</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nayuki/QR-Code-generator</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QrCodeGenerator\QrCodeGenerator.csproj" />
+  </ItemGroup>
+
+</Project>
