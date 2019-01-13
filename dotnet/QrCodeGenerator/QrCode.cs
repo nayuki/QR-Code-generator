@@ -966,7 +966,7 @@ namespace Io.Nayuki.QrCodeGen
         // Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
         // QR Code of the given version number and error correction level, with remainder bits discarded.
         // This stateless pure function could be implemented as a (40*4)-cell lookup table.
-        private static int GetNumDataCodewords(int ver, Ecc ecl)
+        internal static int GetNumDataCodewords(int ver, Ecc ecl)
         {
             return GetNumRawDataModules(ver) / 8
                 - EccCodewordsPerBlock[ecl.Ordinal, ver]

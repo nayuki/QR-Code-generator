@@ -24,7 +24,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using static Io.Nayuki.QrCodeGen.QrSegment;
 
 namespace Io.Nayuki.QrCodeGen
@@ -39,6 +41,282 @@ namespace Io.Nayuki.QrCodeGen
     /// <seealso cref="QrCode"/>
     public static class QrSegmentAdvanced
     {
+        #region Optimal list of segments encoder
+
+        /// <summary>
+        /// Returns a list of zero or more segments to represent the specified Unicode text string.
+        /// The resulting list optimally minimizes the total encoded bit length, subjected to the constraints
+        /// in the specified {error correction level, minimum version number, maximum version number}.
+        /// </summary>
+        /// <remarks>
+        /// This function can utilize all four text encoding modes: numeric, alphanumeric, byte (UTF-8),
+        /// and kanji. This can be considered as a sophisticated but slower replacement for
+        /// <see cref="MakeSegments"/>. This requires more input parameters because it searches a
+        /// range of versions, like <see cref="QrCode.EncodeSegments(List{QrSegment},QrCode.Ecc)"/>.
+        /// </remarks>
+        /// <param name="text">the text to be encoded (not <c>null</c>), which can be any Unicode string</param>
+        /// <param name="ecl">the error correction level to use (not <c>null</c>)</param>
+        /// <param name="minVersion">the minimum allowed version of the QR Code (at least 1)</param>
+        /// <param name="maxVersion">the maximum allowed version of the QR Code (at most 40)</param>
+        /// <returns>a new mutable list (not <c>null</c>) of segments (not <c>null</c>)
+        /// containing the text, minimizing the bit length with respect to the constraints</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the text or error correction level is <c>null</c></exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated</exception>
+        /// <exception cref="DataTooLongException">Thrown if the text fails to fit in the maxVersion QR Code at the ECL</exception>
+        public static List<QrSegment> MakeSegmentsOptimally(string text, QrCode.Ecc ecl, int minVersion, int maxVersion)
+        {
+            // Check arguments
+            Objects.RequireNonNull(text);
+            Objects.RequireNonNull(ecl);
+            if (minVersion < QrCode.MinVersion || minVersion > maxVersion)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minVersion), "Invalid value");
+            }
+
+            if (maxVersion > QrCode.MaxVersion)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxVersion), "Invalid value");
+            }
+
+            // Iterate through version numbers, and make tentative segments
+            List<QrSegment> segs = null;
+            var codePoints = ToCodePoints(text);
+            for (int version = minVersion;; version++)
+            {
+                if (version == minVersion || version == 10 || version == 27)
+                    segs = MakeSegmentsOptimally(codePoints, version);
+                Debug.Assert(segs != null);
+
+                // Check if the segments fit
+                int dataCapacityBits = QrCode.GetNumDataCodewords(version, ecl) * 8;
+                int dataUsedBits = GetTotalBits(segs, version);
+                if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
+                    return segs; // This version number is found to be suitable
+
+                if (version < maxVersion) continue;
+
+                // All versions in the range could not fit the given text
+                var msg = "Segment too long";
+                if (dataUsedBits != -1)
+                    msg = $"Data length = {dataUsedBits} bits, Max capacity = {dataCapacityBits} bits";
+                throw new DataTooLongException(msg);
+            }
+        }
+
+
+        // Returns a new list of segments that is optimal for the given text at the given version number.
+        private static List<QrSegment> MakeSegmentsOptimally(int[] codePoints, int version)
+        {
+            if (codePoints.Length == 0)
+                return new List<QrSegment>();
+            var charModes = ComputeCharacterModes(codePoints, version);
+            return SplitIntoSegments(codePoints, charModes);
+        }
+
+
+        // Returns a new array representing the optimal mode per code point based on the given text and version.
+        private static Mode[] ComputeCharacterModes(int[] codePoints, int version)
+        {
+            if (codePoints.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(codePoints));
+            }
+
+            Mode[] modeTypes = {Mode.Byte, Mode.Alphanumeric, Mode.Numeric, Mode.Kanji}; // Do not modify
+            int numModes = modeTypes.Length;
+
+            // Segment header sizes, measured in 1/6 bits
+            var headCosts = new int[numModes];
+            for (var i = 0; i < numModes; i++)
+            {
+                headCosts[i] = (4 + modeTypes[i].NumCharCountBits(version)) * 6;
+            }
+
+            // charModes[i][j] represents the mode to encode the code point at
+            // index i such that the final segment ends in modeTypes[j] and the
+            // total number of bits is minimized over all possible choices
+            var charModes = new Mode[codePoints.Length, numModes];
+
+            // At the beginning of each iteration of the loop below,
+            // prevCosts[j] is the exact minimum number of 1/6 bits needed to
+            // encode the entire string prefix of length i, and end in modeTypes[j]
+            var prevCosts = (int[]) headCosts.Clone();
+
+            // Calculate costs using dynamic programming
+            for (var i = 0; i < codePoints.Length; i++)
+            {
+                int c = codePoints[i];
+                var curCosts = new int[numModes];
+                {
+                    // Always extend a byte mode segment
+                    curCosts[0] = prevCosts[0] + CountUtf8Bytes(c) * 8 * 6;
+                    charModes[i, 0] = modeTypes[0];
+                }
+                // Extend a segment if possible
+                if (AlphanumericCharset.IndexOf((char) c) != -1)
+                {
+                    // Is alphanumeric
+                    curCosts[1] = prevCosts[1] + 33; // 5.5 bits per alphanumeric char
+                    charModes[i, 1] = modeTypes[1];
+                }
+
+                if ('0' <= c && c <= '9')
+                {
+                    // Is numeric
+                    curCosts[2] = prevCosts[2] + 20; // 3.33 bits per digit
+                    charModes[i, 2] = modeTypes[2];
+                }
+
+                if (IsKanji(c))
+                {
+                    curCosts[3] = prevCosts[3] + 78; // 13 bits per Shift JIS char
+                    charModes[i, 3] = modeTypes[3];
+                }
+
+                // Start new segment at the end to switch modes
+                for (var j = 0; j < numModes; j++)
+                {
+                    // To mode
+                    for (var k = 0; k < numModes; k++)
+                    {
+                        // From mode
+                        int newCost = (curCosts[k] + 5) / 6 * 6 + headCosts[j];
+                        if (charModes[i, k] == null || (charModes[i, j] != null && newCost >= curCosts[j]))
+                            continue;
+                        curCosts[j] = newCost;
+                        charModes[i, j] = modeTypes[k];
+                    }
+                }
+
+                prevCosts = curCosts;
+            }
+
+            // Find optimal ending mode
+            Mode curMode = null;
+            for (int i = 0, minCost = 0; i < numModes; i++)
+            {
+                if (curMode != null && prevCosts[i] >= minCost) continue;
+                minCost = prevCosts[i];
+                curMode = modeTypes[i];
+            }
+
+            // Get optimal mode for each code point by tracing backwards
+            var result = new Mode[codePoints.Length];
+            for (int i = result.Length - 1; i >= 0; i--)
+            {
+                for (var j = 0; j < numModes; j++)
+                {
+                    if (modeTypes[j] != curMode) continue;
+                    curMode = charModes[i, j];
+                    result[i] = curMode;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+
+        // Returns a new list of segments based on the given text and modes, such that
+        // consecutive code points in the same mode are put into the same segment.
+        private static List<QrSegment> SplitIntoSegments(int[] codePoints, Mode[] charModes)
+        {
+            if (codePoints.Length == 0)
+                throw new ArgumentOutOfRangeException(nameof(codePoints));
+            var result = new List<QrSegment>();
+
+            // Accumulate run of modes
+            var curMode = charModes[0];
+            var start = 0;
+            for (var i = 1;; i++)
+            {
+                if (i < codePoints.Length && charModes[i] == curMode)
+                    continue;
+
+                string s = FromCodePoints(codePoints, start, i - start);
+                if (curMode == Mode.Byte)
+                {
+                    result.Add(MakeBytes(Encoding.UTF8.GetBytes(s)));
+                }
+                else if (curMode == Mode.Numeric)
+                {
+                    result.Add(MakeNumeric(s));
+                }
+                else if (curMode == Mode.Alphanumeric)
+                {
+                    result.Add(MakeAlphanumeric(s));
+                }
+                else if (curMode == Mode.Kanji)
+                {
+                    result.Add(MakeKanji(s));
+                }
+                else
+                {
+                    Debug.Assert(false);
+                }
+
+                if (i >= codePoints.Length)
+                {
+                    return result;
+                }
+
+                curMode = charModes[i];
+                start = i;
+            }
+        }
+
+
+        public static string FromCodePoints(int[] codepoints, int startIndex, int count)
+        {
+            bool useBigEndian = !BitConverter.IsLittleEndian;
+            Encoding utf32 = new UTF32Encoding(useBigEndian, false , true);
+
+            var octets = new byte[count * 4];
+            for (int i = startIndex, j = 0; i < startIndex + count; i++, j += 4)
+            {
+                var bytes = BitConverter.GetBytes(codepoints[i]);
+                octets[j]     = bytes[0];
+                octets[j + 1] = bytes[1];
+                octets[j + 2] = bytes[2];
+                octets[j + 3] = bytes[3];
+            }
+
+            return utf32.GetString(octets);
+        }
+
+
+        // Returns a new array of Unicode code points (effectively
+        // UTF-32 / UCS-4) representing the given UTF-16 string.
+        private static int[] ToCodePoints(string s)
+        {
+            bool useBigEndian = !BitConverter.IsLittleEndian;
+            Encoding utf32 = new UTF32Encoding(useBigEndian, false , true);
+            var octets = utf32.GetBytes(s) ;
+
+            var result = new int[octets.Length / 4];
+            for (int i = 0, j = 0; i < octets.Length; i += 4, j++)
+            {
+                result[j] = BitConverter.ToInt32(octets, i);
+            }
+
+            return result;
+        }
+
+        
+        // Returns the number of UTF-8 bytes needed to encode the given Unicode code point.
+        private static int CountUtf8Bytes(int cp)
+        {
+            if (cp < 0) throw new ArgumentOutOfRangeException(nameof(cp), "Invalid code point");
+            if (cp < 0x80) return 1;
+            if (cp < 0x800) return 2;
+            if (cp < 0x10000) return 3;
+            if (cp < 0x110000) return 4;
+            throw new ArgumentOutOfRangeException(nameof(cp), "Invalid code point");
+        }
+
+
+        #endregion
+
 
         #region Kanji mode segment encoder
 
@@ -85,7 +363,7 @@ namespace Io.Nayuki.QrCodeGen
         /// Examples of non-encodable characters include {ordinary ASCII, half-width katakana,
         /// more extensive Chinese hanzi}.
         /// </remarks>
-        /// <param name="text">the string to test for encodability (not {@code null})</param>
+        /// <param name="text">the string to test for encodability (not <c>null</c>)</param>
         /// <returns><c>true</c> iff each character is in the kanji mode character set</returns>
         /// <exception cref="ArgumentNullException">Thrown if the string is <c>null</c></exception>
 	    public static bool IsEncodableAsKanji(string text) {
@@ -236,7 +514,6 @@ namespace Io.Nayuki.QrCodeGen
 	    }
 
         #endregion 
-
 	
     }
 }

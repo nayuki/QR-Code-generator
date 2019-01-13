@@ -329,7 +329,7 @@ namespace Io.Nayuki.QrCodeGen
 
         // The set of all legal characters in alphanumeric mode, where
         // each character value maps to the index in the string.
-        static readonly string AlphanumericCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
+        internal static readonly string AlphanumericCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
         #endregion
 
