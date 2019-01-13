@@ -28,7 +28,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Io.Nayuki.QrCodeGen
+namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
     /// A segment of character/binary/control data in a QR Code symbol.

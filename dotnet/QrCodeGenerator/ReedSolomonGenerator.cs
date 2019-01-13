@@ -25,7 +25,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Io.Nayuki.QrCodeGen
+namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
     /// Computes the Reed-Solomon error correction codewords for a sequence of data codewords at a given degree.

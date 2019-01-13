@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Io.Nayuki.QrCodeGen</RootNamespace>
-    <PackageId>Io.Nayuki.QrCodeGen</PackageId>
+    <RootNamespace>IO.Nayuki.QrCodeGen</RootNamespace>
+    <PackageId>IO.Nayuki.QrCodeGen</PackageId>
     <Version>1.4.1</Version>
     <Authors>Project Nayuki</Authors>
     <Product>QR Code Generator for .NET</Product>

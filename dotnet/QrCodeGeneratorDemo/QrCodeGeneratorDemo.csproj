@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <RootNamespace>Io.Nayuki.QrCodeGen.Demo</RootNamespace>
-    <PackageId>Io.Nayuki.QrCodeGen.Demo</PackageId>
+    <RootNamespace>IO.Nayuki.QrCodeGen.Demo</RootNamespace>
+    <PackageId>IO.Nayuki.QrCodeGen.Demo</PackageId>
     <Version>1.4.1</Version>
     <Authors>Project Nayuki</Authors>
     <Product>QR Code Generator for .NET</Product>

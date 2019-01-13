@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Io.Nayuki.QrCodeGen
+namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
     /// Thrown when the supplied data does not fit any QR Code version.

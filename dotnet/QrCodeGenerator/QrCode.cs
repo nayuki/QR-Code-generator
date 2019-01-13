@@ -30,7 +30,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
 
-namespace Io.Nayuki.QrCodeGen
+namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
     /// A QR Code symbol, which is a type of two-dimension barcode.

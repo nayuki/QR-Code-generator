@@ -27,9 +27,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using static Io.Nayuki.QrCodeGen.QrSegment;
+using static IO.Nayuki.QrCodeGen.QrSegment;
 
-namespace Io.Nayuki.QrCodeGen
+namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
     /// Splits text into optimal segments and encodes kanji segments.

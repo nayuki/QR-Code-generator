@@ -23,9 +23,9 @@
 
 using System.Drawing.Imaging;
 using Xunit;
-using static Io.Nayuki.QrCodeGen.QrCode;
+using static IO.Nayuki.QrCodeGen.QrCode;
 
-namespace Io.Nayuki.QrCodeGen.Test
+namespace IO.Nayuki.QrCodeGen.Test
 {
     public class PngTest
     {

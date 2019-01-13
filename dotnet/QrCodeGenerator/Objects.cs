@@ -23,7 +23,7 @@
 
 using System;
 
-namespace Io.Nayuki.QrCodeGen
+namespace IO.Nayuki.QrCodeGen
 {
     internal class Objects
     {

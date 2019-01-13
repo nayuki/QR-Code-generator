@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>Io.Nayuki.QrCodeGen.Test</RootNamespace>
+    <RootNamespace>IO.Nayuki.QrCodeGen.Test</RootNamespace>
 
-    <PackageId>Io.Nayuki.QrCodeGen.Test</PackageId>
+    <PackageId>IO.Nayuki.QrCodeGen.Test</PackageId>
 
     <Version>1.4.1</Version>
 

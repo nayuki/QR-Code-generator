@@ -22,7 +22,7 @@
  */
 
 
-namespace Io.Nayuki.QrCodeGen.Test
+namespace IO.Nayuki.QrCodeGen.Test
 {
     internal class TestHelper
     {

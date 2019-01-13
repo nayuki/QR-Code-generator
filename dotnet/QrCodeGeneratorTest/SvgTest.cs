@@ -24,9 +24,9 @@
 using System.IO;
 using System.Text;
 using Xunit;
-using static Io.Nayuki.QrCodeGen.QrCode;
+using static IO.Nayuki.QrCodeGen.QrCode;
 
-namespace Io.Nayuki.QrCodeGen.Test
+namespace IO.Nayuki.QrCodeGen.Test
 {
     public class SvgTest
     {

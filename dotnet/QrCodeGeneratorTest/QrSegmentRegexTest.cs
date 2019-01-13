@@ -23,7 +23,7 @@
 
 using Xunit;
 
-namespace Io.Nayuki.QrCodeGen.Test
+namespace IO.Nayuki.QrCodeGen.Test
 {
     public class QrSegmentRegexTest
     {

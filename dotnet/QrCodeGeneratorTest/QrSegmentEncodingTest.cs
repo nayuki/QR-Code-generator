@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace Io.Nayuki.QrCodeGen.Test
+namespace IO.Nayuki.QrCodeGen.Test
 {
     public class QrSegmentEncodingTest
     {

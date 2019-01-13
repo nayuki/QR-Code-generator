@@ -26,7 +26,7 @@ using System.IO;
 using System.Drawing.Imaging;
 using System.Text;
 
-namespace Io.Nayuki.QrCodeGen.Demo
+namespace IO.Nayuki.QrCodeGen.Demo
 {
     internal class Program
     {

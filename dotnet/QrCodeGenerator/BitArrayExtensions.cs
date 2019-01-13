@@ -24,7 +24,7 @@
 using System;
 using System.Collections;
 
-namespace Io.Nayuki.QrCodeGen
+namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
     /// Provides extension methods for the <see cref="BitArray"/> class.
