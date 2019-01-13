@@ -21,25 +21,25 @@
  *   Software.
  */
 
-using System.Drawing.Imaging;
+using System.IO;
+using System.Text;
 using Xunit;
 using static Io.Nayuki.QrCodeGen.QrCode;
 
 namespace Io.Nayuki.QrCodeGen.Test
 {
-    public class PngTest
+    public class SvgTest
     {
         [Fact]
-        private void PngImage()
+        private void SvgImage()
         {
-            var qrCode = EncodeText("The quick brown fox jumps over the lazy dog", Ecc.High);
-            using (var bitmap = qrCode.ToBitmap(3, 4))
-            {
-                Assert.Equal(135, bitmap.Width);
-                Assert.Equal(135, bitmap.Height);
+            var qrCode = EncodeText("At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.", Ecc.Medium);
+            string svg = qrCode.ToSvgString(0);
 
-                bitmap.Save("qrcode.png", ImageFormat.Png);
-            }
+            Assert.StartsWith("<?xml", svg);
+            Assert.Contains("\"0 0 69 69\"", svg); // view box
+
+            File.WriteAllText("qrcode.svg", svg, Encoding.UTF8);
         }
     }
 }

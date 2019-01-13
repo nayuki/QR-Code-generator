@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Text;
 
 namespace Io.Nayuki.QrCodeGen
 {
@@ -360,10 +361,10 @@ namespace Io.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Returns a raster image depicting this QR Code, with the specified module scale and border modules.
+        /// Returns a bitmap (raster image) depicting this QR Code, with the specified module scale and border modules.
         /// </summary>
         /// <remarks>
-        /// For example, <c>ToImage(scale: 10, border: 4)</c> means to pad the QR Code with 4 white
+        /// For example, <c>ToBitmap(scale: 10, border: 4)</c> means to pad the QR Code with 4 white
         /// border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
         /// The resulting image only contains the hex colors 000000 and FFFFFF.
         /// </remarks>
@@ -372,7 +373,7 @@ namespace Io.Nayuki.QrCodeGen
         /// <returns>a new image representing this QR Code, with padding and scaling</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the scale is 0 or negative, if the border is negative
         /// or if the resulting image is wider than 32,768 pixels</exception>
-        public Bitmap ToImage(int scale, int border)
+        public Bitmap ToBitmap(int scale, int border)
         {
             if (scale <= 0)
             {
@@ -390,7 +391,7 @@ namespace Io.Nayuki.QrCodeGen
                 throw new ArgumentOutOfRangeException(nameof(scale), "Scale or border too large");
             }
 
-            Bitmap bitmap = new Bitmap(dim, dim, PixelFormat.Format24bppRgb);
+            var bitmap = new Bitmap(dim, dim, PixelFormat.Format24bppRgb);
 
             // simple and inefficient
             for (var y = 0; y < dim; y++)
@@ -405,6 +406,49 @@ namespace Io.Nayuki.QrCodeGen
             return bitmap;
         }
 
+
+        /// <summary>
+        /// Returns a string of SVG code for an image depicting this QR Code, with the specified number of border modules.
+        /// </summary>
+        /// <remarks>
+        /// The string always uses Unix newlines (\n), regardless of the platform.
+        /// </remarks>
+        /// <param name="border">the number of border modules to add, which must be non-negative</param>
+        /// <returns>a string representing this QR Code as an SVG XML document</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the border is negative</exception>
+        public string ToSvgString(int border)
+        {
+            if (border < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(border), "Border must be non-negative");
+            }
+
+            int dim = Size + border * 2;
+            var sb = new StringBuilder()
+                .Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+                .Append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n")
+                .Append($"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {dim} {dim}\" stroke=\"none\">\n")
+                .Append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n")
+                .Append("\t<path d=\"");
+
+            for (var y = 0; y < Size; y++)
+            {
+                for (var x = 0; x < Size; x++)
+                {
+                    if (GetModule(x, y))
+                    {
+                        if (x != 0 || y != 0)
+                            sb.Append(" ");
+                        sb.Append($"M{x + border},{y + border}h1v1h-1z");
+                    }
+                }
+            }
+
+            return sb
+                .Append("\" fill=\"#000000\"/>\n")
+                .Append("</svg>\n")
+                .ToString();
+        }
 
         #endregion
 
