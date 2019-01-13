@@ -26,6 +26,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Io.Nayuki.QrCodeGen
 {
@@ -355,6 +357,54 @@ namespace Io.Nayuki.QrCodeGen
         {
             return 0 <= x && x < Size && 0 <= y && y < Size && _modules[y, x];
         }
+
+
+        /// <summary>
+        /// Returns a raster image depicting this QR Code, with the specified module scale and border modules.
+        /// </summary>
+        /// <remarks>
+        /// For example, <c>ToImage(scale: 10, border: 4)</c> means to pad the QR Code with 4 white
+        /// border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
+        /// The resulting image only contains the hex colors 000000 and FFFFFF.
+        /// </remarks>
+        /// <param name="scale">the side length (measured in pixels, must be positive) of each module</param>
+        /// <param name="border">the number of border modules to add, which must be non-negative</param>
+        /// <returns>a new image representing this QR Code, with padding and scaling</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the scale is 0 or negative, if the border is negative
+        /// or if the resulting image is wider than 32,768 pixels</exception>
+        public Bitmap ToImage(int scale, int border)
+        {
+            if (scale <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(scale), "Value out of range");
+            }
+            if (border < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(border), "Value out of range");
+            }
+
+            int dim = (Size + border * 2) * scale;
+
+            if (dim > short.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(scale), "Scale or border too large");
+            }
+
+            Bitmap bitmap = new Bitmap(dim, dim, PixelFormat.Format24bppRgb);
+
+            // simple and inefficient
+            for (var y = 0; y < dim; y++)
+            {
+                for (var x = 0; x < dim; x++)
+                {
+                    bool color = GetModule(x / scale - border, y / scale - border);
+                    bitmap.SetPixel(x, y, color ? Color.Black : Color.White);
+                }
+            }
+
+            return bitmap;
+        }
+
 
         #endregion
 
