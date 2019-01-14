@@ -1,5 +1,5 @@
 ﻿/* 
- * QR Code generator library (.NET)
+ * QR code generator library (.NET)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -25,8 +25,21 @@ using System;
 
 namespace IO.Nayuki.QrCodeGen
 {
+    /// <summary>
+    /// Helper functions to check for valid arguments.
+    /// </summary>
     internal class Objects
     {
+        /// <summary>
+        /// Ensures that the specified argument is <i>not null</i>.
+        /// <para>
+        /// Throws a <see cref="ArgumentNullException"/> exception if the argument is <c>null</c>.
+        /// </para>
+        /// </summary>
+        /// <typeparam name="T">The type of the argument.</typeparam>
+        /// <param name="arg">The argument to check.</param>
+        /// <returns>Argument passed to function.</returns>
+        /// <exception cref="ArgumentNullException">The specified argument is <c>null</c>.</exception>
         internal static T RequireNonNull<T>(T arg)
         {
             if (arg == null)

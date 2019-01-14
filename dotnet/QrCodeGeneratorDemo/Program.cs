@@ -1,5 +1,5 @@
 ﻿/* 
- * QR Code generator library (.NET)
+ * QR code generator library (.NET)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -42,13 +42,13 @@ namespace IO.Nayuki.QrCodeGen.Demo
 
         #region Demo suite
 	    
-	    // Creates a single QR Code, then writes it to a PNG file and an SVG file.
+	    // Creates a single QR code, then writes it to a PNG file and an SVG file.
         private static void DoBasicDemo()
         {
             const string text = "Hello, world!"; // User-supplied Unicode text
             var errCorLvl = QrCode.Ecc.Low; // Error correction level
 
-            var qr = QrCode.EncodeText(text, errCorLvl); // Make the QR Code symbol
+            var qr = QrCode.EncodeText(text, errCorLvl); // Make the QR code symbol
 
             using (var img = qr.ToBitmap(10, 4)) // Convert to bitmap image
             {
@@ -60,7 +60,7 @@ namespace IO.Nayuki.QrCodeGen.Demo
         }
 
 
-        // Creates a variety of QR Codes that exercise different features of the library, and writes each one to file.
+        // Creates a variety of QR codes that exercise different features of the library, and writes each one to file.
 	    private static void DoVarietyDemo() {
             // Numeric mode encoding (3.33 bits per digit)
 		    var qr = QrCode.EncodeText("314159265358979323846264338327950288419716939937510", QrCode.Ecc.Medium);
@@ -74,7 +74,7 @@ namespace IO.Nayuki.QrCodeGen.Demo
 		    qr = QrCode.EncodeText("こんにちwa、世界！ αβγδ", QrCode.Ecc.Quartile);
 		    SaveAsPng(qr, "unicode-QR.png", 10, 3);
 		    
-		    // Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
+		    // Moderately large QR code using longer text (from Lewis Carroll's Alice in Wonderland)
 		    qr = QrCode.EncodeText(
 			    "Alice was beginning to get very tired of sitting by her sister on the bank, "
 			    + "and of having nothing to do: once or twice she had peeped into the book her sister was reading, "
@@ -87,7 +87,7 @@ namespace IO.Nayuki.QrCodeGen.Demo
 	    }
 	    
 	    
-	    // Creates QR Codes with manually specified segments for better compactness.
+	    // Creates QR codes with manually specified segments for better compactness.
         private static void DoSegmentDemo()
         {
             // Illustration "silver"
@@ -133,24 +133,24 @@ namespace IO.Nayuki.QrCodeGen.Demo
 	    }
 	    
 	    
-	    // Creates QR Codes with the same size and contents but different mask patterns.
+	    // Creates QR codes with the same size and contents but different mask patterns.
 	    private static void DoMaskDemo() {
             // Project Nayuki URL
 		    var segs = QrSegment.MakeSegments("https://www.nayuki.io/");
-		    var qr = QrCode.EncodeSegments(segs, QrCode.Ecc.High, QrCode.MinVersion, QrCode.MaxVersion, -1, true);
+		    var qr = QrCode.EncodeSegments(segs, QrCode.Ecc.High);
 		    SaveAsPng(qr, "project-nayuki-automask-QR.png", 8, 6);
-		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.High, QrCode.MinVersion, QrCode.MaxVersion, 3, true);  // Force mask 3
+		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.High, QrCode.MinVersion, QrCode.MaxVersion, 3);  // Force mask 3
 		    SaveAsPng(qr, "project-nayuki-mask3-QR.png", 8, 6);
 		    
 		    // Chinese text as UTF-8
 		    segs = QrSegment.MakeSegments("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫");
-		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 0, true);  // Force mask 0
+		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 0);  // Force mask 0
 		    SaveAsPng(qr, "unicode-mask0-QR.png", 10, 3);
-		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 1, true);  // Force mask 1
+		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 1);  // Force mask 1
 		    SaveAsPng(qr, "unicode-mask1-QR.png", 10, 3);
-		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 5, true);  // Force mask 5
+		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 5);  // Force mask 5
 		    SaveAsPng(qr, "unicode-mask5-QR.png", 10, 3);
-		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 7, true);  // Force mask 7
+		    qr = QrCode.EncodeSegments(segs, QrCode.Ecc.Medium, QrCode.MinVersion, QrCode.MaxVersion, 7);  // Force mask 7
 		    SaveAsPng(qr, "unicode-mask7-QR.png", 10, 3);
 	    }
 

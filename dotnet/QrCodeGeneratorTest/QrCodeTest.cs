@@ -1,5 +1,5 @@
 ﻿/* 
- * QR Code generator library (.NET)
+ * QR code generator library (.NET)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -613,7 +613,7 @@ namespace IO.Nayuki.QrCodeGen.Test
         private void TestCode9()
         {
             var segments = QrSegment.MakeSegments(Text9);
-            var qrCode = EncodeSegments(segments, Ecc.High, 1, 40, -1, true);
+            var qrCode = EncodeSegments(segments, Ecc.High);
             Assert.Same(Ecc.High, qrCode.ErrorCorrectionLevel);
             Assert.Equal(29, qrCode.Size);
             Assert.Equal(1, qrCode.Mask);
@@ -658,7 +658,7 @@ namespace IO.Nayuki.QrCodeGen.Test
         private void TestCode10()
         {
             var segments = QrSegment.MakeSegments(Text10);
-            var qrCode = EncodeSegments(segments, Ecc.High, 1, 40, 3, true);
+            var qrCode = EncodeSegments(segments, Ecc.High, 1, 40, 3);
             Assert.Same(Ecc.High, qrCode.ErrorCorrectionLevel);
             Assert.Equal(29, qrCode.Size);
             Assert.Equal(3, qrCode.Mask);
@@ -723,7 +723,7 @@ namespace IO.Nayuki.QrCodeGen.Test
         private void TestCode11()
         {
             var segments = QrSegment.MakeSegments(Text11);
-            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 0, true);
+            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 0);
             Assert.Same(Ecc.Medium, qrCode.ErrorCorrectionLevel);
             Assert.Equal(49, qrCode.Size);
             Assert.Equal(0, qrCode.Mask);
@@ -788,7 +788,7 @@ namespace IO.Nayuki.QrCodeGen.Test
         private void TestCode12()
         {
             var segments = QrSegment.MakeSegments(Text12);
-            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 1, true);
+            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 1);
             Assert.Same(Ecc.Medium, qrCode.ErrorCorrectionLevel);
             Assert.Equal(49, qrCode.Size);
             Assert.Equal(1, qrCode.Mask);
@@ -853,7 +853,7 @@ namespace IO.Nayuki.QrCodeGen.Test
         private void TestCode13()
         {
             var segments = QrSegment.MakeSegments(Text13);
-            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 5, true);
+            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 5);
             Assert.Same(Ecc.Medium, qrCode.ErrorCorrectionLevel);
             Assert.Equal(49, qrCode.Size);
             Assert.Equal(5, qrCode.Mask);
@@ -918,7 +918,7 @@ namespace IO.Nayuki.QrCodeGen.Test
         private void TestCode14()
         {
             var segments = QrSegment.MakeSegments(Text14);
-            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 7, true);
+            var qrCode = EncodeSegments(segments, Ecc.Medium, 1, 40, 7);
             Assert.Same(Ecc.Medium, qrCode.ErrorCorrectionLevel);
             Assert.Equal(49, qrCode.Size);
             Assert.Equal(7, qrCode.Mask);

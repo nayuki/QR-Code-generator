@@ -1,5 +1,5 @@
 ﻿/* 
- * QR Code generator library (.NET)
+ * QR code generator library (.NET)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -32,11 +32,8 @@ using static IO.Nayuki.QrCodeGen.QrSegment;
 namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
-    /// Splits text into optimal segments and encodes kanji segments.
+    /// Advanced methods for encoding QR codes using Kanji mode or using multiple segments with different encodings.
     /// </summary>
-    /// <remarks>
-    /// Provides static functions only; not instantiable.
-    /// </remarks>
     /// <seealso cref="QrSegment"/>
     /// <seealso cref="QrCode"/>
     public static class QrSegmentAdvanced
@@ -44,26 +41,26 @@ namespace IO.Nayuki.QrCodeGen
         #region Optimal list of segments encoder
 
         /// <summary>
-        /// Returns a list of zero or more segments to represent the specified Unicode text string.
+        /// Creates a list of zero or more segments to represent the specified text string.
         /// The resulting list optimally minimizes the total encoded bit length, subjected to the constraints
-        /// in the specified {error correction level, minimum version number, maximum version number}.
+        /// of the specified error correction level, minimum and maximum version number.
+        /// <para>
+        /// This function potentially uses all four text encoding modes: numeric, alphanumeric, byte (UTF-8),
+        /// and Kanji. It is a more sophisticated but slower replacement for <see cref="MakeSegments"/>.
+        /// </para>
+        /// <para>
+        /// The text to be encoded can contain the full set of Unicode characters (code points).
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// This function can utilize all four text encoding modes: numeric, alphanumeric, byte (UTF-8),
-        /// and kanji. This can be considered as a sophisticated but slower replacement for
-        /// <see cref="MakeSegments"/>. This requires more input parameters because it searches a
-        /// range of versions, like <see cref="QrCode.EncodeSegments(List{QrSegment},QrCode.Ecc)"/>.
-        /// </remarks>
-        /// <param name="text">the text to be encoded (not <c>null</c>), which can be any Unicode string</param>
-        /// <param name="ecl">the error correction level to use (not <c>null</c>)</param>
-        /// <param name="minVersion">the minimum allowed version of the QR Code (at least 1)</param>
-        /// <param name="maxVersion">the maximum allowed version of the QR Code (at most 40)</param>
-        /// <returns>a new mutable list (not <c>null</c>) of segments (not <c>null</c>)
-        /// containing the text, minimizing the bit length with respect to the constraints</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the text or error correction level is <c>null</c></exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated</exception>
-        /// <exception cref="DataTooLongException">Thrown if the text fails to fit in the maxVersion QR Code at the ECL</exception>
-        public static List<QrSegment> MakeSegmentsOptimally(string text, QrCode.Ecc ecl, int minVersion, int maxVersion)
+        /// <param name="text">The text to be encoded.</param>
+        /// <param name="ecl">The error correction level to use.</param>
+        /// <param name="minVersion">The minimum version (size) of the QR code (between 1 and 40).</param>
+        /// <param name="maxVersion">The maximum version (size) of the QR code (between 1 and 40).</param>
+        /// <returns>The created mutable list of segments encoding the specified text with a minimal bit length.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> or <paramref name="ecl"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated.</exception>
+        /// <exception cref="DataTooLongException">The text is too long to fit into the QR code with the given encoding parameters.</exception>
+        public static List<QrSegment> MakeSegmentsOptimally(string text, QrCode.Ecc ecl, int minVersion = QrCode.MinVersion, int maxVersion = QrCode.MaxVersion)
         {
             // Check arguments
             Objects.RequireNonNull(text);
@@ -181,7 +178,7 @@ namespace IO.Nayuki.QrCodeGen
                     {
                         // From mode
                         int newCost = (curCosts[k] + 5) / 6 * 6 + headCosts[j];
-                        if (charModes[i, k] == null || (charModes[i, j] != null && newCost >= curCosts[j]))
+                        if (charModes[i, k] == null || charModes[i, j] != null && newCost >= curCosts[j])
                             continue;
                         curCosts[j] = newCost;
                         charModes[i, j] = modeTypes[k];
@@ -266,7 +263,7 @@ namespace IO.Nayuki.QrCodeGen
         }
 
 
-        public static string FromCodePoints(int[] codepoints, int startIndex, int count)
+        private static string FromCodePoints(int[] codepoints, int startIndex, int count)
         {
             bool useBigEndian = !BitConverter.IsLittleEndian;
             Encoding utf32 = new UTF32Encoding(useBigEndian, false , true);
@@ -321,18 +318,18 @@ namespace IO.Nayuki.QrCodeGen
         #region Kanji mode segment encoder
 
         /// <summary>
-        /// Returns a segment representing the specified text string encoded in kanji mode.
+        /// Creates a segment encoding the specified text in Kanji mode.
+        /// <para>
+        /// Broadly speaking, the set of encodable characters are Kanji used in Japan,
+        /// Hiragana, Katakana, East Asian punctuation, full-width ASCII, Greek, and Cyrillic.
+        /// Examples of non-encodable characters include ordinary ASCII, half-width Katakana,
+        /// more extensive Chinese Hanzi.
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// Broadly speaking, the set of encodable characters are {kanji used in Japan,
-        /// hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.
-        /// Examples of non-encodable characters include {ordinary ASCII, half-width katakana,
-        /// more extensive Chinese hanzi}.
-        /// </remarks>
-        /// <param name="text">the text (not <c>null</c>), with only certain characters allowed</param>
-        /// <returns>a segment (not <c>null</c>) containing the text</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the string is <c>null</c></exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the string contains non-encodable characters</exception>
+        /// <param name="text">The text to encoding, containing only characters allowed by the Kanji encoding.</param>
+        /// <returns>The created segment respresenting the specified text.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="text"/> contains non-encodable characters.</exception>
         /// <seealso cref="IsEncodableAsKanji"/>
         public static QrSegment MakeKanji(string text)
         {
@@ -355,17 +352,17 @@ namespace IO.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Tests whether the specified string can be encoded as a segment in kanji mode.
+        /// Tests whether the specified string can be encoded as a segment in Kanji mode.
+        /// <para>
+        /// Broadly speaking, the set of encodable characters are Kanji used in Japan,
+        /// Hiragana, Katakana, East Asian punctuation, full-width ASCII, Greek, and Cyrillic.
+        /// Examples of non-encodable characters include ordinary ASCII, half-width Katakana,
+        /// more extensive Chinese Hanzi.
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// Broadly speaking, the set of encodable characters are {kanji used in Japan,
-        /// hiragana, katakana, East Asian punctuation, full-width ASCII, Greek, Cyrillic}.
-        /// Examples of non-encodable characters include {ordinary ASCII, half-width katakana,
-        /// more extensive Chinese hanzi}.
-        /// </remarks>
-        /// <param name="text">the string to test for encodability (not <c>null</c>)</param>
-        /// <returns><c>true</c> iff each character is in the kanji mode character set</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the string is <c>null</c></exception>
+        /// <param name="text">The text to test for encodability.</param>
+        /// <returns><c>true</c> iff each character is in the Kanji mode character set.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
 	    public static bool IsEncodableAsKanji(string text) {
 		    Objects.RequireNonNull(text);
             foreach (char t in text)

@@ -1,5 +1,5 @@
 ﻿/* 
- * QR Code generator library (.NET)
+ * QR code generator library (.NET)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -29,11 +29,11 @@ namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
     /// Computes the Reed-Solomon error correction codewords for a sequence of data codewords at a given degree.
+    /// <para>
+    /// Instances are immutable, and the state only depends on the degree.
+    /// This class is useful because all data blocks in a QR code share the same the divisor polynomial.
+    /// </para>
     /// </summary>
-    /// <remarks>
-    /// Objects are immutable, and the state only depends on the degree.
-    /// This class exists because each data block in a QR Code shares the same the divisor polynomial.
-    /// </remarks>
     internal class ReedSolomonGenerator
     {
         #region Fields
@@ -48,11 +48,13 @@ namespace IO.Nayuki.QrCodeGen
         #region Constructors
 
         /// <summary>
-        /// Constructs a Reed-Solomon ECC generator for the specified degree. This could be implemented
-        /// as a lookup table over all possible parameter values, instead of as an algorithm.
+        /// Initializes a new Reed-Solomon ECC generator for the specified degree. 
         /// </summary>
-        /// <param name="degree">the divisor polynomial degree, which must be between 1 and 255 (inclusive)</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if degree &lt; 1 or degree > 255</exception>
+        /// <remarks>
+        /// This could be implemented as a lookup table over all possible parameter values, instead of as an algorithm.
+        /// </remarks>
+        /// <param name="degree">The divisor polynomial degree (between 1 and 255).</param>
+        /// <exception cref="ArgumentOutOfRangeException"><c>degree</c> &lt; 1 or <c>degree</c> &gt; 255</exception>
         internal ReedSolomonGenerator(int degree)
         {
             if (degree < 1 || degree > 255)
@@ -89,16 +91,15 @@ namespace IO.Nayuki.QrCodeGen
         #region Methods
 
         /// <summary>
-        /// Computes and returns the Reed-Solomon error correction codewords for the specified
+        /// Computes the Reed-Solomon error correction codewords for the specified
         /// sequence of data codewords.
+        /// <para>
+        /// This method does not alter this object's state (as it is immutable).
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// The returned object is always a new byte array.
-        /// This method does not alter this object's state (because it is immutable).
-        /// </remarks>
-        /// <param name="data">the sequence of data codewords</param>
-        /// <returns>the Reed-Solomon error correction codewords</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the data is <c>null</c></exception>
+        /// <param name="data">The sequence of data codewords.</param>
+        /// <returns>The Reed-Solomon error correction codewords, as a byte array.</returns>
+        /// <exception cref="ArgumentNullException">If <c>data</c> is <c>null</c>.</exception>
         internal byte[] GetRemainder(byte[] data)
         {
             Objects.RequireNonNull(data);
@@ -127,7 +128,7 @@ namespace IO.Nayuki.QrCodeGen
         // are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
         private static byte Multiply(uint x, uint y)
         {
-            Debug.Assert((x >> 8) == 0 && (y >> 8) == 0);
+            Debug.Assert(x >> 8 == 0 && y >> 8 == 0);
             // Russian peasant multiplication
             uint z = 0;
             for (int i = 7; i >= 0; i--)
@@ -135,7 +136,7 @@ namespace IO.Nayuki.QrCodeGen
                 z = (z << 1) ^ ((z >> 7) * 0x11D);
                 z ^= ((y >> i) & 1) * x;
             }
-            Debug.Assert((z >> 8) == 0);
+            Debug.Assert(z >> 8 == 0);
             return (byte)z;
         }
 

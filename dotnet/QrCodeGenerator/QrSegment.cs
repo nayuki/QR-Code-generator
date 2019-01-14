@@ -1,5 +1,5 @@
 ﻿/* 
- * QR Code generator library (.NET)
+ * QR code generator library (.NET)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -31,35 +31,45 @@ using System.Text.RegularExpressions;
 namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
-    /// A segment of character/binary/control data in a QR Code symbol.
+    /// Represents a segment of character/binary/control data in a QR code symbol.
     /// </summary>
     /// <remarks>
-    /// <para>Instances of this class are immutable.</para>
-    /// <para>The mid-level way to create a segment is to take the payload data and call a
-    /// static factory function such as <see cref="MakeNumeric(string)"/>. The low-level
-    /// way to create a segment is to custom-make the bit buffer and call the
-    /// <see cref="QrSegment(Mode, int, BitArray)"/> with appropriate values.</para>
-    /// <para>This segment class imposes no length restrictions, but QR Codes have restrictions.
-    /// Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
-    /// Any segment longer than this is meaningless for the purpose of generating QR Codes.
+    /// <para>
+    /// The easiest way to deal with QR code segments is to call
+    /// <see cref="QrCode.EncodeText"/> or <see cref="QrCode.EncodeBinary"/>, and not
+    /// to use instances of this class directly. The mid-level way is to take the payload
+    /// data and call a static factory function such as <see cref="MakeNumeric(string)"/>.
+    /// The low-level way is to custom-make the bit array and call the
+    /// <see cref="QrSegment(Mode, int, BitArray)"/> constructor with appropriate values.
+    /// </para>
+    /// <para>
+    /// This segment class imposes no length restrictions, but QR codes have restrictions.
+    /// Even in the most favorable conditions, a QR code can only hold 7089 characters of data.
+    /// Any segment longer than this is meaningless for the purpose of generating QR codes.
+    /// </para>
+    /// <para>
     /// This class can represent kanji mode segments, but provides no help in encoding them
-    /// - see <see cref="QrSegmentAdvanced"/> for full kanji support.</para>
+    /// - see <see cref="QrSegmentAdvanced"/> for full kanji support.
+    /// </para>
+    /// <para>
+    /// Instances of this class are immutable.
+    /// </para>
     /// </remarks>
     public class QrSegment
     {
         #region Static factory functions (mid level)
 
         /// <summary>
-        /// Returns a segment representing the specified binary data
+        /// Creates a segment representing the specified binary data
         /// encoded in byte mode. All input byte arrays are acceptable.
-        /// </summary>
-        /// <remarks>
-        /// Any text string can be converted to UTF-8 bytes (<c>Encoding.UTF8.GetBytes(s)</c>)
+        /// <para>
+        /// Any text string can be converted to UTF-8 bytes (using <c>Encoding.UTF8.GetBytes(str)</c>)
         /// and encoded as a byte mode segment.
-        /// </remarks>
-        /// <param name="data">the binary data (not <c>null</c>)</param>
-        /// <returns>a segment (not <c>null</c>) containing the data</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the array is <c>null</c></exception>
+        /// </para>
+        /// </summary>
+        /// <param name="data">The binary data to encode.</param>
+        /// <returns>The created segment containing the specified data.</returns>
+        /// <exception cref="ArgumentNullException"><c>data</c> is <c>null</c>.</exception>
         public static QrSegment MakeBytes(byte[] data)
         {
             Objects.RequireNonNull(data);
@@ -74,12 +84,13 @@ namespace IO.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Returns a segment representing the specified string of decimal digits encoded in numeric mode.
+        /// Creates a segment representing the specified string of decimal digits.
+        /// The segment is encoded in numeric mode.
         /// </summary>
-        /// <param name="digits">the text (not <c>null</c>), with only digits from 0 to 9 allowed</param>
-        /// <returns>a segment (not <c>null</c>) containing the text</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the string is <c>null</c></exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the string contains non-digit characters</exception>
+        /// <param name="digits">The text to encode, consisting of digits from 0 to 9 only.</param>
+        /// <returns>The created segment containing the text.</returns>
+        /// <exception cref="ArgumentNullException"><c>digits</c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><c>digits</c> contains non-digit characters</exception>
         public static QrSegment MakeNumeric(string digits)
         {
             Objects.RequireNonNull(digits);
@@ -101,14 +112,17 @@ namespace IO.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Returns a segment representing the specified text string encoded in alphanumeric mode.
-        /// The characters allowed are: 0 to 9, A to Z(uppercase only), space,
+        /// Creates a segment representing the specified text string.
+        /// The segment is encoded in alphanumeric mode.
+        /// <para>
+        /// Allowed characters are: 0 to 9, A to Z (uppercase only), space,
         /// dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+        /// </para>
         /// </summary>
-        /// <param name="text">the text (not <c>null</c>), with only certain characters allowed</param>
-        /// <returns>a segment (not <c>null</c>) containing the text</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the string is <c>null</c></exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown iif the string contains non-encodable characters</exception>
+        /// <param name="text">The text to encode, consisting of allowed characters only.</param>
+        /// <returns>The created segment containing the text.</returns>
+        /// <exception cref="ArgumentNullException"><c>text</c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><c>text</c> contains non-encodable characters.</exception>
         public static QrSegment MakeAlphanumeric(string text)
         {
             Objects.RequireNonNull(text);
@@ -136,18 +150,26 @@ namespace IO.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Returns a list of zero or more segments to represent the specified Unicode text string.
-        /// The result may use various segment modes and switch modes to optimize the length of the bit stream.
+        /// Creates a list of zero or more segments representing the specified text string.
+        /// <para>
+        /// The text may contain the full range of Unicode characters.
+        /// </para>
+        /// <para>
+        /// The result may multiple segments with various encoding modes in order to minimize the length of the bit stream.
+        /// </para>
         /// </summary>
-        /// <param name="text">the text to be encoded, which can be any Unicode string</param>
-        /// <returns>a new mutable list (not <c>null</c>) of segments (not <c>null</c>) containing the text</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the text is <c>null</c></exception>
+        /// <param name="text">The text to be encoded.</param>
+        /// <returns>The created mutable list of segments representing the specified text.</returns>
+        /// <exception cref="ArgumentNullException"><c>text</c> is <c>null</c>.</exception>
+        /// <remarks>
+        /// The current implementation does not use multiple segments.
+        /// </remarks>
         public static List<QrSegment> MakeSegments(string text)
         {
             Objects.RequireNonNull(text);
 
             // Select the most efficient segment encoding automatically
-            List<QrSegment> result = new List<QrSegment>();
+            var result = new List<QrSegment>();
             if (text == "")
             {
                 // Leave result empty
@@ -170,12 +192,12 @@ namespace IO.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Returns a segment representing an Extended Channel Interpretation
+        /// Creates a segment representing an Extended Channel Interpretation
         /// (ECI) designator with the specified assignment value.
         /// </summary>
-        /// <param name="assignVal">the ECI assignment number (see the AIM ECI specification)</param>
-        /// <returns>a segment (not <c>null</c>) containing the data</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is outside the range [0, 10<sup>6</sup>)</exception>
+        /// <param name="assignVal">The ECI assignment number (see the AIM ECI specification).</param>
+        /// <returns>The created segment containing the data.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><c>assignVal</c>is outside the range [0, 10<sup>6</sup>).</exception>
         public static QrSegment MakeEci(int assignVal)
         {
             BitArray ba = new BitArray(0);
@@ -184,11 +206,11 @@ namespace IO.Nayuki.QrCodeGen
                 throw new ArgumentOutOfRangeException(nameof(assignVal), "ECI assignment value out of range");
             }
 
-            if (assignVal < (1 << 7))
+            if (assignVal < 1 << 7)
             {
                 ba.AppendBits((uint)assignVal, 8);
             }
-            else if (assignVal < (1 << 14))
+            else if (assignVal < 1 << 14)
             {
                 ba.AppendBits(2, 2);
                 ba.AppendBits((uint)assignVal, 14);
@@ -211,16 +233,21 @@ namespace IO.Nayuki.QrCodeGen
 
         #region Instance fields
 
-        /// <summary>
-        /// The mode indicator of this segment. Not <c>null</c>.
-        /// </summary>
+        /// <summary>The encoding mode of this segment.</summary>
+        /// <value>Encoding mode.</value>
         public Mode EncodingMode { get; }
 
         /// <summary>
-        /// The length of this segment's unencoded data. Measured in characters for
-        /// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-        /// Always zero or positive. Not the same as the data's bit length.
+        /// The length of this segment's unencoded data.
+        /// <para>
+        /// Measured in characters for numeric/alphanumeric/kanji mode,
+        /// bytes for byte mode, and 0 for ECI mode.
+        /// </para>
+        /// <para>
+        /// Different from the data's bit length.
+        /// </para>
         /// </summary>
+        /// <value>Length of the segment's unencoded data.</value>
         public int NumChars { get; }
 
         // The data bits of this segment. Not null. Accessed through GetData().
@@ -232,25 +259,27 @@ namespace IO.Nayuki.QrCodeGen
         #region Constructor (low level)
 
         /// <summary>
-        /// Constructs a QR Code segment with the specified attributes and data.
-        /// The character count(numCh) must agree with the mode and the bit buffer length,
-        /// but the constraint isn't checked. The specified bit buffer is cloned and stored.
+        /// Initializes a QR code segment with the specified attributes and data.
+        /// <para>
+        /// The character count <paramref name="numChars"/> must agree with the mode and the bit array length,
+        /// but the constraint isn't checked. The specified bit array is cloned.
+        /// </para>
         /// </summary>
-        /// <param name="md">the mode (not <c>null</c>)</param>
-        /// <param name="numCh">the data length in characters or bytes, which is non-negative</param>
-        /// <param name="data">the data bits (not <c>null</c>)</param>
-        /// <exception cref="ArgumentNullException">Thrown if the mode or data is <c>null</c></exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the character count is negative</exception>
-        public QrSegment(Mode md, int numCh, BitArray data)
+        /// <param name="mode">The segment mode used to encode this segment.</param>
+        /// <param name="numChars">The data length in characters or bytes (depending on the segment mode).</param>
+        /// <param name="data">The data bits.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="mode"/> or <paramref name="data"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="numChars"/> is negative.</exception>
+        public QrSegment(Mode mode, int numChars, BitArray data)
         {
-            EncodingMode = Objects.RequireNonNull(md);
+            EncodingMode = Objects.RequireNonNull(mode);
             Objects.RequireNonNull(data);
-            if (numCh < 0)
+            if (numChars < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(numCh), "Invalid value");
+                throw new ArgumentOutOfRangeException(nameof(numChars), "Invalid value");
             }
 
-            NumChars = numCh;
+            NumChars = numChars;
             _data = (BitArray)data.Clone();  // Make defensive copy
         }
 
@@ -260,9 +289,9 @@ namespace IO.Nayuki.QrCodeGen
         #region Methods
 
         /// <summary>
-        /// Returns the data bits of this segment.
+        /// Returns a copy of this segment's data bits.
         /// </summary>
-        /// <returns>a new copy of the data bits(not<c>null</c>)</returns>
+        /// <returns>A copy of the data bits.</returns>
         public BitArray GetData()
         {
             return (BitArray)_data.Clone();  // Make defensive copy
@@ -280,7 +309,7 @@ namespace IO.Nayuki.QrCodeGen
             {
                 Objects.RequireNonNull(seg);
                 int ccbits = seg.EncodingMode.NumCharCountBits(version);
-                if (seg.NumChars >= (1 << ccbits))
+                if (seg.NumChars >= 1 << ccbits)
                 {
                     return -1;  // The segment's length doesn't fit the field's bit width
                 }
@@ -300,29 +329,35 @@ namespace IO.Nayuki.QrCodeGen
         #region Constants
 
         /// <summary>
-        /// Describes precisely all strings that are encodable in numeric mode.
+        /// Immutable regular expression describing all strings encodable in <i>numeric mode</i>.
+        /// <para>
+        /// A string is encodable iff each character is in the range 0 to 9.
+        /// </para>
         /// </summary>
         /// <remarks>
         /// To test whether a string <c>s</c> is encodable:
         /// <code>
         /// bool ok = NumericRegex.IsMatch(s);
         /// </code> 
-        /// A string is encodable iff each character is in the range 0 to 9.
         /// </remarks>
+        /// <value>Regular exprression describing strings encodable in numeric mode.</value>
         /// <seealso cref="MakeNumeric(string)"/>
         public static readonly Regex NumericRegex = new Regex("^[0-9]*$", RegexOptions.Compiled);
 
         /// <summary>
-        /// Describes precisely all strings that are encodable in alphanumeric mode.
+        /// Immutable regular expression describing all strings that are encodable in <i>alphanumeric mode</i>.
+        /// <para>
+        /// A string is encodable iff each character is in the following set: 0 to 9, A to Z
+        /// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+        /// </para>
         /// </summary>
         /// <remarks>
         /// To test whether a string <c>s</c> is encodable:
         /// <code>
         /// bool ok = AlphanumericRegex.IsMatch(s);
         /// </code> 
-        /// A string is encodable iff each character is in the following set: 0 to 9, A to Z
-        /// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
         /// </remarks>
+        /// <value>Regular exprression describing strings encodable in alphanumeric mode.</value>
         /// <seealso cref="MakeAlphanumeric(string)"/>
         public static readonly Regex AlphanumericRegex = new Regex("^[A-Z0-9 $%*+./:-]*$", RegexOptions.Compiled);
 
@@ -337,34 +372,79 @@ namespace IO.Nayuki.QrCodeGen
         #region Public helper enumeration
 
         /// <summary>
-        /// Describes how a segment's data bits are interpreted.
+        /// Segment encoding mode.
+        /// <para>
+        /// Describes how text or binary data is encoded into bits.
+        /// </para>
         /// </summary>
         public sealed class Mode
         {
+            /// <summary>
+            /// Numeric encoding mode.
+            /// </summary>
+            /// <value>Numeric encoding mode.</value>
             public static readonly Mode Numeric = new Mode(0x1, 10, 12, 14);
 
+            /// <summary>
+            /// Alphanumeric encoding mode.
+            /// </summary>
+            /// <value>Alphanumeric encoding mode.</value>
             public static readonly Mode Alphanumeric = new Mode(0x2, 9, 11, 13);
 
+            /// <summary>
+            /// Byte encoding mode.
+            /// </summary>
+            /// <value>Byte encoding mode.</value>
             public static readonly Mode Byte = new Mode(0x4, 8, 16, 16);
 
+            /// <summary>
+            /// Kanji encoding mode.
+            /// </summary>
+            /// <value>Kanji encoding mode.</value>
             public static readonly Mode Kanji = new Mode(0x8, 8, 10, 12);
 
+            /// <summary>
+            /// ECI encoding mode.
+            /// </summary>
+            /// <value>ECI encoding mode.</value>
             public static readonly Mode Eci = new Mode(0x7, 0, 0, 0);
 
-            // The mode indicator bits, which is a uint4 value (range 0 to 15).
+
+            /// <summary>
+            /// Mode indicator value.
+            /// <para>
+            /// 4 bit value in the QR segment header indicating the encoding mode.
+            /// </para>
+            /// </summary>
+            /// <value>Mode indicator value</value>
             internal uint ModeBits { get; }
 
-            // Number of character count bits for three different version ranges.
+
+            /// <summary>
+            /// Array of character count bit length.
+            /// <para>
+            /// Number of bits for character count in QR segment header.
+            /// The three array values apply to versions 0 to 9, 10 to 26 and 27 to 40
+            /// respectively. All array values are in the range [0, 16].
+            /// </para>
+            /// </summary>
+            /// <value>Array of character count bit length</value>
             internal int[] NumBitsCharCount { get; }
 
-            // Returns the bit width of the character count field for a segment in this mode
-            // in a QR Code at the given version number. The result is in the range [0, 16].
+
+            /// <summary>
+            /// Returns the bith length of the character count in the QR segment header
+            /// for the specified QR code version. The result is in the range [0, 16].
+            /// </summary>
+            /// <param name="ver">the QR code version (between 1 and 40)</param>
+            /// <returns></returns>
             internal int NumCharCountBits(int ver)
             {
                 Debug.Assert(QrCode.MinVersion <= ver && ver <= QrCode.MaxVersion);
                 return NumBitsCharCount[(ver + 7) / 17];
             }
 
+            // private constructor to initializes the constants
             private Mode(uint modeBits, params int[] numBitsCharCount)
             {
                 ModeBits = modeBits;

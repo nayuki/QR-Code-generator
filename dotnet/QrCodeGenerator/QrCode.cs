@@ -1,5 +1,5 @@
 ﻿/* 
- * QR Code generator library (.NET)
+ * QR code generator library (.NET)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
@@ -33,26 +33,35 @@ using System.Text;
 namespace IO.Nayuki.QrCodeGen
 {
     /// <summary>
-    /// A QR Code symbol, which is a type of two-dimension barcode.
+    /// Represents a QR code containing text or binary data.
+    /// <para>
+    /// Instances of this class represent an immutable square grid of black and white pixels
+    /// (called <i>modules</i> by the QR code specification).
+    /// Static factory methods are provided to create QR codes from text or binary data.
+    /// Some of the methods provide detailed control about the encoding parameters such a QR
+    /// code size (called <i>version</i> by the standard), error correction level and mask.
+    /// </para>
+    /// <para>
+    /// QR codes are a type of two-dimensional barcodes, invented by Denso Wave and
+    /// described in the ISO/IEC 18004 standard.
+    /// </para>
+    /// <para>
+    /// This class covers the QR Code Model 2 specification, supporting all versions (sizes)
+    /// from 1 to 40, all 4 error correction levels, and 4 character encoding modes.</para>
     /// </summary>
     /// <remarks>
-    /// <para>Invented by Denso Wave and described in the ISO/IEC 18004 standard.</para>
-    /// <para>araInstances of this class represent an immutable square grid of black and white cells.
-    /// The class provides static factory functions to create a QR Code from text or binary data.
-    /// The class covers the QR Code Model 2 specification, supporting all versions (sizes)
-    /// from 1 to 40, all 4 error correction levels, and 4 character encoding modes.</para>
-    /// <para>Ways to create a QR Code object:</para>
+    /// <para>
+    /// To create a QR code instance:
+    /// </para>
     /// <ul>
     ///   <li>High level: Take the payload data and call <see cref="EncodeText(string, Ecc)"/>
-    ///     or <see cref="EncodeBinary(byte[], Ecc)"/>.</li>
-    ///   <li>Mid level: Custom-make the list of <see cref="QrSegment"/>
-    ///     and call <see cref="EncodeSegments(List{QrSegment}, Ecc)"/> or
-    ///     <see cref="EncodeSegments(List{QrSegment}, Ecc, int, int, int, bool)"/></li>
-    ///   <li>Low level: Custom-make the array of data codeword bytes (including segment headers and
-    ///     final padding, excluding error correction codewords), supply the appropriate version number,
-    ///     and call the <see cref="QrCode(int, Ecc, byte[], int)"/>.</li>
+    ///       or <see cref="EncodeBinary(byte[], Ecc)"/>.</li>
+    ///   <li>Mid level: Custom-make a list of <see cref="QrSegment"/> instances and call
+    ///       <see cref="EncodeSegments"/></li>
+    ///   <li>Low level: Custom-make an array of data codeword bytes (including segment headers and
+    ///       final padding, excluding error correction codewords), supply the appropriate version number,
+    ///       and call the <see cref="QrCode(int, Ecc, byte[], int)"/>.</li>
     /// </ul>
-    /// <para>(Note that all ways require supplying the desired error correction level.)</para>
     /// </remarks>
     /// <seealso cref="QrSegment"/>
     public class QrCode
@@ -60,20 +69,20 @@ namespace IO.Nayuki.QrCodeGen
         #region Static factory functions (high level)
 
         /// <summary>
-        /// Returns a QR Code representing the specified Unicode text string at the specified error correction level.
+        /// Creates a QR code representing the specified text using the specified error correction level.
+        /// <para>
+        /// As a conservative upper bound, this function is guaranteed to succeed for strings with up to 738
+        /// Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
+        /// QR code version (size) is automatically chosen. The resulting ECC level will be higher than the one
+        /// specified if it can be achieved without increasing the size (version).
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
-        /// Unicode code points(not UTF-16 code units) if the low error correction level is used.The smallest possible
-        /// QR Code version is automatically chosen for the output.The ECC level of the result may be higher than the
-        /// ecl argument if it can be done without increasing the version.
-        /// </remarks>
-        /// <param name="text">the text to be encoded (not <c>null</c>), which can be any Unicode string</param>
-        /// <param name="ecl">the error correction level to use (not <c>null</c>) (boostable)</param>
-        /// <returns>a QR Code (not <c>null</c>) representing the text</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the text or error correction level is <c>null</c></exception>
-        /// <exception cref="DataTooLongException">Thrown if the text fails to fit in the
-        /// largest version QR Code at the ECL, which means it is too long</exception>
+        /// <param name="text">The text to be encoded. The full range of Unicode characters may be used.</param>
+        /// <param name="ecl">The minimum error correction level to use.</param>
+        /// <returns>The created QR code instance representing the specified text.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> or <paramref name="ecl"/> is <c>null</c>.</exception>
+        /// <exception cref="DataTooLongException">The text is too long to fit in the largest QR code size (version)
+        /// at the specified error correction level.</exception>
         public static QrCode EncodeText(string text, Ecc ecl)
         {
             Objects.RequireNonNull(text);
@@ -83,19 +92,19 @@ namespace IO.Nayuki.QrCodeGen
         }
 
         /// <summary>
-        /// Returns a QR Code representing the specified binary data at the specified error correction level.
+        /// Creates a QR code representing the specified binary data using the specified error correction level.
+        /// <para>
+        /// This function encodes the data in the binary segment mode. The maximum number of
+        /// bytes allowed is 2953. The smallest possible QR code version is automatically chosen.
+        /// The resulting ECC level will be higher than the one specified if it can be achieved without increasing the size (version).
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// This function always encodes using the binary segment mode, not any text mode. The maximum number of
-        /// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
-        /// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
-        /// </remarks>
-        /// <param name="data">the binary data to encode (not <c>null</c>)</param>
-        /// <param name="ecl">the error correction level to use (not <c>null</c>) (boostable)</param>
-        /// <returns>a QR Code (not <c>null</c>) representing the data</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the data or error correction level is <c>null</c></exception>
-        /// <exception cref="DataTooLongException">Thrown if the data fails to fit in the
-        /// largest version QR Code at the ECL, which means it is too long</exception>
+        /// <param name="data">The binary data to encode.</param>
+        /// <param name="ecl">The minimum error correction level to use.</param>
+        /// <returns>The created QR code representing the specified data.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> or <paramref name="ecl"/> is <c>null</c>.</exception>
+        /// <exception cref="DataTooLongException">The specified data is too long to fit in the largest QR code size (version)
+        /// at the specified error correction level.</exception>
         public static QrCode EncodeBinary(byte[] data, Ecc ecl)
         {
             Objects.RequireNonNull(data);
@@ -110,56 +119,44 @@ namespace IO.Nayuki.QrCodeGen
         #region Static factory functions (mid level)
 
         /// <summary>
-        /// Returns a QR Code representing the specified segments at the specified error correction level.
+        /// Creates a QR code representing the specified segments with the specified encoding parameters.
+        /// <para>
+        /// The smallest possible QR code version (size) is used. The range of versions can be
+        /// restricted by the <paramref name="minVersion"/> and <paramref name="maxVersion"/> parameters.
+        /// </para>
+        /// <para>
+        /// If <paramref name="boostEcl"/> is <c>true</c>, the resulting ECC level will be higher than the
+        /// one specified if it can be achieved without increasing the size (version).
+        /// </para>
+        /// <para>
+        /// The QR code mask is usually automatically chosen. It can be explicitly set with the <paramref name="mask"/>
+        /// parameter by using a value between 0 to 7 (inclusive). -1 is for automatic mode (which may be slow).
+        /// </para>
+        /// <para>
+        /// This function allows the user to create a custom sequence of segments that switches
+        /// between modes (such as alphanumeric and byte) to encode text in less space and gives full control over all
+        /// encoding paramters.
+        /// </para>
         /// </summary>
         /// <remarks>
-        /// <para>The smallest possible QR Code version is automatically chosen for the output. The ECC level
-        /// of the result may be higher than the ecl argument if it can be done without increasing the version. </para>
-        /// <para>This function allows the user to create a custom sequence of segments that switches
-        /// between modes (such as alphanumeric and byte) to encode text in less space.</para>
-        /// <para>This is a mid-level API; the high-level API is <see cref="EncodeText(string, Ecc)"/>
-        /// and <see cref="EncodeBinary(byte[], Ecc)"/></para>
+        /// This is a mid-level API; the high-level APIs are <see cref="EncodeText(string, Ecc)"/>
+        /// and <see cref="EncodeBinary(byte[], Ecc)"/>.
         /// </remarks>
-        /// <param name="segs">the segments to encode</param>
-        /// <param name="ecl">the error correction level to use (not <c>null</c>) (boostable)</param>
-        /// <returns>a QR Code (not <c>null</c>) representing the segments</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the data or error correction level is <c>null</c></exception>
-        /// <exception cref="DataTooLongException">Thrown if the segments fail to fit in the
-        /// largest version QR Code at the ECL, which means it is too long</exception>
-        public static QrCode EncodeSegments(List<QrSegment> segs, Ecc ecl)
+        /// <param name="segments">The segments to encode.</param>
+        /// <param name="ecl">The minimal or fixed error correction level to use .</param>
+        /// <param name="minVersion">The minimum version (size) of the QR code (between 1 and 40).</param>
+        /// <param name="maxVersion">The maximum version (size) of the QR code (between 1 and 40).</param>
+        /// <param name="mask">The mask number to use (between 0 and 7), or -1 for automatic mask selection.</param>
+        /// <param name="boostEcl">If <c>true</c> the ECC level wil be increased if it can be achieved without increasing the size (version).</param>
+        /// <returns>The created QR code representing the segments.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="segments"/>, any list element, or <paramref name="ecl"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
+        /// or -1 &#x2264; mask &#x2264; 7 is violated.</exception>
+        /// <exception cref="DataTooLongException">The segments are too long to fit in the largest QR code size (version)
+        /// at the specified error correction level.</exception>
+        public static QrCode EncodeSegments(List<QrSegment> segments, Ecc ecl, int minVersion = MinVersion, int maxVersion = MaxVersion, int mask = -1, bool boostEcl = true)
         {
-            return EncodeSegments(segs, ecl, MinVersion, MaxVersion, -1, true);
-        }
-
-        /// <summary>
-        /// Returns a QR Code representing the specified segments with the specified encoding parameters.
-        /// </summary>
-        /// <remarks>
-        /// <para>The smallest possible QR Code version within the specified range is automatically
-        /// chosen for the output. Iff boostEcl is <c>true</c>, then the ECC level of the
-        /// result may be higher than the ecl argument if it can be done without increasing
-        /// the version. The mask number is either between 0 to 7 (inclusive) to force that
-        /// mask, or &#x2212;1 to automatically choose an appropriate mask (which may be slow).</para>
-        /// <para>This function allows the user to create a custom sequence of segments that switches
-        /// between modes (such as alphanumeric and byte) to encode text in less space.
-        /// This is a mid-level API; the high-level API is <see cref="EncodeText(string, Ecc)"/>
-        /// and <see cref="EncodeBinary(byte[], Ecc)"/>.</para>
-        /// </remarks>
-        /// <param name="segs">the segments to encode</param>
-        /// <param name="ecl">the error correction level to use (not <c>null</c>) (boostable)</param>
-        /// <param name="minVersion">the minimum allowed version of the QR Code (at least 1)</param>
-        /// <param name="maxVersion">the maximum allowed version of the QR Code (at most 40)</param>
-        /// <param name="mask">the mask number to use (between 0 and 7 (inclusive)), or &#x2212;1 for automatic mask</param>
-        /// <param name="boostEcl">increases the ECC level as long as it doesn't increase the version number</param>
-        /// <returns>a QR Code (not <c>null</c>) representing the segments</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the list of segments, any segment, or the error correction level is <c>null</c></exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40
-        /// or &#x2212;1 &#x2264; mask &#x2264; 7 is violated</exception>
-        /// <exception cref="DataTooLongException">Thrown DataTooLongException if the segments fail to fit in
-        /// the maxVersion QR Code at the ECL, which means they are too long</exception>
-        public static QrCode EncodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, bool boostEcl)
-        {
-            Objects.RequireNonNull(segs);
+            Objects.RequireNonNull(segments);
             Objects.RequireNonNull(ecl);
             if (minVersion < MinVersion || minVersion > maxVersion)
             {
@@ -179,7 +176,7 @@ namespace IO.Nayuki.QrCodeGen
             for (version = minVersion; ; version++)
             {
                 int numDataBits = GetNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-                dataUsedBits = QrSegment.GetTotalBits(segs, version);
+                dataUsedBits = QrSegment.GetTotalBits(segments, version);
                 if (dataUsedBits != -1 && dataUsedBits <= numDataBits)
                 {
                     break;  // This version number is found to be suitable
@@ -209,7 +206,7 @@ namespace IO.Nayuki.QrCodeGen
 
             // Concatenate all segments to create the data bit string
             BitArray ba = new BitArray(0);
-            foreach (QrSegment seg in segs)
+            foreach (QrSegment seg in segments)
             {
                 ba.AppendBits(seg.EncodingMode.ModeBits, 4);
                 ba.AppendBits((uint)seg.NumChars, seg.EncodingMode.NumCharCountBits(version));
@@ -240,7 +237,7 @@ namespace IO.Nayuki.QrCodeGen
                 }
             }
 
-            // Create the QR Code object
+            // Create the QR code object
             return new QrCode(version, ecl, dataCodewords, mask);
         }
 
@@ -250,28 +247,33 @@ namespace IO.Nayuki.QrCodeGen
         #region Public immutable properties
 
         /// <summary>
-        /// The version number of this QR Code, which is between 1 and 40 (inclusive).
-        /// This determines the size of this barcode.
+        /// The version (size) of this QR code (between 1 for the smallest and 40 for the biggest).
         /// </summary>
+        /// <value>The QR code version (size).</value>
         public int Version { get; }
 
         /// <summary>
-        /// The width and height of this QR Code, measured in modules, between
-        /// 21 and 177 (inclusive). This is equal to version &#xD7; 4 + 17.
+        /// The width and height of this QR code, in modules (pixels).
+        /// The size is a value between 21 and 177.
+        /// This is equal to version &#xD7; 4 + 17.
         /// </summary>
+        /// <value>The QR code size.</value>
         public int Size { get; }
 
         /// <summary>
-        /// The error correction level used in this QR Code, which is not <c>null</c>.
+        /// The error correction level used for this QR code.
         /// </summary>
+        /// <value>The error correction level.</value>
         public Ecc ErrorCorrectionLevel { get; }
 
         /// <summary>
-        /// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
+        /// The index of the mask pattern used fort this QR code (between 0 and 7).
+        /// <para>
+        /// Even if a QR code is created with automatic mask selection (<c>mask</c> = 1),
+        /// this property returns the effective mask used.
+        /// </para>
         /// </summary>
-        /// <remarks>Even if a QR Code is created with automatic masking requested (mask =
-        /// &#x2212;1), the resulting object still has a mask value between 0 and 7.
-        /// </remarks>
+        /// <value>The mask pattern index.</value>
         public int Mask { get; }
 
         #endregion
@@ -279,8 +281,8 @@ namespace IO.Nayuki.QrCodeGen
 
         #region Private grids of modules/pixels, with dimensions of size * size
 
-        // The modules of this QR Code (false = white, true = black).
-        // Immutable after constructor finishes. Accessed through getModule().
+        // The modules of this QR code (false = white, true = black).
+        // Immutable after constructor finishes. Accessed through GetModule().
         private readonly bool[,] _modules;
 
         // Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
@@ -292,26 +294,26 @@ namespace IO.Nayuki.QrCodeGen
         #region  Constructor (low level)
 
         /// <summary>
-        /// Constructs a QR Code with the specified version number,
+        /// Constructs a QR code with the specified version number,
         /// error correction level, data codeword bytes, and mask number.
         /// </summary>
         /// <remarks>
         /// This is a low-level API that most users should not use directly. A mid-level
-        /// API is the <see cref="EncodeSegments(List{QrSegment}, Ecc, int, int, int, bool)"/> function.
+        /// API is the <see cref="EncodeSegments"/> function.
         /// </remarks>
-        /// <param name="ver">the version number to use, which must be in the range 1 to 40 (inclusive)</param>
-        /// <param name="ecl">the error correction level to use</param>
-        /// <param name="dataCodewords">the bytes representing segments to encode (without ECC)</param>
-        /// <param name="mask">the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice</param>
-        /// <exception cref="ArgumentNullException">Thrown if the byte array or error correction level is <c>null</c></exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the version or mask value is out of range,
-        /// or if the data is the wrong length for the specified version and error correction level</exception>
-        public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask)
+        /// <param name="version">The version (size) to use (between 1 to 40).</param>
+        /// <param name="ecl">The error correction level to use.</param>
+        /// <param name="dataCodewords">The bytes representing segments to encode (without ECC).</param>
+        /// <param name="mask">The mask pattern to use (either -1 for automatic selection, or a value from 0 to 7 for fixed choice).</param>
+        /// <exception cref="ArgumentNullException"><paramref name="ecl"/> or <paramref name="dataCodewords"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The version or mask value is out of range,
+        /// or the data has an invalid length for the specified version and error correction level.</exception>
+        public QrCode(int version, Ecc ecl, byte[] dataCodewords, int mask = -1)
         {
             // Check arguments and initialize fields
-            if (ver < MinVersion || ver > MaxVersion)
+            if (version < MinVersion || version > MaxVersion)
             {
-                throw new ArgumentOutOfRangeException(nameof(ver), "Version value out of range");
+                throw new ArgumentOutOfRangeException(nameof(version), "Version value out of range");
             }
 
             if (mask < -1 || mask > 7)
@@ -319,8 +321,8 @@ namespace IO.Nayuki.QrCodeGen
                 throw new ArgumentOutOfRangeException(nameof(mask), "Mask value out of range");
             }
 
-            Version = ver;
-            Size = ver * 4 + 17;
+            Version = version;
+            Size = version * 4 + 17;
             Objects.RequireNonNull(ecl);
             ErrorCorrectionLevel = ecl;
             Objects.RequireNonNull(dataCodewords);
@@ -342,18 +344,19 @@ namespace IO.Nayuki.QrCodeGen
         #region Public methods
 
         /// <summary>
-        /// Returns the color of the module (pixel) at the specified coordinates, which is <c>false</c>
-        /// for white or <c>true</c> for black.
+        /// Gets the color of the module (pixel) at the specified coordinates.
+        /// <para>
+        /// The top left corner has the coordinates (x=0, y=0). <i>x</i>-coordinates extend from left to right,
+        /// <i>y</i>-coordinates extend from top to bottom.
+        /// </para>
+        /// <para>
+        /// If coordinates outside the bounds of this QR code are specified, white (<c>false</c>) is returned.
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// The top left corner has the coordinates (x=0, y=0).
-        /// If the specified coordinates are out of bounds, then <c>false</c>
-        /// (white) is returned.
-        /// </remarks>
-        /// <param name="x">the x coordinate, where 0 is the left edge and size&#x2212;1 is the right edge</param>
-        /// <param name="y">the y coordinate, where 0 is the top edge and size&#x2212;1 is the bottom edge</param>
-        /// <returns><c>true</c> if the coordinates are in bounds and the module
-        /// at that location is black, or <c>false</c> (white) otherwise</returns>
+        /// <param name="x">The x coordinate.</param>
+        /// <param name="y">The y coordinate.</param>
+        /// <returns>The color of the specified module: <c>true</c> for black modules and <c>false</c>
+        /// for white modules (or if the coordinates are outside the bounds).</returns>
         public bool GetModule(int x, int y)
         {
             return 0 <= x && x < Size && 0 <= y && y < Size && _modules[y, x];
@@ -361,18 +364,26 @@ namespace IO.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Returns a bitmap (raster image) depicting this QR Code, with the specified module scale and border modules.
-        /// </summary>
-        /// <remarks>
-        /// For example, <c>ToBitmap(scale: 10, border: 4)</c> means to pad the QR Code with 4 white
+        /// Creates a bitmap (raster image) of this QR code.
+        /// <para>
+        /// The <paramref name="scale"/> parameter specifies the scale of the image, which is
+        /// equivalent to the width and height of each QR code module. Additionally, the number
+        /// of modules to add as a border to all four sides can be specified.
+        /// </para>
+        /// <para>
+        /// For example, <c>ToBitmap(scale: 10, border: 4)</c> means to pad the QR code with 4 white
         /// border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
-        /// The resulting image only contains the hex colors 000000 and FFFFFF.
-        /// </remarks>
-        /// <param name="scale">the side length (measured in pixels, must be positive) of each module</param>
-        /// <param name="border">the number of border modules to add, which must be non-negative</param>
-        /// <returns>a new image representing this QR Code, with padding and scaling</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the scale is 0 or negative, if the border is negative
-        /// or if the resulting image is wider than 32,768 pixels</exception>
+        /// </para>
+        /// <para>
+        /// The resulting bitmap uses the pixel format <see cref="PixelFormat.Format24bppRgb"/> and
+        /// only contains black (0x000000) and white (0xFFFFFF) pixels.
+        /// </para>
+        /// </summary>
+        /// <param name="scale">The width and height, in pixels, of each module.</param>
+        /// <param name="border">The number of border modules to add to each of the four sides.</param>
+        /// <returns>The created bitmap representing this QR code.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="scale"/> is 0 or negative, <paramref name="border"/> is negative
+        /// or the resulting image is wider than 32,768 pixels.</exception>
         public Bitmap ToBitmap(int scale, int border)
         {
             if (scale <= 0)
@@ -408,14 +419,14 @@ namespace IO.Nayuki.QrCodeGen
 
 
         /// <summary>
-        /// Returns a string of SVG code for an image depicting this QR Code, with the specified number of border modules.
+        /// Creates an SVG image of this QR code.
+        /// <para>
+        /// The images uses Unix newlines (\n), regardless of the platform.
+        /// </para>
         /// </summary>
-        /// <remarks>
-        /// The string always uses Unix newlines (\n), regardless of the platform.
-        /// </remarks>
-        /// <param name="border">the number of border modules to add, which must be non-negative</param>
-        /// <returns>a string representing this QR Code as an SVG XML document</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the border is negative</exception>
+        /// <param name="border">The number of border modules to add on all four sides.</param>
+        /// <returns>The created SVG XML document of this QR code as a string.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="border"/> is negative.</exception>
         public string ToSvgString(int border)
         {
             if (border < 0)
@@ -424,23 +435,22 @@ namespace IO.Nayuki.QrCodeGen
             }
 
             int dim = Size + border * 2;
-            var sb = new StringBuilder()
+            StringBuilder sb = new StringBuilder()
                 .Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
                 .Append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n")
                 .Append($"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {dim} {dim}\" stroke=\"none\">\n")
                 .Append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n")
                 .Append("\t<path d=\"");
 
-            for (var y = 0; y < Size; y++)
+            for (int y = 0; y < Size; y++)
             {
-                for (var x = 0; x < Size; x++)
+                for (int x = 0; x < Size; x++)
                 {
-                    if (GetModule(x, y))
-                    {
-                        if (x != 0 || y != 0)
-                            sb.Append(" ");
-                        sb.Append($"M{x + border},{y + border}h1v1h-1z");
-                    }
+                    if (!GetModule(x, y)) continue;
+
+                    if (x != 0 || y != 0)
+                        sb.Append(" ");
+                    sb.Append($"M{x + border},{y + border}h1v1h-1z");
                 }
             }
 
@@ -660,7 +670,7 @@ namespace IO.Nayuki.QrCodeGen
 
 
         // Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
-        // data area of this QR Code. Function modules need to be marked off before this is called.
+        // data area of this QR code. Function modules need to be marked off before this is called.
         private void DrawCodewords(byte[] data)
         {
             Objects.RequireNonNull(data);
@@ -689,10 +699,10 @@ namespace IO.Nayuki.QrCodeGen
                         int y = upward ? Size - 1 - vert : vert;  // Actual y coordinate
                         if (!_isFunction[y, x] && i < data.Length * 8)
                         {
-                            _modules[y, x] = GetBit(data[((uint)i) >> 3], 7 - (i & 7));
+                            _modules[y, x] = GetBit(data[(uint)i >> 3], 7 - (i & 7));
                             i++;
                         }
-                        // If this QR Code has any remainder bits (0 to 7), they were assigned as
+                        // If this QR code has any remainder bits (0 to 7), they were assigned as
                         // 0/false/white by the constructor and are left unchanged by this method
                     }
                 }
@@ -701,11 +711,11 @@ namespace IO.Nayuki.QrCodeGen
         }
 
 
-        // XORs the codeword modules in this QR Code with the given mask pattern.
+        // XORs the codeword modules in this QR code with the given mask pattern.
         // The function modules must be marked and the codeword bits must be drawn
         // before masking. Due to the arithmetic of XOR, calling applyMask() with
         // the same mask value a second time will undo the mask. A final well-formed
-        // QR Code needs exactly one (not zero, two, etc.) mask applied.
+        // QR code needs exactly one (not zero, two, etc.) mask applied.
         private void ApplyMask(uint mask)
         {
             if (mask > 7)
@@ -736,7 +746,7 @@ namespace IO.Nayuki.QrCodeGen
         }
 
 
-        // A messy helper function for the constructor. This QR Code must be in an unmasked state when this
+        // A messy helper function for the constructor. This QR code must be in an unmasked state when this
         // method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
         // This method applies and returns the actual mask chosen, from 0 to 7.
         private int HandleConstructorMasking(int mask)
@@ -765,7 +775,7 @@ namespace IO.Nayuki.QrCodeGen
         }
 
 
-        // Calculates and returns the penalty score based on state of this QR Code's current modules.
+        // Calculates and returns the penalty score based on state of this QR code's current modules.
         // This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
         private int GetPenaltyScore()
         {
@@ -932,7 +942,7 @@ namespace IO.Nayuki.QrCodeGen
             }
         }
 
-        // Returns the number of data bits that can be stored in a QR Code of the given version number, after
+        // Returns the number of data bits that can be stored in a QR code of the given version number, after
         // all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
         // The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
         private static int GetNumRawDataModules(int ver)
@@ -943,28 +953,28 @@ namespace IO.Nayuki.QrCodeGen
             }
 
             int size = ver * 4 + 17;
-            int result = size * size;   // Number of modules in the whole QR Code square
+            int result = size * size;   // Number of modules in the whole QR code square
             result -= 8 * 8 * 3;        // Subtract the three finders with separators
             result -= 15 * 2 + 1;       // Subtract the format information and black module
             result -= (size - 16) * 2;  // Subtract the timing patterns (excluding finders)
                                         // The five lines above are equivalent to: int result = (16 * ver + 128) * ver + 64;
-            if (ver >= 2)
+
+            if (ver < 2) return result;
+
+            int numAlign = ver / 7 + 2;
+            result -= (numAlign - 1) * (numAlign - 1) * 25;  // Subtract alignment patterns not overlapping with timing patterns
+            result -= (numAlign - 2) * 2 * 20;  // Subtract alignment patterns that overlap with timing patterns
+            // The two lines above are equivalent to: result -= (25 * numAlign - 10) * numAlign - 55;
+            if (ver >= 7)
             {
-                int numAlign = ver / 7 + 2;
-                result -= (numAlign - 1) * (numAlign - 1) * 25;  // Subtract alignment patterns not overlapping with timing patterns
-                result -= (numAlign - 2) * 2 * 20;  // Subtract alignment patterns that overlap with timing patterns
-                                                    // The two lines above are equivalent to: result -= (25 * numAlign - 10) * numAlign - 55;
-                if (ver >= 7)
-                {
-                    result -= 6 * 3 * 2;  // Subtract version information
-                }
+                result -= 6 * 3 * 2;  // Subtract version information
             }
             return result;
         }
 
 
         // Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
-        // QR Code of the given version number and error correction level, with remainder bits discarded.
+        // QR code of the given version number and error correction level, with remainder bits discarded.
         // This stateless pure function could be implemented as a (40*4)-cell lookup table.
         internal static int GetNumDataCodewords(int ver, Ecc ecl)
         {
@@ -1022,21 +1032,23 @@ namespace IO.Nayuki.QrCodeGen
         #region Constants and tables
 
         /// <summary>
-        /// The minimum version number  (1) supported in the QR Code Model 2 standard.
+        /// The minimum version (size) supported in the QR Code Model 2 standard – namely 1.
         /// </summary>
-        public static readonly int MinVersion = 1;
+        /// <value>The minimum version.</value>
+        public const int MinVersion = 1;
 
         /// <summary>
-        /// The maximum version number (40) supported in the QR Code Model 2 standard.
+        /// The maximum version (size) supported in the QR Code Model 2 standard – namely 40.
         /// </summary>
-        public static readonly int MaxVersion = 40;
+        /// <value>The maximum version.</value>
+        public const int MaxVersion = 40;
 
 
         // For use in getPenaltyScore(), when evaluating which mask is best.
-        private static readonly int PenaltyN1 = 3;
-        private static readonly int PenaltyN2 = 3;
-        private static readonly int PenaltyN3 = 40;
-        private static readonly int PenaltyN4 = 10;
+        private const int PenaltyN1 = 3;
+        private const int PenaltyN2 = 3;
+        private const int PenaltyN3 = 40;
+        private const int PenaltyN4 = 10;
 
 
         private static readonly byte[,] EccCodewordsPerBlock = {
@@ -1063,28 +1075,32 @@ namespace IO.Nayuki.QrCodeGen
         #region Public helper enumeration
 
         /// <summary>
-        /// The error correction level in a QR Code symbol.
+        /// Error correction level in QR code symbol.
         /// </summary>
         public sealed class Ecc
         {
             /// <summary>
-            /// The QR Code can tolerate about 7% erroneous codewords.
+            /// Low error correction level. The QR code can tolerate about 7% erroneous codewords.
             /// </summary>
+            /// <value>Low error correction level.</value>
             public static readonly Ecc Low = new Ecc(0, 1);
 
             /// <summary>
-            /// The QR Code can tolerate about 15% erroneous codewords.
+            /// Medium error correction level. The QR code can tolerate about 15% erroneous codewords.
             /// </summary>
+            /// <value>Medium error correction level.</value>
             public static readonly Ecc Medium = new Ecc(1, 0);
 
             /// <summary>
-            /// The QR Code can tolerate about 25% erroneous codewords.
+            /// Quartile error correction level. The QR code can tolerate about 25% erroneous codewords.
             /// </summary>
+            /// <value>Quartile error correction level.</value>
             public static readonly Ecc Quartile = new Ecc(2, 3);
 
             /// <summary>
-            /// The QR Code can tolerate about 30% erroneous codewords.
+            /// High error correction level. The QR code can tolerate about 30% erroneous codewords.
             /// </summary>
+            /// <value>High error correction level.</value>
             public static readonly Ecc High = new Ecc(3, 2);
 
 
@@ -1096,6 +1112,7 @@ namespace IO.Nayuki.QrCodeGen
             /// <remarks>
             /// Higher number represent a higher amount of error tolerance.
             /// </remarks>
+            /// <value>Ordinal number.</value>
             public int Ordinal { get; }
 
             // In the range 0 to 3 (unsigned 2-bit integer).
