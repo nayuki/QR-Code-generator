@@ -216,8 +216,8 @@ bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
  * The smallest possible QR Code version within the given range is automatically
  * chosen for the output. Iff boostEcl is true, then the ECC level of the result
  * may be higher than the ecl argument if it can be done without increasing the
- * version. The mask number is either between 0 to 7 (inclusive) to force that
- * mask, or -1 to automatically choose an appropriate mask (which may be slow).
+ * version. The mask is either between qrcodegen_Mask_0 to 7 to force that mask, or
+ * qrcodegen_Mask_AUTO to automatically choose an appropriate mask (which may be slow).
  * This function allows the user to create a custom sequence of segments that switches
  * between modes (such as alphanumeric and byte) to encode text in less space.
  * This is a low-level API; the high-level API is qrcodegen_encodeText() and qrcodegen_encodeBinary().
@@ -226,7 +226,7 @@ bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
  * But the qrcode array must not overlap tempBuffer or any segment's data buffer.
  */
 bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], size_t len, enum qrcodegen_Ecc ecl,
-	int minVersion, int maxVersion, int mask, bool boostEcl, uint8_t tempBuffer[], uint8_t qrcode[]);
+	int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl, uint8_t tempBuffer[], uint8_t qrcode[]);
 
 
 /* 
