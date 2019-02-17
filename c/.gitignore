@@ -1,0 +1,7 @@
+*.a
+*.o
+*.d
+.deps/
+qrcodegen-demo
+qrcodegen-test
+qrcodegen-worker
