@@ -114,7 +114,7 @@ namespace qrcodegen {
 			}
 			
 			// Concatenate all segments to create the data bit string
-			let bb = new BitBuffer();
+			let bb = BitBuffer.create();
 			for (const seg of segs) {
 				bb.appendBits(seg.mode.modeBits, 4);
 				bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
@@ -717,7 +717,7 @@ namespace qrcodegen {
 		// byte mode. All input byte arrays are acceptable. Any text string
 		// can be converted to UTF-8 bytes and encoded as a byte mode segment.
 		public static makeBytes(data: Array<byte>): QrSegment {
-			let bb = new BitBuffer();
+			let bb = BitBuffer.create();
 			for (const b of data)
 				bb.appendBits(b, 8);
 			return new QrSegment(QrSegment.Mode.BYTE, data.length, bb);
@@ -728,7 +728,7 @@ namespace qrcodegen {
 		public static makeNumeric(digits: string): QrSegment {
 			if (!this.NUMERIC_REGEX.test(digits))
 				throw "String contains non-numeric characters";
-			let bb = new BitBuffer();
+			let bb = BitBuffer.create();
 			for (let i = 0; i < digits.length; ) {  // Consume up to 3 digits per iteration
 				const n: int = Math.min(digits.length - i, 3);
 				bb.appendBits(parseInt(digits.substr(i, n), 10), n * 3 + 1);
@@ -744,7 +744,7 @@ namespace qrcodegen {
 		public static makeAlphanumeric(text: string): QrSegment {
 			if (!this.ALPHANUMERIC_REGEX.test(text))
 				throw "String contains unencodable characters in alphanumeric mode";
-			let bb = new BitBuffer();
+			let bb = BitBuffer.create();
 			let i: int;
 			for (i = 0; i + 2 <= text.length; i += 2) {  // Process groups of 2
 				let temp: int = QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
@@ -775,7 +775,7 @@ namespace qrcodegen {
 		// Returns a segment representing an Extended Channel Interpretation
 		// (ECI) designator with the given assignment value.
 		public static makeEci(assignVal: int): QrSegment {
-			let bb = new BitBuffer();
+			let bb = BitBuffer.create();
 			if (assignVal < 0)
 				throw "ECI assignment value out of range";
 			else if (assignVal < (1 << 7))
@@ -957,7 +957,11 @@ namespace qrcodegen {
 	 * The implicit constructor creates an empty bit buffer (length 0).
 	 */
 	class BitBuffer extends Array<bit> {
-		
+
+		private constructor(items?: Array<bit>) {
+			super(...items);
+		}
+
 		// Appends the given number of low-order bits of the given value
 		// to this buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 		public appendBits(val: int, len: int): void {
@@ -966,7 +970,10 @@ namespace qrcodegen {
 			for (let i = len - 1; i >= 0; i--)  // Append bit by bit
 				this.push((val >>> i) & 1);
 		}
-		
+
+		public static create(): BitBuffer {
+			return Object.create(BitBuffer.prototype);
+		}
 	}
 	
 }
