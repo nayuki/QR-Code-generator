@@ -9,3 +9,8 @@ readme = "Readme.markdown"
 keywords = ["qr-code", "barcode", "encoder", "image"]
 categories = ["encoding", "multimedia::images"]
 license = "MIT"
+
+[features]
+default = ["std"]
+std = []
+alloc = [] # required for nightly compiler before 1.36.0

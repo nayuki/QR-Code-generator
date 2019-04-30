@@ -79,7 +79,22 @@
 //!     }
 //! }
 //! ```
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "alloc", feature(alloc))]
 
+#![cfg(not(feature = "std"))]
+#[macro_use] extern crate alloc;
+
+#[cfg(not(feature = "std"))]
+use alloc::{string::String, vec::Vec};
+
+#[cfg(not(feature = "std"))]
+mod std {
+    pub use core::i32;
+    pub use core::cmp;
+    pub use core::fmt;
+    pub use alloc::collections;
+}
 
 /*---- QrCode functionality ----*/
 
@@ -1274,6 +1289,7 @@ impl BitBuffer {
 #[derive(Debug, Clone)]
 pub struct DataTooLong(String);
 
+#[cfg(feature = "std")]
 impl std::error::Error for DataTooLong {
 	fn description(&self) -> &str {
 		&self.0
