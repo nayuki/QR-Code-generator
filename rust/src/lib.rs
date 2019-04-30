@@ -801,9 +801,11 @@ impl QrCode {
 /*---- Cconstants and tables ----*/
 
 /// The minimum version number supported in the QR Code Model 2 standard.
+#[allow(non_upper_case_globals)]
 pub const QrCode_MIN_VERSION: Version = Version( 1);
 
 /// The maximum version number supported in the QR Code Model 2 standard.
+#[allow(non_upper_case_globals)]
 pub const QrCode_MAX_VERSION: Version = Version(40);
 
 
