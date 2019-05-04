@@ -834,6 +834,20 @@ pub enum QrCodeEcc {
 	High    ,
 }
 
+impl std::fmt::Display for QrCodeEcc {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+			match self {
+                QrCodeEcc::High => "High",
+        		QrCodeEcc::Low => "Low",
+                QrCodeEcc::Quartile => "Quartile",
+                QrCodeEcc::Medium => "Medium",
+            }
+        )
+    }
+}
 
 impl QrCodeEcc {
 	
@@ -1203,6 +1217,21 @@ pub enum QrSegmentMode {
 	Eci,
 }
 
+impl std::fmt::Display for QrSegmentMode {
+	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+			match self {
+				QrSegmentMode::Alphanumeric => "Alphanumeric",
+				QrSegmentMode::Byte => "Byte",
+				QrSegmentMode::Eci => "Eci",
+				QrSegmentMode::Kanji => "Kanji",
+				QrSegmentMode::Numeric => "Numeric",
+            }
+        )
+    }
+}
 
 impl QrSegmentMode {
 	
