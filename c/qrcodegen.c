@@ -211,7 +211,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	// Find the minimal version number to use
 	int version, dataUsedBits;
 	int i, j;
-    size_t k;
+    	size_t k;
 	uint8_t padByte;	
 	for (version = minVersion; ; version++) {
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
