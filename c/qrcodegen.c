@@ -129,6 +129,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 		enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl) {
 	
 	size_t textLen = strlen(text);
+	size_t i;
 	if (textLen == 0)
 		return qrcodegen_encodeSegmentsAdvanced(NULL, 0, ecl, minVersion, maxVersion, mask, boostEcl, tempBuffer, qrcode);
 	size_t bufLen = qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion);
@@ -145,7 +146,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 	} else {
 		if (textLen > bufLen)
 			goto fail;
-		for (size_t i = 0; i < textLen; i++)
+		for (i = 0; i < textLen; i++)
 			tempBuffer[i] = (uint8_t)text[i];
 		seg.mode = qrcodegen_Mode_BYTE;
 		seg.bitLength = calcSegmentBitLength(seg.mode, textLen);
@@ -183,7 +184,8 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 // bit buffer, increasing the bit length. Requires 0 <= numBits <= 16 and val < 2^numBits.
 testable void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bitLen) {
 	assert(0 <= numBits && numBits <= 16 && (unsigned long)val >> numBits == 0);
-	for (int i = numBits - 1; i >= 0; i--, (*bitLen)++)
+	int i;
+	for (i = numBits - 1; i >= 0; i--, (*bitLen)++)
 		buffer[*bitLen >> 3] |= ((val >> i) & 1) << (7 - (*bitLen & 7));
 }
 
@@ -208,6 +210,9 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	
 	// Find the minimal version number to use
 	int version, dataUsedBits;
+	int i, j;
+    size_t k;
+	uint8_t padByte;	
 	for (version = minVersion; ; version++) {
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
 		dataUsedBits = getTotalBits(segs, len, version);
@@ -221,7 +226,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	assert(dataUsedBits != -1);
 	
 	// Increase the error correction level while the data still fits in the current version number
-	for (int i = (int)qrcodegen_Ecc_MEDIUM; i <= (int)qrcodegen_Ecc_HIGH; i++) {  // From low to high
+	for (i = (int)qrcodegen_Ecc_MEDIUM; i <= (int)qrcodegen_Ecc_HIGH; i++) {  // From low to high
 		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, (enum qrcodegen_Ecc)i) * 8)
 			ecl = (enum qrcodegen_Ecc)i;
 	}
@@ -229,11 +234,11 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	// Concatenate all segments to create the data bit string
 	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
-	for (size_t i = 0; i < len; i++) {
-		const struct qrcodegen_Segment *seg = &segs[i];
+	for (k = 0; k < len; k++) {
+		const struct qrcodegen_Segment *seg = &segs[k];
 		appendBitsToBuffer((int)seg->mode, 4, qrcode, &bitLen);
 		appendBitsToBuffer(seg->numChars, numCharCountBits(seg->mode, version), qrcode, &bitLen);
-		for (int j = 0; j < seg->bitLength; j++)
+		for (j = 0; j < seg->bitLength; j++)
 			appendBitsToBuffer((seg->data[j >> 3] >> (7 - (j & 7))) & 1, 1, qrcode, &bitLen);
 	}
 	assert(bitLen == dataUsedBits);
@@ -249,7 +254,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	assert(bitLen % 8 == 0);
 	
 	// Pad with alternating bytes until data capacity is reached
-	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+	for (padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
 	
 	// Draw function and data codeword modules
@@ -262,7 +267,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	// Handle masking
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
-		for (int i = 0; i < 8; i++) {
+		for (i = 0; i < 8; i++) {
 			enum qrcodegen_Mask msk = (enum qrcodegen_Mask)i;
 			applyMask(tempBuffer, qrcode, msk);
 			drawFormatBits(ecl, msk, qrcode);
@@ -297,22 +302,22 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	int dataLen = getNumDataCodewords(version, ecl);
 	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 	int shortBlockDataLen = rawCodewords / numBlocks - blockEccLen;
-	
+	int i, j, k;
 	// Split data into blocks, calculate ECC, and interleave
 	// (not concatenate) the bytes into a single sequence
 	uint8_t generator[qrcodegen_REED_SOLOMON_DEGREE_MAX];
 	calcReedSolomonGenerator(blockEccLen, generator);
 	const uint8_t *dat = data;
-	for (int i = 0; i < numBlocks; i++) {
+	for (i = 0; i < numBlocks; i++) {
 		int datLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
 		uint8_t *ecc = &data[dataLen];  // Temporary storage
 		calcReedSolomonRemainder(dat, datLen, generator, blockEccLen, ecc);
-		for (int j = 0, k = i; j < datLen; j++, k += numBlocks) {  // Copy data
+		for (j = 0, k = i; j < datLen; j++, k += numBlocks) {  // Copy data
 			if (j == shortBlockDataLen)
 				k -= numShortBlocks;
 			result[k] = dat[j];
 		}
-		for (int j = 0, k = dataLen + i; j < blockEccLen; j++, k += numBlocks)  // Copy ECC
+		for (j = 0, k = dataLen + i; j < blockEccLen; j++, k += numBlocks)  // Copy ECC
 			result[k] = ecc[j];
 		dat += datLen;
 	}
@@ -353,16 +358,16 @@ testable int getNumRawDataModules(int ver) {
 testable void calcReedSolomonGenerator(int degree, uint8_t result[]) {
 	// Start with the monomial x^0
 	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
+	int i, j;
 	memset(result, 0, degree * sizeof(result[0]));
 	result[degree - 1] = 1;
-	
 	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
 	// drop the highest term, and store the rest of the coefficients in order of descending powers.
 	// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
 	uint8_t root = 1;
-	for (int i = 0; i < degree; i++) {
+	for (i = 0; i < degree; i++) {
 		// Multiply the current product by (x - r^i)
-		for (int j = 0; j < degree; j++) {
+		for (j = 0; j < degree; j++) {
 			result[j] = finiteFieldMultiply(result[j], root);
 			if (j + 1 < degree)
 				result[j] ^= result[j + 1];
@@ -379,12 +384,13 @@ testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
 	
 	// Perform polynomial division
 	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
+	int i, j;
 	memset(result, 0, degree * sizeof(result[0]));
-	for (int i = 0; i < dataLen; i++) {
+	for (i = 0; i < dataLen; i++) {
 		uint8_t factor = data[i] ^ result[0];
 		memmove(&result[0], &result[1], (degree - 1) * sizeof(result[0]));
 		result[degree - 1] = 0;
-		for (int j = 0; j < degree; j++)
+		for (j = 0; j < degree; j++)
 			result[j] ^= finiteFieldMultiply(generator[j], factor);
 	}
 }
@@ -397,7 +403,8 @@ testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
 testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
 	// Russian peasant multiplication
 	uint8_t z = 0;
-	for (int i = 7; i >= 0; i--) {
+	int i;
+	for (i = 7; i >= 0; i--) {
 		z = (z << 1) ^ ((z >> 7) * 0x11D);
 		z ^= ((y >> i) & 1) * x;
 	}
@@ -413,6 +420,7 @@ testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
 testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
 	int qrsize = version * 4 + 17;
+	int i, j;
 	memset(qrcode, 0, ((qrsize * qrsize + 7) / 8 + 1) * sizeof(qrcode[0]));
 	qrcode[0] = (uint8_t)qrsize;
 	
@@ -428,8 +436,8 @@ testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Fill numerous alignment patterns
 	uint8_t alignPatPos[7];
 	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
-	for (int i = 0; i < numAlign; i++) {
-		for (int j = 0; j < numAlign; j++) {
+	for (i = 0; i < numAlign; i++) {
+		for (j = 0; j < numAlign; j++) {
 			// Don't draw on the three finder corners
 			if (!((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0)))
 				fillRectangle(alignPatPos[i] - 2, alignPatPos[j] - 2, 5, 5, qrcode);
@@ -450,14 +458,15 @@ testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	// Draw horizontal and vertical timing patterns
 	int qrsize = qrcodegen_getSize(qrcode);
-	for (int i = 7; i < qrsize - 7; i += 2) {
+	int i, j, dy, dx;
+	for (i = 7; i < qrsize - 7; i += 2) {
 		setModule(qrcode, 6, i, false);
 		setModule(qrcode, i, 6, false);
 	}
 	
 	// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
-	for (int dy = -4; dy <= 4; dy++) {
-		for (int dx = -4; dx <= 4; dx++) {
+	for (dy = -4; dy <= 4; dy++) {
+		for (dx = -4; dx <= 4; dx++) {
 			int dist = abs(dx);
 			if (abs(dy) > dist)
 				dist = abs(dy);
@@ -472,12 +481,12 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	// Draw numerous alignment patterns
 	uint8_t alignPatPos[7];
 	int numAlign = getAlignmentPatternPositions(version, alignPatPos);
-	for (int i = 0; i < numAlign; i++) {
-		for (int j = 0; j < numAlign; j++) {
+	for (i = 0; i < numAlign; i++) {
+		for (j = 0; j < numAlign; j++) {
 			if ((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0))
 				continue;  // Don't draw on the three finder corners
-			for (int dy = -1; dy <= 1; dy++) {
-				for (int dx = -1; dx <= 1; dx++)
+			for (dy = -1; dy <= 1; dy++) {
+				for (dx = -1; dx <= 1; dx++)
 					setModule(qrcode, alignPatPos[i] + dx, alignPatPos[j] + dy, dx == 0 && dy == 0);
 			}
 		}
@@ -487,14 +496,14 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 	if (version >= 7) {
 		// Calculate error correction code and pack bits
 		int rem = version;  // version is uint6, in the range [7, 40]
-		for (int i = 0; i < 12; i++)
+		for (i = 0; i < 12; i++)
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
 		long bits = (long)version << 12 | rem;  // uint18
 		assert(bits >> 18 == 0);
 		
 		// Draw two copies
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 3; j++) {
+		for (i = 0; i < 6; i++) {
+			for (j = 0; j < 3; j++) {
 				int k = qrsize - 11 + j;
 				setModule(qrcode, k, i, (bits & 1) != 0);
 				setModule(qrcode, i, k, (bits & 1) != 0);
@@ -514,25 +523,26 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 	static const int table[] = {1, 0, 3, 2};
 	int data = table[(int)ecl] << 3 | (int)mask;  // errCorrLvl is uint2, mask is uint3
 	int rem = data;
-	for (int i = 0; i < 10; i++)
+	int i;
+	for (i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
 	int bits = (data << 10 | rem) ^ 0x5412;  // uint15
 	assert(bits >> 15 == 0);
 	
 	// Draw first copy
-	for (int i = 0; i <= 5; i++)
+	for (i = 0; i <= 5; i++)
 		setModule(qrcode, 8, i, getBit(bits, i));
 	setModule(qrcode, 8, 7, getBit(bits, 6));
 	setModule(qrcode, 8, 8, getBit(bits, 7));
 	setModule(qrcode, 7, 8, getBit(bits, 8));
-	for (int i = 9; i < 15; i++)
+	for (i = 9; i < 15; i++)
 		setModule(qrcode, 14 - i, 8, getBit(bits, i));
 	
 	// Draw second copy
 	int qrsize = qrcodegen_getSize(qrcode);
-	for (int i = 0; i < 8; i++)
+	for (i = 0; i < 8; i++)
 		setModule(qrcode, qrsize - 1 - i, 8, getBit(bits, i));
-	for (int i = 8; i < 15; i++)
+	for (i = 8; i < 15; i++)
 		setModule(qrcode, 8, qrsize - 15 + i, getBit(bits, i));
 	setModule(qrcode, 8, qrsize - 8, true);  // Always black
 }
@@ -543,12 +553,13 @@ static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uin
 // Each position is in the range [0,177), and are used on both the x and y axes.
 // This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
 testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
+	int i, pos;
 	if (version == 1)
 		return 0;
 	int numAlign = version / 7 + 2;
 	int step = (version == 32) ? 26 :
 		(version*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
-	for (int i = numAlign - 1, pos = version * 4 + 10; i >= 1; i--, pos -= step)
+	for (i = numAlign - 1, pos = version * 4 + 10; i >= 1; i--, pos -= step)
 		result[i] = pos;
 	result[0] = 6;
 	return numAlign;
@@ -557,8 +568,9 @@ testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 
 // Sets every pixel in the range [left : left + width] * [top : top + height] to black.
 static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[]) {
-	for (int dy = 0; dy < height; dy++) {
-		for (int dx = 0; dx < width; dx++)
+	int dy, dx;
+	for (dy = 0; dy < height; dy++) {
+		for (dx = 0; dx < width; dx++)
 			setModule(qrcode, left + dx, top + dy, true);
 	}
 }
@@ -572,12 +584,13 @@ static void fillRectangle(int left, int top, int width, int height, uint8_t qrco
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 	int qrsize = qrcodegen_getSize(qrcode);
 	int i = 0;  // Bit index into the data
+	int j, right, vert;
 	// Do the funny zigzag scan
-	for (int right = qrsize - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
+	for (right = qrsize - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
 		if (right == 6)
 			right = 5;
-		for (int vert = 0; vert < qrsize; vert++) {  // Vertical counter
-			for (int j = 0; j < 2; j++) {
+		for (vert = 0; vert < qrsize; vert++) {  // Vertical counter
+			for (j = 0; j < 2; j++) {
 				int x = right - j;  // Actual x coordinate
 				bool upward = ((right + 1) & 2) == 0;
 				int y = upward ? qrsize - 1 - vert : vert;  // Actual y coordinate
@@ -603,8 +616,9 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask) {
 	assert(0 <= (int)mask && (int)mask <= 7);  // Disallows qrcodegen_Mask_AUTO
 	int qrsize = qrcodegen_getSize(qrcode);
-	for (int y = 0; y < qrsize; y++) {
-		for (int x = 0; x < qrsize; x++) {
+	int y, x;
+	for (y = 0; y < qrsize; y++) {
+		for (x = 0; x < qrsize; x++) {
 			if (getModule(functionModules, x, y))
 				continue;
 			bool invert;
@@ -631,13 +645,13 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qr
 static long getPenaltyScore(const uint8_t qrcode[]) {
 	int qrsize = qrcodegen_getSize(qrcode);
 	long result = 0;
-	
+	int y, x;
 	// Adjacent modules in row having same color, and finder-like patterns
-	for (int y = 0; y < qrsize; y++) {
+	for (y = 0; y < qrsize; y++) {
 		unsigned char runHistory[7] = {0};
 		bool color = false;
 		unsigned char runX = 0;
-		for (int x = 0; x < qrsize; x++) {
+		for (x = 0; x < qrsize; x++) {
 			if (getModule(qrcode, x, y) == color) {
 				runX++;
 				if (runX == 5)
@@ -659,11 +673,11 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 			result += PENALTY_N3;
 	}
 	// Adjacent modules in column having same color, and finder-like patterns
-	for (int x = 0; x < qrsize; x++) {
+	for (x = 0; x < qrsize; x++) {
 		unsigned char runHistory[7] = {0};
 		bool color = false;
 		unsigned char runY = 0;
-		for (int y = 0; y < qrsize; y++) {
+		for (y = 0; y < qrsize; y++) {
 			if (getModule(qrcode, x, y) == color) {
 				runY++;
 				if (runY == 5)
@@ -686,8 +700,8 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	}
 	
 	// 2*2 blocks of modules having same color
-	for (int y = 0; y < qrsize - 1; y++) {
-		for (int x = 0; x < qrsize - 1; x++) {
+	for (y = 0; y < qrsize - 1; y++) {
+		for (x = 0; x < qrsize - 1; x++) {
 			bool  color = getModule(qrcode, x, y);
 			if (  color == getModule(qrcode, x + 1, y) &&
 			      color == getModule(qrcode, x, y + 1) &&
@@ -698,8 +712,8 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	
 	// Balance of black and white modules
 	int black = 0;
-	for (int y = 0; y < qrsize; y++) {
-		for (int x = 0; x < qrsize; x++) {
+	for (y = 0; y < qrsize; y++) {
+		for (x = 0; x < qrsize; x++) {
 			if (getModule(qrcode, x, y))
 				black++;
 		}
@@ -975,7 +989,8 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
 testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
 	assert(segs != NULL || len == 0);
 	long result = 0;
-	for (size_t i = 0; i < len; i++) {
+	size_t i;
+	for (i = 0; i < len; i++) {
 		int numChars  = segs[i].numChars;
 		int bitLength = segs[i].bitLength;
 		assert(0 <= numChars  && numChars  <= INT16_MAX);
