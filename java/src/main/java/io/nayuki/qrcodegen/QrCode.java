@@ -596,10 +596,11 @@ public final class QrCode {
 		int result = 0;
 		
 		// Adjacent modules in row having same color, and finder-like patterns
+		FinderPatternDetector det = new FinderPatternDetector();
 		for (int y = 0; y < size; y++) {
-			int[] runHistory = new int[7];
 			boolean color = false;
 			int runX = 0;
+			det.reset();
 			for (int x = 0; x < size; x++) {
 				if (modules[y][x] == color) {
 					runX++;
@@ -608,22 +609,16 @@ public final class QrCode {
 					else if (runX > 5)
 						result++;
 				} else {
-					addRunToHistory(runX, runHistory);
-					if (!color && hasFinderLikePattern(runHistory))
-						result += PENALTY_N3;
 					color = modules[y][x];
 					runX = 1;
 				}
+				result += det.addModuleAndMatch(color) * PENALTY_N3;
 			}
-			addRunToHistory(runX, runHistory);
-			if (color)
-				addRunToHistory(0, runHistory);  // Dummy run of white
-			if (hasFinderLikePattern(runHistory))
-				result += PENALTY_N3;
+			result += det.terminateAndMatch() * PENALTY_N3;
 		}
 		// Adjacent modules in column having same color, and finder-like patterns
 		for (int x = 0; x < size; x++) {
-			int[] runHistory = new int[7];
+			det.reset();
 			boolean color = false;
 			int runY = 0;
 			for (int y = 0; y < size; y++) {
@@ -634,18 +629,12 @@ public final class QrCode {
 					else if (runY > 5)
 						result++;
 				} else {
-					addRunToHistory(runY, runHistory);
-					if (!color && hasFinderLikePattern(runHistory))
-						result += PENALTY_N3;
 					color = modules[y][x];
 					runY = 1;
 				}
+				result += det.addModuleAndMatch(color) * PENALTY_N3;
 			}
-			addRunToHistory(runY, runHistory);
-			if (color)
-				addRunToHistory(0, runHistory);  // Dummy run of white
-			if (hasFinderLikePattern(runHistory))
-				result += PENALTY_N3;
+			result += det.terminateAndMatch() * PENALTY_N3;
 		}
 		
 		// 2*2 blocks of modules having same color
@@ -732,24 +721,6 @@ public final class QrCode {
 		return getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal()][ver]
 			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
-	}
-	
-	
-	// Inserts the given value to the front of the given array, which shifts over the
-	// existing values and deletes the last value. A helper function for getPenaltyScore().
-	private static void addRunToHistory(int run, int[] history) {
-		System.arraycopy(history, 0, history, 1, history.length - 1);
-		history[0] = run;
-	}
-	
-	
-	// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
-	// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
-	// Must only be called immediately after a run of white modules has ended.
-	private static boolean hasFinderLikePattern(int[] runHistory) {
-		int n = runHistory[1];
-		return n > 0 && runHistory[2] == n && runHistory[4] == n && runHistory[5] == n
-			&& runHistory[3] == n * 3 && Math.max(runHistory[0], runHistory[6]) >= n * 4;
 	}
 	
 	
@@ -908,6 +879,120 @@ public final class QrCode {
 			assert z >>> 8 == 0;
 			return z;
 		}
+		
+	}
+	
+	
+	
+	/*---- Private helper class ----*/
+	
+	/**
+	 * Detects finder-like patterns in a line of modules, for the purpose of penalty score calculation.
+	 * A finder-like pattern has alternating black and white modules with run length ratios of 1:1:3:1:1,
+	 * such that the center run is black and this pattern is surrounded by at least a ratio
+	 * of 4:1 white modules on one side and at least 1:1 white modules on the other side.
+	 * The finite line of modules is conceptually padded with an infinite number of white modules on both sides.
+	 * 
+	 * Here are graphic examples of the designed behavior, where '[' means start of line,
+	 * ']' means end of line, '.' means white module, and '#' means black module:
+	 * - [....#.###.#....]  Two matches
+	 * - [#.###.#]          Two matches, because of infinite white border
+	 * - [##..######..##]   Two matches, with a scale of 2
+	 * - [#.###.#.#]        One match, using the infinite white left border
+	 * - [#.#.###.#.#]      Zero matches, due to insufficient white modules surrounding the 1:1:3:1:1 pattern
+	 * - [#.###.##]         Zero matches, because the rightmost black bar is too long
+	 * - [#.###.#.###.#]    Two matches, with the matches overlapping and sharing modules
+	 */
+	private static final class FinderPatternDetector {
+		
+		/*-- Fields --*/
+		
+		// Mutable running state
+		private boolean currentRunColor;  // false = white, true = black
+		private int currentRunLength;     // In modules, always positive
+		// runHistory[0] = length of most recently ended run,
+		// runHistory[1] = length of next older run of opposite color, etc.
+		// This array begins as all zeros. Zero is not a valid run length.
+		private int[] runHistory = new int[7];
+		
+		
+		/*-- Methods --*/
+		
+		/**
+		 * Re-initializes this detector to the start of a row or column.
+		 * This allows reuse of this object and its array, reducing memory allocation.
+		 */
+		public void reset() {
+			currentRunColor = false;
+			currentRunLength = QR_CODE_SIZE_MAX;  // Add white border to initial run
+			Arrays.fill(runHistory, 0);
+		}
+		
+		
+		/**
+		 * Tells this detector that the next module has the specified color, and returns
+		 * the number of finder-like patterns detected due to processing the current module.
+		 * The result is usually 0, but can be 1 or 2 only when transitioning from
+		 * white to black (i.e. {@code currentRunColor == false && color == true}).
+		 * @param color the color of the next module, where {@code true} denotes black and {@code false} is white
+		 * @return either 0, 1, or 2
+		 */
+		public int addModuleAndMatch(boolean color) {
+			if (color == currentRunColor)
+				currentRunLength++;
+			else {
+				addToHistory(currentRunLength);
+				currentRunColor = color;
+				currentRunLength = 1;
+				if (color)  // Transitioning from white to black
+					return countCurrentMatches();
+			}
+			return 0;
+		}
+		
+		
+		/**
+		 * Tells this detector that the line of modules has ended, and
+		 * returns the number of finder-like patterns detected at the end.
+		 * After this, {@link #reset()} must be called before any other methods.
+		 * @return either 0, 1, or 2
+		 */
+		public int terminateAndMatch() {
+			if (currentRunColor) {  // Terminate black run
+				addToHistory(currentRunLength);
+				currentRunLength = 0;
+			}
+			currentRunLength += QR_CODE_SIZE_MAX;  // Add white border to final run
+			addToHistory(currentRunLength);
+			return countCurrentMatches();
+		}
+		
+		
+		// Shifts the array back and puts the given value at the front.
+		private void addToHistory(int run) {
+			System.arraycopy(runHistory, 0, runHistory, 1, runHistory.length - 1);
+			runHistory[0] = run;
+		}
+		
+		
+		// Can only be called immediately after a white run is added.
+		private int countCurrentMatches() {
+			int n = runHistory[1];
+			assert n <= QR_CODE_SIZE_MAX * 3;
+			boolean core = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
+			if (core) {
+				return (runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
+				     + (runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
+			} else
+				return 0;
+		}
+		
+		
+		/*-- Constant --*/
+		
+		// This amount of padding is enough to guarantee at least 4 scaled
+		// white modules at any pattern scale that fits inside any QR Code.
+		private static final int QR_CODE_SIZE_MAX = QrCode.MAX_VERSION * 4 + 17;
 		
 	}
 	
