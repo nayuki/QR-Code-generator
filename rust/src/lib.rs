@@ -642,9 +642,10 @@ impl QrCode {
 		
 		// Adjacent modules in row having same color, and finder-like patterns
 		for y in 0 .. size {
-			let mut runhistory = RunHistory::new();
 			let mut runcolor = false;
 			let mut runx: i32 = 0;
+			let mut runhistory = [0i32; 7];
+			let mut padrun = size;  // Add white border to initial run
 			for x in 0 .. size {
 				if self.module(x, y) == runcolor {
 					runx += 1;
@@ -654,27 +655,23 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
-					runhistory.add_run(runx);
-					if !runcolor && runhistory.has_finder_like_pattern() {
-						result += PENALTY_N3;
+					QrCode::finder_penalty_add_history(runx + padrun, &mut runhistory);
+					padrun = 0;
+					if !runcolor {
+						result += self.finder_penalty_count_patterns(&runhistory) * PENALTY_N3;
 					}
 					runcolor = self.module(x, y);
 					runx = 1;
 				}
 			}
-			runhistory.add_run(runx);
-			if runcolor {
-				runhistory.add_run(0);  // Dummy run of white
-			}
-			if runhistory.has_finder_like_pattern() {
-				result += PENALTY_N3;
-			}
+			result += self.finder_penalty_terminate_and_count(runcolor, runx + padrun, &mut runhistory) * PENALTY_N3;
 		}
 		// Adjacent modules in column having same color, and finder-like patterns
 		for x in 0 .. size {
-			let mut runhistory = RunHistory::new();
 			let mut runcolor = false;
 			let mut runy: i32 = 0;
+			let mut runhistory = [0i32; 7];
+			let mut padrun = size;  // Add white border to initial run
 			for y in 0 .. size {
 				if self.module(x, y) == runcolor {
 					runy += 1;
@@ -684,21 +681,16 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
-					runhistory.add_run(runy);
-					if !runcolor && runhistory.has_finder_like_pattern() {
-						result += PENALTY_N3;
+					QrCode::finder_penalty_add_history(runy + padrun, &mut runhistory);
+					padrun = 0;
+					if !runcolor {
+						result += self.finder_penalty_count_patterns(&runhistory) * PENALTY_N3;
 					}
 					runcolor = self.module(x, y);
 					runy = 1;
 				}
 			}
-			runhistory.add_run(runy);
-			if runcolor {
-				runhistory.add_run(0);  // Dummy run of white
-			}
-			if runhistory.has_finder_like_pattern() {
-				result += PENALTY_N3;
-			}
+			result += self.finder_penalty_terminate_and_count(runcolor, runy + padrun, &mut runhistory) * PENALTY_N3;
 		}
 		
 		// 2*2 blocks of modules having same color
@@ -778,6 +770,38 @@ impl QrCode {
 	// Returns an entry from the given table based on the given values.
 	fn table_get(table: &'static [[i8; 41]; 4], ver: Version, ecl: QrCodeEcc) -> usize {
 		table[ecl.ordinal()][ver.value() as usize] as usize
+	}
+	
+	
+	// Can only be called immediately after a white run is added, and
+	// returns either 0, 1, or 2. A helper function for get_penalty_score().
+	fn finder_penalty_count_patterns(&self, runhistory: &[i32;7]) -> i32 {
+		let n = runhistory[1];
+		assert!(n <= self.size * 3);
+		let core = n > 0 && runhistory[2] == n && runhistory[3] == n * 3 && runhistory[4] == n && runhistory[5] == n;
+		return if core && runhistory[0] >= n * 4 && runhistory[6] >= n { 1 } else { 0 }
+		     + if core && runhistory[6] >= n * 4 && runhistory[0] >= n { 1 } else { 0 };
+	}
+	
+	
+	// Must be called at the end of a line (row or column) of modules. A helper function for get_penalty_score().
+	fn finder_penalty_terminate_and_count(&self, currentruncolor: bool, mut currentrunlength: i32, runhistory: &mut [i32;7]) -> i32 {
+		if currentruncolor {  // Terminate black run
+			QrCode::finder_penalty_add_history(currentrunlength, runhistory);
+			currentrunlength = 0;
+		}
+		currentrunlength += self.size;  // Add white border to final run
+		QrCode::finder_penalty_add_history(currentrunlength, runhistory);
+		self.finder_penalty_count_patterns(runhistory)
+	}
+	
+	
+	// Pushes the given value to the front and drops the last value. A helper function for get_penalty_score().
+	fn finder_penalty_add_history(currentrunlength: i32, runhistory: &mut [i32;7]) {
+		for i in (0 .. runhistory.len()-1).rev() {
+			runhistory[i + 1] = runhistory[i];
+		}
+		runhistory[0] = currentrunlength;
 	}
 	
 }
@@ -931,41 +955,6 @@ impl ReedSolomonGenerator {
 			z ^= ((y >> i) & 1) * x;
 		}
 		z
-	}
-	
-}
-
-
-
-/*---- RunHistory functionality ----*/
-
-struct RunHistory(std::collections::VecDeque<i32>);
-
-
-impl RunHistory {
-	
-	fn new() -> Self {
-		let mut temp = std::collections::VecDeque::<i32>::new();
-		temp.resize(7, 0);
-		RunHistory(temp)
-	}
-	
-	
-	// Inserts the given value to the front of this array, which shifts over the existing
-	// values and deletes the last value. A helper function for get_penalty_score().
-	fn add_run(&mut self, run: i32) {
-		self.0.pop_back();
-		self.0.push_front(run);
-	}
-	
-	
-	// Tests whether this run history has the pattern of ratio 1:1:3:1:1 in the middle, and
-	// surrounded by at least 4 on either or both ends. A helper function for get_penalty_score().
-	// Must only be called immediately after a run of white modules has ended.
-	fn has_finder_like_pattern(&self) -> bool {
-		let n = self.0[1];
-		n > 0 && self.0[2] == n && self.0[4] == n && self.0[5] == n
-			&& self.0[3] == n * 3 && std::cmp::max(self.0[0], self.0[6]) >= n * 4
 	}
 	
 }

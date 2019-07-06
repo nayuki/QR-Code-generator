@@ -512,9 +512,10 @@ namespace qrcodegen {
 			
 			// Adjacent modules in row having same color, and finder-like patterns
 			for (let y = 0; y < this.size; y++) {
-				let runHistory = [0,0,0,0,0,0,0];
 				let runColor = false;
 				let runX = 0;
+				let runHistory = [0,0,0,0,0,0,0];
+				let padRun = this.size;
 				for (let x = 0; x < this.size; x++) {
 					if (this.modules[y][x] == runColor) {
 						runX++;
@@ -523,24 +524,22 @@ namespace qrcodegen {
 						else if (runX > 5)
 							result++;
 					} else {
-						QrCode.addRunToHistory(runX, runHistory);
-						if (!runColor && QrCode.hasFinderLikePattern(runHistory))
-							result += QrCode.PENALTY_N3;
+						QrCode.finderPenaltyAddHistory(runX + padRun, runHistory);
+						padRun = 0;
+						if (!runColor)
+							result += this.finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3;
 						runColor = this.modules[y][x];
 						runX = 1;
 					}
 				}
-				QrCode.addRunToHistory(runX, runHistory);
-				if (runColor)
-					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
-				if (QrCode.hasFinderLikePattern(runHistory))
-					result += QrCode.PENALTY_N3;
+				result += this.finderPenaltyTerminateAndCount(runColor, runX + padRun, runHistory) * QrCode.PENALTY_N3;
 			}
 			// Adjacent modules in column having same color, and finder-like patterns
 			for (let x = 0; x < this.size; x++) {
-				let runHistory = [0,0,0,0,0,0,0];
 				let runColor = false;
 				let runY = 0;
+				let runHistory = [0,0,0,0,0,0,0];
+				let padRun = this.size;
 				for (let y = 0; y < this.size; y++) {
 					if (this.modules[y][x] == runColor) {
 						runY++;
@@ -549,18 +548,15 @@ namespace qrcodegen {
 						else if (runY > 5)
 							result++;
 					} else {
-						QrCode.addRunToHistory(runY, runHistory);
-						if (!runColor && QrCode.hasFinderLikePattern(runHistory))
-							result += QrCode.PENALTY_N3;
+						QrCode.finderPenaltyAddHistory(runY + padRun, runHistory);
+						padRun = 0;
+						if (!runColor)
+							result += this.finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3;
 						runColor = this.modules[y][x];
 						runY = 1;
 					}
 				}
-				QrCode.addRunToHistory(runY, runHistory);
-				if (runColor)
-					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
-				if (QrCode.hasFinderLikePattern(runHistory))
-					result += QrCode.PENALTY_N3;
+				result += this.finderPenaltyTerminateAndCount(runColor, runY + padRun, runHistory) * QrCode.PENALTY_N3;
 			}
 			
 			// 2*2 blocks of modules having same color
@@ -637,21 +633,34 @@ namespace qrcodegen {
 		}
 		
 		
-		// Inserts the given value to the front of the given array, which shifts over the
-		// existing values and deletes the last value. A helper function for getPenaltyScore().
-		private static addRunToHistory(run: int, history: Array<int>): void {
-			history.pop();
-			history.unshift(run);
+		// Can only be called immediately after a white run is added, and
+		// returns either 0, 1, or 2. A helper function for getPenaltyScore().
+		private finderPenaltyCountPatterns(runHistory: Array<int>): int {
+			const n: int = runHistory[1];
+			if (n > this.size * 3)
+				throw "Assertion error";
+			const core: boolean = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
+			return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
+			     + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
 		}
 		
 		
-		// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
-		// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
-		// Must only be called immediately after a run of white modules has ended.
-		private static hasFinderLikePattern(runHistory: Array<int>): boolean {
-			const n: int = runHistory[1];
-			return n > 0 && runHistory[2] == n && runHistory[4] == n && runHistory[5] == n
-				&& runHistory[3] == n * 3 && Math.max(runHistory[0], runHistory[6]) >= n * 4;
+		// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
+		private finderPenaltyTerminateAndCount(currentRunColor: boolean, currentRunLength: int, runHistory: Array<int>): int {
+			if (currentRunColor) {  // Terminate black run
+				QrCode.finderPenaltyAddHistory(currentRunLength, runHistory);
+				currentRunLength = 0;
+			}
+			currentRunLength += this.size;  // Add white border to final run
+			QrCode.finderPenaltyAddHistory(currentRunLength, runHistory);
+			return this.finderPenaltyCountPatterns(runHistory);
+		}
+		
+		
+		// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
+		private static finderPenaltyAddHistory(currentRunLength: int, runHistory: Array<int>): void {
+			runHistory.pop();
+			runHistory.unshift(currentRunLength);
 		}
 		
 		

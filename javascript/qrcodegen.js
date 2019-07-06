@@ -429,9 +429,10 @@ var qrcodegen = new function() {
 			
 			// Adjacent modules in row having same color, and finder-like patterns
 			for (var y = 0; y < size; y++) {
-				var runHistory = [0,0,0,0,0,0,0];
 				var runColor = false;
 				var runX = 0;
+				var runHistory = [0,0,0,0,0,0,0];
+				var padRun = size;
 				for (var x = 0; x < size; x++) {
 					if (modules[y][x] == runColor) {
 						runX++;
@@ -440,24 +441,22 @@ var qrcodegen = new function() {
 						else if (runX > 5)
 							result++;
 					} else {
-						QrCode.addRunToHistory(runX, runHistory);
-						if (!runColor && QrCode.hasFinderLikePattern(runHistory))
-							result += QrCode.PENALTY_N3;
+						QrCode.finderPenaltyAddHistory(runX + padRun, runHistory);
+						padRun = 0;
+						if (!runColor)
+							result += finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3;
 						runColor = modules[y][x];
 						runX = 1;
 					}
 				}
-				QrCode.addRunToHistory(runX, runHistory);
-				if (runColor)
-					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
-				if (QrCode.hasFinderLikePattern(runHistory))
-					result += QrCode.PENALTY_N3;
+				result += finderPenaltyTerminateAndCount(runColor, runX + padRun, runHistory) * QrCode.PENALTY_N3;
 			}
 			// Adjacent modules in column having same color, and finder-like patterns
 			for (var x = 0; x < size; x++) {
-				var runHistory = [0,0,0,0,0,0,0];
 				var runColor = false;
 				var runY = 0;
+				var runHistory = [0,0,0,0,0,0,0];
+				var padRun = size;
 				for (var y = 0; y < size; y++) {
 					if (modules[y][x] == runColor) {
 						runY++;
@@ -466,18 +465,15 @@ var qrcodegen = new function() {
 						else if (runY > 5)
 							result++;
 					} else {
-						QrCode.addRunToHistory(runY, runHistory);
-						if (!runColor && QrCode.hasFinderLikePattern(runHistory))
-							result += QrCode.PENALTY_N3;
+						QrCode.finderPenaltyAddHistory(runY + padRun, runHistory);
+						padRun = 0;
+						if (!runColor)
+							result += finderPenaltyCountPatterns(runHistory) * QrCode.PENALTY_N3;
 						runColor = modules[y][x];
 						runY = 1;
 					}
 				}
-				QrCode.addRunToHistory(runY, runHistory);
-				if (runColor)
-					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
-				if (QrCode.hasFinderLikePattern(runHistory))
-					result += QrCode.PENALTY_N3;
+				result += finderPenaltyTerminateAndCount(runColor, runY + padRun, runHistory) * QrCode.PENALTY_N3;
 			}
 			
 			// 2*2 blocks of modules having same color
@@ -522,6 +518,30 @@ var qrcodegen = new function() {
 					result.splice(1, 0, pos);
 				return result;
 			}
+		}
+		
+		
+		// Can only be called immediately after a white run is added, and
+		// returns either 0, 1, or 2. A helper function for getPenaltyScore().
+		function finderPenaltyCountPatterns(runHistory) {
+			var n = runHistory[1];
+			if (n > size * 3)
+				throw "Assertion error";
+			var core = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
+			return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
+			     + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
+		}
+		
+		
+		// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
+		function finderPenaltyTerminateAndCount(currentRunColor, currentRunLength, runHistory) {
+			if (currentRunColor) {  // Terminate black run
+				QrCode.finderPenaltyAddHistory(currentRunLength, runHistory);
+				currentRunLength = 0;
+			}
+			currentRunLength += size;  // Add white border to final run
+			QrCode.finderPenaltyAddHistory(currentRunLength, runHistory);
+			return finderPenaltyCountPatterns(runHistory);
 		}
 		
 		
@@ -667,11 +687,10 @@ var qrcodegen = new function() {
 	};
 	
 	
-	// Inserts the given value to the front of the given array, which shifts over the
-	// existing values and deletes the last value. A helper function for getPenaltyScore().
-	QrCode.addRunToHistory = function(run, history) {
-		history.pop();
-		history.unshift(run);
+	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
+	QrCode.finderPenaltyAddHistory = function(currentRunLength, runHistory) {
+		runHistory.pop();
+		runHistory.unshift(currentRunLength);
 	};
 	
 	

@@ -464,9 +464,10 @@ class QrCode(object):
 		
 		# Adjacent modules in row having same color, and finder-like patterns
 		for y in range(size):
-			runhistory = collections.deque([0] * 7, 7)
 			runcolor = False
 			runx = 0
+			runhistory = collections.deque([0] * 7, 7)
+			padrun = size  # Add white border to initial run
 			for x in range(size):
 				if modules[y][x] == runcolor:
 					runx += 1
@@ -475,21 +476,19 @@ class QrCode(object):
 					elif runx > 5:
 						result += 1
 				else:
-					runhistory.appendleft(runx)
-					if not runcolor and QrCode.has_finder_like_pattern(runhistory):
-						result += QrCode._PENALTY_N3
+					runhistory.appendleft(runx + padrun)
+					padrun = 0
+					if not runcolor:
+						result += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
 					runcolor = modules[y][x]
 					runx = 1
-			runhistory.appendleft(runx)
-			if runcolor:
-				runhistory.appendleft(0)  # Dummy run of white
-			if QrCode.has_finder_like_pattern(runhistory):
-				result += QrCode._PENALTY_N3
+			result += self._finder_penalty_terminate_and_count(runcolor, runx + padrun, runhistory) * QrCode._PENALTY_N3
 		# Adjacent modules in column having same color, and finder-like patterns
 		for x in range(size):
-			runhistory = collections.deque([0] * 7, 7)
 			runcolor = False
 			runy = 0
+			runhistory = collections.deque([0] * 7, 7)
+			padrun = size  # Add white border to initial run
 			for y in range(size):
 				if modules[y][x] == runcolor:
 					runy += 1
@@ -498,16 +497,13 @@ class QrCode(object):
 					elif runy > 5:
 						result += 1
 				else:
-					runhistory.appendleft(runy)
-					if not runcolor and QrCode.has_finder_like_pattern(runhistory):
-						result += QrCode._PENALTY_N3
+					runhistory.appendleft(runy + padrun)
+					padrun = 0
+					if not runcolor:
+						result += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
 					runcolor = modules[y][x]
 					runy = 1
-			runhistory.appendleft(runy)
-			if runcolor:
-				runhistory.appendleft(0)  # Dummy run of white
-			if QrCode.has_finder_like_pattern(runhistory):
-				result += QrCode._PENALTY_N3
+			result += self._finder_penalty_terminate_and_count(runcolor, runy + padrun, runhistory) * QrCode._PENALTY_N3
 		
 		# 2*2 blocks of modules having same color
 		for y in range(size - 1):
@@ -567,11 +563,24 @@ class QrCode(object):
 			* QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
 	
 	
-	@staticmethod
-	def has_finder_like_pattern(runhistory):
+	# Can only be called immediately after a white run is added, and
+	# returns either 0, 1, or 2. A helper function for _get_penalty_score().
+	def _finder_penalty_count_patterns(self, runhistory):
 		n = runhistory[1]
-		return n > 0 and n == runhistory[2] == runhistory[4] == runhistory[5] \
-			and runhistory[3] == n * 3 and max(runhistory[0], runhistory[6]) >= n * 4
+		assert n <= self._size * 3
+		core = n > 0 and (runhistory[2] == runhistory[4] == runhistory[5] == n) and runhistory[3] == n * 3
+		return (1 if (core and runhistory[0] >= n * 4 and runhistory[6] >= n) else 0) \
+		     + (1 if (core and runhistory[6] >= n * 4 and runhistory[0] >= n) else 0)
+	
+	
+	# Must be called at the end of a line (row or column) of modules. A helper function for _get_penalty_score().
+	def _finder_penalty_terminate_and_count(self, currentruncolor, currentrunlength, runhistory):
+		if currentruncolor:  # Terminate black run
+			runhistory.appendleft(currentrunlength)
+			currentrunlength = 0
+		currentrunlength += self._size  # Add white border to final run
+		runhistory.appendleft(currentrunlength)
+		return self._finder_penalty_count_patterns(runhistory)
 	
 	
 	# ---- Constants and tables ----

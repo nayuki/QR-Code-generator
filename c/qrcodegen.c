@@ -72,8 +72,9 @@ static void fillRectangle(int left, int top, int width, int height, uint8_t qrco
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask);
 static long getPenaltyScore(const uint8_t qrcode[]);
-static void addRunToHistory(unsigned char run, unsigned char history[7]);
-static bool hasFinderLikePattern(const unsigned char runHistory[7]);
+static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize);
+static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, int runHistory[7], int qrsize);
+static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7]);
 
 testable bool getModule(const uint8_t qrcode[], int x, int y);
 testable void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
@@ -634,9 +635,10 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	
 	// Adjacent modules in row having same color, and finder-like patterns
 	for (int y = 0; y < qrsize; y++) {
-		unsigned char runHistory[7] = {0};
 		bool runColor = false;
-		unsigned char runX = 0;
+		int runX = 0;
+		int runHistory[7] = {0};
+		int padRun = qrsize;  // Add white border to initial run
 		for (int x = 0; x < qrsize; x++) {
 			if (getModule(qrcode, x, y) == runColor) {
 				runX++;
@@ -645,24 +647,22 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 				else if (runX > 5)
 					result++;
 			} else {
-				addRunToHistory(runX, runHistory);
-				if (!runColor && hasFinderLikePattern(runHistory))
-					result += PENALTY_N3;
+				finderPenaltyAddHistory(runX + padRun, runHistory);
+				padRun = 0;
+				if (!runColor)
+					result += finderPenaltyCountPatterns(runHistory, qrsize) * PENALTY_N3;
 				runColor = getModule(qrcode, x, y);
 				runX = 1;
 			}
 		}
-		addRunToHistory(runX, runHistory);
-		if (runColor)
-			addRunToHistory(0, runHistory);  // Dummy run of white
-		if (hasFinderLikePattern(runHistory))
-			result += PENALTY_N3;
+		result += finderPenaltyTerminateAndCount(runColor, runX + padRun, runHistory, qrsize) * PENALTY_N3;
 	}
 	// Adjacent modules in column having same color, and finder-like patterns
 	for (int x = 0; x < qrsize; x++) {
-		unsigned char runHistory[7] = {0};
 		bool runColor = false;
-		unsigned char runY = 0;
+		int runY = 0;
+		int runHistory[7] = {0};
+		int padRun = qrsize;  // Add white border to initial run
 		for (int y = 0; y < qrsize; y++) {
 			if (getModule(qrcode, x, y) == runColor) {
 				runY++;
@@ -671,18 +671,15 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 				else if (runY > 5)
 					result++;
 			} else {
-				addRunToHistory(runY, runHistory);
-				if (!runColor && hasFinderLikePattern(runHistory))
-					result += PENALTY_N3;
+				finderPenaltyAddHistory(runY + padRun, runHistory);
+				padRun = 0;
+				if (!runColor)
+					result += finderPenaltyCountPatterns(runHistory, qrsize) * PENALTY_N3;
 				runColor = getModule(qrcode, x, y);
 				runY = 1;
 			}
 		}
-		addRunToHistory(runY, runHistory);
-		if (runColor)
-			addRunToHistory(0, runHistory);  // Dummy run of white
-		if (hasFinderLikePattern(runHistory))
-			result += PENALTY_N3;
+		result += finderPenaltyTerminateAndCount(runColor, runY + padRun, runHistory, qrsize) * PENALTY_N3;
 	}
 	
 	// 2*2 blocks of modules having same color
@@ -712,23 +709,35 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 }
 
 
-// Inserts the given value to the front of the given array, which shifts over the
-// existing values and deletes the last value. A helper function for getPenaltyScore().
-static void addRunToHistory(unsigned char run, unsigned char history[7]) {
-	memmove(&history[1], &history[0], 6 * sizeof(history[0]));
-	history[0] = run;
+// Can only be called immediately after a white run is added, and
+// returns either 0, 1, or 2. A helper function for getPenaltyScore().
+static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize) {
+	int n = runHistory[1];
+	assert(n <= qrsize * 3);
+	bool core = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
+	// The maximum QR Code size is 177, hence the black run length n <= 177.
+	// Arithmetic is promoted to int, so n*4 will not overflow.
+	return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
+	     + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
 }
 
 
-// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
-// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
-// Must only be called immediately after a run of white modules has ended.
-static bool hasFinderLikePattern(const unsigned char runHistory[7]) {
-	unsigned char n = runHistory[1];
-	// The maximum QR Code size is 177, hence the run length n <= 177.
-	// Arithmetic is promoted to int, so n*4 will not overflow.
-	return n > 0 && runHistory[2] == n && runHistory[4] == n && runHistory[5] == n
-		&& runHistory[3] == n * 3 && (runHistory[0] >= n * 4 || runHistory[6] >= n * 4);
+// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
+static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, int runHistory[7], int qrsize) {
+	if (currentRunColor) {  // Terminate black run
+		finderPenaltyAddHistory(currentRunLength, runHistory);
+		currentRunLength = 0;
+	}
+	currentRunLength += qrsize;  // Add white border to final run
+	finderPenaltyAddHistory(currentRunLength, runHistory);
+	return finderPenaltyCountPatterns(runHistory, qrsize);
+}
+
+
+// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
+static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7]) {
+	memmove(&runHistory[1], &runHistory[0], 6 * sizeof(runHistory[0]));
+	runHistory[0] = currentRunLength;
 }
 
 

@@ -23,8 +23,8 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
-#include <deque>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -274,15 +274,17 @@ class QrCode final {
 	private: static int getNumDataCodewords(int ver, Ecc ecl);
 	
 	
-	// Inserts the given value to the front of the given array, which shifts over the
-	// existing values and deletes the last value. A helper function for getPenaltyScore().
-	private: static void addRunToHistory(int run, std::deque<int> &history);
+	// Can only be called immediately after a white run is added, and
+	// returns either 0, 1, or 2. A helper function for getPenaltyScore().
+	private: int finderPenaltyCountPatterns(const std::array<int,7> &runHistory) const;
 	
 	
-	// Tests whether the given run history has the pattern of ratio 1:1:3:1:1 in the middle, and
-	// surrounded by at least 4 on either or both ends. A helper function for getPenaltyScore().
-	// Must only be called immediately after a run of white modules has ended.
-	private: static bool hasFinderLikePattern(const std::deque<int> &runHistory);
+	// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
+	private: int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, std::array<int,7> &runHistory) const;
+	
+	
+	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
+	private: static void finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory);
 	
 	
 	// Returns true iff the i'th bit of x is set to 1.

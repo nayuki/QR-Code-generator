@@ -427,9 +427,10 @@ long QrCode::getPenaltyScore() const {
 	
 	// Adjacent modules in row having same color, and finder-like patterns
 	for (int y = 0; y < size; y++) {
-		std::deque<int> runHistory(7, 0);
 		bool runColor = false;
 		int runX = 0;
+		std::array<int,7> runHistory = {};
+		int padRun = size;  // Add white border to initial run
 		for (int x = 0; x < size; x++) {
 			if (module(x, y) == runColor) {
 				runX++;
@@ -438,24 +439,22 @@ long QrCode::getPenaltyScore() const {
 				else if (runX > 5)
 					result++;
 			} else {
-				addRunToHistory(runX, runHistory);
-				if (!runColor && hasFinderLikePattern(runHistory))
-					result += PENALTY_N3;
+				finderPenaltyAddHistory(runX + padRun, runHistory);
+				padRun = 0;
+				if (!runColor)
+					result += finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
 				runColor = module(x, y);
 				runX = 1;
 			}
 		}
-		addRunToHistory(runX, runHistory);
-		if (runColor)
-			addRunToHistory(0, runHistory);  // Dummy run of white
-		if (hasFinderLikePattern(runHistory))
-			result += PENALTY_N3;
+		result += finderPenaltyTerminateAndCount(runColor, runX + padRun, runHistory) * PENALTY_N3;
 	}
 	// Adjacent modules in column having same color, and finder-like patterns
 	for (int x = 0; x < size; x++) {
-		std::deque<int> runHistory(7, 0);
 		bool runColor = false;
 		int runY = 0;
+		std::array<int,7> runHistory = {};
+		int padRun = size;  // Add white border to initial run
 		for (int y = 0; y < size; y++) {
 			if (module(x, y) == runColor) {
 				runY++;
@@ -464,18 +463,15 @@ long QrCode::getPenaltyScore() const {
 				else if (runY > 5)
 					result++;
 			} else {
-				addRunToHistory(runY, runHistory);
-				if (!runColor && hasFinderLikePattern(runHistory))
-					result += PENALTY_N3;
+				finderPenaltyAddHistory(runY + padRun, runHistory);
+				padRun = 0;
+				if (!runColor)
+					result += finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
 				runColor = module(x, y);
 				runY = 1;
 			}
 		}
-		addRunToHistory(runY, runHistory);
-		if (runColor)
-			addRunToHistory(0, runHistory);  // Dummy run of white
-		if (hasFinderLikePattern(runHistory))
-			result += PENALTY_N3;
+		result += finderPenaltyTerminateAndCount(runColor, runY + padRun, runHistory) * PENALTY_N3;
 	}
 	
 	// 2*2 blocks of modules having same color
@@ -542,16 +538,30 @@ int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 }
 
 
-void QrCode::addRunToHistory(int run, std::deque<int> &history) {
-	history.pop_back();
-	history.push_front(run);
+int QrCode::finderPenaltyCountPatterns(const std::array<int,7> &runHistory) const {
+	int n = runHistory.at(1);
+	if (n > size * 3)
+		throw std::logic_error("Assertion error");
+	bool core = n > 0 && runHistory.at(2) == n && runHistory.at(3) == n * 3 && runHistory.at(4) == n && runHistory.at(5) == n;
+	return (core && runHistory.at(0) >= n * 4 && runHistory.at(6) >= n ? 1 : 0)
+	     + (core && runHistory.at(6) >= n * 4 && runHistory.at(0) >= n ? 1 : 0);
 }
 
 
-bool QrCode::hasFinderLikePattern(const std::deque<int> &runHistory) {
-	int n = runHistory.at(1);
-	return n > 0 && runHistory.at(2) == n && runHistory.at(4) == n && runHistory.at(5) == n
-		&& runHistory.at(3) == n * 3 && std::max(runHistory.at(0), runHistory.at(6)) >= n * 4;
+int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, std::array<int,7> &runHistory) const {
+	if (currentRunColor) {  // Terminate black run
+		finderPenaltyAddHistory(currentRunLength, runHistory);
+		currentRunLength = 0;
+	}
+	currentRunLength += size;  // Add white border to final run
+	finderPenaltyAddHistory(currentRunLength, runHistory);
+	return finderPenaltyCountPatterns(runHistory);
+}
+
+
+void QrCode::finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory) {
+	std::copy_backward(runHistory.cbegin(), runHistory.cend() - 1, runHistory.end());
+	runHistory.at(0) = currentRunLength;
 }
 
 
