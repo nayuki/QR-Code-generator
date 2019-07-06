@@ -465,10 +465,10 @@ class QrCode(object):
 		# Adjacent modules in row having same color, and finder-like patterns
 		for y in range(size):
 			runhistory = collections.deque([0] * 7, 7)
-			color = False
+			runcolor = False
 			runx = 0
 			for x in range(size):
-				if modules[y][x] == color:
+				if modules[y][x] == runcolor:
 					runx += 1
 					if runx == 5:
 						result += QrCode._PENALTY_N1
@@ -476,22 +476,22 @@ class QrCode(object):
 						result += 1
 				else:
 					runhistory.appendleft(runx)
-					if not color and QrCode.has_finder_like_pattern(runhistory):
+					if not runcolor and QrCode.has_finder_like_pattern(runhistory):
 						result += QrCode._PENALTY_N3
-					color = modules[y][x]
+					runcolor = modules[y][x]
 					runx = 1
 			runhistory.appendleft(runx)
-			if color:
+			if runcolor:
 				runhistory.appendleft(0)  # Dummy run of white
 			if QrCode.has_finder_like_pattern(runhistory):
 				result += QrCode._PENALTY_N3
 		# Adjacent modules in column having same color, and finder-like patterns
 		for x in range(size):
 			runhistory = collections.deque([0] * 7, 7)
-			color = False
+			runcolor = False
 			runy = 0
 			for y in range(size):
-				if modules[y][x] == color:
+				if modules[y][x] == runcolor:
 					runy += 1
 					if runy == 5:
 						result += QrCode._PENALTY_N1
@@ -499,12 +499,12 @@ class QrCode(object):
 						result += 1
 				else:
 					runhistory.appendleft(runy)
-					if not color and QrCode.has_finder_like_pattern(runhistory):
+					if not runcolor and QrCode.has_finder_like_pattern(runhistory):
 						result += QrCode._PENALTY_N3
-					color = modules[y][x]
+					runcolor = modules[y][x]
 					runy = 1
 			runhistory.appendleft(runy)
-			if color:
+			if runcolor:
 				runhistory.appendleft(0)  # Dummy run of white
 			if QrCode.has_finder_like_pattern(runhistory):
 				result += QrCode._PENALTY_N3

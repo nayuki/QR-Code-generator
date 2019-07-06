@@ -598,41 +598,41 @@ public final class QrCode {
 		// Adjacent modules in row having same color, and finder-like patterns
 		FinderPatternDetector det = new FinderPatternDetector();
 		for (int y = 0; y < size; y++) {
-			boolean color = false;
+			boolean runClor = false;
 			int runX = 0;
 			det.reset();
 			for (int x = 0; x < size; x++) {
-				if (modules[y][x] == color) {
+				if (modules[y][x] == runClor) {
 					runX++;
 					if (runX == 5)
 						result += PENALTY_N1;
 					else if (runX > 5)
 						result++;
 				} else {
-					color = modules[y][x];
+					runClor = modules[y][x];
 					runX = 1;
 				}
-				result += det.addModuleAndMatch(color) * PENALTY_N3;
+				result += det.addModuleAndMatch(runClor) * PENALTY_N3;
 			}
 			result += det.terminateAndMatch() * PENALTY_N3;
 		}
 		// Adjacent modules in column having same color, and finder-like patterns
 		for (int x = 0; x < size; x++) {
 			det.reset();
-			boolean color = false;
+			boolean runColor = false;
 			int runY = 0;
 			for (int y = 0; y < size; y++) {
-				if (modules[y][x] == color) {
+				if (modules[y][x] == runColor) {
 					runY++;
 					if (runY == 5)
 						result += PENALTY_N1;
 					else if (runY > 5)
 						result++;
 				} else {
-					color = modules[y][x];
+					runColor = modules[y][x];
 					runY = 1;
 				}
-				result += det.addModuleAndMatch(color) * PENALTY_N3;
+				result += det.addModuleAndMatch(runColor) * PENALTY_N3;
 			}
 			result += det.terminateAndMatch() * PENALTY_N3;
 		}

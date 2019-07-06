@@ -643,10 +643,10 @@ impl QrCode {
 		// Adjacent modules in row having same color, and finder-like patterns
 		for y in 0 .. size {
 			let mut runhistory = RunHistory::new();
-			let mut color = false;
+			let mut runcolor = false;
 			let mut runx: i32 = 0;
 			for x in 0 .. size {
-				if self.module(x, y) == color {
+				if self.module(x, y) == runcolor {
 					runx += 1;
 					if runx == 5 {
 						result += PENALTY_N1;
@@ -655,15 +655,15 @@ impl QrCode {
 					}
 				} else {
 					runhistory.add_run(runx);
-					if !color && runhistory.has_finder_like_pattern() {
+					if !runcolor && runhistory.has_finder_like_pattern() {
 						result += PENALTY_N3;
 					}
-					color = self.module(x, y);
+					runcolor = self.module(x, y);
 					runx = 1;
 				}
 			}
 			runhistory.add_run(runx);
-			if color {
+			if runcolor {
 				runhistory.add_run(0);  // Dummy run of white
 			}
 			if runhistory.has_finder_like_pattern() {
@@ -673,10 +673,10 @@ impl QrCode {
 		// Adjacent modules in column having same color, and finder-like patterns
 		for x in 0 .. size {
 			let mut runhistory = RunHistory::new();
-			let mut color = false;
+			let mut runcolor = false;
 			let mut runy: i32 = 0;
 			for y in 0 .. size {
-				if self.module(x, y) == color {
+				if self.module(x, y) == runcolor {
 					runy += 1;
 					if runy == 5 {
 						result += PENALTY_N1;
@@ -685,15 +685,15 @@ impl QrCode {
 					}
 				} else {
 					runhistory.add_run(runy);
-					if !color && runhistory.has_finder_like_pattern() {
+					if !runcolor && runhistory.has_finder_like_pattern() {
 						result += PENALTY_N3;
 					}
-					color = self.module(x, y);
+					runcolor = self.module(x, y);
 					runy = 1;
 				}
 			}
 			runhistory.add_run(runy);
-			if color {
+			if runcolor {
 				runhistory.add_run(0);  // Dummy run of white
 			}
 			if runhistory.has_finder_like_pattern() {

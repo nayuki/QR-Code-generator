@@ -513,10 +513,10 @@ namespace qrcodegen {
 			// Adjacent modules in row having same color, and finder-like patterns
 			for (let y = 0; y < this.size; y++) {
 				let runHistory = [0,0,0,0,0,0,0];
-				let color = false;
+				let runColor = false;
 				let runX = 0;
 				for (let x = 0; x < this.size; x++) {
-					if (this.modules[y][x] == color) {
+					if (this.modules[y][x] == runColor) {
 						runX++;
 						if (runX == 5)
 							result += QrCode.PENALTY_N1;
@@ -524,14 +524,14 @@ namespace qrcodegen {
 							result++;
 					} else {
 						QrCode.addRunToHistory(runX, runHistory);
-						if (!color && QrCode.hasFinderLikePattern(runHistory))
+						if (!runColor && QrCode.hasFinderLikePattern(runHistory))
 							result += QrCode.PENALTY_N3;
-						color = this.modules[y][x];
+						runColor = this.modules[y][x];
 						runX = 1;
 					}
 				}
 				QrCode.addRunToHistory(runX, runHistory);
-				if (color)
+				if (runColor)
 					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
 				if (QrCode.hasFinderLikePattern(runHistory))
 					result += QrCode.PENALTY_N3;
@@ -539,10 +539,10 @@ namespace qrcodegen {
 			// Adjacent modules in column having same color, and finder-like patterns
 			for (let x = 0; x < this.size; x++) {
 				let runHistory = [0,0,0,0,0,0,0];
-				let color = false;
+				let runColor = false;
 				let runY = 0;
 				for (let y = 0; y < this.size; y++) {
-					if (this.modules[y][x] == color) {
+					if (this.modules[y][x] == runColor) {
 						runY++;
 						if (runY == 5)
 							result += QrCode.PENALTY_N1;
@@ -550,14 +550,14 @@ namespace qrcodegen {
 							result++;
 					} else {
 						QrCode.addRunToHistory(runY, runHistory);
-						if (!color && QrCode.hasFinderLikePattern(runHistory))
+						if (!runColor && QrCode.hasFinderLikePattern(runHistory))
 							result += QrCode.PENALTY_N3;
-						color = this.modules[y][x];
+						runColor = this.modules[y][x];
 						runY = 1;
 					}
 				}
 				QrCode.addRunToHistory(runY, runHistory);
-				if (color)
+				if (runColor)
 					QrCode.addRunToHistory(0, runHistory);  // Dummy run of white
 				if (QrCode.hasFinderLikePattern(runHistory))
 					result += QrCode.PENALTY_N3;
