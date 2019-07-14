@@ -570,7 +570,7 @@ class QrCode(object):
 		if degree < 1 or degree > 255:
 			raise ValueError("Degree out of range")
 		# Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
-		# For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
+		# For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array [255, 8, 93].
 		result = [0] * (degree - 1) + [1]  # Start off with the monomial x^0
 		
 		# Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),

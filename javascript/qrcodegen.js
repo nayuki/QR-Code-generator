@@ -693,7 +693,7 @@ var qrcodegen = new function() {
 		if (degree < 1 || degree > 255)
 			throw "Degree out of range";
 		// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
-		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
+		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array [255, 8, 93].
 		var result = [];
 		for (var i = 0; i < degree - 1; i++)
 			result.push(0);

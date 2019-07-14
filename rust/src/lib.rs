@@ -778,7 +778,7 @@ impl QrCode {
 	fn reed_solomon_compute_divisor(degree: usize) -> Vec<u8> {
 		assert!(1 <= degree && degree <= 255, "Degree out of range");
 		// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
-		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
+		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array [255, 8, 93].
 		let mut result = vec![0u8; degree - 1];
 		result.push(1);  // Start off with the monomial x^0
 		
