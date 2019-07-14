@@ -567,7 +567,7 @@ class QrCode(object):
 	def _reed_solomon_compute_divisor(degree):
 		"""Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
 		implemented as a lookup table over all possible parameter values, instead of as an algorithm."""
-		if degree < 1 or degree > 255:
+		if not (1 <= degree <= 255):
 			raise ValueError("Degree out of range")
 		# Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
 		# For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array [255, 8, 93].

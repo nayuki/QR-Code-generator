@@ -569,8 +569,8 @@ vector<uint8_t> QrCode::reedSolomonComputeRemainder(const vector<uint8_t> &data,
 		uint8_t factor = b ^ result.at(0);
 		result.erase(result.begin());
 		result.push_back(0);
-		for (size_t j = 0; j < result.size(); j++)
-			result.at(j) ^= reedSolomonMultiply(divisor.at(j), factor);
+		for (size_t i = 0; i < result.size(); i++)
+			result.at(i) ^= reedSolomonMultiply(divisor.at(i), factor);
 	}
 	return result;
 }
