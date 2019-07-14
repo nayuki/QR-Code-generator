@@ -614,9 +614,9 @@ class QrCode(object):
 		return z
 	
 	
-	# Can only be called immediately after a white run is added, and
-	# returns either 0, 1, or 2. A helper function for _get_penalty_score().
 	def _finder_penalty_count_patterns(self, runhistory):
+		"""Can only be called immediately after a white run is added, and
+		returns either 0, 1, or 2. A helper function for _get_penalty_score()."""
 		n = runhistory[1]
 		assert n <= self._size * 3
 		core = n > 0 and (runhistory[2] == runhistory[4] == runhistory[5] == n) and runhistory[3] == n * 3
@@ -624,8 +624,8 @@ class QrCode(object):
 		     + (1 if (core and runhistory[6] >= n * 4 and runhistory[0] >= n) else 0)
 	
 	
-	# Must be called at the end of a line (row or column) of modules. A helper function for _get_penalty_score().
 	def _finder_penalty_terminate_and_count(self, currentruncolor, currentrunlength, runhistory):
+		"""Must be called at the end of a line (row or column) of modules. A helper function for _get_penalty_score()."""
 		if currentruncolor:  # Terminate black run
 			runhistory.appendleft(currentrunlength)
 			currentrunlength = 0
