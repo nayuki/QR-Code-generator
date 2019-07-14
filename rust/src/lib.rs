@@ -550,12 +550,12 @@ impl QrCode {
 		
 		// Split data into blocks and append ECC to each block
 		let mut blocks = Vec::<Vec<u8>>::with_capacity(numblocks);
-		let rs = ReedSolomonGenerator::new(blockecclen);
+		let rsdiv: Vec<u8> = QrCode::reed_solomon_compute_divisor(blockecclen);
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
 			let mut dat = data[k .. k + shortblocklen - blockecclen + ((i >= numshortblocks) as usize)].to_vec();
 			k += dat.len();
-			let ecc: Vec<u8> = rs.get_remainder(&dat);
+			let ecc: Vec<u8> = QrCode::reed_solomon_compute_remainder(&dat, &rsdiv);
 			if i < numshortblocks {
 				dat.push(0);
 			}
@@ -773,6 +773,60 @@ impl QrCode {
 	}
 	
 	
+	// Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
+	// implemented as a lookup table over all possible parameter values, instead of as an algorithm.
+	fn reed_solomon_compute_divisor(degree: usize) -> Vec<u8> {
+		assert!(1 <= degree && degree <= 255, "Degree out of range");
+		// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
+		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
+		let mut result = vec![0u8; degree - 1];
+		result.push(1);  // Start off with the monomial x^0
+		
+		// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
+		// and drop the highest monomial term which is always 1x^degree.
+		// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
+		let mut root: u8 = 1;
+		for _ in 0 .. degree {  // Unused variable i
+			// Multiply the current product by (x - r^i)
+			for j in 0 .. degree {
+				result[j] = QrCode::reed_solomon_multiply(result[j], root);
+				if j + 1 < result.len() {
+					result[j] ^= result[j + 1];
+				}
+			}
+			root = QrCode::reed_solomon_multiply(root, 0x02);
+		}
+		result
+	}
+	
+	
+	// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
+	fn reed_solomon_compute_remainder(data: &[u8], divisor: &[u8]) -> Vec<u8> {
+		let mut result = vec![0u8; divisor.len()];
+		for b in data {  // Polynomial division
+			let factor: u8 = b ^ result.remove(0);
+			result.push(0);
+			for (x, y) in result.iter_mut().zip(divisor.iter()) {
+				*x ^= QrCode::reed_solomon_multiply(*y, factor);
+			}
+		}
+		result
+	}
+	
+	
+	// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
+	// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
+	fn reed_solomon_multiply(x: u8, y: u8) -> u8 {
+		// Russian peasant multiplication
+		let mut z: u8 = 0;
+		for i in (0 .. 8).rev() {
+			z = (z << 1) ^ ((z >> 7) * 0x1D);
+			z ^= ((y >> i) & 1) * x;
+		}
+		z
+	}
+	
+	
 	// Can only be called immediately after a white run is added, and
 	// returns either 0, 1, or 2. A helper function for get_penalty_score().
 	fn finder_penalty_count_patterns(&self, runhistory: &[i32;7]) -> i32 {
@@ -882,79 +936,6 @@ impl QrCodeEcc {
 			Quartile => 3,
 			High     => 2,
 		}
-	}
-	
-}
-
-
-
-/*---- ReedSolomonGenerator functionality ----*/
-
-// Computes the Reed-Solomon error correction codewords for a sequence of data codewords
-// at a given degree. Objects are immutable, and the state only depends on the degree.
-// This struct and impl exist because each data block in a QR Code shares the same the divisor polynomial.
-struct ReedSolomonGenerator {
-	
-	// Coefficients of the divisor polynomial, stored from highest to lowest power, excluding the leading term which
-	// is always 1. For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
-	coefficients: Vec<u8>,
-	
-}
-
-
-impl ReedSolomonGenerator {
-	
-	// Creates a Reed-Solomon ECC generator for the given degree. This could be implemented
-	// as a lookup table over all possible parameter values, instead of as an algorithm.
-	fn new(degree: usize) -> Self {
-		assert!(1 <= degree && degree <= 255, "Degree out of range");
-		// Start with the monomial x^0
-		let mut coefs = vec![0u8; degree - 1];
-		coefs.push(1);
-		
-		// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
-		// drop the highest term, and store the rest of the coefficients in order of descending powers.
-		// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
-		let mut root: u8 = 1;
-		for _ in 0 .. degree {  // Unused variable i
-			// Multiply the current product by (x - r^i)
-			for j in 0 .. degree {
-				coefs[j] = ReedSolomonGenerator::multiply(coefs[j], root);
-				if j + 1 < coefs.len() {
-					coefs[j] ^= coefs[j + 1];
-				}
-			}
-			root = ReedSolomonGenerator::multiply(root, 0x02);
-		}
-		Self { coefficients: coefs }
-	}
-	
-	
-	// Computes and returns the Reed-Solomon error correction codewords for the given sequence of data codewords.
-	fn get_remainder(&self, data: &[u8]) -> Vec<u8> {
-		// Compute the remainder by performing polynomial division
-		let mut result = vec![0u8; self.coefficients.len()];
-		for b in data {
-			let factor: u8 = b ^ result.remove(0);
-			result.push(0);
-			for (x, y) in result.iter_mut().zip(self.coefficients.iter()) {
-				*x ^= ReedSolomonGenerator::multiply(*y, factor);
-			}
-		}
-		result
-	}
-	
-	
-	// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
-	// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
-	fn multiply(x: u8, y: u8) -> u8 {
-		// Russian peasant multiplication
-		let mut z: u8 = 0;
-		for i in (0 .. 8).rev() {
-			z = (z << 1) ^ ((z >> 7) * 0x1D);
-			z ^= ((y >> i) & 1) * x;
-		}
-		z
 	}
 	
 }

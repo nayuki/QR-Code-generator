@@ -274,6 +274,20 @@ class QrCode final {
 	private: static int getNumDataCodewords(int ver, Ecc ecl);
 	
 	
+	// Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
+	// implemented as a lookup table over all possible parameter values, instead of as an algorithm.
+	private: static std::vector<std::uint8_t> reedSolomonComputeDivisor(int degree);
+	
+	
+	// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
+	private: static std::vector<std::uint8_t> reedSolomonComputeRemainder(const std::vector<std::uint8_t> &data, const std::vector<std::uint8_t> &divisor);
+	
+	
+	// Returns the product of the two given field elements modulo GF(2^8/0x11D).
+	// All inputs are valid. This could be implemented as a 256*256 lookup table.
+	private: static std::uint8_t reedSolomonMultiply(std::uint8_t x, std::uint8_t y);
+	
+	
 	// Can only be called immediately after a white run is added, and
 	// returns either 0, 1, or 2. A helper function for getPenaltyScore().
 	private: int finderPenaltyCountPatterns(const std::array<int,7> &runHistory) const;
@@ -309,51 +323,6 @@ class QrCode final {
 	
 	private: static const std::int8_t ECC_CODEWORDS_PER_BLOCK[4][41];
 	private: static const std::int8_t NUM_ERROR_CORRECTION_BLOCKS[4][41];
-	
-	
-	
-	/*---- Private helper class ----*/
-	
-	/* 
-	 * Computes the Reed-Solomon error correction codewords for a sequence of data codewords
-	 * at a given degree. Objects are immutable, and the state only depends on the degree.
-	 * This class exists because each data block in a QR Code shares the same the divisor polynomial.
-	 */
-	private: class ReedSolomonGenerator final {
-		
-		/*-- Immutable field --*/
-		
-		// Coefficients of the divisor polynomial, stored from highest to lowest power, excluding the leading term which
-		// is always 1. For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
-		private: std::vector<std::uint8_t> coefficients;
-		
-		
-		/*-- Constructor --*/
-		
-		/* 
-		 * Creates a Reed-Solomon ECC generator for the given degree. This could be implemented
-		 * as a lookup table over all possible parameter values, instead of as an algorithm.
-		 */
-		public: explicit ReedSolomonGenerator(int degree);
-		
-		
-		/*-- Method --*/
-		
-		/* 
-		 * Computes and returns the Reed-Solomon error correction codewords for the given
-		 * sequence of data codewords. The returned object is always a new byte array.
-		 * This method does not alter this object's state (because it is immutable).
-		 */
-		public: std::vector<std::uint8_t> getRemainder(const std::vector<std::uint8_t> &data) const;
-		
-		
-		/*-- Static function --*/
-		
-		// Returns the product of the two given field elements modulo GF(2^8/0x11D).
-		// All inputs are valid. This could be implemented as a 256*256 lookup table.
-		private: static std::uint8_t multiply(std::uint8_t x, std::uint8_t y);
-		
-	};
 	
 };
 

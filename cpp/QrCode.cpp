@@ -345,11 +345,11 @@ vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	
 	// Split data into blocks and append ECC to each block
 	vector<vector<uint8_t> > blocks;
-	const ReedSolomonGenerator rs(blockEccLen);
+	const vector<uint8_t> rsDiv = reedSolomonComputeDivisor(blockEccLen);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
 		vector<uint8_t> dat(data.cbegin() + k, data.cbegin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
 		k += dat.size();
-		const vector<uint8_t> ecc = rs.getRemainder(dat);
+		const vector<uint8_t> ecc = reedSolomonComputeRemainder(dat, rsDiv);
 		if (i < numShortBlocks)
 			dat.push_back(0);
 		dat.insert(dat.end(), ecc.cbegin(), ecc.cend());
@@ -538,6 +538,57 @@ int QrCode::getNumDataCodewords(int ver, Ecc ecl) {
 }
 
 
+vector<uint8_t> QrCode::reedSolomonComputeDivisor(int degree) {
+	if (degree < 1 || degree > 255)
+		throw std::domain_error("Degree out of range");
+	// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
+	// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
+	vector<uint8_t> result(degree);
+	result.at(degree - 1) = 1;  // Start off with the monomial x^0
+	
+	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
+	// and drop the highest monomial term which is always 1x^degree.
+	// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
+	uint8_t root = 1;
+	for (int i = 0; i < degree; i++) {
+		// Multiply the current product by (x - r^i)
+		for (size_t j = 0; j < result.size(); j++) {
+			result.at(j) = reedSolomonMultiply(result.at(j), root);
+			if (j + 1 < result.size())
+				result.at(j) ^= result.at(j + 1);
+		}
+		root = reedSolomonMultiply(root, 0x02);
+	}
+	return result;
+}
+
+
+vector<uint8_t> QrCode::reedSolomonComputeRemainder(const vector<uint8_t> &data, const vector<uint8_t> &divisor) {
+	vector<uint8_t> result(divisor.size());
+	for (uint8_t b : data) {  // Polynomial division
+		uint8_t factor = b ^ result.at(0);
+		result.erase(result.begin());
+		result.push_back(0);
+		for (size_t j = 0; j < result.size(); j++)
+			result.at(j) ^= reedSolomonMultiply(divisor.at(j), factor);
+	}
+	return result;
+}
+
+
+uint8_t QrCode::reedSolomonMultiply(uint8_t x, uint8_t y) {
+	// Russian peasant multiplication
+	int z = 0;
+	for (int i = 7; i >= 0; i--) {
+		z = (z << 1) ^ ((z >> 7) * 0x11D);
+		z ^= ((y >> i) & 1) * x;
+	}
+	if (z >> 8 != 0)
+		throw std::logic_error("Assertion error");
+	return static_cast<uint8_t>(z);
+}
+
+
 int QrCode::finderPenaltyCountPatterns(const std::array<int,7> &runHistory) const {
 	int n = runHistory.at(1);
 	if (n > size * 3)
@@ -595,58 +646,6 @@ const int8_t QrCode::NUM_ERROR_CORRECTION_BLOCKS[4][41] = {
 	{-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8,  8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68},  // Quartile
 	{-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81},  // High
 };
-
-
-QrCode::ReedSolomonGenerator::ReedSolomonGenerator(int degree) :
-		coefficients() {
-	if (degree < 1 || degree > 255)
-		throw std::domain_error("Degree out of range");
-	
-	// Start with the monomial x^0
-	coefficients.resize(degree);
-	coefficients.at(degree - 1) = 1;
-	
-	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
-	// drop the highest term, and store the rest of the coefficients in order of descending powers.
-	// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
-	uint8_t root = 1;
-	for (int i = 0; i < degree; i++) {
-		// Multiply the current product by (x - r^i)
-		for (size_t j = 0; j < coefficients.size(); j++) {
-			coefficients.at(j) = multiply(coefficients.at(j), root);
-			if (j + 1 < coefficients.size())
-				coefficients.at(j) ^= coefficients.at(j + 1);
-		}
-		root = multiply(root, 0x02);
-	}
-}
-
-
-vector<uint8_t> QrCode::ReedSolomonGenerator::getRemainder(const vector<uint8_t> &data) const {
-	// Compute the remainder by performing polynomial division
-	vector<uint8_t> result(coefficients.size());
-	for (uint8_t b : data) {
-		uint8_t factor = b ^ result.at(0);
-		result.erase(result.begin());
-		result.push_back(0);
-		for (size_t j = 0; j < result.size(); j++)
-			result.at(j) ^= multiply(coefficients.at(j), factor);
-	}
-	return result;
-}
-
-
-uint8_t QrCode::ReedSolomonGenerator::multiply(uint8_t x, uint8_t y) {
-	// Russian peasant multiplication
-	int z = 0;
-	for (int i = 7; i >= 0; i--) {
-		z = (z << 1) ^ ((z >> 7) * 0x11D);
-		z ^= ((y >> i) & 1) * x;
-	}
-	if (z >> 8 != 0)
-		throw std::logic_error("Assertion error");
-	return static_cast<uint8_t>(z);
-}
 
 
 data_too_long::data_too_long(const std::string &msg) :

@@ -396,12 +396,12 @@ class QrCode(object):
 		
 		# Split data into blocks and append ECC to each block
 		blocks = []
-		rs = _ReedSolomonGenerator(blockecclen)
+		rsdiv = QrCode._reed_solomon_compute_divisor(blockecclen)
 		k = 0
 		for i in range(numblocks):
 			dat = data[k : k + shortblocklen - blockecclen + (0 if i < numshortblocks else 1)]
 			k += len(dat)
-			ecc = rs.get_remainder(dat)
+			ecc = QrCode._reed_solomon_compute_remainder(dat, rsdiv)
 			if i < numshortblocks:
 				dat.append(0)
 			blocks.append(dat + ecc)
@@ -561,6 +561,57 @@ class QrCode(object):
 		return QrCode._get_num_raw_data_modules(ver) // 8 \
 			- QrCode._ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal][ver] \
 			* QrCode._NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver]
+	
+	
+	@staticmethod
+	def _reed_solomon_compute_divisor(degree):
+		"""Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
+		implemented as a lookup table over all possible parameter values, instead of as an algorithm."""
+		if degree < 1 or degree > 255:
+			raise ValueError("Degree out of range")
+		# Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
+		# For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
+		result = [0] * (degree - 1) + [1]  # Start off with the monomial x^0
+		
+		# Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
+		# and drop the highest monomial term which is always 1x^degree.
+		# Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
+		root = 1
+		for _ in range(degree):  # Unused variable i
+			# Multiply the current product by (x - r^i)
+			for j in range(degree):
+				result[j] = QrCode._reed_solomon_multiply(result[j], root)
+				if j + 1 < degree:
+					result[j] ^= result[j + 1]
+			root = QrCode._reed_solomon_multiply(root, 0x02)
+		return result
+	
+	
+	@staticmethod
+	def _reed_solomon_compute_remainder(data, divisor):
+		"""Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials."""
+		result = [0] * len(divisor)
+		for b in data:  # Polynomial division
+			factor = b ^ result.pop(0)
+			result.append(0)
+			for (i, coef) in enumerate(divisor):
+				result[i] ^= QrCode._reed_solomon_multiply(coef, factor)
+		return result
+	
+	
+	@staticmethod
+	def _reed_solomon_multiply(x, y):
+		"""Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
+		are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8."""
+		if x >> 8 != 0 or y >> 8 != 0:
+			raise ValueError("Byte out of range")
+		# Russian peasant multiplication
+		z = 0
+		for i in reversed(range(8)):
+			z = (z << 1) ^ ((z >> 7) * 0x11D)
+			z ^= ((y >> i) & 1) * x
+		assert z >> 8 == 0
+		return z
 	
 	
 	# Can only be called immediately after a white run is added, and
@@ -841,64 +892,7 @@ class QrSegment(object):
 
 
 
-# ---- Private helper classes ----
-
-class _ReedSolomonGenerator(object):
-	"""Computes the Reed-Solomon error correction codewords for a sequence of data codewords
-	at a given degree. Objects are immutable, and the state only depends on the degree.
-	This class exists because each data block in a QR Code shares the same the divisor polynomial."""
-	
-	def __init__(self, degree):
-		"""Creates a Reed-Solomon ECC generator for the given degree. This could be implemented
-		as a lookup table over all possible parameter values, instead of as an algorithm."""
-		if degree < 1 or degree > 255:
-			raise ValueError("Degree out of range")
-		
-		# Start with the monomial x^0
-		self.coefficients = [0] * (degree - 1) + [1]
-		
-		# Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
-		# drop the highest term, and store the rest of the coefficients in order of descending powers.
-		# Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
-		root = 1
-		for _ in range(degree):  # Unused variable i
-			# Multiply the current product by (x - r^i)
-			for j in range(degree):
-				self.coefficients[j] = _ReedSolomonGenerator._multiply(self.coefficients[j], root)
-				if j + 1 < degree:
-					self.coefficients[j] ^= self.coefficients[j + 1]
-			root = _ReedSolomonGenerator._multiply(root, 0x02)
-	
-	
-	def get_remainder(self, data):
-		"""Computes and returns the Reed-Solomon error correction codewords for the given
-		sequence of data codewords. The returned object is always a new byte list.
-		This method does not alter this object's state (because it is immutable)."""
-		# Compute the remainder by performing polynomial division
-		result = [0] * len(self.coefficients)
-		for b in data:
-			factor = b ^ result.pop(0)
-			result.append(0)
-			for (i, coef) in enumerate(self.coefficients):
-				result[i] ^= _ReedSolomonGenerator._multiply(coef, factor)
-		return result
-	
-	
-	@staticmethod
-	def _multiply(x, y):
-		"""Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
-		are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8."""
-		if x >> 8 != 0 or y >> 8 != 0:
-			raise ValueError("Byte out of range")
-		# Russian peasant multiplication
-		z = 0
-		for i in reversed(range(8)):
-			z = (z << 1) ^ ((z >> 7) * 0x11D)
-			z ^= ((y >> i) & 1) * x
-		assert z >> 8 == 0
-		return z
-
-
+# ---- Private helper class ----
 
 class _BitBuffer(list):
 	"""An appendable sequence of bits (0s and 1s). Mainly used by QrSegment."""
