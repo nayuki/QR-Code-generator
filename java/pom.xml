@@ -4,7 +4,7 @@
 	
 	<groupId>io.nayuki</groupId>
 	<artifactId>qrcodegen</artifactId>
-	<version>1.4.0</version>
+	<version>1.5.0</version>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
