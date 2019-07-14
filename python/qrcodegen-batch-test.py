@@ -33,6 +33,7 @@ CHILD_PROGRAMS = [
 	["python2", "../python/qrcodegen-worker.py"],  # Python 2 program
 	["python3", "../python/qrcodegen-worker.py"],  # Python 3 program
 	["java", "-cp", "../java/src/main/java", "-ea:io.nayuki.qrcodegen...", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
+	["node", "../typescript/qrcodegen-worker.js"],  # TypeScript program
 	["../c/qrcodegen-worker"],  # C program
 	["../cpp/QrCodeGeneratorWorker"],  # C++ program
 	["../rust/target/debug/examples/qrcodegen-worker"],  # Rust program
