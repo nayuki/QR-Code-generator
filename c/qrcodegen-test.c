@@ -49,9 +49,9 @@ void appendBitsToBuffer(unsigned int val, int numBits, uint8_t buffer[], int *bi
 void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ecc ecl, uint8_t result[]);
 int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 int getNumRawDataModules(int version);
-void calcReedSolomonGenerator(int degree, uint8_t result[]);
-void calcReedSolomonRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
-uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
+void reedSolomonComputeDivisor(int degree, uint8_t result[]);
+void reedSolomonComputeRemainder(const uint8_t data[], int dataLen, const uint8_t generator[], int degree, uint8_t result[]);
+uint8_t reedSolomonMultiply(uint8_t x, uint8_t y);
 void initializeFunctionModules(int version, uint8_t qrcode[]);
 int getAlignmentPatternPositions(int version, uint8_t result[7]);
 bool getModule(const uint8_t qrcode[], int x, int y);
@@ -116,12 +116,12 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 	// Split data into blocks and append ECC to each block
 	uint8_t **blocks = malloc(numBlocks * sizeof(uint8_t*));
 	uint8_t *generator = malloc(blockEccLen * sizeof(uint8_t));
-	calcReedSolomonGenerator(blockEccLen, generator);
+	reedSolomonComputeDivisor(blockEccLen, generator);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
 		uint8_t *block = malloc((shortBlockLen + 1) * sizeof(uint8_t));
 		int datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
 		memcpy(block, &data[k], datLen * sizeof(uint8_t));
-		calcReedSolomonRemainder(&data[k], datLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
+		reedSolomonComputeRemainder(&data[k], datLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
 		k += datLen;
 		blocks[i] = block;
 	}
@@ -235,19 +235,19 @@ static void testGetNumRawDataModules(void) {
 }
 
 
-static void testCalcReedSolomonGenerator(void) {
+static void testReedSolomonComputeDivisor(void) {
 	uint8_t generator[30];
 	
-	calcReedSolomonGenerator(1, generator);
+	reedSolomonComputeDivisor(1, generator);
 	assert(generator[0] == 0x01);
 	numTestCases++;
 	
-	calcReedSolomonGenerator(2, generator);
+	reedSolomonComputeDivisor(2, generator);
 	assert(generator[0] == 0x03);
 	assert(generator[1] == 0x02);
 	numTestCases++;
 	
-	calcReedSolomonGenerator(5, generator);
+	reedSolomonComputeDivisor(5, generator);
 	assert(generator[0] == 0x1F);
 	assert(generator[1] == 0xC6);
 	assert(generator[2] == 0x3F);
@@ -255,7 +255,7 @@ static void testCalcReedSolomonGenerator(void) {
 	assert(generator[4] == 0x74);
 	numTestCases++;
 	
-	calcReedSolomonGenerator(30, generator);
+	reedSolomonComputeDivisor(30, generator);
 	assert(generator[ 0] == 0xD4);
 	assert(generator[ 1] == 0xF6);
 	assert(generator[ 5] == 0xC0);
@@ -268,13 +268,13 @@ static void testCalcReedSolomonGenerator(void) {
 }
 
 
-static void testCalcReedSolomonRemainder(void) {
+static void testReedSolomonComputeRemainder(void) {
 	{
 		uint8_t data[1];
 		uint8_t generator[3];
 		uint8_t remainder[ARRAY_LENGTH(generator)];
-		calcReedSolomonGenerator(ARRAY_LENGTH(generator), generator);
-		calcReedSolomonRemainder(data, 0, generator, ARRAY_LENGTH(generator), remainder);
+		reedSolomonComputeDivisor(ARRAY_LENGTH(generator), generator);
+		reedSolomonComputeRemainder(data, 0, generator, ARRAY_LENGTH(generator), remainder);
 		assert(remainder[0] == 0);
 		assert(remainder[1] == 0);
 		assert(remainder[2] == 0);
@@ -284,8 +284,8 @@ static void testCalcReedSolomonRemainder(void) {
 		uint8_t data[2] = {0, 1};
 		uint8_t generator[4];
 		uint8_t remainder[ARRAY_LENGTH(generator)];
-		calcReedSolomonGenerator(ARRAY_LENGTH(generator), generator);
-		calcReedSolomonRemainder(data, ARRAY_LENGTH(data), generator, ARRAY_LENGTH(generator), remainder);
+		reedSolomonComputeDivisor(ARRAY_LENGTH(generator), generator);
+		reedSolomonComputeRemainder(data, ARRAY_LENGTH(data), generator, ARRAY_LENGTH(generator), remainder);
 		assert(remainder[0] == generator[0]);
 		assert(remainder[1] == generator[1]);
 		assert(remainder[2] == generator[2]);
@@ -296,8 +296,8 @@ static void testCalcReedSolomonRemainder(void) {
 		uint8_t data[5] = {0x03, 0x3A, 0x60, 0x12, 0xC7};
 		uint8_t generator[5];
 		uint8_t remainder[ARRAY_LENGTH(generator)];
-		calcReedSolomonGenerator(ARRAY_LENGTH(generator), generator);
-		calcReedSolomonRemainder(data, ARRAY_LENGTH(data), generator, ARRAY_LENGTH(generator), remainder);
+		reedSolomonComputeDivisor(ARRAY_LENGTH(generator), generator);
+		reedSolomonComputeRemainder(data, ARRAY_LENGTH(data), generator, ARRAY_LENGTH(generator), remainder);
 		assert(remainder[0] == 0xCB);
 		assert(remainder[1] == 0x36);
 		assert(remainder[2] == 0x16);
@@ -315,8 +315,8 @@ static void testCalcReedSolomonRemainder(void) {
 		};
 		uint8_t generator[30];
 		uint8_t remainder[ARRAY_LENGTH(generator)];
-		calcReedSolomonGenerator(ARRAY_LENGTH(generator), generator);
-		calcReedSolomonRemainder(data, ARRAY_LENGTH(data), generator, ARRAY_LENGTH(generator), remainder);
+		reedSolomonComputeDivisor(ARRAY_LENGTH(generator), generator);
+		reedSolomonComputeRemainder(data, ARRAY_LENGTH(data), generator, ARRAY_LENGTH(generator), remainder);
 		assert(remainder[ 0] == 0xCE);
 		assert(remainder[ 1] == 0xF0);
 		assert(remainder[ 2] == 0x31);
@@ -333,7 +333,7 @@ static void testCalcReedSolomonRemainder(void) {
 }
 
 
-static void testFiniteFieldMultiply(void) {
+static void testReedSolomonMultiply(void) {
 	const uint8_t cases[][3] = {
 		{0x00, 0x00, 0x00},
 		{0x01, 0x01, 0x01},
@@ -354,7 +354,7 @@ static void testFiniteFieldMultiply(void) {
 	};
 	for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
 		const uint8_t *tc = cases[i];
-		assert(finiteFieldMultiply(tc[0], tc[1]) == tc[2]);
+		assert(reedSolomonMultiply(tc[0], tc[1]) == tc[2]);
 		numTestCases++;
 	}
 }
@@ -1054,9 +1054,9 @@ int main(void) {
 	testAddEccAndInterleave();
 	testGetNumDataCodewords();
 	testGetNumRawDataModules();
-	testCalcReedSolomonGenerator();
-	testCalcReedSolomonRemainder();
-	testFiniteFieldMultiply();
+	testReedSolomonComputeDivisor();
+	testReedSolomonComputeRemainder();
+	testReedSolomonMultiply();
 	testInitializeFunctionModulesEtc();
 	testGetAlignmentPatternPositions();
 	testGetSetModule();

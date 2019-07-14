@@ -58,10 +58,10 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 testable int getNumDataCodewords(int version, enum qrcodegen_Ecc ecl);
 testable int getNumRawDataModules(int ver);
 
-testable void calcReedSolomonGenerator(int degree, uint8_t result[]);
-testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
+testable void reedSolomonComputeDivisor(int degree, uint8_t result[]);
+testable void reedSolomonComputeRemainder(const uint8_t data[], int dataLen,
 	const uint8_t generator[], int degree, uint8_t result[]);
-testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y);
+testable uint8_t reedSolomonMultiply(uint8_t x, uint8_t y);
 
 testable void initializeFunctionModules(int version, uint8_t qrcode[]);
 static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
@@ -301,13 +301,13 @@ testable void addEccAndInterleave(uint8_t data[], int version, enum qrcodegen_Ec
 	
 	// Split data into blocks, calculate ECC, and interleave
 	// (not concatenate) the bytes into a single sequence
-	uint8_t generator[qrcodegen_REED_SOLOMON_DEGREE_MAX];
-	calcReedSolomonGenerator(blockEccLen, generator);
+	uint8_t rsdiv[qrcodegen_REED_SOLOMON_DEGREE_MAX];
+	reedSolomonComputeDivisor(blockEccLen, rsdiv);
 	const uint8_t *dat = data;
 	for (int i = 0; i < numBlocks; i++) {
 		int datLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);
 		uint8_t *ecc = &data[dataLen];  // Temporary storage
-		calcReedSolomonRemainder(dat, datLen, generator, blockEccLen, ecc);
+		reedSolomonComputeRemainder(dat, datLen, rsdiv, blockEccLen, ecc);
 		for (int j = 0, k = i; j < datLen; j++, k += numBlocks) {  // Copy data
 			if (j == shortBlockDataLen)
 				k -= numShortBlocks;
@@ -350,43 +350,44 @@ testable int getNumRawDataModules(int ver) {
 
 /*---- Reed-Solomon ECC generator functions ----*/
 
-// Calculates the Reed-Solomon generator polynomial of the given degree, storing in result[0 : degree].
-testable void calcReedSolomonGenerator(int degree, uint8_t result[]) {
-	// Start with the monomial x^0
+// Computes a Reed-Solomon ECC generator polynomial for the given degree, storing in result[0 : degree].
+// This could be implemented as a lookup table over all possible parameter values, instead of as an algorithm.
+testable void reedSolomonComputeDivisor(int degree, uint8_t result[]) {
 	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
+	// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
+	// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
 	memset(result, 0, degree * sizeof(result[0]));
-	result[degree - 1] = 1;
+	result[degree - 1] = 1;  // Start off with the monomial x^0
 	
 	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
-	// drop the highest term, and store the rest of the coefficients in order of descending powers.
+	// drop the highest monomial term which is always 1x^degree.
 	// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
 	uint8_t root = 1;
 	for (int i = 0; i < degree; i++) {
 		// Multiply the current product by (x - r^i)
 		for (int j = 0; j < degree; j++) {
-			result[j] = finiteFieldMultiply(result[j], root);
+			result[j] = reedSolomonMultiply(result[j], root);
 			if (j + 1 < degree)
 				result[j] ^= result[j + 1];
 		}
-		root = finiteFieldMultiply(root, 0x02);
+		root = reedSolomonMultiply(root, 0x02);
 	}
 }
 
 
-// Calculates the remainder of the polynomial data[0 : dataLen] when divided by the generator[0 : degree], where all
-// polynomials are in big endian and the generator has an implicit leading 1 term, storing the result in result[0 : degree].
-testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
+// Computes the Reed-Solomon error correction codeword for the given data and divisor polynomials.
+// The remainder when data[0 : dataLen] is divided by divisor[0 : degree] is stored in result[0 : degree].
+// All polynomials are in big endian, and the generator has an implicit leading 1 term.
+testable void reedSolomonComputeRemainder(const uint8_t data[], int dataLen,
 		const uint8_t generator[], int degree, uint8_t result[]) {
-	
-	// Perform polynomial division
 	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
 	memset(result, 0, degree * sizeof(result[0]));
-	for (int i = 0; i < dataLen; i++) {
+	for (int i = 0; i < dataLen; i++) {  // Polynomial division
 		uint8_t factor = data[i] ^ result[0];
 		memmove(&result[0], &result[1], (degree - 1) * sizeof(result[0]));
 		result[degree - 1] = 0;
 		for (int j = 0; j < degree; j++)
-			result[j] ^= finiteFieldMultiply(generator[j], factor);
+			result[j] ^= reedSolomonMultiply(generator[j], factor);
 	}
 }
 
@@ -395,7 +396,7 @@ testable void calcReedSolomonRemainder(const uint8_t data[], int dataLen,
 
 // Returns the product of the two given field elements modulo GF(2^8/0x11D).
 // All inputs are valid. This could be implemented as a 256*256 lookup table.
-testable uint8_t finiteFieldMultiply(uint8_t x, uint8_t y) {
+testable uint8_t reedSolomonMultiply(uint8_t x, uint8_t y) {
 	// Russian peasant multiplication
 	uint8_t z = 0;
 	for (int i = 7; i >= 0; i--) {
