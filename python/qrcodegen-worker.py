@@ -26,7 +26,6 @@
 #   Software.
 # 
 
-from __future__ import print_function
 import sys
 import qrcodegen
 py3 = sys.version_info.major >= 3
@@ -43,7 +42,7 @@ def main():
 		length = read_int()
 		if length == -1:
 			break
-		data = [read_int() for _ in range(length)]
+		data = bytearray(read_int() for _ in range(length))
 		
 		# Read encoding parameters
 		errcorlvl  = read_int()
@@ -54,11 +53,9 @@ def main():
 		
 		# Make segments for encoding
 		if all((b < 128) for b in data):  # Is ASCII
-			segs = qrcodegen.QrSegment.make_segments("".join(chr(b) for b in data))
-		elif py3:
-			segs = [qrcodegen.QrSegment.make_bytes(bytes(data))]
+			segs = qrcodegen.QrSegment.make_segments(data.decode("ASCII"))
 		else:
-			segs = [qrcodegen.QrSegment.make_bytes("".join(chr(b) for b in data))]
+			segs = [qrcodegen.QrSegment.make_bytes(data)]
 		
 		try:  # Try to make QR Code symbol
 			qr = qrcodegen.QrCode.encode_segments(segs, ECC_LEVELS[errcorlvl], minversion, maxversion, mask, boostecl != 0)
