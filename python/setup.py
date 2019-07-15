@@ -88,6 +88,8 @@ Install this package by downloading the source code ZIP file from PyPI_, or by r
 
 Examples:
 
+::
+
     from qrcodegen import *
     
     # Simple operation
