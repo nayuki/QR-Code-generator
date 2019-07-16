@@ -29,7 +29,7 @@ namespace app {
 	function initialize(): void {
 		let elems = document.querySelectorAll("input[type=number], textarea");
 		for (let el of elems) {
-			if (!el.id.startsWith("version-"))
+			if (el.id.indexOf("version-") != 0)
 				(el as any).oninput = redrawQrCode;
 		}
 		elems = document.querySelectorAll("input[type=radio], input[type=checkbox]");

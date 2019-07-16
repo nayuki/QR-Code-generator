@@ -114,10 +114,10 @@ namespace qrcodegen {
 			}
 			
 			// Concatenate all segments to create the data bit string
-			let bb = new BitBuffer();
+			let bb: Array<bit> = []
 			for (const seg of segs) {
-				bb.appendBits(seg.mode.modeBits, 4);
-				bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
+				appendBits(seg.mode.modeBits, 4, bb);
+				appendBits(seg.numChars, seg.mode.numCharCountBits(version), bb);
 				for (const b of seg.getData())
 					bb.push(b);
 			}
@@ -128,14 +128,14 @@ namespace qrcodegen {
 			const dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;
 			if (bb.length > dataCapacityBits)
 				throw "Assertion error";
-			bb.appendBits(0, Math.min(4, dataCapacityBits - bb.length));
-			bb.appendBits(0, (8 - bb.length % 8) % 8);
+			appendBits(0, Math.min(4, dataCapacityBits - bb.length), bb);
+			appendBits(0, (8 - bb.length % 8) % 8, bb);
 			if (bb.length % 8 != 0)
 				throw "Assertion error";
 			
 			// Pad with alternating bytes until data capacity is reached
 			for (let padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-				bb.appendBits(padByte, 8);
+				appendBits(padByte, 8, bb);
 			
 			// Pack bits into bytes in big endian
 			let dataCodewords: Array<byte> = [];
@@ -757,6 +757,16 @@ namespace qrcodegen {
 	}
 	
 	
+	// Appends the given number of low-order bits of the given value
+	// to the given buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.
+	function appendBits(val: int, len: int, bb: Array<bit>): void {
+		if (len < 0 || len > 31 || val >>> len != 0)
+			throw "Value out of range";
+		for (let i = len - 1; i >= 0; i--)  // Append bit by bit
+			bb.push((val >>> i) & 1);
+	}
+	
+	
 	// Returns true iff the i'th bit of x is set to 1.
 	function getBit(x: int, i: int): boolean {
 		return ((x >>> i) & 1) != 0;
@@ -785,9 +795,9 @@ namespace qrcodegen {
 		// byte mode. All input byte arrays are acceptable. Any text string
 		// can be converted to UTF-8 bytes and encoded as a byte mode segment.
 		public static makeBytes(data: Array<byte>): QrSegment {
-			let bb = new BitBuffer();
+			let bb: Array<bit> = []
 			for (const b of data)
-				bb.appendBits(b, 8);
+				appendBits(b, 8, bb);
 			return new QrSegment(QrSegment.Mode.BYTE, data.length, bb);
 		}
 		
@@ -796,10 +806,10 @@ namespace qrcodegen {
 		public static makeNumeric(digits: string): QrSegment {
 			if (!this.NUMERIC_REGEX.test(digits))
 				throw "String contains non-numeric characters";
-			let bb = new BitBuffer();
+			let bb: Array<bit> = []
 			for (let i = 0; i < digits.length; ) {  // Consume up to 3 digits per iteration
 				const n: int = Math.min(digits.length - i, 3);
-				bb.appendBits(parseInt(digits.substr(i, n), 10), n * 3 + 1);
+				appendBits(parseInt(digits.substr(i, n), 10), n * 3 + 1, bb);
 				i += n;
 			}
 			return new QrSegment(QrSegment.Mode.NUMERIC, digits.length, bb);
@@ -812,15 +822,15 @@ namespace qrcodegen {
 		public static makeAlphanumeric(text: string): QrSegment {
 			if (!this.ALPHANUMERIC_REGEX.test(text))
 				throw "String contains unencodable characters in alphanumeric mode";
-			let bb = new BitBuffer();
+			let bb: Array<bit> = []
 			let i: int;
 			for (i = 0; i + 2 <= text.length; i += 2) {  // Process groups of 2
 				let temp: int = QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
 				temp += QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
-				bb.appendBits(temp, 11);
+				appendBits(temp, 11, bb);
 			}
 			if (i < text.length)  // 1 character remaining
-				bb.appendBits(QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
+				appendBits(QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6, bb);
 			return new QrSegment(QrSegment.Mode.ALPHANUMERIC, text.length, bb);
 		}
 		
@@ -843,17 +853,17 @@ namespace qrcodegen {
 		// Returns a segment representing an Extended Channel Interpretation
 		// (ECI) designator with the given assignment value.
 		public static makeEci(assignVal: int): QrSegment {
-			let bb = new BitBuffer();
+			let bb: Array<bit> = []
 			if (assignVal < 0)
 				throw "ECI assignment value out of range";
 			else if (assignVal < (1 << 7))
-				bb.appendBits(assignVal, 8);
+				appendBits(assignVal, 8, bb);
 			else if (assignVal < (1 << 14)) {
-				bb.appendBits(2, 2);
-				bb.appendBits(assignVal, 14);
+				appendBits(2, 2, bb);
+				appendBits(assignVal, 14, bb);
 			} else if (assignVal < 1000000) {
-				bb.appendBits(6, 3);
-				bb.appendBits(assignVal, 21);
+				appendBits(6, 3, bb);
+				appendBits(assignVal, 21, bb);
 			} else
 				throw "ECI assignment value out of range";
 			return new QrSegment(QrSegment.Mode.ECI, 0, bb);
@@ -937,27 +947,6 @@ namespace qrcodegen {
 		// The set of all legal characters in alphanumeric mode,
 		// where each character value maps to the index in the string.
 		private static readonly ALPHANUMERIC_CHARSET: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
-		
-	}
-	
-	
-	
-	/*---- Private helper class ----*/
-	
-	/* 
-	 * An appendable sequence of bits (0s and 1s). Mainly used by QrSegment.
-	 * The implicit constructor creates an empty bit buffer (length 0).
-	 */
-	class BitBuffer extends Array<bit> {
-		
-		// Appends the given number of low-order bits of the given value
-		// to this buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.
-		public appendBits(val: int, len: int): void {
-			if (len < 0 || len > 31 || val >>> len != 0)
-				throw "Value out of range";
-			for (let i = len - 1; i >= 0; i--)  // Append bit by bit
-				this.push((val >>> i) & 1);
-		}
 		
 	}
 	
