@@ -33,9 +33,6 @@ final class ReedSolomonGenerator {
 		= new Memoizer<>(ReedSolomonGenerator::new);
 	
 	
-	
-	/*---- Instance members ----*/
-	
 	// A table of size 256 * degree, where polynomialMultiply[i][j] = multiply(i, coefficients[j]).
 	// 'coefficients' is the temporary array representing the coefficients of the divisor polynomial,
 	// stored from highest to lowest power, excluding the leading term which is always 1.
@@ -89,9 +86,6 @@ final class ReedSolomonGenerator {
 		}
 	}
 	
-	
-	
-	/*---- Constant members ----*/
 	
 	// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 	// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.

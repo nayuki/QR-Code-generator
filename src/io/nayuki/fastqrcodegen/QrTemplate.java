@@ -33,9 +33,6 @@ final class QrTemplate {
 		= new Memoizer<>(QrTemplate::new);
 	
 	
-	
-	/*---- Instance members ----*/
-	
 	private final int version;
 	private final int size;
 	
