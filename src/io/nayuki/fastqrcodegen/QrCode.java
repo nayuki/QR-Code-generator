@@ -377,13 +377,10 @@ public final class QrCode {
 	private void setModule(int x, int y, int black) {
 		assert 0 <= x && x < size;
 		assert 0 <= y && y < size;
+		assert black == 0 || black == 1;
 		int i = y * size + x;
-		if (black == 0)
-			modules[i >>> 5] &= ~(1 << i);
-		else if (black == 1)
-			modules[i >>> 5] |= 1 << i;
-		else
-			throw new IllegalArgumentException();
+		modules[i >>> 5] &= ~(1 << i);
+		modules[i >>> 5] |= black << i;
 	}
 	
 	
