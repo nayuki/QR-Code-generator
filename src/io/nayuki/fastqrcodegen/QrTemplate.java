@@ -25,59 +25,12 @@ package io.nayuki.fastqrcodegen;
 
 import static io.nayuki.fastqrcodegen.QrCode.MAX_VERSION;
 import static io.nayuki.fastqrcodegen.QrCode.MIN_VERSION;
-import java.lang.ref.SoftReference;
 
 
 final class QrTemplate {
 	
-	/*---- Factory members ----*/
-	
-	public static QrTemplate getInstance(int version) {
-		if (version < MIN_VERSION || version > MAX_VERSION)
-			throw new IllegalArgumentException("Version out of range");
-		
-		while (true) {
-			synchronized(cache) {
-				SoftReference<QrTemplate> ref = cache[version];
-				if (ref != null) {
-					QrTemplate result = ref.get();
-					if (result != null)
-						return result;
-					cache[version] = null;
-				}
-				
-				if (!isPending[version]) {
-					isPending[version] = true;
-					break;
-				}
-				
-				try {
-					cache.wait();
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		
-		try {
-			QrTemplate tpl = new QrTemplate(version);
-			synchronized(cache) {
-				cache[version] = new SoftReference<>(tpl);
-			}
-			return tpl;
-		} finally {
-			synchronized(cache) {
-				isPending[version] = false;
-				cache.notifyAll();
-			}
-		}
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	private static final SoftReference<QrTemplate>[] cache = new SoftReference[MAX_VERSION + 1];
-	
-	private static final boolean[] isPending = new boolean[MAX_VERSION + 1];
+	public static final Memoizer<Integer,QrTemplate> MEMOIZER
+		= new Memoizer<>(QrTemplate::new);
 	
 	
 	

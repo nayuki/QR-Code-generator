@@ -248,7 +248,7 @@ public final class QrCode {
 		errorCorrectionLevel = Objects.requireNonNull(ecl);
 		Objects.requireNonNull(dataCodewords);
 		
-		QrTemplate tpl = QrTemplate.getInstance(ver);
+		QrTemplate tpl = QrTemplate.MEMOIZER.get(ver);
 		modules = tpl.template.clone();
 		
 		// Compute ECC, draw modules, do masking
@@ -407,7 +407,7 @@ public final class QrCode {
 		// Split data into blocks, calculate ECC, and interleave
 		// (not concatenate) the bytes into a single sequence
 		byte[] result = new byte[rawCodewords];
-		ReedSolomonGenerator rs = ReedSolomonGenerator.getInstance(blockEccLen);
+		ReedSolomonGenerator rs = ReedSolomonGenerator.MEMOIZER.get(blockEccLen);
 		byte[] ecc = new byte[blockEccLen];  // Temporary storage per iteration
 		for (int i = 0, k = 0; i < numBlocks; i++) {
 			int datLen = shortBlockDataLen + (i < numShortBlocks ? 0 : 1);

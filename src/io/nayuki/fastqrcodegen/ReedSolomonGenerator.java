@@ -23,63 +23,14 @@
 
 package io.nayuki.fastqrcodegen;
 
-import java.lang.ref.SoftReference;
 import java.util.Arrays;
 import java.util.Objects;
 
 
 final class ReedSolomonGenerator {
 	
-	/*---- Factory members ----*/
-	
-	public static ReedSolomonGenerator getInstance(int degree) {
-		if (degree < 1 || degree > MAX_DEGREE)
-			throw new IllegalArgumentException("Degree out of range");
-		
-		while (true) {
-			synchronized(cache) {
-				SoftReference<ReedSolomonGenerator> ref = cache[degree];
-				if (ref != null) {
-					ReedSolomonGenerator result = ref.get();
-					if (result != null)
-						return result;
-					cache[degree] = null;
-				}
-				
-				if (!isPending[degree]) {
-					isPending[degree] = true;
-					break;
-				}
-				
-				try {
-					cache.wait();
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		
-		try {
-			ReedSolomonGenerator rs = new ReedSolomonGenerator(degree);
-			synchronized(cache) {
-				cache[degree] = new SoftReference<>(rs);
-			}
-			return rs;
-		} finally {
-			synchronized(cache) {
-				isPending[degree] = false;
-				cache.notifyAll();
-			}
-		}
-	}
-	
-	
-	private static final int MAX_DEGREE = 30;
-	
-	@SuppressWarnings("unchecked")
-	private static final SoftReference<ReedSolomonGenerator>[] cache = new SoftReference[MAX_DEGREE + 1];
-	
-	private static final boolean[] isPending = new boolean[MAX_DEGREE + 1];
+	public static final Memoizer<Integer,ReedSolomonGenerator> MEMOIZER
+		= new Memoizer<>(ReedSolomonGenerator::new);
 	
 	
 	
