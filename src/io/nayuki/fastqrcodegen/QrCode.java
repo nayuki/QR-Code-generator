@@ -215,9 +215,8 @@ public final class QrCode {
 	 * &#x2212;1), the resulting object still has a mask value between 0 and 7. */
 	public final int mask;
 	
-	// Private grid of modules/pixels:
-	
-	// The modules of this QR Code. Immutable after constructor finishes. Accessed through getModule().
+	// Private grid of modules of this QR Code, packed tightly into bits.
+	// Immutable after constructor finishes. Accessed through getModule().
 	private final int[] modules;
 	
 	
@@ -424,8 +423,8 @@ public final class QrCode {
 	}
 	
 	
-	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
-	// data area of this QR Code symbol. Function modules need to be marked off before this is called.
+	// Draws the given sequence of 8-bit codewords (data and error correction)
+	// onto the entire data area of this QR Code, based on the given bit indexes.
 	private void drawCodewords(int[] dataOutputBitIndexes, byte[] allCodewords) {
 		Objects.requireNonNull(dataOutputBitIndexes);
 		Objects.requireNonNull(allCodewords);
@@ -443,7 +442,7 @@ public final class QrCode {
 	// The function modules must be marked and the codeword bits must be drawn
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
-	// QR Code symbol needs exactly one (not zero, two, etc.) mask applied.
+	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 	private void applyMask(int[] mask) {
 		if (mask.length != modules.length)
 			throw new IllegalArgumentException();
@@ -453,7 +452,7 @@ public final class QrCode {
 	
 	
 	// A messy helper function for the constructor. This QR Code must be in an unmasked state when this
-	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
+	// method is called. The 'mask' argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
 	// This method applies and returns the actual mask chosen, from 0 to 7.
 	private int handleConstructorMasking(int[][] masks, int mask) {
 		if (mask == -1) {  // Automatically choose best mask

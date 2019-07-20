@@ -24,23 +24,28 @@
 package io.nayuki.fastqrcodegen;
 
 
+// Stores the parts of a QR Code that depend only on the version number,
+// and does not depend on the data or error correction level or mask.
 final class QrTemplate {
 	
+	// Use this memoizer to get instances of this class.
 	public static final Memoizer<Integer,QrTemplate> MEMOIZER
 		= new Memoizer<>(QrTemplate::new);
 	
 	
-	private final int version;
-	private final int size;
+	private final int version;  // In the range [1, 40].
+	private final int size;  // Derived from version.
 	
-	final int[] template;
-	final int[][] masks;
-	final int[] dataOutputBitIndexes;
+	final int[] template;  // Length and values depend on version.
+	final int[][] masks;  // masks.length == 8, and masks[i].length == template.length.
+	final int[] dataOutputBitIndexes;  // Length and values depend on version.
 	
 	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
+	// Otherwise when the constructor is running, isFunction.length == template.length.
 	private int[] isFunction;
 	
 	
+	// Creates a QR Code template for the given version number.
 	private QrTemplate(int ver) {
 		if (ver < QrCode.MIN_VERSION || ver > QrCode.MAX_VERSION)
 			throw new IllegalArgumentException("Version out of range");
@@ -56,6 +61,7 @@ final class QrTemplate {
 	}
 	
 	
+	// Reads this object's version field, and draws and marks all function modules.
 	private void drawFunctionPatterns() {
 		// Draw horizontal and vertical timing patterns
 		for (int i = 0; i < size; i++) {
@@ -101,7 +107,7 @@ final class QrTemplate {
 			darkenFunctionModule(size - 1 - i, 8, 0);
 		for (int i = 8; i < 15; i++)
 			darkenFunctionModule(8, size - 15 + i, 0);
-		darkenFunctionModule(8, size - 8, 1);
+		darkenFunctionModule(8, size - 8, 1);  // Always black
 	}
 	
 	
@@ -153,6 +159,7 @@ final class QrTemplate {
 	}
 	
 	
+	// Computes and returns a new array of masks, based on this object's various fields.
 	private int[][] generateMasks() {
 		int[][] result = new int[8][template.length];
 		for (int mask = 0; mask < result.length; mask++) {
@@ -180,6 +187,7 @@ final class QrTemplate {
 	}
 	
 	
+	// Computes and returns an array of bit indexes, based on this object's various fields.
 	private int[] generateZigzagScan() {
 		int[] result = new int[getNumRawDataModules(version) / 8 * 8];
 		int i = 0;  // Bit index into the data
@@ -203,6 +211,7 @@ final class QrTemplate {
 	}
 	
 	
+	// Returns the value of the bit at the given coordinates in the given grid.
 	private int getModule(int[] grid, int x, int y) {
 		assert 0 <= x && x < size;
 		assert 0 <= y && y < size;

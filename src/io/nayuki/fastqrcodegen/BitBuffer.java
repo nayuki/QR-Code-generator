@@ -27,24 +27,20 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
-/**
- * An appendable sequence of bits (0s and 1s). Mainly used by {@link QrSegment}.
- */
+// An appendable sequence of bits (0s and 1s), mainly used by QrSegment.
 final class BitBuffer {
 	
 	/*---- Fields ----*/
 	
-	int[] data;
+	int[] data;  // In each 32-bit word, bits are filled from top down.
 	
-	int bitLength;
+	int bitLength;  // Always non-negative.
 	
 	
 	
 	/*---- Constructor ----*/
 	
-	/**
-	 * Constructs an empty bit buffer (length 0).
-	 */
+	// Creates an empty bit buffer.
 	public BitBuffer() {
 		data = new int[64];
 		bitLength = 0;
@@ -54,10 +50,7 @@ final class BitBuffer {
 	
 	/*---- Methods ----*/
 	
-	/**
-	 * Returns the length of this sequence, which is a non-negative value.
-	 * @return the length of this sequence
-	 */
+	// Returns the bit at the given index, yielding 0 or 1.
 	public int getBit(int index) {
 		if (index < 0 || index >= bitLength)
 			throw new IndexOutOfBoundsException();
@@ -65,11 +58,8 @@ final class BitBuffer {
 	}
 	
 	
-	/**
-	 * Returns an array representing this buffer's bits packed into bytes
-	 * in big endian. The current bit length must be a multiple of 8.
-	 * @return a new byte array (not {@code null}) representing this bit sequence
-	 */
+	// Returns a new array representing this buffer's bits packed into
+	// bytes in big endian. The current bit length must be a multiple of 8.
 	public byte[] getBytes() {
 		if (bitLength % 8 != 0)
 			throw new IllegalStateException("Data is not a whole number of bytes");
@@ -80,15 +70,8 @@ final class BitBuffer {
 	}
 	
 	
-	/**
-	 * Appends the specified number of low-order bits of the specified value to this
-	 * buffer. Requires 0 &#x2264; len &#x2264; 31 and 0 &#x2264; val &lt; 2<sup>len</sup>.
-	 * @param val the value to append
-	 * @param len the number of low-order bits in the value to take
-	 * @throws IllegalArgumentException if the value or number of bits is out of range
-	 * @throws IllegalStateException if appending the data
-	 * would make bitLength exceed Integer.MAX_VALUE
-	 */
+	// Appends the given number of low-order bits of the given value
+	// to this buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
@@ -114,14 +97,8 @@ final class BitBuffer {
 	}
 	
 	
-	/**
-	 * Appends the specified sequence of bits to this buffer.
-	 * Requires 0 &#x2264; len &#x2264; 32 &#xD7; vals.length.
-	 * @param vals the sequence of bits to append (not {@code null})
-	 * @param len the number of prefix bits to read from the array
-	 * @throws IllegalStateException if appending the data
-	 * would make bitLength exceed Integer.MAX_VALUE
-	 */
+	// Appends to this buffer the sequence of bits represented by the given
+	// word array and given bit length. Requires 0 <= len <= 32 * vals.length.
 	public void appendBits(int[] vals, int len) {
 		Objects.requireNonNull(vals);
 		if (len == 0)
