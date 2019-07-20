@@ -23,9 +23,6 @@
 
 package io.nayuki.fastqrcodegen;
 
-import static io.nayuki.fastqrcodegen.QrCode.MAX_VERSION;
-import static io.nayuki.fastqrcodegen.QrCode.MIN_VERSION;
-
 
 final class QrTemplate {
 	
@@ -45,7 +42,7 @@ final class QrTemplate {
 	
 	
 	private QrTemplate(int ver) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
+		if (ver < QrCode.MIN_VERSION || ver > QrCode.MAX_VERSION)
 			throw new IllegalArgumentException("Version out of range");
 		version = ver;
 		size = version * 4 + 17;
@@ -249,7 +246,7 @@ final class QrTemplate {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	static int getNumRawDataModules(int ver) {
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
+		if (ver < QrCode.MIN_VERSION || ver > QrCode.MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
 		int result = (16 * ver + 128) * ver + 64;
 		if (ver >= 2) {
