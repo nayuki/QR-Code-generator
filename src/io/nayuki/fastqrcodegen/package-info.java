@@ -8,11 +8,12 @@
  * <h2>Features</h2>
  * <p>Core features:</p>
  * <ul>
- *   <li><p>Available in 7 programming languages, all with nearly equal functionality: Java, JavaScript, TypeScript, Python, C++, C, Rust</p></li>
- *   <li><p>Significantly shorter code but more documentation comments compared to competing libraries</p></li>
  *   <li><p>Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard</p></li>
  *   <li><p>Output formats: Raw modules/pixels of the QR symbol, SVG XML string, {@code BufferedImage} raster bitmap</p></li>
  *   <li><p>Encodes numeric and special-alphanumeric text in less space than general text</p></li>
+ *   <li><p>Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes</p></li>
+ *   <li><p>Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts</p></li>
+ *   <li><p>Detects finder-like penalty patterns more accurately than other implementations</p></li>
  *   <li><p>Open source code under the permissive MIT License</p></li>
  * </ul>
  * <p>Manual parameters:</p>

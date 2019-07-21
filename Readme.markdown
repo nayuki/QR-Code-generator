@@ -5,9 +5,9 @@ Fast QR Code generator library
 Introduction
 ------------
 
-This Java library generates QR Code symbols, and its design is optimized for speed. It contrasts with another QR library by the same author which is slow but which optimizes for clarity and conciseness. The functionality of this library and its API are nearly identical to the slow library, but it runs anywhere from 1.5× to 6× as fast.
+This Java library generates QR Code symbols, and its design is optimized for speed. It contrasts with another QR library by the same author which is slow but which optimizes for clarity and conciseness. The functionality of this library and its API are nearly identical to the slow library, but it runs anywhere from 1.5× to 10× as fast.
 
-Home page for the fast library (design explanation, benchmarks): https://www.nayuki.io/page/fast-qr-code-generator-library
+Home page for the fast library (design explanation, benchmarks): [https://www.nayuki.io/page/fast-qr-code-generator-library](https://www.nayuki.io/page/fast-qr-code-generator-library)
 
 Home page for the slow library (live demo, QR Code introduction, competitor comparisons): [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
@@ -22,6 +22,7 @@ Core features:
 * Encodes numeric and special-alphanumeric text in less space than general text
 * Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes
 * Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts
+* Detects finder-like penalty patterns more accurately than other implementations
 * Open source code under the permissive MIT License
 
 Manual parameters:
@@ -59,7 +60,7 @@ Examples
 License
 -------
 
-Copyright © 2018 Project Nayuki. (MIT License)  
+Copyright © 2019 Project Nayuki. (MIT License)  
 [https://www.nayuki.io/page/fast-qr-code-generator-library](https://www.nayuki.io/page/fast-qr-code-generator-library)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
