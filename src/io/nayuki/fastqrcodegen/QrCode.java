@@ -482,13 +482,13 @@ public final class QrCode {
 		// Iterate over adjacent pairs of rows
 		for (int index = 0, downIndex = size, end = size * size; index < end; ) {
 			Arrays.fill(runHistory, 0);
-			int color = 0;
+			int runColor = 0;
 			int runX = 0;
 			int curRow = 0;
 			int nextRow = 0;
 			for (int x = 0; x < size; x++, index++, downIndex++) {
 				int c = getBit(modules[index >>> 5], index);
-				if (c == color) {
+				if (c == runColor) {
 					runX++;
 					if (runX == 5)
 						result += PENALTY_N1;
@@ -496,9 +496,9 @@ public final class QrCode {
 						result++;
 				} else {
 					addRunToHistory(runX, runHistory);
-					if (color == 0 && hasFinderLikePattern(runHistory))
+					if (runColor == 0 && hasFinderLikePattern(runHistory))
 						result += PENALTY_N3;
-					color = c;
+					runColor = c;
 					runX = 1;
 				}
 				black += c;
@@ -511,7 +511,7 @@ public final class QrCode {
 				}
 			}
 			addRunToHistory(runX, runHistory);
-			if (color == 1)
+			if (runColor == 1)
 				addRunToHistory(0, runHistory);  // Dummy run of white
 			if (hasFinderLikePattern(runHistory))
 				result += PENALTY_N3;
@@ -520,11 +520,11 @@ public final class QrCode {
 		// Iterate over single columns
 		for (int x = 0; x < size; x++) {
 			Arrays.fill(runHistory, 0);
-			int color = 0;
+			int runColor = 0;
 			int runY = 0;
 			for (int y = 0, index = x; y < size; y++, index += size) {
 				int c = getBit(modules[index >>> 5], index);
-				if (c == color) {
+				if (c == runColor) {
 					runY++;
 					if (runY == 5)
 						result += PENALTY_N1;
@@ -532,14 +532,14 @@ public final class QrCode {
 						result++;
 				} else {
 					addRunToHistory(runY, runHistory);
-					if (color == 0 && hasFinderLikePattern(runHistory))
+					if (runColor == 0 && hasFinderLikePattern(runHistory))
 						result += PENALTY_N3;
-					color = c;
+					runColor = c;
 					runY = 1;
 				}
 			}
 			addRunToHistory(runY, runHistory);
-			if (color == 1)
+			if (runColor == 1)
 				addRunToHistory(0, runHistory);  // Dummy run of white
 			if (hasFinderLikePattern(runHistory))
 				result += PENALTY_N3;
