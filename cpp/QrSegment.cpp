@@ -101,7 +101,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 		const char *temp = std::strchr(ALPHANUMERIC_CHARSET, *text);
 		if (temp == nullptr)
 			throw std::domain_error("String contains unencodable characters in alphanumeric mode");
-		accumData = accumData * 45 + (temp - ALPHANUMERIC_CHARSET);
+		accumData = accumData * 45 + static_cast<int>(temp - ALPHANUMERIC_CHARSET);
 		accumCount++;
 		if (accumCount == 2) {
 			bb.appendBits(static_cast<uint32_t>(accumData), 11);

@@ -155,7 +155,7 @@ static void doSegmentDemo() {
 	for (int c : kanjiChars)
 		bb.appendBits(static_cast<std::uint32_t>(c), 13);
 	const QrCode qr5 = QrCode::encodeSegments(
-		{QrSegment(QrSegment::Mode::KANJI, kanjiChars.size(), bb)},
+		{QrSegment(QrSegment::Mode::KANJI, static_cast<int>(kanjiChars.size()), bb)},
 		QrCode::Ecc::LOW);
 	printQr(qr5);
 }
