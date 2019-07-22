@@ -717,9 +717,10 @@ static void testCalcSegmentBitLength(void) {
 			{9832, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 6, -1},
+			{SIZE_MAX / 3, -1},
+			{SIZE_MAX / 2, -1},
+			{SIZE_MAX / 1, -1},
 		};
 		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
 			assert(calcSegmentBitLength(qrcodegen_Mode_NUMERIC, CASES[i].numChars) == CASES[i].result);
@@ -745,11 +746,10 @@ static void testCalcSegmentBitLength(void) {
 			{5959, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 5, -1},
-			{INT_MAX / 4, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 10, -1},
+			{SIZE_MAX / 5, -1},
+			{SIZE_MAX / 2, -1},
+			{SIZE_MAX / 1, -1},
 		};
 		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
 			assert(calcSegmentBitLength(qrcodegen_Mode_ALPHANUMERIC, CASES[i].numChars) == CASES[i].result);
@@ -771,14 +771,11 @@ static void testCalcSegmentBitLength(void) {
 			{5957, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 8 + 1, -1},
-			{INT_MAX / 7, -1},
-			{INT_MAX / 6, -1},
-			{INT_MAX / 5, -1},
-			{INT_MAX / 4, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 15, -1},
+			{SIZE_MAX / 12, -1},
+			{SIZE_MAX / 7, -1},
+			{SIZE_MAX / 3, -1},
+			{SIZE_MAX / 1, -1},
 		};
 		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
 			assert(calcSegmentBitLength(qrcodegen_Mode_BYTE, CASES[i].numChars) == CASES[i].result);
@@ -800,13 +797,12 @@ static void testCalcSegmentBitLength(void) {
 			{2522, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 13 + 1, -1},
-			{INT_MAX / 12, -1},
-			{INT_MAX / 9, -1},
-			{INT_MAX / 4, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 25, -1},
+			{SIZE_MAX / 20, -1},
+			{SIZE_MAX / 11, -1},
+			{SIZE_MAX / 4, -1},
+			{SIZE_MAX / 2, -1},
+			{SIZE_MAX / 1, -1},
 		};
 		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
 			assert(calcSegmentBitLength(qrcodegen_Mode_KANJI, CASES[i].numChars) == CASES[i].result);
