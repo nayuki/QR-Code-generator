@@ -694,8 +694,12 @@ static void testCalcSegmentBufferSize(void) {
 
 
 static void testCalcSegmentBitLength(void) {
+	struct TestCase {
+		size_t numChars;
+		int result;
+	};
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 4},
 			{2, 7},
@@ -717,13 +721,13 @@ static void testCalcSegmentBitLength(void) {
 			{INT_MAX / 2, -1},
 			{INT_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_NUMERIC, (size_t)cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_NUMERIC, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 6},
 			{2, 11},
@@ -747,13 +751,13 @@ static void testCalcSegmentBitLength(void) {
 			{INT_MAX / 2, -1},
 			{INT_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_ALPHANUMERIC, (size_t)cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_ALPHANUMERIC, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 8},
 			{2, 16},
@@ -776,13 +780,13 @@ static void testCalcSegmentBitLength(void) {
 			{INT_MAX / 2, -1},
 			{INT_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_BYTE, (size_t)cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_BYTE, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 13},
 			{2, 26},
@@ -804,8 +808,8 @@ static void testCalcSegmentBitLength(void) {
 			{INT_MAX / 2, -1},
 			{INT_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_KANJI, (size_t)cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_KANJI, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
