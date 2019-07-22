@@ -96,8 +96,8 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	// Concatenate all segments to create the data bit string
 	BitBuffer bb;
 	for (const QrSegment &seg : segs) {
-		bb.appendBits(seg.getMode().getModeBits(), 4);
-		bb.appendBits(seg.getNumChars(), seg.getMode().numCharCountBits(version));
+		bb.appendBits(static_cast<uint32_t>(seg.getMode().getModeBits()), 4);
+		bb.appendBits(static_cast<uint32_t>(seg.getNumChars()), seg.getMode().numCharCountBits(version));
 		bb.insert(bb.end(), seg.getData().begin(), seg.getData().end());
 	}
 	if (bb.size() != static_cast<unsigned int>(dataUsedBits))
