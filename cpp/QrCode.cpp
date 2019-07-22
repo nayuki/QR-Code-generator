@@ -107,8 +107,8 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	size_t dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 	if (bb.size() > dataCapacityBits)
 		throw std::logic_error("Assertion error");
-	bb.appendBits(0, std::min<size_t>(4, dataCapacityBits - bb.size()));
-	bb.appendBits(0, (8 - bb.size() % 8) % 8);
+	bb.appendBits(0, std::min(4, static_cast<int>(dataCapacityBits - bb.size())));
+	bb.appendBits(0, (8 - static_cast<int>(bb.size() % 8)) % 8);
 	if (bb.size() % 8 != 0)
 		throw std::logic_error("Assertion error");
 	
