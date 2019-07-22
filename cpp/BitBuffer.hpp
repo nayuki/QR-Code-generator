@@ -45,7 +45,7 @@ class BitBuffer final : public std::vector<bool> {
 	
 	// Appends the given number of low-order bits of the given value
 	// to this buffer. Requires 0 <= len <= 31 and val < 2^len.
-	public: void appendBits(std::uint32_t val, int len);
+	public: void appendBits(std::size_t val, std::size_t len);
 	
 };
 

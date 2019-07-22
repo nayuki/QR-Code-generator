@@ -235,9 +235,9 @@ void QrCode::drawFunctionPatterns() {
 	
 	// Draw numerous alignment patterns
 	const vector<int> alignPatPos = getAlignmentPatternPositions();
-	int numAlign = alignPatPos.size();
-	for (int i = 0; i < numAlign; i++) {
-		for (int j = 0; j < numAlign; j++) {
+	std::size_t numAlign = alignPatPos.size();
+	for (std::size_t i = 0; i < numAlign; i++) {
+		for (std::size_t j = 0; j < numAlign; j++) {
 			// Don't draw on the three finder corners
 			if (!((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0)))
 				drawAlignmentPattern(alignPatPos.at(i), alignPatPos.at(j));
@@ -346,7 +346,8 @@ vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	// Split data into blocks and append ECC to each block
 	vector<vector<uint8_t> > blocks;
 	const vector<uint8_t> rsDiv = reedSolomonComputeDivisor(blockEccLen);
-	for (int i = 0, k = 0; i < numBlocks; i++) {
+	std::size_t k = 0;
+	for (int i = 0; i < numBlocks; i++) {
 		vector<uint8_t> dat(data.cbegin() + k, data.cbegin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
 		k += dat.size();
 		const vector<uint8_t> ecc = reedSolomonComputeRemainder(dat, rsDiv);

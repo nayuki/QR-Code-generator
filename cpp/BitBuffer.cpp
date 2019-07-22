@@ -31,11 +31,11 @@ BitBuffer::BitBuffer()
 	: std::vector<bool>() {}
 
 
-void BitBuffer::appendBits(std::uint32_t val, int len) {
-	if (len < 0 || len > 31 || val >> len != 0)
+void BitBuffer::appendBits(std::size_t val, std::size_t len) {
+	if (len > 31 || val >> len != 0) // len < 0 does not need to be checked, because std::size_t is guaranteed to be unsigned
 		throw std::domain_error("Value out of range");
-	for (int i = len - 1; i >= 0; i--)  // Append bit by bit
-		this->push_back(((val >> i) & 1) != 0);
+	for (std::size_t i = len; i > 0; i--)  // Append bit by bit
+		this->push_back(((val >> (i-1)) & 1) != 0);
 }
 
 }
