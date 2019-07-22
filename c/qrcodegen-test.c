@@ -148,19 +148,19 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 static void testAddEccAndInterleave(void) {
 	for (int version = 1; version <= 40; version++) {
 		for (int ecl = 0; ecl < 4; ecl++) {
-			int dataLen = getNumDataCodewords(version, (enum qrcodegen_Ecc)ecl);
-			uint8_t *pureData = malloc((size_t)dataLen * sizeof(uint8_t));
-			for (int i = 0; i < dataLen; i++)
+			size_t dataLen = (size_t)getNumDataCodewords(version, (enum qrcodegen_Ecc)ecl);
+			uint8_t *pureData = malloc(dataLen * sizeof(uint8_t));
+			for (size_t i = 0; i < dataLen; i++)
 				pureData[i] = (uint8_t)(rand() % 256);
 			uint8_t *expectOutput = addEccAndInterleaveReference(pureData, version, (enum qrcodegen_Ecc)ecl);
 			
-			int dataAndEccLen = getNumRawDataModules(version) / 8;
-			uint8_t *paddedData = malloc((size_t)dataAndEccLen * sizeof(uint8_t));
-			memcpy(paddedData, pureData, (size_t)dataLen * sizeof(uint8_t));
-			uint8_t *actualOutput = malloc((size_t)dataAndEccLen * sizeof(uint8_t));
+			size_t dataAndEccLen = (size_t)getNumRawDataModules(version) / 8;
+			uint8_t *paddedData = malloc(dataAndEccLen * sizeof(uint8_t));
+			memcpy(paddedData, pureData, dataLen * sizeof(uint8_t));
+			uint8_t *actualOutput = malloc(dataAndEccLen * sizeof(uint8_t));
 			addEccAndInterleave(paddedData, version, (enum qrcodegen_Ecc)ecl, actualOutput);
 			
-			assert(memcmp(actualOutput, expectOutput, (size_t)dataAndEccLen * sizeof(uint8_t)) == 0);
+			assert(memcmp(actualOutput, expectOutput, dataAndEccLen * sizeof(uint8_t)) == 0);
 			free(pureData);
 			free(expectOutput);
 			free(paddedData);
