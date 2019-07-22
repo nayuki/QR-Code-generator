@@ -47,7 +47,7 @@ int main(void) {
 		
 		// Read data bytes
 		bool isAscii = true;
-		uint8_t *data = malloc(length * sizeof(uint8_t));
+		uint8_t *data = malloc((size_t)length * sizeof(uint8_t));
 		if (data == NULL) {
 			perror("malloc");
 			return EXIT_FAILURE;
@@ -67,8 +67,8 @@ int main(void) {
 		
 		// Allocate memory for QR Code
 		int bufferLen = qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion);
-		uint8_t *qrcode     = malloc(bufferLen * sizeof(uint8_t));
-		uint8_t *tempBuffer = malloc(bufferLen * sizeof(uint8_t));
+		uint8_t *qrcode     = malloc((size_t)bufferLen * sizeof(uint8_t));
+		uint8_t *tempBuffer = malloc((size_t)bufferLen * sizeof(uint8_t));
 		if (qrcode == NULL || tempBuffer == NULL) {
 			perror("malloc");
 			return EXIT_FAILURE;
@@ -77,7 +77,7 @@ int main(void) {
 		// Try to make QR Code symbol
 		bool ok;
 		if (isAscii) {
-			char *text = malloc((length + 1) * sizeof(char));
+			char *text = malloc((size_t)(length + 1) * sizeof(char));
 			if (text == NULL) {
 				perror("malloc");
 				return EXIT_FAILURE;
@@ -89,7 +89,7 @@ int main(void) {
 				minVersion, maxVersion, (enum qrcodegen_Mask)mask, boostEcl == 1);
 			free(text);
 		} else if (length <= bufferLen) {
-			memcpy(tempBuffer, data, length * sizeof(data[0]));
+			memcpy(tempBuffer, data, (size_t)length * sizeof(data[0]));
 			ok = qrcodegen_encodeBinary(tempBuffer, (size_t)length, qrcode, (enum qrcodegen_Ecc)errCorLvl,
 				minVersion, maxVersion, (enum qrcodegen_Mask)mask, boostEcl == 1);
 		} else

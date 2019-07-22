@@ -132,7 +132,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 	size_t textLen = strlen(text);
 	if (textLen == 0)
 		return qrcodegen_encodeSegmentsAdvanced(NULL, 0, ecl, minVersion, maxVersion, mask, boostEcl, tempBuffer, qrcode);
-	size_t bufLen = qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion);
+	size_t bufLen = (size_t)qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion);
 	
 	struct qrcodegen_Segment seg;
 	if (qrcodegen_isNumeric(text)) {
@@ -228,14 +228,16 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	}
 	
 	// Concatenate all segments to create the data bit string
-	memset(qrcode, 0, qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
+	memset(qrcode, 0, (size_t)qrcodegen_BUFFER_LEN_FOR_VERSION(version) * sizeof(qrcode[0]));
 	int bitLen = 0;
 	for (size_t i = 0; i < len; i++) {
 		const struct qrcodegen_Segment *seg = &segs[i];
-		appendBitsToBuffer((int)seg->mode, 4, qrcode, &bitLen);
-		appendBitsToBuffer(seg->numChars, numCharCountBits(seg->mode, version), qrcode, &bitLen);
-		for (int j = 0; j < seg->bitLength; j++)
-			appendBitsToBuffer((seg->data[j >> 3] >> (7 - (j & 7))) & 1, 1, qrcode, &bitLen);
+		appendBitsToBuffer((unsigned int)seg->mode, 4, qrcode, &bitLen);
+		appendBitsToBuffer((unsigned int)seg->numChars, numCharCountBits(seg->mode, version), qrcode, &bitLen);
+		for (int j = 0; j < seg->bitLength; j++) {
+			int bit = (seg->data[j >> 3] >> (7 - (j & 7))) & 1;
+			appendBitsToBuffer((unsigned int)bit, 1, qrcode, &bitLen);
+		}
 	}
 	assert(bitLen == dataUsedBits);
 	
@@ -356,7 +358,7 @@ testable void reedSolomonComputeDivisor(int degree, uint8_t result[]) {
 	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
 	// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
 	// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
-	memset(result, 0, degree * sizeof(result[0]));
+	memset(result, 0, (size_t)degree * sizeof(result[0]));
 	result[degree - 1] = 1;  // Start off with the monomial x^0
 	
 	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
@@ -381,10 +383,10 @@ testable void reedSolomonComputeDivisor(int degree, uint8_t result[]) {
 testable void reedSolomonComputeRemainder(const uint8_t data[], int dataLen,
 		const uint8_t generator[], int degree, uint8_t result[]) {
 	assert(1 <= degree && degree <= qrcodegen_REED_SOLOMON_DEGREE_MAX);
-	memset(result, 0, degree * sizeof(result[0]));
+	memset(result, 0, (size_t)degree * sizeof(result[0]));
 	for (int i = 0; i < dataLen; i++) {  // Polynomial division
 		uint8_t factor = data[i] ^ result[0];
-		memmove(&result[0], &result[1], (degree - 1) * sizeof(result[0]));
+		memmove(&result[0], &result[1], (size_t)(degree - 1) * sizeof(result[0]));
 		result[degree - 1] = 0;
 		for (int j = 0; j < degree; j++)
 			result[j] ^= reedSolomonMultiply(generator[j], factor);
@@ -400,7 +402,7 @@ testable uint8_t reedSolomonMultiply(uint8_t x, uint8_t y) {
 	// Russian peasant multiplication
 	uint8_t z = 0;
 	for (int i = 7; i >= 0; i--) {
-		z = (z << 1) ^ ((z >> 7) * 0x11D);
+		z = (uint8_t)((z << 1) ^ ((z >> 7) * 0x11D));
 		z ^= ((y >> i) & 1) * x;
 	}
 	return z;
@@ -415,7 +417,7 @@ testable uint8_t reedSolomonMultiply(uint8_t x, uint8_t y) {
 testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
 	int qrsize = version * 4 + 17;
-	memset(qrcode, 0, ((qrsize * qrsize + 7) / 8 + 1) * sizeof(qrcode[0]));
+	memset(qrcode, 0, (size_t)((qrsize * qrsize + 7) / 8 + 1) * sizeof(qrcode[0]));
 	qrcode[0] = (uint8_t)qrsize;
 	
 	// Fill horizontal and vertical timing patterns
@@ -551,7 +553,7 @@ testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 	int step = (version == 32) ? 26 :
 		(version*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
 	for (int i = numAlign - 1, pos = version * 4 + 10; i >= 1; i--, pos -= step)
-		result[i] = pos;
+		result[i] = (uint8_t)pos;
 	result[0] = 6;
 	return numAlign;
 }
@@ -962,16 +964,16 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
 		assert(false);
 	else if (assignVal < (1 << 7)) {
 		memset(buf, 0, 1 * sizeof(buf[0]));
-		appendBitsToBuffer(assignVal, 8, buf, &result.bitLength);
+		appendBitsToBuffer((unsigned int)assignVal, 8, buf, &result.bitLength);
 	} else if (assignVal < (1 << 14)) {
 		memset(buf, 0, 2 * sizeof(buf[0]));
 		appendBitsToBuffer(2, 2, buf, &result.bitLength);
-		appendBitsToBuffer(assignVal, 14, buf, &result.bitLength);
+		appendBitsToBuffer((unsigned int)assignVal, 14, buf, &result.bitLength);
 	} else if (assignVal < 1000000L) {
 		memset(buf, 0, 3 * sizeof(buf[0]));
 		appendBitsToBuffer(6, 3, buf, &result.bitLength);
-		appendBitsToBuffer(assignVal >> 10, 11, buf, &result.bitLength);
-		appendBitsToBuffer(assignVal & 0x3FF, 10, buf, &result.bitLength);
+		appendBitsToBuffer((unsigned int)(assignVal >> 10), 11, buf, &result.bitLength);
+		appendBitsToBuffer((unsigned int)(assignVal & 0x3FF), 10, buf, &result.bitLength);
 	} else
 		assert(false);
 	result.data = buf;

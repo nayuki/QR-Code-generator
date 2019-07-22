@@ -224,7 +224,7 @@ static void doSegmentDemo(void) {
 			uint8_t *segBuf = calloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_KANJI, len), sizeof(uint8_t));
 			struct qrcodegen_Segment seg;
 			seg.mode = qrcodegen_Mode_KANJI;
-			seg.numChars = len;
+			seg.numChars = (int)len;
 			seg.bitLength = 0;
 			for (size_t i = 0; i < len; i++) {
 				for (int j = 12; j >= 0; j--, seg.bitLength++)
