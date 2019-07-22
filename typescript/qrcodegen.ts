@@ -26,9 +26,9 @@
 
 namespace qrcodegen {
 	
-	type bit = number;
+	type bit  = number;
 	type byte = number;
-	type int = number;
+	type int  = number;
 	
 	
 	/*---- QR Code symbol class ----*/
