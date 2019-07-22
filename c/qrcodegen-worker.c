@@ -59,7 +59,7 @@ int main(void) {
 		for (size_t i = 0; i < length; i++) {
 			int b;
 			if (scanf("%d", &b) != 1)
-			return EXIT_FAILURE;
+				return EXIT_FAILURE;
 			data[i] = (uint8_t)b;
 			isAscii &= 0 < b && b < 128;
 		}
