@@ -107,30 +107,30 @@ static void testAppendBitsToBuffer(void) {
 // Ported from the Java version of the code.
 static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, enum qrcodegen_Ecc ecl) {
 	// Calculate parameter numbers
-	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
-	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
-	int rawCodewords = getNumRawDataModules(version) / 8;
-	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
-	int shortBlockLen = rawCodewords / numBlocks;
+	size_t numBlocks = (size_t)NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
+	size_t blockEccLen = (size_t)ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
+	size_t rawCodewords = (size_t)getNumRawDataModules(version) / 8;
+	size_t numShortBlocks = numBlocks - rawCodewords % numBlocks;
+	size_t shortBlockLen = rawCodewords / numBlocks;
 	
 	// Split data into blocks and append ECC to each block
-	uint8_t **blocks = malloc((size_t)numBlocks * sizeof(uint8_t*));
-	uint8_t *generator = malloc((size_t)blockEccLen * sizeof(uint8_t));
-	reedSolomonComputeDivisor(blockEccLen, generator);
-	for (int i = 0, k = 0; i < numBlocks; i++) {
-		uint8_t *block = malloc((size_t)(shortBlockLen + 1) * sizeof(uint8_t));
-		int datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
-		memcpy(block, &data[k], (size_t)datLen * sizeof(uint8_t));
-		reedSolomonComputeRemainder(&data[k], datLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
+	uint8_t **blocks = malloc(numBlocks * sizeof(uint8_t*));
+	uint8_t *generator = malloc(blockEccLen * sizeof(uint8_t));
+	reedSolomonComputeDivisor((int)blockEccLen, generator);
+	for (size_t i = 0, k = 0; i < numBlocks; i++) {
+		uint8_t *block = malloc((shortBlockLen + 1) * sizeof(uint8_t));
+		size_t datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
+		memcpy(block, &data[k], datLen * sizeof(uint8_t));
+		reedSolomonComputeRemainder(&data[k], (int)datLen, generator, (int)blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
 		k += datLen;
 		blocks[i] = block;
 	}
 	free(generator);
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
-	uint8_t *result = malloc((size_t)rawCodewords * sizeof(uint8_t));
-	for (int i = 0, k = 0; i < shortBlockLen + 1; i++) {
-		for (int j = 0; j < numBlocks; j++) {
+	uint8_t *result = malloc(rawCodewords * sizeof(uint8_t));
+	for (size_t i = 0, k = 0; i < shortBlockLen + 1; i++) {
+		for (size_t j = 0; j < numBlocks; j++) {
 			// Skip the padding byte in short blocks
 			if (i != shortBlockLen - blockEccLen || j >= numShortBlocks) {
 				result[k] = blocks[j][i];
@@ -138,7 +138,7 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 			}
 		}
 	}
-	for (int i = 0; i < numBlocks; i++)
+	for (size_t i = 0; i < numBlocks; i++)
 		free(blocks[i]);
 	free(blocks);
 	return result;
