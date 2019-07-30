@@ -27,8 +27,8 @@
 namespace app {
 	
 	function initialize(): void {
-		(document.getElementById("loading") as HTMLElement).style.display = "none";
-		(document.getElementById("loaded") as HTMLElement).style.removeProperty("display");
+		getElem("loading").style.display = "none";
+		getElem("loaded").style.removeProperty("display");
 		let elems = document.querySelectorAll("input[type=number], textarea");
 		for (let el of elems) {
 			if (el.id.indexOf("version-") != 0)
