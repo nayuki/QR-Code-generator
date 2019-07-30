@@ -51,7 +51,12 @@
 
 <body>
 <h1>QR Code generator demo library (JavaScript)</h1>
-<form action="#" method="get" onsubmit="return false;">
+<div id="loading">
+	<p>Loading application...</p>
+	<p>(Are the JavaScript files missing?)</p>
+	<p>(The JavaScript code needs to be compiled from the TypeScript code.)</p>
+</div>
+<form id="loaded" style="display:none" action="#" method="get" onsubmit="return false;">
 	<table class="noborder" style="width:100%">
 		<tbody>
 			<tr>
