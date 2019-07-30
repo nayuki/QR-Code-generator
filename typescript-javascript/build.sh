@@ -21,7 +21,7 @@
 #   Software.
 # 
 
-tsc --strict --lib DOM,DOM.Iterable,ES6 --target ES6 qrcodegen.ts qrcodegen-demo.ts
+tsc --strict --lib DOM,DOM.Iterable,ES6 --target ES6 qrcodegen.ts qrcodegen-input-demo.ts
 
 if [ '!' -d node_modules ]; then
 	npm install @types/node
