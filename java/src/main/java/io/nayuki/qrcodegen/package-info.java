@@ -7,7 +7,7 @@
  * <h2>Features</h2>
  * <p>Core features:</p>
  * <ul>
- *   <li><p>Available in 7 programming languages, all with nearly equal functionality: Java, JavaScript, TypeScript, Python, C++, C, Rust</p></li>
+ *   <li><p>Available in 6 programming languages, all with nearly equal functionality: Java, TypeScript/JavaScript, Python, Rust, C++, C</p></li>
  *   <li><p>Significantly shorter code but more documentation comments compared to competing libraries</p></li>
  *   <li><p>Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard</p></li>
  *   <li><p>Output formats: Raw modules/pixels of the QR symbol, SVG XML string, {@code BufferedImage} raster bitmap</p></li>
