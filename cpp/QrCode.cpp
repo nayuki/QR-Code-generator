@@ -96,19 +96,19 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	// Concatenate all segments to create the data bit string
 	BitBuffer bb;
 	for (const QrSegment &seg : segs) {
-		bb.appendBits(seg.getMode().getModeBits(), 4);
-		bb.appendBits(seg.getNumChars(), seg.getMode().numCharCountBits(version));
+		bb.appendBits(static_cast<uint32_t>(seg.getMode().getModeBits()), 4);
+		bb.appendBits(static_cast<uint32_t>(seg.getNumChars()), seg.getMode().numCharCountBits(version));
 		bb.insert(bb.end(), seg.getData().begin(), seg.getData().end());
 	}
 	if (bb.size() != static_cast<unsigned int>(dataUsedBits))
 		throw std::logic_error("Assertion error");
 	
 	// Add terminator and pad up to a byte if applicable
-	size_t dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
+	size_t dataCapacityBits = static_cast<size_t>(getNumDataCodewords(version, ecl)) * 8;
 	if (bb.size() > dataCapacityBits)
 		throw std::logic_error("Assertion error");
-	bb.appendBits(0, std::min<size_t>(4, dataCapacityBits - bb.size()));
-	bb.appendBits(0, (8 - bb.size() % 8) % 8);
+	bb.appendBits(0, std::min(4, static_cast<int>(dataCapacityBits - bb.size())));
+	bb.appendBits(0, (8 - static_cast<int>(bb.size() % 8)) % 8);
 	if (bb.size() % 8 != 0)
 		throw std::logic_error("Assertion error");
 	
@@ -135,8 +135,9 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	if (mask < -1 || mask > 7)
 		throw std::domain_error("Mask value out of range");
 	size = ver * 4 + 17;
-	modules    = vector<vector<bool> >(size, vector<bool>(size));  // Initially all white
-	isFunction = vector<vector<bool> >(size, vector<bool>(size));
+	size_t sz = static_cast<size_t>(size);
+	modules    = vector<vector<bool> >(sz, vector<bool>(sz));  // Initially all white
+	isFunction = vector<vector<bool> >(sz, vector<bool>(sz));
 	
 	// Compute ECC, draw modules
 	drawFunctionPatterns();
@@ -235,9 +236,9 @@ void QrCode::drawFunctionPatterns() {
 	
 	// Draw numerous alignment patterns
 	const vector<int> alignPatPos = getAlignmentPatternPositions();
-	int numAlign = alignPatPos.size();
-	for (int i = 0; i < numAlign; i++) {
-		for (int j = 0; j < numAlign; j++) {
+	size_t numAlign = alignPatPos.size();
+	for (size_t i = 0; i < numAlign; i++) {
+		for (size_t j = 0; j < numAlign; j++) {
 			// Don't draw on the three finder corners
 			if (!((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0)))
 				drawAlignmentPattern(alignPatPos.at(i), alignPatPos.at(j));
@@ -322,13 +323,15 @@ void QrCode::drawAlignmentPattern(int x, int y) {
 
 
 void QrCode::setFunctionModule(int x, int y, bool isBlack) {
-	modules.at(y).at(x) = isBlack;
-	isFunction.at(y).at(x) = true;
+	size_t ux = static_cast<size_t>(x);
+	size_t uy = static_cast<size_t>(y);
+	modules   .at(uy).at(ux) = isBlack;
+	isFunction.at(uy).at(ux) = true;
 }
 
 
 bool QrCode::module(int x, int y) const {
-	return modules.at(y).at(x);
+	return modules.at(static_cast<size_t>(y)).at(static_cast<size_t>(x));
 }
 
 
@@ -348,7 +351,7 @@ vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	const vector<uint8_t> rsDiv = reedSolomonComputeDivisor(blockEccLen);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
 		vector<uint8_t> dat(data.cbegin() + k, data.cbegin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
-		k += dat.size();
+		k += static_cast<int>(dat.size());
 		const vector<uint8_t> ecc = reedSolomonComputeRemainder(dat, rsDiv);
 		if (i < numShortBlocks)
 			dat.push_back(0);
@@ -382,9 +385,9 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 			right = 5;
 		for (int vert = 0; vert < size; vert++) {  // Vertical counter
 			for (int j = 0; j < 2; j++) {
-				int x = right - j;  // Actual x coordinate
+				size_t x = static_cast<size_t>(right - j);  // Actual x coordinate
 				bool upward = ((right + 1) & 2) == 0;
-				int y = upward ? size - 1 - vert : vert;  // Actual y coordinate
+				size_t y = static_cast<size_t>(upward ? size - 1 - vert : vert);  // Actual y coordinate
 				if (!isFunction.at(y).at(x) && i < data.size() * 8) {
 					modules.at(y).at(x) = getBit(data.at(i >> 3), 7 - static_cast<int>(i & 7));
 					i++;
@@ -402,8 +405,9 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 void QrCode::applyMask(int mask) {
 	if (mask < 0 || mask > 7)
 		throw std::domain_error("Mask value out of range");
-	for (int y = 0; y < size; y++) {
-		for (int x = 0; x < size; x++) {
+	size_t sz = static_cast<size_t>(size);
+	for (size_t y = 0; y < sz; y++) {
+		for (size_t x = 0; x < sz; x++) {
 			bool invert;
 			switch (mask) {
 				case 0:  invert = (x + y) % 2 == 0;                    break;
@@ -543,8 +547,8 @@ vector<uint8_t> QrCode::reedSolomonComputeDivisor(int degree) {
 		throw std::domain_error("Degree out of range");
 	// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
 	// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
-	vector<uint8_t> result(degree);
-	result.at(degree - 1) = 1;  // Start off with the monomial x^0
+	vector<uint8_t> result(static_cast<size_t>(degree));
+	result.at(result.size() - 1) = 1;  // Start off with the monomial x^0
 	
 	// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
 	// and drop the highest monomial term which is always 1x^degree.

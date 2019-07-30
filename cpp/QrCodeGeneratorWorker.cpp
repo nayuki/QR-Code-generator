@@ -26,6 +26,7 @@
  *   Software.
  */
 
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -83,7 +84,7 @@ int main() {
 		
 		try {  // Try to make QR Code symbol
 			const QrCode qr = QrCode::encodeSegments(segs,
-				ECC_LEVELS.at(errCorLvl), minVersion, maxVersion, mask, boostEcl == 1);
+				ECC_LEVELS.at(static_cast<std::size_t>(errCorLvl)), minVersion, maxVersion, mask, boostEcl == 1);
 			// Print grid of modules
 			std::cout << qr.getVersion() << std::endl;
 			for (int y = 0; y < qr.getSize(); y++) {

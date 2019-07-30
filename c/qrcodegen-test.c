@@ -107,21 +107,21 @@ static void testAppendBitsToBuffer(void) {
 // Ported from the Java version of the code.
 static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, enum qrcodegen_Ecc ecl) {
 	// Calculate parameter numbers
-	int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
-	int blockEccLen = ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
-	int rawCodewords = getNumRawDataModules(version) / 8;
-	int numShortBlocks = numBlocks - rawCodewords % numBlocks;
-	int shortBlockLen = rawCodewords / numBlocks;
+	size_t numBlocks = (size_t)NUM_ERROR_CORRECTION_BLOCKS[(int)ecl][version];
+	size_t blockEccLen = (size_t)ECC_CODEWORDS_PER_BLOCK[(int)ecl][version];
+	size_t rawCodewords = (size_t)getNumRawDataModules(version) / 8;
+	size_t numShortBlocks = numBlocks - rawCodewords % numBlocks;
+	size_t shortBlockLen = rawCodewords / numBlocks;
 	
 	// Split data into blocks and append ECC to each block
 	uint8_t **blocks = malloc(numBlocks * sizeof(uint8_t*));
 	uint8_t *generator = malloc(blockEccLen * sizeof(uint8_t));
-	reedSolomonComputeDivisor(blockEccLen, generator);
-	for (int i = 0, k = 0; i < numBlocks; i++) {
+	reedSolomonComputeDivisor((int)blockEccLen, generator);
+	for (size_t i = 0, k = 0; i < numBlocks; i++) {
 		uint8_t *block = malloc((shortBlockLen + 1) * sizeof(uint8_t));
-		int datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
+		size_t datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
 		memcpy(block, &data[k], datLen * sizeof(uint8_t));
-		reedSolomonComputeRemainder(&data[k], datLen, generator, blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
+		reedSolomonComputeRemainder(&data[k], (int)datLen, generator, (int)blockEccLen, &block[shortBlockLen + 1 - blockEccLen]);
 		k += datLen;
 		blocks[i] = block;
 	}
@@ -129,8 +129,8 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
 	uint8_t *result = malloc(rawCodewords * sizeof(uint8_t));
-	for (int i = 0, k = 0; i < shortBlockLen + 1; i++) {
-		for (int j = 0; j < numBlocks; j++) {
+	for (size_t i = 0, k = 0; i < shortBlockLen + 1; i++) {
+		for (size_t j = 0; j < numBlocks; j++) {
 			// Skip the padding byte in short blocks
 			if (i != shortBlockLen - blockEccLen || j >= numShortBlocks) {
 				result[k] = blocks[j][i];
@@ -138,7 +138,7 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 			}
 		}
 	}
-	for (int i = 0; i < numBlocks; i++)
+	for (size_t i = 0; i < numBlocks; i++)
 		free(blocks[i]);
 	free(blocks);
 	return result;
@@ -148,13 +148,13 @@ static uint8_t *addEccAndInterleaveReference(const uint8_t *data, int version, e
 static void testAddEccAndInterleave(void) {
 	for (int version = 1; version <= 40; version++) {
 		for (int ecl = 0; ecl < 4; ecl++) {
-			int dataLen = getNumDataCodewords(version, (enum qrcodegen_Ecc)ecl);
+			size_t dataLen = (size_t)getNumDataCodewords(version, (enum qrcodegen_Ecc)ecl);
 			uint8_t *pureData = malloc(dataLen * sizeof(uint8_t));
-			for (int i = 0; i < dataLen; i++)
-				pureData[i] = rand() % 256;
+			for (size_t i = 0; i < dataLen; i++)
+				pureData[i] = (uint8_t)(rand() % 256);
 			uint8_t *expectOutput = addEccAndInterleaveReference(pureData, version, (enum qrcodegen_Ecc)ecl);
 			
-			int dataAndEccLen = getNumRawDataModules(version) / 8;
+			size_t dataAndEccLen = (size_t)getNumRawDataModules(version) / 8;
 			uint8_t *paddedData = malloc(dataAndEccLen * sizeof(uint8_t));
 			memcpy(paddedData, pureData, dataLen * sizeof(uint8_t));
 			uint8_t *actualOutput = malloc(dataAndEccLen * sizeof(uint8_t));
@@ -362,7 +362,7 @@ static void testReedSolomonMultiply(void) {
 
 static void testInitializeFunctionModulesEtc(void) {
 	for (int ver = 1; ver <= 40; ver++) {
-		uint8_t *qrcode = malloc(qrcodegen_BUFFER_LEN_FOR_VERSION(ver) * sizeof(uint8_t));
+		uint8_t *qrcode = malloc((size_t)qrcodegen_BUFFER_LEN_FOR_VERSION(ver) * sizeof(uint8_t));
 		assert(qrcode != NULL);
 		initializeFunctionModules(ver, qrcode);
 		
@@ -694,8 +694,12 @@ static void testCalcSegmentBufferSize(void) {
 
 
 static void testCalcSegmentBitLength(void) {
+	struct TestCase {
+		size_t numChars;
+		int result;
+	};
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 4},
 			{2, 7},
@@ -713,17 +717,18 @@ static void testCalcSegmentBitLength(void) {
 			{9832, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 6, -1},
+			{SIZE_MAX / 3, -1},
+			{SIZE_MAX / 2, -1},
+			{SIZE_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_NUMERIC, cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_NUMERIC, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 6},
 			{2, 11},
@@ -741,19 +746,18 @@ static void testCalcSegmentBitLength(void) {
 			{5959, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 5, -1},
-			{INT_MAX / 4, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 10, -1},
+			{SIZE_MAX / 5, -1},
+			{SIZE_MAX / 2, -1},
+			{SIZE_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_ALPHANUMERIC, cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_ALPHANUMERIC, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 8},
 			{2, 16},
@@ -767,22 +771,19 @@ static void testCalcSegmentBitLength(void) {
 			{5957, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 8 + 1, -1},
-			{INT_MAX / 7, -1},
-			{INT_MAX / 6, -1},
-			{INT_MAX / 5, -1},
-			{INT_MAX / 4, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 15, -1},
+			{SIZE_MAX / 12, -1},
+			{SIZE_MAX / 7, -1},
+			{SIZE_MAX / 3, -1},
+			{SIZE_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_BYTE, cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_BYTE, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
 	{
-		const int cases[][2] = {
+		const struct TestCase CASES[] = {
 			{0, 0},
 			{1, 13},
 			{2, 26},
@@ -796,16 +797,15 @@ static void testCalcSegmentBitLength(void) {
 			{2522, -1},
 			{12000, -1},
 			{28453, -1},
-			{INT_MAX / 13 + 1, -1},
-			{INT_MAX / 12, -1},
-			{INT_MAX / 9, -1},
-			{INT_MAX / 4, -1},
-			{INT_MAX / 3, -1},
-			{INT_MAX / 2, -1},
-			{INT_MAX / 1, -1},
+			{SIZE_MAX / 25, -1},
+			{SIZE_MAX / 20, -1},
+			{SIZE_MAX / 11, -1},
+			{SIZE_MAX / 4, -1},
+			{SIZE_MAX / 2, -1},
+			{SIZE_MAX / 1, -1},
 		};
-		for (size_t i = 0; i < ARRAY_LENGTH(cases); i++) {
-			assert(calcSegmentBitLength(qrcodegen_Mode_KANJI, cases[i][0]) == cases[i][1]);
+		for (size_t i = 0; i < ARRAY_LENGTH(CASES); i++) {
+			assert(calcSegmentBitLength(qrcodegen_Mode_KANJI, CASES[i].numChars) == CASES[i].result);
 			numTestCases++;
 		}
 	}
@@ -1049,7 +1049,7 @@ static void testGetTotalBits(void) {
 /*---- Main runner ----*/
 
 int main(void) {
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	testAppendBitsToBuffer();
 	testAddEccAndInterleave();
 	testGetNumDataCodewords();

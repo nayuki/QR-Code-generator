@@ -81,13 +81,13 @@ QrSegment QrSegment::makeNumeric(const char *digits) {
 		accumData = accumData * 10 + (c - '0');
 		accumCount++;
 		if (accumCount == 3) {
-			bb.appendBits(accumData, 10);
+			bb.appendBits(static_cast<uint32_t>(accumData), 10);
 			accumData = 0;
 			accumCount = 0;
 		}
 	}
 	if (accumCount > 0)  // 1 or 2 digits remaining
-		bb.appendBits(accumData, accumCount * 3 + 1);
+		bb.appendBits(static_cast<uint32_t>(accumData), accumCount * 3 + 1);
 	return QrSegment(Mode::NUMERIC, charCount, std::move(bb));
 }
 
@@ -101,16 +101,16 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 		const char *temp = std::strchr(ALPHANUMERIC_CHARSET, *text);
 		if (temp == nullptr)
 			throw std::domain_error("String contains unencodable characters in alphanumeric mode");
-		accumData = accumData * 45 + (temp - ALPHANUMERIC_CHARSET);
+		accumData = accumData * 45 + static_cast<int>(temp - ALPHANUMERIC_CHARSET);
 		accumCount++;
 		if (accumCount == 2) {
-			bb.appendBits(accumData, 11);
+			bb.appendBits(static_cast<uint32_t>(accumData), 11);
 			accumData = 0;
 			accumCount = 0;
 		}
 	}
 	if (accumCount > 0)  // 1 character remaining
-		bb.appendBits(accumData, 6);
+		bb.appendBits(static_cast<uint32_t>(accumData), 6);
 	return QrSegment(Mode::ALPHANUMERIC, charCount, std::move(bb));
 }
 
@@ -138,13 +138,13 @@ QrSegment QrSegment::makeEci(long assignVal) {
 	if (assignVal < 0)
 		throw std::domain_error("ECI assignment value out of range");
 	else if (assignVal < (1 << 7))
-		bb.appendBits(assignVal, 8);
+		bb.appendBits(static_cast<uint32_t>(assignVal), 8);
 	else if (assignVal < (1 << 14)) {
 		bb.appendBits(2, 2);
-		bb.appendBits(assignVal, 14);
+		bb.appendBits(static_cast<uint32_t>(assignVal), 14);
 	} else if (assignVal < 1000000L) {
 		bb.appendBits(6, 3);
-		bb.appendBits(assignVal, 21);
+		bb.appendBits(static_cast<uint32_t>(assignVal), 21);
 	} else
 		throw std::domain_error("ECI assignment value out of range");
 	return QrSegment(Mode::ECI, 0, std::move(bb));
