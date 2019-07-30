@@ -1,5 +1,5 @@
 /* 
- * QR Code generator demo (TypeScript)
+ * QR Code generator input demo (TypeScript)
  * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
