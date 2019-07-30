@@ -111,7 +111,7 @@ def do_segment_demo():
 	qr = QrCode.encode_text(madoka, QrCode.Ecc.LOW)
 	print_qr(qr)
 	
-	kanjiCharBits = [  # Kanji mode encoding (13 bits per character)
+	kanjicharbits = [  # Kanji mode encoding (13 bits per character)
 		0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1,
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
 		0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
@@ -142,7 +142,7 @@ def do_segment_demo():
 		0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
 	]
-	segs = [QrSegment(QrSegment.Mode.KANJI, len(kanjiCharBits) // 13, kanjiCharBits)]
+	segs = [QrSegment(QrSegment.Mode.KANJI, len(kanjicharbits) // 13, kanjicharbits)]
 	qr = QrCode.encode_segments(segs, QrCode.Ecc.LOW)
 	print_qr(qr)
 
