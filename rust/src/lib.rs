@@ -1128,10 +1128,7 @@ impl QrSegment {
 			if seg.numchars >= 1 << ccbits {
 				return None;  // The segment's length doesn't fit the field's bit width
 			}
-			match result.checked_add(4 + (ccbits as usize) + seg.data.len()) {
-				None => return None,  // The sum will overflow a usize type
-				Some(val) => result = val,
-			}
+			result = result.checked_add(4 + (ccbits as usize) + seg.data.len())?;
 		}
 		Some(result)
 	}
