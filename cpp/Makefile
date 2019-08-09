@@ -28,12 +28,11 @@
 # - CXX: The C++ compiler, such as g++ or clang++.
 # - CXXFLAGS: Any extra user-specified compiler flags (can be blank).
 
-# Mandatory compiler flags
-CXXFLAGS += -std=c++11
-# Diagnostics. Adding '-fsanitize=address' is helpful for most versions of Clang and newer versions of GCC.
-CXXFLAGS += -Wall -fsanitize=undefined
-# Optimization level
-CXXFLAGS += -O1
+# Recommended compiler flags:
+CXXFLAGS += -std=c++11 -O
+
+# Extra flags for diagnostics:
+# CXXFLAGS += -g -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -fsanitize=undefined,address
 
 
 # ---- Controlling make ----

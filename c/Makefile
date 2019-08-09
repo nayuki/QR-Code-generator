@@ -28,12 +28,11 @@
 # - CC: The C compiler, such as gcc or clang.
 # - CFLAGS: Any extra user-specified compiler flags (can be blank).
 
-# Mandatory compiler flags
-CFLAGS += -std=c99
-# Diagnostics. Adding '-fsanitize=address' is helpful for most versions of Clang and newer versions of GCC.
-CFLAGS += -Wall -fsanitize=undefined
-# Optimization level
-CFLAGS += -O1
+# Recommended compiler flags:
+CFLAGS += -std=c99 -O
+
+# Extra flags for diagnostics:
+# CFLAGS += -g -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -fsanitize=undefined,address
 
 
 # ---- Controlling make ----
