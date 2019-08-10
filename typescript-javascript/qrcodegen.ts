@@ -435,11 +435,11 @@ namespace qrcodegen {
 			// Interleave (not concatenate) the bytes from every block into a single sequence
 			let result: Array<byte> = [];
 			for (let i = 0; i < blocks[0].length; i++) {
-				for (let j = 0; j < blocks.length; j++) {
+				blocks.forEach((block, j) => {
 					// Skip the padding byte in short blocks
 					if (i != shortBlockLen - blockEccLen || j >= numShortBlocks)
-						result.push(blocks[j][i]);
-				}
+						result.push(block[i]);
+				});
 			}
 			if (result.length != rawCodewords)
 				throw "Assertion error";

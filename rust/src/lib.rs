@@ -567,10 +567,10 @@ impl QrCode {
 		// Interleave (not concatenate) the bytes from every block into a single sequence
 		let mut result = Vec::<u8>::with_capacity(rawcodewords);
 		for i in 0 .. shortblocklen + 1 {
-			for j in 0 .. numblocks {
+			for (j, block) in blocks.iter().enumerate() {
 				// Skip the padding byte in short blocks
 				if i != shortblocklen - blockecclen || j >= numshortblocks {
-					result.push(blocks[j][i]);
+					result.push(block[i]);
 				}
 			}
 		}
