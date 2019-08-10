@@ -66,13 +66,12 @@ fn main() {
 		assert!(boostecl >> 1 == 0);
 		
 		// Make segments for encoding
-		let segs: Vec<QrSegment>;
-		if isascii {
+		let segs: Vec<QrSegment> = if isascii {
 			let chrs: Vec<char> = std::str::from_utf8(&data).unwrap().chars().collect();
-			segs = QrSegment::make_segments(&chrs);
+			QrSegment::make_segments(&chrs)
 		} else {
-			segs = vec![QrSegment::make_bytes(&data)];
-		}
+			vec![QrSegment::make_bytes(&data)]
+		};
 		
 		// Try to make QR Code symbol
 		let msk = if mask == -1 { None } else { Some(Mask::new(mask as u8)) };

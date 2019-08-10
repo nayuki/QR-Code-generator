@@ -834,8 +834,8 @@ impl QrCode {
 		let n = runhistory[1];
 		assert!(n <= self.size * 3);
 		let core = n > 0 && runhistory[2] == n && runhistory[3] == n * 3 && runhistory[4] == n && runhistory[5] == n;
-		return if core && runhistory[0] >= n * 4 && runhistory[6] >= n { 1 } else { 0 }
-		     + if core && runhistory[6] >= n * 4 && runhistory[0] >= n { 1 } else { 0 };
+		( i32::from(core && runhistory[0] >= n * 4 && runhistory[6] >= n)
+		+ i32::from(core && runhistory[6] >= n * 4 && runhistory[0] >= n))
 	}
 	
 	
@@ -1088,11 +1088,7 @@ impl QrSegment {
 	/// The character count (numchars) must agree with the mode and
 	/// the bit buffer length, but the constraint isn't checked.
 	pub fn new(mode: QrSegmentMode, numchars: usize, data: Vec<bool>) -> Self {
-		Self {
-			mode: mode,
-			numchars: numchars,
-			data: data,
-		}
+		Self { mode, numchars, data }
 	}
 	
 	
