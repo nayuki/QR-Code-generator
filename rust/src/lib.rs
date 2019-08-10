@@ -917,9 +917,9 @@ pub enum QrCodeEcc {
 impl QrCodeEcc {
 	
 	// Returns an unsigned 2-bit integer (in the range 0 to 3).
-	fn ordinal(&self) -> usize {
+	fn ordinal(self) -> usize {
 		use QrCodeEcc::*;
-		match *self {
+		match self {
 			Low      => 0,
 			Medium   => 1,
 			Quartile => 2,
@@ -929,9 +929,9 @@ impl QrCodeEcc {
 	
 	
 	// Returns an unsigned 2-bit integer (in the range 0 to 3).
-	fn format_bits(&self) -> u32 {
+	fn format_bits(self) -> u32 {
 		use QrCodeEcc::*;
-		match *self {
+		match self {
 			Low      => 1,
 			Medium   => 0,
 			Quartile => 3,
@@ -1176,9 +1176,9 @@ impl QrSegmentMode {
 	
 	// Returns an unsigned 4-bit integer value (range 0 to 15)
 	// representing the mode indicator bits for this mode object.
-	fn mode_bits(&self) -> u32 {
+	fn mode_bits(self) -> u32 {
 		use QrSegmentMode::*;
-		match *self {
+		match self {
 			Numeric      => 0x1,
 			Alphanumeric => 0x2,
 			Byte         => 0x4,
@@ -1190,9 +1190,9 @@ impl QrSegmentMode {
 	
 	// Returns the bit width of the character count field for a segment in this mode
 	// in a QR Code at the given version number. The result is in the range [0, 16].
-	fn num_char_count_bits(&self, ver: Version) -> u8 {
+	fn num_char_count_bits(self, ver: Version) -> u8 {
 		use QrSegmentMode::*;
-		(match *self {
+		(match self {
 			Numeric      => [10, 12, 14],
 			Alphanumeric => [ 9, 11, 13],
 			Byte         => [ 8, 16, 16],
@@ -1269,7 +1269,7 @@ impl Version {
 	}
 	
 	/// Returns the value, which is in the range [1, 40].
-	pub fn value(&self) -> u8 {
+	pub fn value(self) -> u8 {
 		self.0
 	}
 }
@@ -1289,7 +1289,7 @@ impl Mask {
 	}
 	
 	/// Returns the value, which is in the range [0, 7].
-	pub fn value(&self) -> u8 {
+	pub fn value(self) -> u8 {
 		self.0
 	}
 }
