@@ -442,7 +442,7 @@ impl QrCode {
 		// Calculate error correction code and pack bits
 		let size: i32 = self.size;
 		// errcorrlvl is uint2, mask is uint3
-		let data: u32 = self.errorcorrectionlevel.format_bits() << 3 | (mask.value() as u32);
+		let data: u32 = self.errorcorrectionlevel.format_bits() << 3 | u32::from(mask.value());
 		let mut rem: u32 = data;
 		for _ in 0 .. 10 {
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -480,11 +480,11 @@ impl QrCode {
 		}
 		
 		// Calculate error correction code and pack bits
-		let mut rem: u32 = self.version.value() as u32;  // version is uint6, in the range [7, 40]
+		let mut rem: u32 = u32::from(self.version.value());  // version is uint6, in the range [7, 40]
 		for _ in 0 .. 12 {
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
 		}
-		let bits: u32 = (self.version.value() as u32) << 12 | rem;  // uint18
+		let bits: u32 = u32::from(self.version.value()) << 12 | rem;  // uint18
 		assert!(bits >> 18 == 0, "Assertion error");
 		
 		// Draw two copies
@@ -596,7 +596,7 @@ impl QrCode {
 					let upward: bool = (right + 1) & 2 == 0;
 					let y: i32 = if upward { self.size - 1 - vert } else { vert };  // Actual y coordinate
 					if !self.isfunction[(y * self.size + x) as usize] && i < data.len() * 8 {
-						*self.module_mut(x, y) = get_bit(data[i >> 3] as u32, 7 - ((i & 7) as i32));
+						*self.module_mut(x, y) = get_bit(u32::from(data[i >> 3]), 7 - ((i & 7) as i32));
 						i += 1;
 					}
 					// If this QR Code has any remainder bits (0 to 7), they were assigned as
@@ -729,9 +729,9 @@ impl QrCode {
 		if ver == 1 {
 			vec![]
 		} else {
-			let numalign: i32 = (ver as i32) / 7 + 2;
+			let numalign: i32 = i32::from(ver) / 7 + 2;
 			let step: i32 = if ver == 32 { 26 } else
-				{((ver as i32)*4 + numalign*2 + 1) / (numalign*2 - 2) * 2};
+				{(i32::from(ver)*4 + numalign*2 + 1) / (numalign*2 - 2) * 2};
 			let mut result: Vec<i32> = (0 .. numalign - 1).map(
 				|i| self.size - 7 - i * step).collect();
 			result.push(6);
@@ -986,7 +986,7 @@ impl QrSegment {
 	pub fn make_bytes(data: &[u8]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
 		for b in data {
-			bb.append_bits(*b as u32, 8);
+			bb.append_bits(u32::from(*b), 8);
 		}
 		QrSegment::new(QrSegmentMode::Byte, data.len(), bb.0)
 	}
@@ -1215,7 +1215,7 @@ impl BitBuffer {
 	/// Requires len &#x2264; 31 and val &lt; 2<sup>len</sup>.
 	pub fn append_bits(&mut self, val: u32, len: u8) {
 		assert!(len <= 31 && (val >> len) == 0, "Value out of range");
-		self.0.extend((0 .. len as i32).rev().map(|i| get_bit(val, i)));  // Append bit by bit
+		self.0.extend((0 .. i32::from(len)).rev().map(|i| get_bit(val, i)));  // Append bit by bit
 	}
 }
 
