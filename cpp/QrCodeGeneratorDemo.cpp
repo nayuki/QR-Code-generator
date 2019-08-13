@@ -192,7 +192,7 @@ static void printQr(const QrCode &qr) {
 	int border = 4;
 	for (int y = -border; y < qr.getSize() + border; y++) {
 		for (int x = -border; x < qr.getSize() + border; x++) {
-			std::cout << (qr.getModule(x, y) ? "##" : "  ");
+			std::cout << (qr.getModule(x, y) ? "\033[47m  \033[0m" : "\033[40m  \033[0m");
 		}
 		std::cout << std::endl;
 	}
