@@ -190,9 +190,16 @@ static void doMaskDemo() {
 // Prints the given QrCode object to the console.
 static void printQr(const QrCode &qr) {
 	int border = 4;
+#if defined(_WINDOWS_)
+	const char* white = "##";
+	const char* black = "  ";
+#else
+	const char* white = "\e[47m  \e[0m";
+	const char* black = "\e[40m  \e[0m";
+#endif
 	for (int y = -border; y < qr.getSize() + border; y++) {
 		for (int x = -border; x < qr.getSize() + border; x++) {
-			std::cout << (qr.getModule(x, y) ? "\033[47m  \033[0m" : "\033[40m  \033[0m");
+			std::cout << (qr.getModule(x, y) ? white : black);
 		}
 		std::cout << std::endl;
 	}
