@@ -23,6 +23,7 @@
 
 package io.nayuki.qrcodegen;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
@@ -311,6 +312,17 @@ public final class QrCode {
 		}
 		return result;
 	}
+
+	public BufferedImage toImage(int width, int height, int scale, int border)
+    {
+        BufferedImage inital = toImage(scale, border);
+        Image tmp = inital.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        BufferedImage res = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = res.createGraphics();
+        g2d.drawImage(tmp, 0, 0, null);
+        g2d.dispose();
+        return res;
+    }
 	
 	
 	/**
