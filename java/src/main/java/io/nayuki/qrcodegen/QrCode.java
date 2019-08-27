@@ -23,11 +23,7 @@
 
 package io.nayuki.qrcodegen;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -315,19 +311,8 @@ public final class QrCode {
 		}
 		return result;
 	}
-
-	public BufferedImage toImage(int width, int height, int scale, int border)
-	{
-		BufferedImage ini = toImage(scale, border);
-		Image tmp = ini.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-		BufferedImage new_image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = new_image.createGraphics();
-		g2d.drawImage(tmp, 0, 0, null);
-		g2d.dispose();
-		return new_image;
-	}
-
-
+	
+	
 	/**
 	 * Returns a string of SVG code for an image depicting this QR Code, with the specified number
 	 * of border modules. The string always uses Unix newlines (\n), regardless of the platform.
