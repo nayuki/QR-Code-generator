@@ -283,7 +283,7 @@ impl QrCode {
 	/// A mid-level API is the `encode_segments()` function.
 	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mut mask: Option<Mask>) -> Self {
 		// Initialize fields
-		let size: usize = usize::from(ver.value()) * 4 + 17;
+		let size = usize::from(ver.value()) * 4 + 17;
 		let mut result = Self {
 			version: ver,
 			size: size as i32,
@@ -729,7 +729,7 @@ impl QrCode {
 		if ver == 1 {
 			vec![]
 		} else {
-			let numalign: i32 = i32::from(ver) / 7 + 2;
+			let numalign = i32::from(ver) / 7 + 2;
 			let step: i32 = if ver == 32 { 26 } else
 				{(i32::from(ver)*4 + numalign*2 + 1) / (numalign*2 - 2) * 2};
 			let mut result: Vec<i32> = (0 .. numalign - 1).map(
