@@ -266,7 +266,7 @@ impl QrCode {
 		// Pack bits into bytes in big endian
 		let mut datacodewords = vec![0u8; bb.0.len() / 8];
 		for (i, bit) in bb.0.iter().enumerate() {
-			datacodewords[i >> 3] |= (*bit as u8) << (7 - (i & 7));
+			datacodewords[i >> 3] |= u8::from(*bit) << (7 - (i & 7));
 		}
 		
 		// Create the QR Code object
@@ -283,7 +283,7 @@ impl QrCode {
 	/// A mid-level API is the `encode_segments()` function.
 	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mut mask: Option<Mask>) -> Self {
 		// Initialize fields
-		let size: usize = (ver.value() as usize) * 4 + 17;
+		let size: usize = usize::from(ver.value()) * 4 + 17;
 		let mut result = Self {
 			version: ver,
 			size: size as i32,
@@ -554,7 +554,7 @@ impl QrCode {
 		let rsdiv: Vec<u8> = QrCode::reed_solomon_compute_divisor(blockecclen);
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
-			let mut dat = data[k .. k + shortblocklen - blockecclen + ((i >= numshortblocks) as usize)].to_vec();
+			let mut dat = data[k .. k + shortblocklen - blockecclen + usize::from(i >= numshortblocks)].to_vec();
 			k += dat.len();
 			let ecc: Vec<u8> = QrCode::reed_solomon_compute_remainder(&dat, &rsdiv);
 			if i < numshortblocks {
@@ -709,7 +709,7 @@ impl QrCode {
 		// Balance of black and white modules
 		let mut black: i32 = 0;
 		for color in &self.modules {
-			black += *color as i32;
+			black += i32::from(*color);
 		}
 		let total: i32 = size * size;  // Note that size is odd, so black/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
@@ -745,7 +745,7 @@ impl QrCode {
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	fn get_num_raw_data_modules(ver: Version) -> usize {
-		let ver = ver.value() as usize;
+		let ver = usize::from(ver.value());
 		let mut result: usize = (16 * ver + 128) * ver + 64;
 		if ver >= 2 {
 			let numalign: usize = ver / 7 + 2;
@@ -770,7 +770,7 @@ impl QrCode {
 	
 	// Returns an entry from the given table based on the given values.
 	fn table_get(table: &'static [[i8; 41]; 4], ver: Version, ecl: QrCodeEcc) -> usize {
-		table[ecl.ordinal()][ver.value() as usize] as usize
+		table[ecl.ordinal()][usize::from(ver.value())] as usize
 	}
 	
 	
