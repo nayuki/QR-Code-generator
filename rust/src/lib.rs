@@ -440,14 +440,15 @@ impl QrCode {
 	// based on the given mask and this object's error correction level field.
 	fn draw_format_bits(&mut self, mask: Mask) {
 		// Calculate error correction code and pack bits
-		let size: i32 = self.size;
-		// errcorrlvl is uint2, mask is uint3
-		let data: u32 = self.errorcorrectionlevel.format_bits() << 3 | u32::from(mask.value());
-		let mut rem: u32 = data;
-		for _ in 0 .. 10 {
-			rem = (rem << 1) ^ ((rem >> 9) * 0x537);
-		}
-		let bits: u32 = (data << 10 | rem) ^ 0x5412;  // uint15
+		let bits: u32 = {
+			// errcorrlvl is uint2, mask is uint3
+			let data: u32 = self.errorcorrectionlevel.format_bits() << 3 | u32::from(mask.value());
+			let mut rem: u32 = data;
+			for _ in 0 .. 10 {
+				rem = (rem << 1) ^ ((rem >> 9) * 0x537);
+			}
+			(data << 10 | rem) ^ 0x5412  // uint15
+		};
 		assert_eq!(bits >> 15, 0, "Assertion error");
 		
 		// Draw first copy
@@ -462,6 +463,7 @@ impl QrCode {
 		}
 		
 		// Draw second copy
+		let size: i32 = self.size;
 		for i in 0 .. 8 {
 			self.set_function_module(size - 1 - i, 8, get_bit(bits, i));
 		}
@@ -480,11 +482,14 @@ impl QrCode {
 		}
 		
 		// Calculate error correction code and pack bits
-		let mut rem: u32 = u32::from(self.version.value());  // version is uint6, in the range [7, 40]
-		for _ in 0 .. 12 {
-			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
-		}
-		let bits: u32 = u32::from(self.version.value()) << 12 | rem;  // uint18
+		let bits: u32 = {
+			let data = u32::from(self.version.value());  // uint6, in the range [7, 40]
+			let mut rem: u32 = data;
+			for _ in 0 .. 12 {
+				rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
+			}
+			data << 12 | rem  // uint18
+		};
 		assert!(bits >> 18 == 0, "Assertion error");
 		
 		// Draw two copies
