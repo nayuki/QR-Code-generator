@@ -208,15 +208,13 @@ impl QrCode {
 		
 		// Find the minimal version number to use
 		let mut version = minversion;
-		let datausedbits: usize;
-		loop {
+		let datausedbits: usize = loop {
 			// Number of data bits available
 			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 			let dataused: Option<usize> = QrSegment::get_total_bits(segs, version);
 			if let Some(n) = dataused {
 				if n <= datacapacitybits {
-					datausedbits = n;
-					break;  // This version number is found to be suitable
+					break n;  // This version number is found to be suitable
 				}
 			}
 			if version.value() >= maxversion.value() {  // All versions in the range could not fit the given data
@@ -228,7 +226,7 @@ impl QrCode {
 				return Err(DataTooLong(msg));
 			}
 			version = Version::new(version.value() + 1);
-		}
+		};
 		
 		// Increase the error correction level while the data still fits in the current version number
 		for newecl in &[QrCodeEcc::Medium, QrCodeEcc::Quartile, QrCodeEcc::High] {  // From low to high
@@ -559,8 +557,9 @@ impl QrCode {
 		let rsdiv: Vec<u8> = QrCode::reed_solomon_compute_divisor(blockecclen);
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
-			let mut dat = data[k .. k + shortblocklen - blockecclen + usize::from(i >= numshortblocks)].to_vec();
-			k += dat.len();
+			let datlen: usize = shortblocklen - blockecclen + usize::from(i >= numshortblocks);
+			let mut dat = data[k .. k + datlen].to_vec();
+			k += datlen;
 			let ecc: Vec<u8> = QrCode::reed_solomon_compute_remainder(&dat, &rsdiv);
 			if i < numshortblocks {
 				dat.push(0);
@@ -712,10 +711,7 @@ impl QrCode {
 		}
 		
 		// Balance of black and white modules
-		let mut black: i32 = 0;
-		for color in &self.modules {
-			black += i32::from(*color);
-		}
+		let black: i32 = self.modules.iter().copied().map(i32::from).sum();
 		let total: i32 = size * size;  // Note that size is odd, so black/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 		let k: i32 = ((black * 20 - total * 10).abs() + total - 1) / total - 1;
