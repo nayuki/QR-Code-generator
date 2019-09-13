@@ -227,9 +227,9 @@ impl QrCode {
 		};
 		
 		// Increase the error correction level while the data still fits in the current version number
-		for newecl in &[QrCodeEcc::Medium, QrCodeEcc::Quartile, QrCodeEcc::High] {  // From low to high
-			if boostecl && datausedbits <= QrCode::get_num_data_codewords(version, *newecl) * 8 {
-				ecl = *newecl;
+		for &newecl in &[QrCodeEcc::Medium, QrCodeEcc::Quartile, QrCodeEcc::High] {  // From low to high
+			if boostecl && datausedbits <= QrCode::get_num_data_codewords(version, newecl) * 8 {
+				ecl = newecl;
 			}
 		}
 		
@@ -252,17 +252,17 @@ impl QrCode {
 		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
 		
 		// Pad with alternating bytes until data capacity is reached
-		for padbyte in [0xEC, 0x11].iter().cycle() {
+		for &padbyte in [0xEC, 0x11].iter().cycle() {
 			if bb.0.len() >= datacapacitybits {
 				break;
 			}
-			bb.append_bits(*padbyte, 8);
+			bb.append_bits(padbyte, 8);
 		}
 		
 		// Pack bits into bytes in big endian
 		let mut datacodewords = vec![0u8; bb.0.len() / 8];
-		for (i, bit) in bb.0.iter().enumerate() {
-			datacodewords[i >> 3] |= u8::from(*bit) << (7 - (i & 7));
+		for (i, &bit) in bb.0.iter().enumerate() {
+			datacodewords[i >> 3] |= u8::from(bit) << (7 - (i & 7));
 		}
 		
 		// Create the QR Code object
@@ -806,8 +806,8 @@ impl QrCode {
 		for b in data {  // Polynomial division
 			let factor: u8 = b ^ result.remove(0);
 			result.push(0);
-			for (x, y) in result.iter_mut().zip(divisor.iter()) {
-				*x ^= QrCode::reed_solomon_multiply(*y, factor);
+			for (x, &y) in result.iter_mut().zip(divisor.iter()) {
+				*x ^= QrCode::reed_solomon_multiply(y, factor);
 			}
 		}
 		result
@@ -984,8 +984,8 @@ impl QrSegment {
 	/// Any text string can be converted to UTF-8 bytes and encoded as a byte mode segment.
 	pub fn make_bytes(data: &[u8]) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
-		for b in data {
-			bb.append_bits(u32::from(*b), 8);
+		for &b in data {
+			bb.append_bits(u32::from(b), 8);
 		}
 		QrSegment::new(QrSegmentMode::Byte, data.len(), bb.0)
 	}
@@ -998,9 +998,9 @@ impl QrSegment {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u8 = 0;
-		for c in text {
-			assert!('0' <= *c && *c <= '9', "String contains non-numeric characters");
-			accumdata = accumdata * 10 + ((*c as u32) - ('0' as u32));
+		for &c in text {
+			assert!('0' <= c && c <= '9', "String contains non-numeric characters");
+			accumdata = accumdata * 10 + ((c as u32) - ('0' as u32));
 			accumcount += 1;
 			if accumcount == 3 {
 				bb.append_bits(accumdata, 10);
@@ -1025,8 +1025,8 @@ impl QrSegment {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
-		for c in text {
-			let i = ALPHANUMERIC_CHARSET.iter().position(|x| *x == *c)
+		for &c in text {
+			let i = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
 				.expect("String contains unencodable characters in alphanumeric mode");
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
@@ -1140,7 +1140,7 @@ impl QrSegment {
 	// Tests whether the given string can be encoded as a segment in numeric mode.
 	// A string is encodable iff each character is in the range 0 to 9.
 	fn is_numeric(text: &[char]) -> bool {
-		text.iter().all(|c| '0' <= *c && *c <= '9')
+		text.iter().all(|&c| '0' <= c && c <= '9')
 	}
 	
 }
