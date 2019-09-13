@@ -504,8 +504,8 @@ impl QrCode {
 	// Draws a 9*9 finder pattern including the border separator,
 	// with the center module at (x, y). Modules can be out of bounds.
 	fn draw_finder_pattern(&mut self, x: i32, y: i32) {
-		for dy in -4 .. 5 {
-			for dx in -4 .. 5 {
+		for dy in -4 ..= 4 {
+			for dx in -4 ..= 4 {
 				let xx: i32 = x + dx;
 				let yy: i32 = y + dy;
 				if 0 <= xx && xx < self.size && 0 <= yy && yy < self.size {
@@ -520,8 +520,8 @@ impl QrCode {
 	// Draws a 5*5 alignment pattern, with the center module
 	// at (x, y). All modules must be in bounds.
 	fn draw_alignment_pattern(&mut self, x: i32, y: i32) {
-		for dy in -2 .. 3 {
-			for dx in -2 .. 3 {
+		for dy in -2 ..= 2 {
+			for dx in -2 ..= 2 {
 				self.set_function_module(x + dx, y + dy, std::cmp::max(dx.abs(), dy.abs()) != 1);
 			}
 		}
@@ -570,7 +570,7 @@ impl QrCode {
 		
 		// Interleave (not concatenate) the bytes from every block into a single sequence
 		let mut result = Vec::<u8>::with_capacity(rawcodewords);
-		for i in 0 .. shortblocklen + 1 {
+		for i in 0 ..= shortblocklen {
 			for (j, block) in blocks.iter().enumerate() {
 				// Skip the padding byte in short blocks
 				if i != shortblocklen - blockecclen || j >= numshortblocks {
