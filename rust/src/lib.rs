@@ -753,6 +753,7 @@ impl QrCode {
 				result -= 36;
 			}
 		}
+		assert!(208 <= result && result <= 29648);
 		result
 	}
 	

@@ -550,6 +550,7 @@ class QrCode(object):
 			result -= (25 * numalign - 10) * numalign - 55
 			if ver >= 7:
 				result -= 36
+		assert 208 <= result <= 29648
 		return result
 	
 	

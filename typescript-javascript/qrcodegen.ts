@@ -619,6 +619,8 @@ namespace qrcodegen {
 				if (ver >= 7)
 					result -= 36;
 			}
+			if (!(208 <= result && result <= 29648))
+				throw "Assertion error";
 			return result;
 		}
 		

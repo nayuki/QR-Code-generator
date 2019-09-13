@@ -345,6 +345,7 @@ testable int getNumRawDataModules(int ver) {
 		if (ver >= 7)
 			result -= 36;
 	}
+	assert(208 <= result && result <= 29648);
 	return result;
 }
 

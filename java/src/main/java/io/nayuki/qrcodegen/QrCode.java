@@ -718,6 +718,7 @@ public final class QrCode {
 			if (ver >= 7)
 				result -= 6 * 3 * 2;  // Subtract version information
 		}
+		assert 208 <= result && result <= 29648;
 		return result;
 	}
 	
