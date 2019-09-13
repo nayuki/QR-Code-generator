@@ -165,7 +165,7 @@ impl QrCode {
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
 	pub fn encode_binary(data: &[u8], ecl: QrCodeEcc) -> Result<Self,DataTooLong> {
-		let segs: Vec<QrSegment> = vec![QrSegment::make_bytes(data)];
+		let segs: [QrSegment; 1] = [QrSegment::make_bytes(data)];
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
@@ -212,20 +212,18 @@ impl QrCode {
 			// Number of data bits available
 			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 			let dataused: Option<usize> = QrSegment::get_total_bits(segs, version);
-			if let Some(n) = dataused {
-				if n <= datacapacitybits {
-					break n;  // This version number is found to be suitable
-				}
-			}
-			if version.value() >= maxversion.value() {  // All versions in the range could not fit the given data
+			if dataused.map_or(false, |n| n <= datacapacitybits) {
+				break dataused.unwrap();  // This version number is found to be suitable
+			} else if version.value() >= maxversion.value() {  // All versions in the range could not fit the given data
 				let msg: String = match dataused {
 					None => String::from("Segment too long"),
 					Some(n) => format!("Data length = {} bits, Max capacity = {} bits",
 						n, datacapacitybits),
 				};
 				return Err(DataTooLong(msg));
+			} else {
+				version = Version::new(version.value() + 1);
 			}
-			version = Version::new(version.value() + 1);
 		};
 		
 		// Increase the error correction level while the data still fits in the current version number
@@ -1262,7 +1260,7 @@ impl Version {
 	/// Panics if the number is outside the range [1, 40].
 	pub fn new(ver: u8) -> Self {
 		assert!(QrCode_MIN_VERSION.value() <= ver && ver <= QrCode_MAX_VERSION.value(), "Version number out of range");
-		Version(ver)
+		Self(ver)
 	}
 	
 	/// Returns the value, which is in the range [1, 40].
@@ -1282,7 +1280,7 @@ impl Mask {
 	/// Panics if the number is outside the range [0, 7].
 	pub fn new(mask: u8) -> Self {
 		assert!(mask <= 7, "Mask value out of range");
-		Mask(mask)
+		Self(mask)
 	}
 	
 	/// Returns the value, which is in the range [0, 7].
