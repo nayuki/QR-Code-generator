@@ -1001,7 +1001,7 @@ impl QrSegment {
 		let mut accumcount: u8 = 0;
 		for &c in text {
 			assert!('0' <= c && c <= '9', "String contains non-numeric characters");
-			accumdata = accumdata * 10 + ((c as u32) - ('0' as u32));
+			accumdata = accumdata * 10 + (u32::from(c) - u32::from('0'));
 			accumcount += 1;
 			if accumcount == 3 {
 				bb.append_bits(accumdata, 10);
@@ -1124,7 +1124,7 @@ impl QrSegment {
 			if seg.numchars >= 1 << ccbits {
 				return None;  // The segment's length doesn't fit the field's bit width
 			}
-			result = result.checked_add(4 + (ccbits as usize) + seg.data.len())?;
+			result = result.checked_add(4 + usize::from(ccbits) + seg.data.len())?;
 		}
 		Some(result)
 	}
@@ -1194,7 +1194,7 @@ impl QrSegmentMode {
 			Byte         => [ 8, 16, 16],
 			Kanji        => [ 8, 10, 12],
 			Eci          => [ 0,  0,  0],
-		})[((ver.value() + 7) / 17) as usize]
+		})[usize::from((ver.value() + 7) / 17)]
 	}
 	
 }
