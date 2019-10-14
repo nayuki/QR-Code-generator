@@ -241,16 +241,16 @@ public final class QrCode {
 	 * @param ver the version number to use, which must be in the range 1 to 40 (inclusive)
 	 * @param ecl the error correction level to use
 	 * @param dataCodewords the bytes representing segments to encode (without ECC)
-	 * @param mask the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice
+	 * @param msk the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice
 	 * @throws NullPointerException if the byte array or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the version or mask value is out of range,
 	 * or if the data is the wrong length for the specified version and error correction level
 	 */
-	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int mask) {
+	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int msk) {
 		// Check arguments and initialize fields
 		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version value out of range");
-		if (mask < -1 || mask > 7)
+		if (msk < -1 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
 		version = ver;
 		size = ver * 4 + 17;
@@ -263,7 +263,7 @@ public final class QrCode {
 		drawFunctionPatterns();
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
-		this.mask = handleConstructorMasking(mask);
+		this.mask = handleConstructorMasking(msk);
 		isFunction = null;
 	}
 	
@@ -382,9 +382,9 @@ public final class QrCode {
 	
 	// Draws two copies of the format bits (with its own error correction code)
 	// based on the given mask and this object's error correction level field.
-	private void drawFormatBits(int mask) {
+	private void drawFormatBits(int msk) {
 		// Calculate error correction code and pack bits
-		int data = errorCorrectionLevel.formatBits << 3 | mask;  // errCorrLvl is uint2, mask is uint3
+		int data = errorCorrectionLevel.formatBits << 3 | msk;  // errCorrLvl is uint2, mask is uint3
 		int rem = data;
 		for (int i = 0; i < 10; i++)
 			rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
@@ -543,13 +543,13 @@ public final class QrCode {
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
-	private void applyMask(int mask) {
-		if (mask < 0 || mask > 7)
+	private void applyMask(int msk) {
+		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
 				boolean invert;
-				switch (mask) {
+				switch (msk) {
 					case 0:  invert = (x + y) % 2 == 0;                    break;
 					case 1:  invert = y % 2 == 0;                          break;
 					case 2:  invert = x % 3 == 0;                          break;
@@ -569,24 +569,24 @@ public final class QrCode {
 	// A messy helper function for the constructor. This QR Code must be in an unmasked state when this
 	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
 	// This method applies and returns the actual mask chosen, from 0 to 7.
-	private int handleConstructorMasking(int mask) {
-		if (mask == -1) {  // Automatically choose best mask
+	private int handleConstructorMasking(int msk) {
+		if (msk == -1) {  // Automatically choose best mask
 			int minPenalty = Integer.MAX_VALUE;
 			for (int i = 0; i < 8; i++) {
 				applyMask(i);
 				drawFormatBits(i);
 				int penalty = getPenaltyScore();
 				if (penalty < minPenalty) {
-					mask = i;
+					msk = i;
 					minPenalty = penalty;
 				}
 				applyMask(i);  // Undoes the mask due to XOR
 			}
 		}
-		assert 0 <= mask && mask <= 7;
-		applyMask(mask);  // Apply the final choice of mask
-		drawFormatBits(mask);  // Overwrite old format bits
-		return mask;  // The caller shall assign this value to the final-declared field
+		assert 0 <= msk && msk <= 7;
+		applyMask(msk);  // Apply the final choice of mask
+		drawFormatBits(msk);  // Overwrite old format bits
+		return msk;  // The caller shall assign this value to the final-declared field
 	}
 	
 	

@@ -147,7 +147,7 @@ class QrCode final {
 	 * This is a low-level API that most users should not use directly.
 	 * A mid-level API is the encodeSegments() function.
 	 */
-	public: QrCode(int ver, Ecc ecl, const std::vector<std::uint8_t> &dataCodewords, int mask);
+	public: QrCode(int ver, Ecc ecl, const std::vector<std::uint8_t> &dataCodewords, int msk);
 	
 	
 	
@@ -201,7 +201,7 @@ class QrCode final {
 	
 	// Draws two copies of the format bits (with its own error correction code)
 	// based on the given mask and this object's error correction level field.
-	private: void drawFormatBits(int mask);
+	private: void drawFormatBits(int msk);
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
@@ -245,7 +245,7 @@ class QrCode final {
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
-	private: void applyMask(int mask);
+	private: void applyMask(int msk);
 	
 	
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.

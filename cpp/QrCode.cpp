@@ -126,13 +126,13 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 }
 
 
-QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask) :
+QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) :
 		// Initialize fields and check arguments
 		version(ver),
 		errorCorrectionLevel(ecl) {
 	if (ver < MIN_VERSION || ver > MAX_VERSION)
 		throw std::domain_error("Version value out of range");
-	if (mask < -1 || mask > 7)
+	if (msk < -1 || msk > 7)
 		throw std::domain_error("Mask value out of range");
 	size = ver * 4 + 17;
 	size_t sz = static_cast<size_t>(size);
@@ -145,24 +145,24 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int mask)
 	drawCodewords(allCodewords);
 	
 	// Do masking
-	if (mask == -1) {  // Automatically choose best mask
+	if (msk == -1) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
 			applyMask(i);
 			drawFormatBits(i);
 			long penalty = getPenaltyScore();
 			if (penalty < minPenalty) {
-				mask = i;
+				msk = i;
 				minPenalty = penalty;
 			}
 			applyMask(i);  // Undoes the mask due to XOR
 		}
 	}
-	if (mask < 0 || mask > 7)
+	if (msk < 0 || msk > 7)
 		throw std::logic_error("Assertion error");
-	this->mask = mask;
-	applyMask(mask);  // Apply the final choice of mask
-	drawFormatBits(mask);  // Overwrite old format bits
+	this->mask = msk;
+	applyMask(msk);  // Apply the final choice of mask
+	drawFormatBits(msk);  // Overwrite old format bits
 	
 	isFunction.clear();
 	isFunction.shrink_to_fit();
@@ -251,9 +251,9 @@ void QrCode::drawFunctionPatterns() {
 }
 
 
-void QrCode::drawFormatBits(int mask) {
+void QrCode::drawFormatBits(int msk) {
 	// Calculate error correction code and pack bits
-	int data = getFormatBits(errorCorrectionLevel) << 3 | mask;  // errCorrLvl is uint2, mask is uint3
+	int data = getFormatBits(errorCorrectionLevel) << 3 | msk;  // errCorrLvl is uint2, msk is uint3
 	int rem = data;
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -402,14 +402,14 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 }
 
 
-void QrCode::applyMask(int mask) {
-	if (mask < 0 || mask > 7)
+void QrCode::applyMask(int msk) {
+	if (msk < 0 || msk > 7)
 		throw std::domain_error("Mask value out of range");
 	size_t sz = static_cast<size_t>(size);
 	for (size_t y = 0; y < sz; y++) {
 		for (size_t x = 0; x < sz; x++) {
 			bool invert;
-			switch (mask) {
+			switch (msk) {
 				case 0:  invert = (x + y) % 2 == 0;                    break;
 				case 1:  invert = y % 2 == 0;                          break;
 				case 2:  invert = x % 3 == 0;                          break;
