@@ -52,7 +52,7 @@ VERSION = 1.5.0
 
 # ---- Targets to build ----
 
-LIB = qrcodegen
+LIB = qrcodegencpp
 ARFILE = lib$(LIB).a
 LIBFILE = lib$(LIB).so
 # Bump the soname number when the ABI changes and gets incompatible
