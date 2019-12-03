@@ -29,7 +29,7 @@
 # - CFLAGS: Any extra user-specified compiler flags (can be blank).
 
 # Recommended compiler flags:
-CFLAGS += -std=c99 -O
+CFLAGS ?= -std=c99 -O
 
 # Extra flags for diagnostics:
 # CFLAGS += -g -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -fsanitize=undefined,address

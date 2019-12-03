@@ -29,7 +29,7 @@
 # - CXXFLAGS: Any extra user-specified compiler flags (can be blank).
 
 # Recommended compiler flags:
-CXXFLAGS += -std=c++11 -O
+CXXFLAGS ?= -std=c++11 -O
 
 # Extra flags for diagnostics:
 # CXXFLAGS += -g -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -fsanitize=undefined,address
