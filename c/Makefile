@@ -34,6 +34,8 @@ CFLAGS ?= -std=c99 -O
 # Extra flags for diagnostics:
 # CFLAGS += -g -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -fsanitize=undefined,address
 
+# Version information
+VERSION = 1.5.0
 
 # ---- Controlling make ----
 
@@ -55,8 +57,14 @@ ARFILE = lib$(LIB).a
 LIBFILE = lib$(LIB).so
 # Bump the soname number when the ABI changes and gets incompatible
 SO_NAME = $(LIBFILE).1
+REAL_NAME = $(LIBFILE).$(VERSION)
+HEADERS = qrcodegen.h
 LIBOBJ = qrcodegen.o
 MAINS = qrcodegen-demo qrcodegen-test qrcodegen-worker
+
+# define paths to install
+INCLUDEDIR ?= $(DESTDIR)/usr/include/qrcodegen
+LIBDIR ?= $(DESTDIR)/usr/lib
 
 # Build all binaries
 all: $(LIBFILE) $(ARFILE) $(MAINS)
@@ -65,6 +73,24 @@ all: $(LIBFILE) $(ARFILE) $(MAINS)
 clean:
 	rm -f -- $(LIBOBJ) $(LIBFILE) $(ARFILE) $(MAINS:=.o) $(MAINS)
 	rm -rf .deps
+
+install-shared: $(LIBFILE)
+	install -d $(LIBDIR) || true
+	install -m 0644 $(LIBFILE) $(LIBDIR)/$(REAL_NAME)
+	rm -f $(LIBDIR)/$(SO_NAME)
+	ln -s $(REAL_NAME) $(LIBDIR)/$(SO_NAME)
+	rm -f $(LIBDIR)/$(LIBFILE)
+	ln -s $(SO_NAME) $(LIBDIR)/$(LIBFILE)
+
+install-static: $(ARFILE)
+	install -d $(LIBDIR) || true
+	install -m 0644 $(ARFILE) $(LIBDIR)/$(ARFILE)
+
+install-header: $(HEADERS)
+	install -d $(INCLUDEDIR) || true
+	install -m 0644 $(HEADERS) $(INCLUDEDIR)/
+
+install: install-shared install-static install-header
 
 # Executable files
 %: %.o $(LIBFILE)
