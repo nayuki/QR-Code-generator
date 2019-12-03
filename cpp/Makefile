@@ -51,16 +51,19 @@ CXXFLAGS ?= -std=c++11 -O
 # ---- Targets to build ----
 
 LIB = qrcodegen
-LIBFILE = lib$(LIB).a
+ARFILE = lib$(LIB).a
+LIBFILE = lib$(LIB).so
+# Bump the soname number when the ABI changes and gets incompatible
+SO_NAME = $(LIBFILE).1
 LIBOBJ = QrCode.o
 MAINS = QrCodeGeneratorDemo QrCodeGeneratorWorker
 
 # Build all binaries
-all: $(LIBFILE) $(MAINS)
+all: $(LIBFILE) $(ARFILE) $(MAINS)
 
 # Delete build output
 clean:
-	rm -f -- $(LIBOBJ) $(LIBFILE) $(MAINS:=.o) $(MAINS)
+	rm -f -- $(LIBOBJ) $(LIBFILE) $(ARFILE) $(MAINS:=.o) $(MAINS)
 	rm -rf .deps
 
 # Executable files
@@ -68,8 +71,11 @@ clean:
 	$(CXX) $(CXXFLAGS) -o $@ $< -L . -l $(LIB)
 
 # The library
-$(LIBFILE): $(LIBOBJ)
+$(ARFILE): $(LIBOBJ)
 	$(AR) -crs $@ -- $^
+
+$(LIBFILE): $(LIBOBJ)
+	$(CC) -shared -Wl,-soname,$(SO_NAME) $(LDFLAGS) -o $@ $^
 
 # Object files
 %.o: %.cpp .deps/timestamp

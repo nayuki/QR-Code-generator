@@ -51,16 +51,19 @@ CFLAGS ?= -std=c99 -O
 # ---- Targets to build ----
 
 LIB = qrcodegen
-LIBFILE = lib$(LIB).a
+ARFILE = lib$(LIB).a
+LIBFILE = lib$(LIB).so
+# Bump the soname number when the ABI changes and gets incompatible
+SO_NAME = $(LIBFILE).1
 LIBOBJ = qrcodegen.o
 MAINS = qrcodegen-demo qrcodegen-test qrcodegen-worker
 
 # Build all binaries
-all: $(LIBFILE) $(MAINS)
+all: $(LIBFILE) $(ARFILE) $(MAINS)
 
 # Delete build output
 clean:
-	rm -f -- $(LIBOBJ) $(LIBFILE) $(MAINS:=.o) $(MAINS)
+	rm -f -- $(LIBOBJ) $(LIBFILE) $(ARFILE) $(MAINS:=.o) $(MAINS)
 	rm -rf .deps
 
 # Executable files
@@ -72,8 +75,11 @@ qrcodegen-test: qrcodegen-test.c $(LIBOBJ:%.o=%.c)
 	$(CC) $(CFLAGS) -DQRCODEGEN_TEST -o $@ $^
 
 # The library
-$(LIBFILE): $(LIBOBJ)
+$(ARFILE): $(LIBOBJ)
 	$(AR) -crs $@ -- $^
+
+$(LIBFILE): $(LIBOBJ)
+	$(CC) -shared -Wl,-soname,$(SO_NAME) $(LDFLAGS) -o $@ $^
 
 # Object files
 %.o: %.c .deps/timestamp
