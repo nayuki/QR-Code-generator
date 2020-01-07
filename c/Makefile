@@ -77,7 +77,7 @@ clean:
 
 install-shared: $(LIBFILE)
 	install -d $(LIBDIR) || true
-	install -m 0644 $(LIBFILE) $(LIBDIR)/$(REAL_NAME)
+	install -m 0755 $(LIBFILE) $(LIBDIR)/$(REAL_NAME)
 	rm -f $(LIBDIR)/$(SO_NAME)
 	ln -s $(REAL_NAME) $(LIBDIR)/$(SO_NAME)
 	rm -f $(LIBDIR)/$(LIBFILE)
@@ -85,7 +85,7 @@ install-shared: $(LIBFILE)
 
 install-static: $(ARFILE)
 	install -d $(LIBDIR) || true
-	install -m 0644 $(ARFILE) $(LIBDIR)/$(ARFILE)
+	install -m 0755 $(ARFILE) $(LIBDIR)/$(ARFILE)
 
 install-header: $(HEADERS)
 	install -d $(INCLUDEDIR) || true
