@@ -29,7 +29,7 @@
 # - CXXFLAGS: Any extra user-specified compiler flags (can be blank).
 
 # Recommended compiler flags:
-CXXFLAGS ?= -std=c++11 -O
+CXXFLAGS += -std=c++11
 
 # Extra flags for diagnostics:
 # CXXFLAGS += -g -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -fsanitize=undefined,address
@@ -63,8 +63,9 @@ LIBOBJ = QrCode.o
 MAINS = QrCodeGeneratorDemo QrCodeGeneratorWorker
 
 # define paths to install
-INCLUDEDIR ?= $(DESTDIR)/usr/include/qrcodegen
-LIBDIR ?= $(DESTDIR)/usr/lib
+PREFIX ?= /usr/local
+INCLUDEDIR ?= $(DESTDIR)$(PREFIX)/include/qrcodegen
+LIBDIR ?= $(DESTDIR)$(PREFIX)/lib
 
 
 # Build all binaries
@@ -102,7 +103,7 @@ $(ARFILE): $(LIBOBJ)
 	$(AR) -crs $@ -- $^
 
 $(LIBFILE): $(LIBOBJ)
-	$(CC) -shared -Wl,-soname,$(SO_NAME) $(LDFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -shared -Wl,-soname,$(SO_NAME) $(LDFLAGS) -o $@ $^
 
 # Object files
 %.o: %.cpp .deps/timestamp
