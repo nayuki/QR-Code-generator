@@ -30,7 +30,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "BitBuffer.hpp"
 #include "QrCode.hpp"
 
 using std::uint8_t;
