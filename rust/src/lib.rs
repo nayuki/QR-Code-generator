@@ -862,7 +862,7 @@ impl QrCode {
 }
 
 
-/*---- Cconstants and tables ----*/
+/*---- Constants and tables ----*/
 
 /// The minimum version number supported in the QR Code Model 2 standard.
 pub const QrCode_MIN_VERSION: Version = Version( 1);
