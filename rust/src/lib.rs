@@ -647,7 +647,7 @@ impl QrCode {
 		for y in 0 .. size {
 			let mut runcolor = false;
 			let mut runx: i32 = 0;
-			let mut runhistory = [0i32; 7];
+			let mut runhistory = FinderPenalty::new(size);
 			let mut padrun = size;  // Add white border to initial run
 			for x in 0 .. size {
 				if self.module(x, y) == runcolor {
@@ -658,22 +658,22 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
-					QrCode::finder_penalty_add_history(runx + padrun, &mut runhistory);
+					runhistory.add_history(runx + padrun);
 					padrun = 0;
 					if !runcolor {
-						result += self.finder_penalty_count_patterns(&runhistory) * PENALTY_N3;
+						result += runhistory.count_patterns() * PENALTY_N3;
 					}
 					runcolor = self.module(x, y);
 					runx = 1;
 				}
 			}
-			result += self.finder_penalty_terminate_and_count(runcolor, runx + padrun, &mut runhistory) * PENALTY_N3;
+			result += runhistory.terminate_and_count(runcolor, runx + padrun) * PENALTY_N3;
 		}
 		// Adjacent modules in column having same color, and finder-like patterns
 		for x in 0 .. size {
 			let mut runcolor = false;
 			let mut runy: i32 = 0;
-			let mut runhistory = [0i32; 7];
+			let mut runhistory = FinderPenalty::new(size);
 			let mut padrun = size;  // Add white border to initial run
 			for y in 0 .. size {
 				if self.module(x, y) == runcolor {
@@ -684,16 +684,16 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
-					QrCode::finder_penalty_add_history(runy + padrun, &mut runhistory);
+					runhistory.add_history(runy + padrun);
 					padrun = 0;
 					if !runcolor {
-						result += self.finder_penalty_count_patterns(&runhistory) * PENALTY_N3;
+						result += runhistory.count_patterns() * PENALTY_N3;
 					}
 					runcolor = self.module(x, y);
 					runy = 1;
 				}
 			}
-			result += self.finder_penalty_terminate_and_count(runcolor, runy + padrun, &mut runhistory) * PENALTY_N3;
+			result += runhistory.terminate_and_count(runcolor, runy + padrun) * PENALTY_N3;
 		}
 		
 		// 2*2 blocks of modules having same color
@@ -827,36 +827,57 @@ impl QrCode {
 		z
 	}
 	
+}
+
+
+/*---- Helper struct for get_penalty_score() ----*/
+
+struct FinderPenalty {
+	qr_size: i32,
+	run_history: [i32; 7],
+}
+
+
+impl FinderPenalty {
 	
-	// Can only be called immediately after a white run is added, and
-	// returns either 0, 1, or 2. A helper function for get_penalty_score().
-	fn finder_penalty_count_patterns(&self, runhistory: &[i32;7]) -> i32 {
-		let n = runhistory[1];
-		assert!(n <= self.size * 3);
-		let core = n > 0 && runhistory[2] == n && runhistory[3] == n * 3 && runhistory[4] == n && runhistory[5] == n;
-		( i32::from(core && runhistory[0] >= n * 4 && runhistory[6] >= n)
-		+ i32::from(core && runhistory[6] >= n * 4 && runhistory[0] >= n))
+	pub fn new(size: i32) -> Self {
+		Self {
+			qr_size: size,
+			run_history: [0i32; 7],
+		}
 	}
 	
 	
-	// Must be called at the end of a line (row or column) of modules. A helper function for get_penalty_score().
-	fn finder_penalty_terminate_and_count(&self, currentruncolor: bool, mut currentrunlength: i32, runhistory: &mut [i32;7]) -> i32 {
+	// Pushes the given value to the front and drops the last value.
+	pub fn add_history(&mut self, currentrunlength: i32) {
+		let rh = &mut self.run_history;
+		for i in (0 .. rh.len()-1).rev() {
+			rh[i + 1] = rh[i];
+		}
+		rh[0] = currentrunlength;
+	}
+	
+	
+	// Can only be called immediately after a white run is added, and returns either 0, 1, or 2.
+	pub fn count_patterns(&self) -> i32 {
+		let rh = &self.run_history;
+		let n = rh[1];
+		assert!(n <= self.qr_size * 3);
+		let core = n > 0 && rh[2] == n && rh[3] == n * 3 && rh[4] == n && rh[5] == n;
+		( i32::from(core && rh[0] >= n * 4 && rh[6] >= n)
+		+ i32::from(core && rh[6] >= n * 4 && rh[0] >= n))
+	}
+	
+	
+	// Must be called at the end of a line (row or column) of modules.
+	pub fn terminate_and_count(mut self, currentruncolor: bool, mut currentrunlength: i32) -> i32 {
 		if currentruncolor {  // Terminate black run
-			QrCode::finder_penalty_add_history(currentrunlength, runhistory);
+			self.add_history(currentrunlength);
 			currentrunlength = 0;
 		}
-		currentrunlength += self.size;  // Add white border to final run
-		QrCode::finder_penalty_add_history(currentrunlength, runhistory);
-		self.finder_penalty_count_patterns(runhistory)
-	}
-	
-	
-	// Pushes the given value to the front and drops the last value. A helper function for get_penalty_score().
-	fn finder_penalty_add_history(currentrunlength: i32, runhistory: &mut [i32;7]) {
-		for i in (0 .. runhistory.len()-1).rev() {
-			runhistory[i + 1] = runhistory[i];
-		}
-		runhistory[0] = currentrunlength;
+		currentrunlength += self.qr_size;  // Add white border to final run
+		self.add_history(currentrunlength);
+		self.count_patterns()
 	}
 	
 }
