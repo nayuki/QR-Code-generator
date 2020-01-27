@@ -648,7 +648,6 @@ impl QrCode {
 			let mut runcolor = false;
 			let mut runx: i32 = 0;
 			let mut runhistory = FinderPenalty::new(size);
-			let mut padrun = size;  // Add white border to initial run
 			for x in 0 .. size {
 				if self.module(x, y) == runcolor {
 					runx += 1;
@@ -658,8 +657,7 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
-					runhistory.add_history(runx + padrun);
-					padrun = 0;
+					runhistory.add_history(runx);
 					if !runcolor {
 						result += runhistory.count_patterns() * PENALTY_N3;
 					}
@@ -667,14 +665,13 @@ impl QrCode {
 					runx = 1;
 				}
 			}
-			result += runhistory.terminate_and_count(runcolor, runx + padrun) * PENALTY_N3;
+			result += runhistory.terminate_and_count(runcolor, runx) * PENALTY_N3;
 		}
 		// Adjacent modules in column having same color, and finder-like patterns
 		for x in 0 .. size {
 			let mut runcolor = false;
 			let mut runy: i32 = 0;
 			let mut runhistory = FinderPenalty::new(size);
-			let mut padrun = size;  // Add white border to initial run
 			for y in 0 .. size {
 				if self.module(x, y) == runcolor {
 					runy += 1;
@@ -684,8 +681,7 @@ impl QrCode {
 						result += 1;
 					}
 				} else {
-					runhistory.add_history(runy + padrun);
-					padrun = 0;
+					runhistory.add_history(runy);
 					if !runcolor {
 						result += runhistory.count_patterns() * PENALTY_N3;
 					}
@@ -693,7 +689,7 @@ impl QrCode {
 					runy = 1;
 				}
 			}
-			result += runhistory.terminate_and_count(runcolor, runy + padrun) * PENALTY_N3;
+			result += runhistory.terminate_and_count(runcolor, runy) * PENALTY_N3;
 		}
 		
 		// 2*2 blocks of modules having same color
@@ -849,7 +845,10 @@ impl FinderPenalty {
 	
 	
 	// Pushes the given value to the front and drops the last value.
-	pub fn add_history(&mut self, currentrunlength: i32) {
+	pub fn add_history(&mut self, mut currentrunlength: i32) {
+		if self.run_history[0] == 0 {
+			currentrunlength += self.qr_size;  // Add white border to initial run
+		}
 		let rh = &mut self.run_history;
 		for i in (0 .. rh.len()-1).rev() {
 			rh[i + 1] = rh[i];
