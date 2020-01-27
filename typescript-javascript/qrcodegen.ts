@@ -572,12 +572,8 @@ namespace qrcodegen {
 			
 			// Balance of black and white modules
 			let black: int = 0;
-			for (const row of this.modules) {
-				for (const color of row) {
-					if (color)
-						black++;
-				}
-			}
+			for (const row of this.modules)
+				black = row.reduce((sum, color) => sum + (color ? 1 : 0), black);
 			const total: int = this.size * this.size;  // Note that size is odd, so black/total != 1/2
 			// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 			const k: int = Math.ceil(Math.abs(black * 20 - total * 10) / total) - 1;
