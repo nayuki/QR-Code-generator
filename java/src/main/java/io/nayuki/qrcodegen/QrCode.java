@@ -596,11 +596,10 @@ public final class QrCode {
 		int result = 0;
 		
 		// Adjacent modules in row having same color, and finder-like patterns
-		int[] runHistory = new int[7];
 		for (int y = 0; y < size; y++) {
 			boolean runColor = false;
 			int runX = 0;
-			Arrays.fill(runHistory, 0);
+			int[] runHistory = new int[7];
 			int padRun = size;  // Add white border to initial run
 			for (int x = 0; x < size; x++) {
 				if (modules[y][x] == runColor) {
@@ -624,7 +623,7 @@ public final class QrCode {
 		for (int x = 0; x < size; x++) {
 			boolean runColor = false;
 			int runY = 0;
-			Arrays.fill(runHistory, 0);
+			int[] runHistory = new int[7];
 			int padRun = size;  // Add white border to initial run
 			for (int y = 0; y < size; y++) {
 				if (modules[y][x] == runColor) {
