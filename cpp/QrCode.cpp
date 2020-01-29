@@ -625,7 +625,6 @@ long QrCode::getPenaltyScore() const {
 		bool runColor = false;
 		int runX = 0;
 		std::array<int,7> runHistory = {};
-		int padRun = size;  // Add white border to initial run
 		for (int x = 0; x < size; x++) {
 			if (module(x, y) == runColor) {
 				runX++;
@@ -634,22 +633,20 @@ long QrCode::getPenaltyScore() const {
 				else if (runX > 5)
 					result++;
 			} else {
-				finderPenaltyAddHistory(runX + padRun, runHistory);
-				padRun = 0;
+				finderPenaltyAddHistory(runX, runHistory);
 				if (!runColor)
 					result += finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
 				runColor = module(x, y);
 				runX = 1;
 			}
 		}
-		result += finderPenaltyTerminateAndCount(runColor, runX + padRun, runHistory) * PENALTY_N3;
+		result += finderPenaltyTerminateAndCount(runColor, runX, runHistory) * PENALTY_N3;
 	}
 	// Adjacent modules in column having same color, and finder-like patterns
 	for (int x = 0; x < size; x++) {
 		bool runColor = false;
 		int runY = 0;
 		std::array<int,7> runHistory = {};
-		int padRun = size;  // Add white border to initial run
 		for (int y = 0; y < size; y++) {
 			if (module(x, y) == runColor) {
 				runY++;
@@ -658,15 +655,14 @@ long QrCode::getPenaltyScore() const {
 				else if (runY > 5)
 					result++;
 			} else {
-				finderPenaltyAddHistory(runY + padRun, runHistory);
-				padRun = 0;
+				finderPenaltyAddHistory(runY, runHistory);
 				if (!runColor)
 					result += finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
 				runColor = module(x, y);
 				runY = 1;
 			}
 		}
-		result += finderPenaltyTerminateAndCount(runColor, runY + padRun, runHistory) * PENALTY_N3;
+		result += finderPenaltyTerminateAndCount(runColor, runY, runHistory) * PENALTY_N3;
 	}
 	
 	// 2*2 blocks of modules having same color
@@ -807,7 +803,9 @@ int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunL
 }
 
 
-void QrCode::finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory) {
+void QrCode::finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory) const {
+	if (runHistory.at(0) == 0)
+		currentRunLength += size;  // Add white border to initial run
 	std::copy_backward(runHistory.cbegin(), runHistory.cend() - 1, runHistory.end());
 	runHistory.at(0) = currentRunLength;
 }

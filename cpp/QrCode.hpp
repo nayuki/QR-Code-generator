@@ -482,7 +482,7 @@ class QrCode final {
 	
 	
 	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
-	private: static void finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory);
+	private: void finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory) const;
 	
 	
 	// Returns true iff the i'th bit of x is set to 1.

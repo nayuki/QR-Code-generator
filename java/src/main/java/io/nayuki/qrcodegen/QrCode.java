@@ -600,7 +600,6 @@ public final class QrCode {
 			boolean runColor = false;
 			int runX = 0;
 			int[] runHistory = new int[7];
-			int padRun = size;  // Add white border to initial run
 			for (int x = 0; x < size; x++) {
 				if (modules[y][x] == runColor) {
 					runX++;
@@ -609,22 +608,20 @@ public final class QrCode {
 					else if (runX > 5)
 						result++;
 				} else {
-					finderPenaltyAddHistory(runX + padRun, runHistory);
-					padRun = 0;
+					finderPenaltyAddHistory(runX, runHistory);
 					if (!runColor)
 						result += finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
 					runColor = modules[y][x];
 					runX = 1;
 				}
 			}
-			result += finderPenaltyTerminateAndCount(runColor, runX + padRun, runHistory) * PENALTY_N3;
+			result += finderPenaltyTerminateAndCount(runColor, runX, runHistory) * PENALTY_N3;
 		}
 		// Adjacent modules in column having same color, and finder-like patterns
 		for (int x = 0; x < size; x++) {
 			boolean runColor = false;
 			int runY = 0;
 			int[] runHistory = new int[7];
-			int padRun = size;  // Add white border to initial run
 			for (int y = 0; y < size; y++) {
 				if (modules[y][x] == runColor) {
 					runY++;
@@ -633,15 +630,14 @@ public final class QrCode {
 					else if (runY > 5)
 						result++;
 				} else {
-					finderPenaltyAddHistory(runY + padRun, runHistory);
-					padRun = 0;
+					finderPenaltyAddHistory(runY, runHistory);
 					if (!runColor)
 						result += finderPenaltyCountPatterns(runHistory) * PENALTY_N3;
 					runColor = modules[y][x];
 					runY = 1;
 				}
 			}
-			result += finderPenaltyTerminateAndCount(runColor, runY + padRun, runHistory) * PENALTY_N3;
+			result += finderPenaltyTerminateAndCount(runColor, runY, runHistory) * PENALTY_N3;
 		}
 		
 		// 2*2 blocks of modules having same color
@@ -814,7 +810,9 @@ public final class QrCode {
 	
 	
 	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
-	private static void finderPenaltyAddHistory(int currentRunLength, int[] runHistory) {
+	private void finderPenaltyAddHistory(int currentRunLength, int[] runHistory) {
+		if (runHistory[0] == 0)
+			currentRunLength += size;  // Add white border to initial run
 		System.arraycopy(runHistory, 0, runHistory, 1, runHistory.length - 1);
 		runHistory[0] = currentRunLength;
 	}

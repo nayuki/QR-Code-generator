@@ -467,7 +467,6 @@ class QrCode(object):
 			runcolor = False
 			runx = 0
 			runhistory = collections.deque([0] * 7, 7)
-			padrun = size  # Add white border to initial run
 			for x in range(size):
 				if modules[y][x] == runcolor:
 					runx += 1
@@ -476,19 +475,17 @@ class QrCode(object):
 					elif runx > 5:
 						result += 1
 				else:
-					runhistory.appendleft(runx + padrun)
-					padrun = 0
+					self._finder_penalty_add_history(runx, runhistory)
 					if not runcolor:
 						result += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
 					runcolor = modules[y][x]
 					runx = 1
-			result += self._finder_penalty_terminate_and_count(runcolor, runx + padrun, runhistory) * QrCode._PENALTY_N3
+			result += self._finder_penalty_terminate_and_count(runcolor, runx, runhistory) * QrCode._PENALTY_N3
 		# Adjacent modules in column having same color, and finder-like patterns
 		for x in range(size):
 			runcolor = False
 			runy = 0
 			runhistory = collections.deque([0] * 7, 7)
-			padrun = size  # Add white border to initial run
 			for y in range(size):
 				if modules[y][x] == runcolor:
 					runy += 1
@@ -497,13 +494,12 @@ class QrCode(object):
 					elif runy > 5:
 						result += 1
 				else:
-					runhistory.appendleft(runy + padrun)
-					padrun = 0
+					self._finder_penalty_add_history(runy, runhistory)
 					if not runcolor:
 						result += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
 					runcolor = modules[y][x]
 					runy = 1
-			result += self._finder_penalty_terminate_and_count(runcolor, runy + padrun, runhistory) * QrCode._PENALTY_N3
+			result += self._finder_penalty_terminate_and_count(runcolor, runy, runhistory) * QrCode._PENALTY_N3
 		
 		# 2*2 blocks of modules having same color
 		for y in range(size - 1):
@@ -628,11 +624,17 @@ class QrCode(object):
 	def _finder_penalty_terminate_and_count(self, currentruncolor, currentrunlength, runhistory):
 		"""Must be called at the end of a line (row or column) of modules. A helper function for _get_penalty_score()."""
 		if currentruncolor:  # Terminate black run
-			runhistory.appendleft(currentrunlength)
+			self._finder_penalty_add_history(currentrunlength, runhistory)
 			currentrunlength = 0
 		currentrunlength += self._size  # Add white border to final run
-		runhistory.appendleft(currentrunlength)
+		self._finder_penalty_add_history(currentrunlength, runhistory)
 		return self._finder_penalty_count_patterns(runhistory)
+	
+	
+	def _finder_penalty_add_history(self, currentrunlength, runhistory):
+		if runhistory[0] == 0:
+			currentrunlength += self._size  # Add white border to initial run
+		runhistory.appendleft(currentrunlength)
 	
 	
 	# ---- Constants and tables ----
