@@ -103,7 +103,7 @@
 ///   appropriate version number, and call the `QrCode::encode_codewords()` constructor.
 /// 
 /// (Note that all ways require supplying the desired error correction level.)
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct QrCode {
 	
 	// Scalar parameters:
@@ -921,7 +921,7 @@ static NUM_ERROR_CORRECTION_BLOCKS: [[i8; 41]; 4] = [
 /*---- QrCodeEcc functionality ----*/
 
 /// The error correction level in a QR Code symbol.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum QrCodeEcc {
 	/// The QR Code can tolerate about  7% erroneous codewords.
 	Low     ,
@@ -977,7 +977,7 @@ impl QrCodeEcc {
 /// This segment struct imposes no length restrictions, but QR Codes have restrictions.
 /// Even in the most favorable conditions, a QR Code can only hold 7089 characters of data.
 /// Any segment longer than this is meaningless for the purpose of generating QR Codes.
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct QrSegment {
 	
 	// The mode indicator of this segment. Accessed through mode().
@@ -1178,7 +1178,7 @@ static ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6','7','8','
 /*---- QrSegmentMode functionality ----*/
 
 /// Describes how a segment's data bits are interpreted.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum QrSegmentMode {
 	Numeric,
 	Alphanumeric,
@@ -1272,7 +1272,7 @@ impl std::fmt::Display for DataTooLong {
 
 
 /// A number between 1 and 40 (inclusive).
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Version(u8);
 
 impl Version {
@@ -1292,7 +1292,7 @@ impl Version {
 
 
 /// A number between 0 and 7 (inclusive).
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Mask(u8);
 
 impl Mask {
