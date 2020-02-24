@@ -499,4 +499,78 @@ struct QRCode {
 			}
 		}
 	}
+
+	/// Calculates and returns the penalty score based on state of this QR Code's current modules.
+	/// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+	private func getPenaltyScore() -> Int {
+		var result: Int = 0
+		
+		// Adjacent modules in row having same color and finder-like patterns
+		for y in 0..<size {
+			var runColor = false
+			var runX: Int = 0
+			var runHistory = FinderPenalty(size)
+			for x in 0..<size {
+				if self[x, y] == runColor {
+					runX += 1
+					if runX == 5 {
+						result += penaltyN1
+					} else if runX > 5 {
+						result += 1
+					}
+				} else {
+					runHistory.addHistory(runLength: runX)
+					if !runColor {
+						result += runHistory.countPatterns() * penaltyN3
+					}
+					runColor = self[x, y]
+					runX = 1
+				}
+			}
+			result += runHistory.terminateAndCount(runColor: runColor, runLength: runX) * penaltyN3
+		}
+		
+		// Adjacent modules in column having same color and finder-like patterns
+		for x in 0..<size {
+			var runColor = false
+			var runY: Int = 0
+			var runHistory = FinderPenalty(size)
+			for y in 0..<size {
+				if self[x, y] == runColor {
+					runY += 1
+					if runY == 5 {
+						result += penaltyN1
+					} else if runY > 5 {
+						result += 1
+					}
+				} else {
+					runHistory.addHistory(runLength: runY)
+					if !runColor {
+						result += runHistory.countPatterns() * penaltyN3
+					}
+					runColor = self[x, y]
+					runY = 1
+				}
+			}
+			result += runHistory.terminateAndCount(runColor: runColor, runLength: runY) * penaltyN3
+		}
+		
+		// 2*2 blocks of modules having same color
+		for y in 0..<(size - 1) {
+			for x in 0..<(size - 1) {
+				let color: Bool = self[x, y]
+				if color == self[x + 1, y] && color == self[x, y + 1] && color == self[x + 1, y + 1] {
+					result += penaltyN2
+				}
+			}
+		}
+		
+		// Balance of black and white modules
+		let black: Int = modules.map(Int.init).sum()
+		let total: Int = size * size // Note that size is odd, so black/total != 1/2
+		// Compute the smallest integer k >= 0 such that (45 - 5k)% <= black/total <= (55+5k)%
+		let k: Int = (abs(black * 20 - total * 10) + total - 1) / total - 1
+		result += k * penaltyN4
+		return result
+	}
 }
