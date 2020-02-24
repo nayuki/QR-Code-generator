@@ -367,4 +367,36 @@ struct QRCode {
 			setFunctionModule(x: b, y: a, isBlack: bit)
 		}
 	}
+	
+	/// Draws a 9*9 finder pattern including the border separator,
+	/// with the center module at (x, y). Modules can be out of bounds.
+	private mutating func drawFinderPattern(x: Int, y: Int) {
+		for dy in -4...4 {
+			for dx in -4...4 {
+				let xx: Int = x + dx
+				let yy: Int = y + dy
+				if 0 <= xx && xx < size && 0 <= yy && yy < size {
+					let dist: Int = max(abs(dx), abs(dy))
+					setFunctionModule(x: xx, y: yy, isBlack: dist != 2 && dist != 4)
+				}
+			}
+		}
+	}
+	
+	/// Draws a 5*5 alignment pattern, with the center module
+	/// at (x, y). All modules must be in bounds.
+	private mutating func drawAlignmentPattern(x: Int, y: Int) {
+		for dy in -2...2 {
+			for dx in -2...2 {
+				setFunctionModule(x: x + dx, y: y + dy, isBlack: max(abs(dx), abs(dy)) != 1)
+			}
+		}
+	}
+	
+	/// Sets the color of a module and marks it as a function mdoule.
+	/// Only used by the constructor. Coordinates must be in bounds.
+	private mutating func setFunctionModule(x: Int, y: Int, isBlack: Bool) {
+		self[x, y] = isBlack
+		isFunction[y * size + x] = true
+	}
 }
