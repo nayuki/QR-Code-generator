@@ -33,7 +33,7 @@ public struct BitBuffer {
 	/// Appends the given number of low-order bits of the given value to this buffer.
 	/// 
 	/// Requires len &#x2264; 31 and val &lt; 2<sup>len</sup>.
-	public mutating func writeBits(_ value: UInt32, _ length: Int) {
+	public mutating func appendBits(_ value: UInt32, _ length: Int) {
 		assert(length <= 31 && (value >> length) == 0, "Value out of range")
 		bits.append((0..<length).reversed().map { getBit(value, $0) })
 	}
