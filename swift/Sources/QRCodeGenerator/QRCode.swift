@@ -21,6 +21,9 @@
  *   Software.
  */
 
+import BinaryKit
+import Foundation
+
 struct QRCode {
 	// Scalar parameters:
 
@@ -35,7 +38,7 @@ struct QRCode {
 	/// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
 	/// Even if a QR Code is created with automatic masking requested (mask = None),
 	/// the resulting object still has a mask value between 0 and 7.
-	private let mask: Mask
+	private let mask: QRCodeMask
 
 	// Grids of modules/pixels, with dimensions of size*size:
 	
@@ -46,5 +49,141 @@ struct QRCode {
 	/// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
 	private let isFunction: [Bool]
 	
-	// TODO: Implement methods
+	/*---- Static factory functions (high level) ----*/
+
+	/// Returns a QR Code representing the given Unicode text string at the given error correction level.
+	/// 
+	/// As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer Unicode
+	/// code points (not UTF-8 code units) if the low error correction level is used. The smallest possible
+	/// QR Code version is automatically chosen for the output. The ECC level of the result may be higher than
+	/// the ecl argument if it can be done without increasing the version.
+	/// 
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the
+	/// data is too long to fit in any version at the given ECC level.
+	public static func encode(text: String, ecl: QRCodeECC) throws -> Self {
+		let chrs = Array(text)
+		let segs = QRSegment.makeSegments(chrs)
+		return try QRCode.encode(segments: segs, ecl: ecl)
+	}
+	
+	/// Returns a QR Code representing the given binary data at the given error correction level.
+	/// 
+	/// This function always encodes using the binary segment mode, not any text mode. The maximum number of
+	/// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
+	/// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
+	/// 
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the
+	/// data is too long to fit in any version at the given ECC level.
+	public static func encode(binary data: [UInt8], ecl: QRCodeECC) throws -> Self {
+		let segs = [QRSegment.make(bytes: data)]
+		return try QRCode.encode(segments: segs, ecl: ecl)
+	}
+	
+	/*---- Static factory functions (mid level) ----*/
+	
+	/// Returns a QR Code representing the given segments at the given error correction level.
+	/// 
+	/// The smallest possible QR Code version is automatically chosen for the output. The ECC level
+	/// of the result may be higher than the ecl argument if it can be done without increasing the version.
+	/// 
+	/// This function allows the user to create a custom sequence of segments that switches
+	/// between modes (such as alphanumeric and byte) to encode text in less space.
+	/// This is a mid-level API; the high-level API is `encode_text()` and `encode_binary()`.
+	/// 
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the
+	/// data is too long to fit in any version at the given ECC level.
+	public static func encode(segments: [QRSegment], ecl: QRCodeECC) throws -> Self {
+		try QRCode.encodeAdvanced(segments: segments, ecl: ecl, minVersion: qrCodeMinVersion, maxVersion: qrCodeMaxVersion, boostECL: true)
+	}
+	
+	/// Returns a QR Code representing the given segments with the given encoding parameters.
+	/// 
+	/// The smallest possible QR Code version within the given range is automatically
+	/// chosen for the output. Iff boostecl is `true`, then the ECC level of the result
+	/// may be higher than the ecl argument if it can be done without increasing the
+	/// version. The mask number is either between 0 to 7 (inclusive) to force that
+	/// mask, or `None` to automatically choose an appropriate mask (which may be slow).
+	/// 
+	/// This function allows the user to create a custom sequence of segments that switches
+	/// between modes (such as alphanumeric and byte) to encode text in less space.
+	/// This is a mid-level API; the high-level API is `encode_text()` and `encode_binary()`.
+	/// 
+	/// Returns a wrapped `QrCode` if successful, or `Err` if the data is too
+	/// long to fit in any version in the given range at the given ECC level.
+	public static func encodeAdvanced(segments: [QRSegment], ecl: QRCodeECC, minVersion: QRCodeVersion, maxVersion: QRCodeVersion, mask: QRCodeMask? = nil, boostECL: Bool) throws -> Self {
+		assert(minVersion <= maxVersion, "Invalid value")
+		
+		// Find the minimal version number to use
+		var version = minVersion
+		var dataUsedBits: UInt!
+		while true {
+			// Number of data bits available
+			let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: ecl) * 8
+			let dataUsed: UInt? = QRSegment.getTotalBits(segments: segments, version: version)
+			if let used = dataUsed, used <= dataCapacityBits {
+				// The version number is found to be suitable
+				dataUsedBits = used
+				break
+			} else if version >= maxVersion {
+				let msg: String
+				if let used = dataUsed {
+					msg = "Data length = \(used) bits, Max capacity = \(dataCapacityBits) bits"
+				} else {
+					msg = "Segment too long"
+				}
+			} else {
+				version = QRCodeVersion(version.value + 1)
+			}
+		}
+		
+		// Increase error correction level while the data still fits in the current version number
+		for newECL in [QRCodeECC.medium, QRCodeECC.quartile, QRCodeECC.high] {
+			if boostECL && dataUsedBits <= QRCode.getNumDataCodewords(version: version, ecl: newECL) * 8 {
+				ecl = newECL
+			}
+		}
+		
+		// Concatenate all segments to create the data bit string
+		var bb = BitBuffer()
+		for seg in segments {
+			bb.appendBits(seg.mode.modeBits(), 4)
+			bb.appendBits(UInt32(seg.numChars), seg.mode.numCharCountBits(version: version))
+			bb.values += seg.data
+		}
+		
+		assert(bb.count == dataUsedBits)
+		
+		// Add terminator and pad up to a byte if applicable
+		let dataCapacityBits: UInt = QRCode.getNumDataCodeWords(version: version, ecl: ecl)
+		assert(bb.count <= dataCapacityBits)
+		var numZeroBits = min(4, dataCapacityBits - bb.count)
+		bb.appendBits(0, UInt8(numZeroBits))
+		numZeroBits = (0 &- bb.count) & 7
+		bb.appendBits(0, UInt8(numZeroBits))
+		assert(bb.count % 8 == 0)
+		
+		// Pad with alternating bytes until data capacity is reached
+		let padBytes = [0xEC, 0x11]
+		var i = 0
+		while bb.count < dataCapacityBits {
+			bb.appendBits(padBytes[i], 8)
+			i += 1
+			if i >= padBytes.count {
+				i = 0
+			}
+		}
+		
+		// Pack bits into bytes in big endian
+		var dataCodeWords = [UInt8](repeating: 0, bb.count / 8)
+		for (i, bit) in bb.values.enumerated() {
+			dataCodeWords[i >> 3] |= UInt8(bit) << (7 - (i & 7))
+		}
+		
+		// Create the QRCode object
+		return QRCode.encodeCodewords(version: version, ecl: ecl, dataCodeWords: dataCodeWords, mask: mask)
+	}
+	
+	/*---- Constructor (low level) ----*/
+	
+	// TODO
 }
