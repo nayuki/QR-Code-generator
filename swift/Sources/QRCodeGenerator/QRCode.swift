@@ -674,4 +674,50 @@ struct QRCode {
 		}
 		return z
 	}
+
+	/*---- Helper struct for get_penalty_score() ----*/
+	
+	private struct FinderPenalty {
+		let qrSize: Int
+		let runHistory: [Int]
+		
+		init(_ qrSize: Int) {
+			self.qrSize = qrSize
+			runHistory = Array(repeating: 0, count: 7)
+		}
+
+		/// Pushes the given value to the front and drops the last value.
+		mutating func addHistory(runLength: Int) {
+			var currentRunLength = runLength
+			if runHistory[0] == 0 {
+				currentRunLength += qrSize
+			}
+			for i in (0..<(runHistory.count - 1)).reversed() {
+				runHistory[i + 1] = runHistory[i]
+			}
+			runHistory[0] = currentRunLength
+		}
+
+		/// Can only be called immediately after a white run is added and
+		/// returns either 0, 1 or 2.
+		func countPatterns() -> Int {
+			let n = runHistory[1]
+			assert(n <= qrSize * 3)
+			let core = n > 0 && runHistory[2] == n && runHistory[3] == n && runHistory[4] == n && runHistory[5] == n
+			return ((core && runHistory[0] >= n * 4 && runHistory[6] >= n) ? 1 : 0)
+				 + ((core && runHistory[6] >= n * 4 && runHistory[0] >= n) ? 1 : 0)
+		}
+		
+		/// Must be called at the end of a line (row or column) of modules.
+		mutating func terminateAndCount(runColor: Bool, runLength: Int) -> Int {
+			var currentRunLength = runLength
+			if runColor { // Terminate black run
+				addHistory(runLength: runLength)
+				currentRunLength = 0
+			}
+			currentRunLength += qrSize // Add white border to final run
+			addHistory(runLength: currentRunLength)
+			countPatterns()
+		}
+	}
 }
