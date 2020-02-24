@@ -399,4 +399,50 @@ struct QRCode {
 		self[x, y] = isBlack
 		isFunction[y * size + x] = true
 	}
+
+	/*---- Private helper methods for constructor: Codewords and masking ----*/
+
+	/// Returns a new byte string representing the given data with the appropriate error correction
+	/// codewords appended to it, based on this object's version and error correction level.
+	private func addECCAndInterleave(data: [UInt8]) -> [UInt8] {
+		let ver = version
+		let ecl = errorCorrectionLevel
+		assert(data.count == QRCode.getNumDataCodewords(version: ver, ecl: ecl), "Illegal argument")
+		
+		// Calculate parameter numbers
+		let numBlocks: UInt = QRCode.tableGet(numErrorCorrectionBlocks, version: ver, ecl: ecl)
+		let blockECCLen: UInt = QRCode.tableGet(eccCodewordsPerBlock, version: ver, ecl: ecl)
+		let rawCodeWords: UInt = QRCode.getNumRawDataModules(version: ver) / 8
+		let numShortBlocks: UInt = numBlocks - rawCodeWords % numBlocks
+		let shortBlockLen: UInt = rawCodeWords / numBlocks
+		
+		// Split data into blocks and append ECC to each block
+		var blocks = [[UInt8]]()
+		let rsDiv: [UInt8] = QRCode.reedSolomonComputeDivisor(degree: blockECCLen)
+		var k: UInt = 0
+		for i in 0..<numBlocks {
+			let datLen: UInt = shortBlockLen - blockECCLen + (i >= numShortBlocks ? 1 : 0)
+			var dat = Array(d[k..<(k + datLen)])
+			k += datLen
+			let ecc: [UInt8] = QRCode.reedSolomonComputeRemainder(data: dat, divisor: rsDiv)
+			if i < numShortBlocks {
+				dat.append(0)
+			}
+			dat += ecc
+			blocks.append(dat)
+		}
+		
+		// Interleave (not concatenate) the bytes from every block into a single sequence
+		var result = [UInt8]()
+		for i in 0...shortBlockLen {
+			for (j, block) in blocks.enumerated() {
+				// Skip the padding byte in short blocks
+				if i != shortBlockLen - blockECCLen || j >= numShortBlocks {
+					result.push(block[i])
+				}
+			}
+		}
+		
+		return result
+	}
 }
