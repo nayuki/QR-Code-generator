@@ -343,4 +343,28 @@ struct QRCode {
 		}
 		setFunctionModule(x: 8, y: size - 8, isBlack: true) // Always black
 	}
+
+	/// Draws two copies of the version bits (with its own error correction code),
+	/// based on this object's version field, iff 7 <= version <= 40.
+	private mutating func drawVersion() {
+		guard version.value >= 7 else { return }
+		
+		// Calculate error correction code and pack bits
+		let data = UInt32(version.value) // uint6, in the range [7, 40]
+		var rem = data
+		for _ in 0..<12 {
+			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25)
+		}
+		let bits: UInt32 = data << 12 | rem // uint18
+		assert(bits >> 18 == 0)
+		
+		// Draw two copies
+		for i in 0..<18 {
+			let bit = getBit(bits, i)
+			let a: Int = size - 11 + i % 3
+			let b: Int = i / 3
+			setFunctionModule(x: a, y: b, isBlack: bit)
+			setFunctionModule(x: b, y: a, isBlack: bit)
+		}
+	}
 }
