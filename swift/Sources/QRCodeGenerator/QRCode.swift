@@ -623,4 +623,55 @@ struct QRCode {
 	private func table_get(_ table: [[Int]], version: Version, ecl: QrCodeEcc) -> UInt {
 		UInt(table[ecl.ordinal][Int(version.value)])
 	}
+	
+	/// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
+	private static func reedSolomonComputeDivisor(degree: UInt) -> [UInt8] {
+		assert(1 <= degree && degree <= 255, "Degree out of range")
+		// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
+		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array [255, 8, 93].
+		var result = [UInt8](repeating: 0, count: Int(degree - 1))
+		result.append(1) // Start off with monomial x^0
+
+		// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
+		// and drop the highest monomial term which is always 1x^degree.
+		// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
+		var root: UInt8 = 1
+		for _ in 0..<degree {
+			// Multiply the current product by (x - r^i)
+			for j in 0..<degree {
+				result[j] = QRCode.reedSolomonMultiply(x: result[j], y: root)
+				if j + 1 < result.count {
+					result[j] ^= result[j + 1]
+				}
+			}
+			root = QRCode.reedSolomonMultiply(x: root, y: 0x02)
+		}
+
+		return result
+	}
+	
+	/// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
+	private static func reedSolomonComputeRemainder(data: [UInt8], divisor: [UInt8]) -> [UInt8] {
+		var result = [UInt8](repeating: 0, count: divisor.count)
+		for b in data { // Polynomial divison
+			let factor: UInt8 = b ^ result.popFirst()!
+			result.append(0)
+			for (i, y) in divisor.enumerated() {
+				result[i] = QRCode.reedSolomonMultiply(x: y, y: factor)
+			}
+		}
+		return result
+	}
+	
+	/// Returns the product of the two given field elements modulo GF(2^8/0x11D).
+	/// All inputs are valid. This could be implemented as a 256*256 lookup table.
+	private static func reedSolomonMultiply(x: UInt8, y: UInt8) -> UInt8 {
+		// Russian peasant multiplication
+		var z: UInt8 = 0
+		for i in (0..<8).reversed() {
+			z = (z << 1) ^ ((z >> 7) * 0x1D)
+			z ^= ((y >> i) & 1) * x
+		}
+		return z
+	}
 }
