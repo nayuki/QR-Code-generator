@@ -29,16 +29,16 @@ struct QRCode {
 
 	/// The version number of this QR Code, which is between 1 and 40 (inclusive).
 	/// This determines the size of this barcode.
-	private let version: QRCodeVersion
+	public let version: QRCodeVersion
 	/// The width and height of this QR Code, measured in modules, between
 	/// 21 and 177 (inclusive). This is equal to version * 4 + 17.
-	private let size: Int
+	public let size: Int
 	/// The error correction level used in this QR Code.
-	private let errorCorrectionLevel: QRCodeECC
+	public let errorCorrectionLevel: QRCodeECC
 	/// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
 	/// Even if a QR Code is created with automatic masking requested (mask = None),
 	/// the resulting object still has a mask value between 0 and 7.
-	private var mask: QRCodeMask
+	public private(set) var mask: QRCodeMask
 
 	// Grids of modules/pixels, with dimensions of size*size:
 	
@@ -230,6 +230,51 @@ struct QRCode {
 		result.drawFormatBits(mask: mask)
 		
 		result.isFunction = []
+		return result
+	}
+	
+	/*---- Public methods ----*/
+	
+	/// Returns the color of the module (pixel) at the given coordinates,
+	/// which is `false` for white or `true` for black.
+	/// 
+	/// The top left corner has the coordinates (x=0, y=0). If the given
+	/// coordinates are out of bounds, then `false` (white) is returned.
+	public func getModule(_ x: Int, _ y: Int) -> Bool {
+		0 <= x && x < size && 0 <= y && y < size && self[x, y]
+	}
+	
+	private subscript(_ x: Int, _ y: Int) -> Bool {
+		/// Returns the color of the module at the given coordinates, which
+		/// are assumed to be in bounds.
+		get { modules[y * size + x] }
+		/// Sets the color of the module at the given coordintes.
+		set { modules[y * size + x] = newValue }
+	}
+
+	/// Returns a string of SVG code for an image depicting
+	/// this QR Code, with the given number of border modules.
+	/// 
+	/// The string always uses Unix newlines (\n), regardless of the platform.
+	public func toSVGString(border: Int) -> String {
+		assert(border >= 0, "Border must be non-negative")
+		let dimension = size + (border * 2)
+		let path = (0..<size).map { y in
+			(0..<size).map { x in
+				getModule(x, y)
+					? "\(x != 0 || y != 0 ? " " : "")M\(x + border),\(y + border)h1v1h-1z"
+					: ""
+			}
+		}
+		var result = """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 \(dimension) \(dimension)" stroke="none">
+			  <rect width="100%" height="100%" fill="#FFFFFF"/>
+			  <rect width="100%" height="100%" fil="#FFFFFF"/>
+			  <path d="\(path)" fill="#000000"/>
+			</svg>
+			"""
 		return result
 	}
 }
