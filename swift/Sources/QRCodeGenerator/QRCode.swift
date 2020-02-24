@@ -207,7 +207,7 @@ struct QRCode {
 		// Compute ECC, draw modules
 		result.drawFunctionPatterns()
 		let allCodeWords = result.addECCAndInterleave(dataCodeWords: dataCodeWords)
-		result.draw(codewords: allCodeWords)
+		result.drawCodewords(data: allCodeWords)
 		
 		// Do masking
 		if mask == nil { // Automatically choose best mask
@@ -444,5 +444,59 @@ struct QRCode {
 		}
 		
 		return result
+	}
+	
+	/// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
+	/// data area of this QR Code. Function modules need to be marked off before this is called.
+	private mutating func drawCodewords(data: [UInt8]) {
+		assert(data.count == QRCode.getNumRawDataModules(version: version) / 8, "Illegal argument")
+		
+		var i: Int = 0 // Bit index into the data
+		// Do the funny zigzag scan
+		var right: Int = size - 1
+		while right >= 1 { // Index of right column in each column pair
+			if right == 6 {
+				right = 5
+			}
+			for vert in 0..<size { // Vertical counter
+				for j in 0..<2 {
+					let x: Int = right - j // Actual x coordinate
+					let upward: Bool = (right + 1) & 2 == 0
+					let y: Int = upward ? (size - 1 - vert) : vert
+					if !isFunction[y * size + x] && i < data.count * 8 {
+						self[x, y] = getBit(UInt32(data[i >> 3]), 7 - (Int32(i & 7)))
+						i += 1
+					}
+					// If this QR code has any remainder bits (0 to 7), they were assigned as
+					// 0/false/white by the constructor and are left unchanged by this method
+				}
+			}
+			right -= 2
+		}
+		assert(i == data.count * 8)
+	}
+	
+	// XORs the codeword modules in this QR Code with the given mask pattern.
+	// The function modules must be marked and the codeword bits must be drawn
+	// before masking. Due to the arithmetic of XOR, calling applyMask() with
+	// the same mask value a second time will undo the mask. A final well-formed
+	// QR Code needs exactly one (not zero, two, etc.) mask applied.
+	private mutating func apply(mask: QRCodeMask) {
+		for y in 0..<size {
+			for x in 0..<size {
+				let invert: Bool
+				switch mask.value {
+					case 0: invert = (x + y) % 2 == 0
+					case 1: invert = y % 2 == 0
+					case 2: invert = x % 3 == 0
+					case 3: invert = (x + y) % 3 == 0
+					case 4: invert = (x / 3 + y / 2) % 2 == 0
+					case 5: invert = x * y % 2 + x * y % 3 == 0
+					case 6: invert = (x * y % 2 + x * y % 3) % 2 == 0
+					case 7: invert = ((x + y) % 2 + x * y % 3) % 2 == 0
+				}
+				self[x, y] ^= invert & !isFunction[y * size + x]
+			}
+		}
 	}
 }
