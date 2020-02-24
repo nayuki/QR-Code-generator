@@ -154,7 +154,7 @@ struct QRCode {
 		assert(bb.count == dataUsedBits)
 		
 		// Add terminator and pad up to a byte if applicable
-		let dataCapacityBits: UInt = QRCode.getNumDataCodeWords(version: version, ecl: ecl)
+		let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: ecl)
 		assert(bb.count <= dataCapacityBits)
 		var numZeroBits = min(4, dataCapacityBits - bb.count)
 		bb.appendBits(0, UInt8(numZeroBits))
@@ -572,5 +572,55 @@ struct QRCode {
 		let k: Int = (abs(black * 20 - total * 10) + total - 1) / total - 1
 		result += k * penaltyN4
 		return result
+	}
+
+	/*---- Private helper functions ----*/
+	
+	/// Returns an ascending list of positions of alignment patterns for this version number.
+	/// Each position is in the range [0,177), and are used on both the x and y axes.
+	/// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
+	private func getAlignmentPatternPositions() -> [Int] {
+		let ver = version.value
+		if ver == 1 {
+			return []
+		} else {
+			let numAlign = Int(ver) / 7 + 2
+			let step: Int = (ver == 32) ? 26 : ((Int(ver) * 4 + numAlign * 2 + 1) / (numAlign * 2 - 2) * 2)
+			var result: [Int] = (0..<(numAlign - 1)).map { size - 7 - $0 * step }
+			result.append(6)
+			result.reverse()
+			return result
+		}
+	}
+	
+	/// Returns the number of data bits that can be stored in a QR Code of the given version number, after
+	/// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
+	/// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
+	private func getNumRawDataModules(version: QRCodeVersion) -> UInt {
+		let ver = UInt(version.value)
+		var result: UInt = (16 * ver + 128) * ver + 64
+		if ver >= 2 {
+			let numAlign: UInt = ver / 7 + 2
+			result -= (25 * numAlign - 10) * numAlign - 55
+			if ver >= 7 {
+				result -= 36
+			}
+		}
+		assert(208 <= result && result <= 29648)
+		return result
+	}
+	
+	/// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
+	/// QR Code of the given version number and error correction level, with remainder bits discarded.
+	/// This stateless pure function could be implemented as a (40*4)-cell lookup table.
+	private func getNumDataCodewords(version: QRCodeVersion, ecc: QRCodeECC) -> UInt {
+		QRCode.getNumRawDataModules(version: ver) / 8
+			- QRCode.tableGet(eccCodewordsPerBlock, version: version, ecc: ecc)
+			* QRCode.tableGet(numErrorCorrectionBlocks, version: version, ecc: ecc)
+	}
+	
+	/// Returns an entry from the given table based on the given values.
+	private func table_get(_ table: [[Int]], version: Version, ecl: QrCodeEcc) -> UInt {
+		UInt(table[ecl.ordinal][Int(version.value)])
 	}
 }
