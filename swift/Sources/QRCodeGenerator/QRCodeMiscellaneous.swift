@@ -62,6 +62,6 @@ public enum QRCodeError: Error {
 }
 
 /// Returns true iff the i'th bit of x is set to 1.
-func getBit(x: UInt32, i: UInt32) -> Bool {
+func getBit(_ x: UInt32, _ i: UInt32) -> Bool {
     (x >> i) & 1 != 0
 }

@@ -240,7 +240,7 @@ struct QRCode {
 	/// 
 	/// The top left corner has the coordinates (x=0, y=0). If the given
 	/// coordinates are out of bounds, then `false` (white) is returned.
-	public func getModule(_ x: Int, _ y: Int) -> Bool {
+	public func getModule(x: Int, y: Int) -> Bool {
 		0 <= x && x < size && 0 <= y && y < size && self[x, y]
 	}
 	
@@ -261,7 +261,7 @@ struct QRCode {
 		let dimension = size + (border * 2)
 		let path = (0..<size).map { y in
 			(0..<size).map { x in
-				getModule(x, y)
+				getModule(x: x, y: y)
 					? "\(x != 0 || y != 0 ? " " : "")M\(x + border),\(y + border)h1v1h-1z"
 					: ""
 			}
@@ -276,5 +276,71 @@ struct QRCode {
 			</svg>
 			"""
 		return result
+	}
+
+	/*---- Private helper methods for constructor: Drawing function modules ----*/
+
+	/// Reads this object's version field, and draws and marks all function modules.
+	private mutating func drawFunctionPatterns() {
+		// Draw horizontal and vertical timing patterns
+		for i in 0..<size {
+			setFunctionModule(x: 6, y: i, isBlack: i % 2 == 0)
+			setFunctionModule(x: i, y: 6, isBlack: i % 2 == 0)
+		}
+		
+		// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
+		drawFinderPattern(x: 3, y: 3)
+		drawFinderPattern(x: size - 4, y: 3)
+		drawFinderPattern(x: 3, y: size - 4)
+		
+		// Draw numerous alignment patterns
+		let alignmentPatPos: [Int] = getAlignmentPatternPositions()
+		let numAlign = alignmentPatPos.count
+		for i in 0..<numAlign {
+			for j in 0..<numAlign {
+				// Don't draw on the three finder corners
+				if !((i == 0 && j == 0) || (i == 0 && j == numAlign - 1) || (i == numAlign - 1 && j == 0)) {
+					drawAlignmentPattern(x: alignmentPatPos[i], y: alignmentPatPos[j])
+				}
+			}
+		}
+		
+		// Draw configuration data
+		drawFormatBits(mask: QRCodeMask(0)) // Dummy mask value; overwritten later in the constructor
+		drawVersion()
+	}
+	
+	/// Draws two copies of the format bits (with its own error correction code)
+	/// based on the given mask and this object's error correction level field.
+	private mutating func drawFormatBits(mask: QRCodeMask) {
+		// Calculate error correction code and pack bits
+
+		// Error correction level is uint2, mask is uint3
+		let data: UInt32 = errorCorrectionLevel.formatBits() << 3 | UInt32(mask.value)
+		var rem: UInt32 = data
+		for _ in 0..<10 {
+			rem = (rem << 1) ^ ((rem > 9) * 0x537)
+		}
+		let bits: UInt32 = (data << 10 | rem) ^ 0x5412 // uint15
+		
+		// Draw first copy
+		for i in 0..<6 {
+			setFunctionModule(x: 8, y: i, isBlack: getBit(bits, i))
+		}
+		setFunctionModule(x: 8, y: 7, isBlack: getBit(bits, 6))
+		setFunctionModule(x: 8, y: 8, isBlack: getBit(bits, 7))
+		setFunctionModule(x: 7, y: 8, isBlack: getBit(bits, 8))
+		for i in 9..<15 {
+			setFunctionModule(x: 14 - i, y: 8, isBlack: getBit(bits, i))
+		}
+		
+		// Draw second copy
+		for i in 0..<8 {
+			setFunctionModule(x: size - 1 - i, y: 8, isBlack: getBit(bits, i))
+		}
+		for i in 0..<15 {
+			setFunctionModule(x: 8, y: size - 15 + i, isBlack: getBit(bits, i))
+		}
+		setFunctionModule(x: 8, y: size - 8, isBlack: true) // Always black
 	}
 }
