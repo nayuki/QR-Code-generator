@@ -38,16 +38,16 @@ struct QRCode {
 	/// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
 	/// Even if a QR Code is created with automatic masking requested (mask = None),
 	/// the resulting object still has a mask value between 0 and 7.
-	private let mask: QRCodeMask
+	private var mask: QRCodeMask
 
 	// Grids of modules/pixels, with dimensions of size*size:
 	
 	/// The modules of this QR Code (false = white, true = black).
 	/// Immutable after constructor finishes. Accessed through get_module().
-	private let modules: [Bool]
+	private var modules: [Bool]
 	
 	/// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
-	private let isFunction: [Bool]
+	private var isFunction: [Bool]
 	
 	/*---- Static factory functions (high level) ----*/
 
@@ -185,5 +185,51 @@ struct QRCode {
 	
 	/*---- Constructor (low level) ----*/
 	
-	// TODO
+	/// Creates a new QR Code with the given version number,
+	/// error correction level, data codeword bytes, and mask number.
+	/// 
+	/// This is a low-level API that most users should not use directly.
+	/// A mid-level API is the `encode_segments()` function.
+	public static func encodeCodewords(version: QRCodeVersion, ecl: QRCodeECC, dataCodeWords: [UInt8], mask: QRCodeMask? = nil) -> Self {
+		var mutMask = mask
+
+		// Initialize fields
+		let size = UInt(version.value)
+		var result = Self(
+			version: version,
+			size: Int(size),
+			mask: QRCodeMask(0), // Dummy value
+			errorCorrectionLevel: ecl,
+			modules: Array(repeating: false, count: size * size), // Initially all white
+			isFunction: Array(repeating: false, count: size * size)
+		)
+		
+		// Compute ECC, draw modules
+		result.drawFunctionPatterns()
+		let allCodeWords = result.addECCAndInterleave(dataCodeWords: dataCodeWords)
+		result.draw(codewords: allCodeWords)
+		
+		// Do masking
+		if mask == nil { // Automatically choose best mask
+			var minPenalty = Int32.max
+			for i in UInt8(0)..<8 {
+				let newMask = QRCodeMask(i)
+				result.apply(mask: newMask)
+				result.drawFormatBits(mask: newMask)
+				let penalty = result.getPenaltyScore()
+				if penalty < minPenalty {
+					mutMask = newMask
+					minPenalty = penalty
+				}
+				result.apply(mask: newMask) // Undoes mask due to XOR
+			}
+		}
+		let mask: QRCodeMask = mask!
+		result.mask = mask
+		result.apply(mask: mask) // Apply the final choice of mask
+		result.drawFormatBits(mask: mask)
+		
+		result.isFunction = []
+		return result
+	}
 }
