@@ -21,7 +21,6 @@
  *   Software.
  */
 
-import BinaryKit
 import Foundation
 
 struct QRCode {
@@ -620,7 +619,7 @@ struct QRCode {
 	}
 	
 	/// Returns an entry from the given table based on the given values.
-	private func table_get(_ table: [[Int]], version: Version, ecl: QrCodeEcc) -> UInt {
+	private func table_get(_ table: [[Int]], version: QRCodeVersion, ecl: QRCodeECC) -> UInt {
 		UInt(table[ecl.ordinal][Int(version.value)])
 	}
 	

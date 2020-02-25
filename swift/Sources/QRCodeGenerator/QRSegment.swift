@@ -171,7 +171,7 @@ public struct QRSegment: Hashable {
 	/// Calculates and returns the number of bits needed to encode the given
 	/// segments at the given version. The result is None if a segment has too many
 	/// characters to fit its length field, or the total bits exceeds usize::MAX.
-	public static func getTotalBits(segments: [Self], version: Version) -> UInt? {
+	public static func getTotalBits(segments: [Self], version: QRCodeVersion) -> UInt? {
 		var result: UInt = 0
 		for seg in segments {
 			let ccBits = seg.mode.numCharCountBits(version: version)
@@ -197,7 +197,7 @@ public struct QRSegment: Hashable {
 	}
 	
 	/*---- QrSegmentMode functionality ----*/
-	public struct Mode: Hashable {
+	public enum Mode: Hashable {
 		case numeric
 		case alphanumeric
 		case byte
