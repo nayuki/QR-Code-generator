@@ -26,7 +26,7 @@ public struct BitBuffer {
 	public var bits: [Bool]
 	public var count: UInt { UInt(bits.count) }
 	
-	public init(bits: [Bool]) {
+	public init(_ bits: [Bool] = []) {
 		self.bits = bits
 	}
 
@@ -35,6 +35,6 @@ public struct BitBuffer {
 	/// Requires len &#x2264; 31 and val &lt; 2<sup>len</sup>.
 	public mutating func appendBits(_ value: UInt32, _ length: Int) {
 		assert(length <= 31 && (value >> length) == 0, "Value out of range")
-		bits.append((0..<length).reversed().map { getBit(value, $0) })
+		bits += (0..<length).reversed().map { getBit(value, Int32($0)) }
 	}
 }

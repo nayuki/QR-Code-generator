@@ -21,6 +21,8 @@
  *   Software.
  */
 
+import Foundation
+
 /// The set of all legal characters in alphanumeric mode,
 /// where each character value maps to the index in the string.
 fileprivate let alphanumericCharset: [Character] = [
@@ -61,23 +63,24 @@ public struct QRSegment: Hashable {
 	/// 
 	/// Any text string can be converted to UTF-8 bytes and encoded as a byte mode segment.
 	public static func makeBytes(_ data: [UInt8]) -> Self {
-		var bb = BitBuffer([])
+		var bb = BitBuffer()
 		for b in data {
 			bb.appendBits(UInt32(b), 8)
 		}
-		return QRSegment(mode: .byte, numChars: data.count, data: bb.bits)
+		return QRSegment(mode: .byte, numChars: UInt(data.count), data: bb.bits)
 	}
 	
 	/// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	/// 
 	/// Panics if the string contains non-digit characters.
 	public static func makeNumeric(_ text: [Character]) -> Self {
-		var bb = BitBuffer([])
+		var bb = BitBuffer()
 		var accumData: UInt32 = 0
 		var accumCount: UInt8 = 0
 		for c in text {
 			assert(c.isNumber && c.isASCII, "String contains non-numeric characters")
-			accumData = accumData * 10 + (UInt32(c.asciiValue!) - UInt32("0".asciiValue!))
+			let zero: Character = "0"
+			accumData = accumData * 10 + (UInt32(c.asciiValue!) - UInt32(zero.asciiValue!))
 			accumCount += 1
 			if accumCount == 3 {
 				bb.appendBits(accumData, 10)
@@ -86,9 +89,9 @@ public struct QRSegment: Hashable {
 			}
 		}
 		if accumCount > 0 { // 1 or 2 digits remaining
-			bb.appendBits(accumData, accumCount * 3 + 1)
+			bb.appendBits(accumData, Int(accumCount * 3 + 1))
 		}
-		return QRSegment(mode: .numeric, numChars: text.count, data: bb.bits)
+		return QRSegment(mode: .numeric, numChars: UInt(text.count), data: bb.bits)
 	}
 	
 	/// Returns a segment representing the given text string encoded in alphanumeric mode.
@@ -98,7 +101,7 @@ public struct QRSegment: Hashable {
 	/// 
 	/// Panics if the string contains non-encodable characters.
 	public static func makeAlphanumeric(_ text: [Character]) -> Self {
-		var bb = BitBuffer([])
+		var bb = BitBuffer()
 		var accumData: UInt32 = 0
 		var accumCount: UInt32 = 0
 		for c in text {
@@ -116,14 +119,14 @@ public struct QRSegment: Hashable {
 		if accumCount > 0 { // 1 character remaining
 			bb.appendBits(accumData, 6)
 		}
-		return QRSegment(mode: .alphanumeric, numChars: text.count, data: bb.bits)
+		return QRSegment(mode: .alphanumeric, numChars: UInt(text.count), data: bb.bits)
 	}
 	
 	/// Returns a list of zero or more segments to represent the given Unicode text string.
 	/// 
 	/// The result may use various segment modes and switch
 	/// modes to optimize the length of the bit stream.
-	public static func makeSegments(_ text: [Character]) -> Self {
+	public static func makeSegments(_ text: [Character]) -> [Self] {
 		if text.isEmpty {
 			return []
 		} else if QRSegment.isNumeric(text) {
@@ -139,7 +142,7 @@ public struct QRSegment: Hashable {
 	/// Returns a segment representing an Extended Channel Interpretation
 	/// (ECI) designator with the given assignment value.
 	public static func makeECI(assignVal: UInt32) -> Self {
-		var bb = BitBuffer([])
+		var bb = BitBuffer()
 		if assignVal < (1 << 7) {
 			bb.appendBits(assignVal, 8)
 		} else if assignVal < (1 << 14) {
@@ -178,7 +181,7 @@ public struct QRSegment: Hashable {
 			guard seg.numChars < (1 << ccBits) else {
 				return nil // The segment"s length doesn't fit the field's bit width
 			}
-			result += 4 + UInt(ccBits) + seg.data.count
+			result += 4 + UInt(ccBits) + UInt(seg.data.count)
 		}
 		return result
 	}
@@ -227,7 +230,7 @@ public struct QRSegment: Hashable {
 				case .kanji: v = [8, 10, 12]
 				case .eci: v = [0, 0, 0]
 			}
-			return v[(version.value + 7) / 17]
+			return v[(Int(version.value) + 7) / 17]
 		}
 	}
 }

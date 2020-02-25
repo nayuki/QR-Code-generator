@@ -25,7 +25,7 @@
 public struct QRCodeVersion: Hashable, Comparable {
     public let value: UInt8
     
-    public init(value: UInt8) {
+    public init(_ value: UInt8) {
         assert(1 <= value && value <= 40, "Version number out of range")
         self.value = value
     }
@@ -39,7 +39,7 @@ public struct QRCodeVersion: Hashable, Comparable {
 public struct QRCodeMask: Hashable {
     public let value: UInt8
     
-    public init(value: UInt8) {
+    public init(_ value: UInt8) {
         assert(value <= 7, "Mask value out of range")
         self.value = value
     }

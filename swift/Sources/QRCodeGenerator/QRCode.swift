@@ -74,7 +74,7 @@ struct QRCode {
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
 	public static func encode(binary data: [UInt8], ecl: QRCodeECC) throws -> Self {
-		let segs = [QRSegment.make(bytes: data)]
+		let segs = [QRSegment.makeBytes(data)]
 		return try QRCode.encode(segments: segs, ecl: ecl)
 	}
 	
@@ -111,13 +111,14 @@ struct QRCode {
 	/// long to fit in any version in the given range at the given ECC level.
 	public static func encodeAdvanced(segments: [QRSegment], ecl: QRCodeECC, minVersion: QRCodeVersion, maxVersion: QRCodeVersion, mask: QRCodeMask? = nil, boostECL: Bool) throws -> Self {
 		assert(minVersion <= maxVersion, "Invalid value")
+		var mutECL = ecl
 		
 		// Find the minimal version number to use
 		var version = minVersion
 		var dataUsedBits: UInt!
 		while true {
 			// Number of data bits available
-			let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: ecl) * 8
+			let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: mutECL) * 8
 			let dataUsed: UInt? = QRSegment.getTotalBits(segments: segments, version: version)
 			if let used = dataUsed, used <= dataCapacityBits {
 				// The version number is found to be suitable
@@ -130,6 +131,7 @@ struct QRCode {
 				} else {
 					msg = "Segment too long"
 				}
+				throw QRCodeError.dataTooLong(msg)
 			} else {
 				version = QRCodeVersion(version.value + 1)
 			}
@@ -138,34 +140,34 @@ struct QRCode {
 		// Increase error correction level while the data still fits in the current version number
 		for newECL in [QRCodeECC.medium, QRCodeECC.quartile, QRCodeECC.high] {
 			if boostECL && dataUsedBits <= QRCode.getNumDataCodewords(version: version, ecl: newECL) * 8 {
-				ecl = newECL
+				mutECL = newECL
 			}
 		}
 		
 		// Concatenate all segments to create the data bit string
 		var bb = BitBuffer()
 		for seg in segments {
-			bb.appendBits(seg.mode.modeBits(), 4)
-			bb.appendBits(UInt32(seg.numChars), seg.mode.numCharCountBits(version: version))
-			bb.values += seg.data
+			bb.appendBits(seg.mode.modeBits, 4)
+			bb.appendBits(UInt32(seg.numChars), Int(seg.mode.numCharCountBits(version: version)))
+			bb.bits += seg.data
 		}
 		
 		assert(bb.count == dataUsedBits)
 		
 		// Add terminator and pad up to a byte if applicable
-		let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: ecl)
+		let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: mutECL)
 		assert(bb.count <= dataCapacityBits)
 		var numZeroBits = min(4, dataCapacityBits - bb.count)
-		bb.appendBits(0, UInt8(numZeroBits))
+		bb.appendBits(0, Int(numZeroBits))
 		numZeroBits = (0 &- bb.count) & 7
-		bb.appendBits(0, UInt8(numZeroBits))
+		bb.appendBits(0, Int(numZeroBits))
 		assert(bb.count % 8 == 0)
 		
 		// Pad with alternating bytes until data capacity is reached
 		let padBytes = [0xEC, 0x11]
 		var i = 0
 		while bb.count < dataCapacityBits {
-			bb.appendBits(padBytes[i], 8)
+			bb.appendBits(UInt32(padBytes[i]), 8)
 			i += 1
 			if i >= padBytes.count {
 				i = 0
@@ -173,13 +175,13 @@ struct QRCode {
 		}
 		
 		// Pack bits into bytes in big endian
-		var dataCodeWords = [UInt8](repeating: 0, bb.count / 8)
-		for (i, bit) in bb.values.enumerated() {
-			dataCodeWords[i >> 3] |= UInt8(bit) << (7 - (i & 7))
+		var dataCodeWords = [UInt8](repeating: 0, count: Int(bb.count / 8))
+		for (i, bit) in bb.bits.enumerated() {
+			dataCodeWords[i >> 3] |= (bit ? 1 : 0) << (7 - (i & 7))
 		}
 		
 		// Create the QRCode object
-		return QRCode.encodeCodewords(version: version, ecl: ecl, dataCodeWords: dataCodeWords, mask: mask)
+		return QRCode.encodeCodewords(version: version, ecl: mutECL, dataCodeWords: dataCodeWords, mask: mask)
 	}
 	
 	/*---- Constructor (low level) ----*/
@@ -197,25 +199,25 @@ struct QRCode {
 		var result = Self(
 			version: version,
 			size: Int(size),
-			mask: QRCodeMask(0), // Dummy value
 			errorCorrectionLevel: ecl,
-			modules: Array(repeating: false, count: size * size), // Initially all white
-			isFunction: Array(repeating: false, count: size * size)
+			mask: QRCodeMask(0), // Dummy value
+			modules: Array(repeating: false, count: Int(size * size)), // Initially all white
+			isFunction: Array(repeating: false, count: Int(size * size))
 		)
 		
 		// Compute ECC, draw modules
 		result.drawFunctionPatterns()
-		let allCodeWords = result.addECCAndInterleave(dataCodeWords: dataCodeWords)
+		let allCodeWords = result.addECCAndInterleave(data: dataCodeWords)
 		result.drawCodewords(data: allCodeWords)
 		
 		// Do masking
-		if mask == nil { // Automatically choose best mask
+		if mutMask == nil { // Automatically choose best mask
 			var minPenalty = Int32.max
 			for i in UInt8(0)..<8 {
 				let newMask = QRCodeMask(i)
 				result.apply(mask: newMask)
 				result.drawFormatBits(mask: newMask)
-				let penalty = result.getPenaltyScore()
+				let penalty = Int32(result.getPenaltyScore())
 				if penalty < minPenalty {
 					mutMask = newMask
 					minPenalty = penalty
@@ -223,10 +225,10 @@ struct QRCode {
 				result.apply(mask: newMask) // Undoes mask due to XOR
 			}
 		}
-		let mask: QRCodeMask = mask!
-		result.mask = mask
-		result.apply(mask: mask) // Apply the final choice of mask
-		result.drawFormatBits(mask: mask)
+		let resMask: QRCodeMask = mutMask!
+		result.mask = resMask
+		result.apply(mask: resMask) // Apply the final choice of mask
+		result.drawFormatBits(mask: resMask)
 		
 		result.isFunction = []
 		return result
@@ -265,7 +267,7 @@ struct QRCode {
 					: ""
 			}
 		}
-		var result = """
+		return """
 			<?xml version="1.0" encoding="UTF-8"?>
 			<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 \(dimension) \(dimension)" stroke="none">
@@ -274,7 +276,6 @@ struct QRCode {
 			  <path d="\(path)" fill="#000000"/>
 			</svg>
 			"""
-		return result
 	}
 
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
@@ -315,30 +316,30 @@ struct QRCode {
 		// Calculate error correction code and pack bits
 
 		// Error correction level is uint2, mask is uint3
-		let data: UInt32 = errorCorrectionLevel.formatBits() << 3 | UInt32(mask.value)
+		let data: UInt32 = errorCorrectionLevel.formatBits << 3 | UInt32(mask.value)
 		var rem: UInt32 = data
 		for _ in 0..<10 {
-			rem = (rem << 1) ^ ((rem > 9) * 0x537)
+			rem = (rem << 1) ^ ((rem >> 9) * 0x537)
 		}
 		let bits: UInt32 = (data << 10 | rem) ^ 0x5412 // uint15
 		
 		// Draw first copy
 		for i in 0..<6 {
-			setFunctionModule(x: 8, y: i, isBlack: getBit(bits, i))
+			setFunctionModule(x: 8, y: i, isBlack: getBit(bits, Int32(i)))
 		}
 		setFunctionModule(x: 8, y: 7, isBlack: getBit(bits, 6))
 		setFunctionModule(x: 8, y: 8, isBlack: getBit(bits, 7))
 		setFunctionModule(x: 7, y: 8, isBlack: getBit(bits, 8))
 		for i in 9..<15 {
-			setFunctionModule(x: 14 - i, y: 8, isBlack: getBit(bits, i))
+			setFunctionModule(x: 14 - i, y: 8, isBlack: getBit(bits, Int32(i)))
 		}
 		
 		// Draw second copy
 		for i in 0..<8 {
-			setFunctionModule(x: size - 1 - i, y: 8, isBlack: getBit(bits, i))
+			setFunctionModule(x: size - 1 - i, y: 8, isBlack: getBit(bits, Int32(i)))
 		}
 		for i in 0..<15 {
-			setFunctionModule(x: 8, y: size - 15 + i, isBlack: getBit(bits, i))
+			setFunctionModule(x: 8, y: size - 15 + i, isBlack: getBit(bits, Int32(i)))
 		}
 		setFunctionModule(x: 8, y: size - 8, isBlack: true) // Always black
 	}
@@ -359,7 +360,7 @@ struct QRCode {
 		
 		// Draw two copies
 		for i in 0..<18 {
-			let bit = getBit(bits, i)
+			let bit = getBit(bits, Int32(i))
 			let a: Int = size - 11 + i % 3
 			let b: Int = i / 3
 			setFunctionModule(x: a, y: b, isBlack: bit)
@@ -421,7 +422,7 @@ struct QRCode {
 		var k: UInt = 0
 		for i in 0..<numBlocks {
 			let datLen: UInt = shortBlockLen - blockECCLen + (i >= numShortBlocks ? 1 : 0)
-			var dat = Array(d[k..<(k + datLen)])
+			var dat = Array(data[Int(k)..<Int(k + datLen)])
 			k += datLen
 			let ecc: [UInt8] = QRCode.reedSolomonComputeRemainder(data: dat, divisor: rsDiv)
 			if i < numShortBlocks {
@@ -437,7 +438,7 @@ struct QRCode {
 			for (j, block) in blocks.enumerated() {
 				// Skip the padding byte in short blocks
 				if i != shortBlockLen - blockECCLen || j >= numShortBlocks {
-					result.push(block[i])
+					result.append(block[Int(i)])
 				}
 			}
 		}
@@ -493,8 +494,9 @@ struct QRCode {
 					case 5: invert = x * y % 2 + x * y % 3 == 0
 					case 6: invert = (x * y % 2 + x * y % 3) % 2 == 0
 					case 7: invert = ((x + y) % 2 + x * y % 3) % 2 == 0
+					default: fatalError("Unreachable")
 				}
-				self[x, y] ^= invert & !isFunction[y * size + x]
+				self[x, y] = self[x, y] != (invert && !isFunction[y * size + x])
 			}
 		}
 	}
@@ -565,7 +567,7 @@ struct QRCode {
 		}
 		
 		// Balance of black and white modules
-		let black: Int = modules.map(Int.init).sum()
+		let black: Int = modules.map { $0 ? 1 : 0 }.reduce(0, +)
 		let total: Int = size * size // Note that size is odd, so black/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45 - 5k)% <= black/total <= (55+5k)%
 		let k: Int = (abs(black * 20 - total * 10) + total - 1) / total - 1
@@ -595,7 +597,7 @@ struct QRCode {
 	/// Returns the number of data bits that can be stored in a QR Code of the given version number, after
 	/// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	/// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
-	private func getNumRawDataModules(version: QRCodeVersion) -> UInt {
+	private static func getNumRawDataModules(version: QRCodeVersion) -> UInt {
 		let ver = UInt(version.value)
 		var result: UInt = (16 * ver + 128) * ver + 64
 		if ver >= 2 {
@@ -612,15 +614,15 @@ struct QRCode {
 	/// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 	/// QR Code of the given version number and error correction level, with remainder bits discarded.
 	/// This stateless pure function could be implemented as a (40*4)-cell lookup table.
-	private func getNumDataCodewords(version: QRCodeVersion, ecc: QRCodeECC) -> UInt {
-		QRCode.getNumRawDataModules(version: ver) / 8
-			- QRCode.tableGet(eccCodewordsPerBlock, version: version, ecc: ecc)
-			* QRCode.tableGet(numErrorCorrectionBlocks, version: version, ecc: ecc)
+	private static func getNumDataCodewords(version: QRCodeVersion, ecl: QRCodeECC) -> UInt {
+		QRCode.getNumRawDataModules(version: version) / 8
+			- QRCode.tableGet(eccCodewordsPerBlock, version: version, ecl: ecl)
+			* QRCode.tableGet(numErrorCorrectionBlocks, version: version, ecl: ecl)
 	}
 	
 	/// Returns an entry from the given table based on the given values.
-	private func table_get(_ table: [[Int]], version: QRCodeVersion, ecl: QRCodeECC) -> UInt {
-		UInt(table[ecl.ordinal][Int(version.value)])
+	private static func tableGet(_ table: [[Int]], version: QRCodeVersion, ecl: QRCodeECC) -> UInt {
+		UInt(table[Int(ecl.ordinal)][Int(version.value)])
 	}
 	
 	/// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
@@ -637,7 +639,7 @@ struct QRCode {
 		var root: UInt8 = 1
 		for _ in 0..<degree {
 			// Multiply the current product by (x - r^i)
-			for j in 0..<degree {
+			for j in 0..<Int(degree) {
 				result[j] = QRCode.reedSolomonMultiply(x: result[j], y: root)
 				if j + 1 < result.count {
 					result[j] ^= result[j + 1]
@@ -653,7 +655,7 @@ struct QRCode {
 	private static func reedSolomonComputeRemainder(data: [UInt8], divisor: [UInt8]) -> [UInt8] {
 		var result = [UInt8](repeating: 0, count: divisor.count)
 		for b in data { // Polynomial divison
-			let factor: UInt8 = b ^ result.popFirst()!
+			let factor: UInt8 = b ^ result[...].popFirst()!
 			result.append(0)
 			for (i, y) in divisor.enumerated() {
 				result[i] = QRCode.reedSolomonMultiply(x: y, y: factor)
@@ -678,7 +680,7 @@ struct QRCode {
 	
 	private struct FinderPenalty {
 		let qrSize: Int
-		let runHistory: [Int]
+		var runHistory: [Int]
 		
 		init(_ qrSize: Int) {
 			self.qrSize = qrSize
@@ -716,7 +718,7 @@ struct QRCode {
 			}
 			currentRunLength += qrSize // Add white border to final run
 			addHistory(runLength: currentRunLength)
-			countPatterns()
+			return countPatterns()
 		}
 	}
 }
