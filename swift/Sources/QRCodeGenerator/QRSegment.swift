@@ -21,6 +21,14 @@
  *   Software.
  */
 
+/// The set of all legal characters in alphanumeric mode,
+/// where each character value maps to the index in the string.
+fileprivate let alphanumericCharset: [Character] = [
+	"0","1","2","3","4","5","6","7","8","9",
+	"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+	" ","$","%","*","+","-",".","/",":"
+]
+
 /*---- QrSegment functionality ----*/
 
 /// A segment of character/binary/control data in a QR Code symbol.
@@ -38,9 +46,9 @@
 public struct QRSegment: Hashable {
 	/// The mode indicator of this segment.
 	public let mode: Mode
-	/// The length of this segment's unencoded data. Measured in characters for
+	/// The length of this segment"s unencoded data. Measured in characters for
 	/// numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-	/// Not the same as the data's bit length.
+	/// Not the same as the data"s bit length.
 	public let numChars: UInt
 	/// The data bits of this segment.
 	public let data: [Bool]
@@ -52,7 +60,7 @@ public struct QRSegment: Hashable {
 	/// All input byte slices are acceptable.
 	/// 
 	/// Any text string can be converted to UTF-8 bytes and encoded as a byte mode segment.
-	public static func makeBytes(data: [UInt8]) -> Self {
+	public static func makeBytes(_ data: [UInt8]) -> Self {
 		var bb = BitBuffer([])
 		for b in data {
 			bb.appendBits(UInt32(b), 8)
@@ -63,7 +71,7 @@ public struct QRSegment: Hashable {
 	/// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	/// 
 	/// Panics if the string contains non-digit characters.
-	public static func makeNumeric(text: [Character]) -> Self {
+	public static func makeNumeric(_ text: [Character]) -> Self {
 		var bb = BitBuffer([])
 		var accumData: UInt32 = 0
 		var accumCount: UInt8 = 0
@@ -89,7 +97,7 @@ public struct QRSegment: Hashable {
 	/// dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	/// 
 	/// Panics if the string contains non-encodable characters.
-	public static func makeAlphanumeric(text: [Character]) -> Self {
+	public static func makeAlphanumeric(_ text: [Character]) -> Self {
 		var bb = BitBuffer([])
 		var accumData: UInt32 = 0
 		var accumCount: UInt32 = 0
@@ -115,7 +123,7 @@ public struct QRSegment: Hashable {
 	/// 
 	/// The result may use various segment modes and switch
 	/// modes to optimize the length of the bit stream.
-	public static func makeSegments(text: [Character]) -> Self {
+	public static func makeSegments(_ text: [Character]) -> Self {
 		if text.isEmpty {
 			return []
 		} else if QRSegment.isNumeric(text) {
@@ -144,5 +152,47 @@ public struct QRSegment: Hashable {
 			fatalError("ECI assignment value out of range")
 		}
 		return QRSegment(mode: .eci, numChars: 0, data: bb.bits)
+	}
+	
+	/*---- Constructor (low level) ----*/
+	
+	/// Creates a new QR Code segment with the given attributes and data.
+	/// 
+	/// The character count (numchars) must agree with the mode and
+	/// the bit buffer length, but the constraint isn"t checked.
+	public init(mode: Mode, numChars: UInt, data: [Bool]) {
+		self.mode = mode
+		self.numChars = numChars
+		self.data = data
+	}
+	
+	/*---- Other static functions ----*/
+	
+	/// Calculates and returns the number of bits needed to encode the given
+	/// segments at the given version. The result is None if a segment has too many
+	/// characters to fit its length field, or the total bits exceeds usize::MAX.
+	public static func getTotalBits(segments: [Self], version: Version) -> UInt? {
+		var result: UInt = 0
+		for seg in segments {
+			let ccBits = seg.mode.numCharCountBits(version: version)
+			guard seg.numChars < (1 << ccBits) else {
+				return nil // The segment"s length doesn't fit the field's bit width
+			}
+			result += 4 + UInt(ccBits) + seg.data.count
+		}
+		return result
+	}
+
+	/// Tests whether the given string can be encoded as a segment in alphanumeric mode.
+	/// A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	/// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	public static func isAlphanumeric(_ text: [Character]) -> Bool {
+		text.allSatisfy { alphanumericCharset.contains($0) }
+	}
+	
+	// Tests whether the given string can be encoded as a segment in numeric mode.
+	// A string is encodable iff each character is in the range 0 to 9.
+	public static func isNumeric(_ text: [Character]) -> Bool {
+		text.allSatisfy { $0.isNumber }
 	}
 }
