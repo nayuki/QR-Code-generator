@@ -171,6 +171,12 @@ Rust language:
         }
     }
 
+Swift language:
+
+    import QRCodeGenerator
+    
+    let qr = try! QRCode.encode(text: text, ecl: .medium)
+    let svg = qr.toSVGString(border: 4)
 
 License
 -------
