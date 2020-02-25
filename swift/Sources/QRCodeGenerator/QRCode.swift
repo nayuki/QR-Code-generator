@@ -92,7 +92,7 @@ struct QRCode {
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
 	public static func encode(segments: [QRSegment], ecl: QRCodeECC) throws -> Self {
-		try QRCode.encodeAdvanced(segments: segments, ecl: ecl, minVersion: qrCodeMinVersion, maxVersion: qrCodeMaxVersion, boostECL: true)
+		try QRCode.advancedEncode(segments: segments, ecl: ecl, minVersion: qrCodeMinVersion, maxVersion: qrCodeMaxVersion, boostECL: true)
 	}
 	
 	/// Returns a QR Code representing the given segments with the given encoding parameters.
@@ -109,7 +109,7 @@ struct QRCode {
 	/// 
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the data is too
 	/// long to fit in any version in the given range at the given ECC level.
-	public static func encodeAdvanced(segments: [QRSegment], ecl: QRCodeECC, minVersion: QRCodeVersion, maxVersion: QRCodeVersion, mask: QRCodeMask? = nil, boostECL: Bool) throws -> Self {
+	public static func advancedEncode(segments: [QRSegment], ecl: QRCodeECC, minVersion: QRCodeVersion, maxVersion: QRCodeVersion, mask: QRCodeMask? = nil, boostECL: Bool) throws -> Self {
 		assert(minVersion <= maxVersion, "Invalid value")
 		var mutECL = ecl
 		
@@ -155,7 +155,7 @@ struct QRCode {
 		assert(bb.count == dataUsedBits)
 		
 		// Add terminator and pad up to a byte if applicable
-		let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: mutECL)
+		let dataCapacityBits: UInt = QRCode.getNumDataCodewords(version: version, ecl: mutECL) * 8
 		assert(bb.count <= dataCapacityBits)
 		var numZeroBits = min(4, dataCapacityBits - bb.count)
 		bb.appendBits(0, Int(numZeroBits))
@@ -195,7 +195,7 @@ struct QRCode {
 		var mutMask = mask
 
 		// Initialize fields
-		let size = UInt(version.value)
+		let size = UInt(version.value) * 4 + 17
 		var result = Self(
 			version: version,
 			size: Int(size),
@@ -265,14 +265,13 @@ struct QRCode {
 				getModule(x: x, y: y)
 					? "\(x != 0 || y != 0 ? " " : "")M\(x + border),\(y + border)h1v1h-1z"
 					: ""
-			}
-		}
+			}.joined()
+		}.joined()
 		return """
 			<?xml version="1.0" encoding="UTF-8"?>
 			<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 \(dimension) \(dimension)" stroke="none">
 			  <rect width="100%" height="100%" fill="#FFFFFF"/>
-			  <rect width="100%" height="100%" fil="#FFFFFF"/>
 			  <path d="\(path)" fill="#000000"/>
 			</svg>
 			"""
@@ -464,7 +463,7 @@ struct QRCode {
 					let upward: Bool = (right + 1) & 2 == 0
 					let y: Int = upward ? (size - 1 - vert) : vert
 					if !isFunction[y * size + x] && i < data.count * 8 {
-						self[x, y] = getBit(UInt32(data[i >> 3]), 7 - (Int32(i & 7)))
+						self[x, y] = getBit(UInt32(data[i >> 3]), 7 - Int32(i & 7))
 						i += 1
 					}
 					// If this QR code has any remainder bits (0 to 7), they were assigned as
