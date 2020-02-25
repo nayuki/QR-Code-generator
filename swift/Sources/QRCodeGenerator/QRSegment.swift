@@ -195,4 +195,39 @@ public struct QRSegment: Hashable {
 	public static func isNumeric(_ text: [Character]) -> Bool {
 		text.allSatisfy { $0.isNumber }
 	}
+	
+	/*---- QrSegmentMode functionality ----*/
+	public struct Mode: Hashable {
+		case numeric
+		case alphanumeric
+		case byte
+		case kanji
+		case eci
+		
+		/// Returns an unsigned 4-bit integer value (range 0 to 15)
+		/// representing the mode indicator bits for this mode object.
+		var modeBits: UInt32 {
+			switch self {
+				case .numeric: return 0x1
+				case .alphanumeric: return 0x2
+				case .byte: return 0x4
+				case .kanji: return 0x8
+				case .eci: return 0x7
+			}
+		}
+		
+		/// Returns the bit width of the character count field for a segment in this mode
+		/// in a QR Code at the given version number. The result is in the range [0, 16].
+		func numCharCountBits(version: QRCodeVersion) -> UInt8 {
+			let v: [UInt8]
+			switch self {
+				case .numeric: v = [10, 12, 14]
+				case .alphanumeric: v = [9, 11, 13]
+				case .byte: v = [8, 16, 16]
+				case .kanji: v = [8, 10, 12]
+				case .eci: v = [0, 0, 0]
+			}
+			return v[(version.value + 7) / 17]
+		}
+	}
 }
