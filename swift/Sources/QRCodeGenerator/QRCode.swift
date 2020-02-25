@@ -337,7 +337,7 @@ struct QRCode {
 		for i in 0..<8 {
 			setFunctionModule(x: size - 1 - i, y: 8, isBlack: getBit(bits, Int32(i)))
 		}
-		for i in 0..<15 {
+		for i in 8..<15 {
 			setFunctionModule(x: 8, y: size - 15 + i, isBlack: getBit(bits, Int32(i)))
 		}
 		setFunctionModule(x: 8, y: size - 8, isBlack: true) // Always black
@@ -375,7 +375,7 @@ struct QRCode {
 				let xx: Int = x + dx
 				let yy: Int = y + dy
 				if 0 <= xx && xx < size && 0 <= yy && yy < size {
-					let dist: Int = max(abs(dx), abs(dy))
+					let dist: Int = max(abs(dx), abs(dy)) // Chebyshev/infinity norm
 					setFunctionModule(x: xx, y: yy, isBlack: dist != 2 && dist != 4)
 				}
 			}
@@ -450,7 +450,7 @@ struct QRCode {
 	private mutating func drawCodewords(data: [UInt8]) {
 		assert(data.count == QRCode.getNumRawDataModules(version: version) / 8, "Illegal argument")
 		
-		var i: Int = 0 // Bit index into the data
+		var i: UInt = 0 // Bit index into the data
 		// Do the funny zigzag scan
 		var right: Int = size - 1
 		while right >= 1 { // Index of right column in each column pair
@@ -463,7 +463,7 @@ struct QRCode {
 					let upward: Bool = (right + 1) & 2 == 0
 					let y: Int = upward ? (size - 1 - vert) : vert
 					if !isFunction[y * size + x] && i < data.count * 8 {
-						self[x, y] = getBit(UInt32(data[i >> 3]), 7 - Int32(i & 7))
+						self[x, y] = getBit(UInt32(data[Int(i >> 3)]), 7 - Int32(i & 7))
 						i += 1
 					}
 					// If this QR code has any remainder bits (0 to 7), they were assigned as
@@ -657,7 +657,7 @@ struct QRCode {
 			let factor: UInt8 = b ^ result[...].popFirst()!
 			result.append(0)
 			for (i, y) in divisor.enumerated() {
-				result[i] = QRCode.reedSolomonMultiply(x: y, y: factor)
+				result[i] ^= QRCode.reedSolomonMultiply(x: y, y: factor)
 			}
 		}
 		return result
