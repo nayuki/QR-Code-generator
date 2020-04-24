@@ -25,6 +25,7 @@
 # 
 
 import itertools, random, subprocess, sys, time
+from typing import Optional, TypeVar
 
 
 CHILD_PROGRAMS = [
@@ -56,7 +57,7 @@ def main():
 		for proc in subprocs:
 			if proc.poll() is None:
 				print(-1, file=proc.stdin)
-				proc.stdin.flush()
+				not_none(proc.stdin).flush()
 		sys.exit("Error: One or more workers failed to start")
 	
 	# Do tests
@@ -120,14 +121,21 @@ def write_all(val):
 
 def flush_all():
 	for proc in subprocs:
-		proc.stdin.flush()
+		not_none(proc.stdin).flush()
 
 def read_verify():
-	val = subprocs[0].stdout.readline().rstrip("\r\n")
+	val = not_none(subprocs[0].stdout).readline().rstrip("\r\n")
 	for proc in subprocs[1 : ]:
-		if proc.stdout.readline().rstrip("\r\n") != val:
+		if not_none(proc.stdout).readline().rstrip("\r\n") != val:
 			raise ValueError("Mismatch")
 	return int(val)
+
+
+T = TypeVar("T")
+def not_none(obj: Optional[T]) -> T:
+	if obj is None:
+		raise TypeError()
+	return obj
 
 
 if __name__ == "__main__":
