@@ -30,11 +30,11 @@ import sys
 import qrcodegen
 
 
-def read_int():
+def read_int() -> int:
 	return int(input())
 
 
-def main():
+def main() -> None:
 	while True:
 		
 		# Read data or exit

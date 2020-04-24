@@ -27,7 +27,7 @@
 from qrcodegen import QrCode, QrSegment
 
 
-def main():
+def main() -> None:
 	"""The main application program."""
 	do_basic_demo()
 	do_variety_demo()
@@ -38,7 +38,7 @@ def main():
 
 # ---- Demo suite ----
 
-def do_basic_demo():
+def do_basic_demo() -> None:
 	"""Creates a single QR Code, then prints it to the console."""
 	text = "Hello, world!"      # User-supplied Unicode text
 	errcorlvl = QrCode.Ecc.LOW  # Error correction level
@@ -49,7 +49,7 @@ def do_basic_demo():
 	print(qr.to_svg_str(4))
 
 
-def do_variety_demo():
+def do_variety_demo() -> None:
 	"""Creates a variety of QR Codes that exercise different features of the library, and prints each one to the console."""
 	
 	# Numeric mode encoding (3.33 bits per digit)
@@ -76,7 +76,7 @@ def do_variety_demo():
 	print_qr(qr)
 
 
-def do_segment_demo():
+def do_segment_demo() -> None:
 	"""Creates QR Codes with manually specified segments for better compactness."""
 	
 	# Illustration "silver"
@@ -146,7 +146,7 @@ def do_segment_demo():
 	print_qr(qr)
 
 
-def do_mask_demo():
+def do_mask_demo() -> None:
 	"""Creates QR Codes with the same size and contents but different mask patterns."""
 	
 	# Project Nayuki URL
@@ -170,7 +170,7 @@ def do_mask_demo():
 
 # ---- Utilities ----
 
-def print_qr(qrcode):
+def print_qr(qrcode: QrCode) -> None:
 	"""Prints the given QrCode object to the console."""
 	border = 4
 	for y in range(-border, qrcode.get_size() + border):

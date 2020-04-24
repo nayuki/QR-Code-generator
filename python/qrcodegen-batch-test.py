@@ -25,10 +25,10 @@
 # 
 
 import itertools, random, subprocess, sys, time
-from typing import Optional, TypeVar
+from typing import List, Optional, TypeVar
 
 
-CHILD_PROGRAMS = [
+CHILD_PROGRAMS: List[List[str]] = [
 	["python3", "-B", "../python/qrcodegen-worker.py"],  # Python program
 	["java", "-cp", "../java/src/main/java", "-ea:io.nayuki.qrcodegen...", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
 	["node", "../typescript-javascript/qrcodegen-worker.js"],  # TypeScript program
@@ -38,9 +38,9 @@ CHILD_PROGRAMS = [
 ]
 
 
-subprocs = []
+subprocs: List[subprocess.Popen] = []
 
-def main():
+def main() -> None:
 	# Launch workers
 	global subprocs
 	try:
@@ -67,7 +67,7 @@ def main():
 		print()
 
 
-def do_trial():
+def do_trial() -> None:
 	mode = random.randrange(4)
 	if mode == 0:  # Numeric
 		length = round((2 * 7089) ** random.random())
@@ -115,15 +115,15 @@ def do_trial():
 		read_verify()
 
 
-def write_all(val):
+def write_all(val: int) -> None:
 	for proc in subprocs:
 		print(val, file=proc.stdin)
 
-def flush_all():
+def flush_all() -> None:
 	for proc in subprocs:
 		not_none(proc.stdin).flush()
 
-def read_verify():
+def read_verify() -> int:
 	val = not_none(subprocs[0].stdout).readline().rstrip("\r\n")
 	for proc in subprocs[1 : ]:
 		if not_none(proc.stdout).readline().rstrip("\r\n") != val:
