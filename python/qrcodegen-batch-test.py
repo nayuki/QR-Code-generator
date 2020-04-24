@@ -70,10 +70,10 @@ def do_trial():
 	mode = random.randrange(4)
 	if mode == 0:  # Numeric
 		length = round((2 * 7089) ** random.random())
-		data = [random.randrange(48, 58) for _ in range(length)]
+		data = random.choices(b"0123456789", k=length)
 	elif mode == 1:  # Alphanumeric
 		length = round((2 * 4296) ** random.random())
-		data = [ord(random.choice("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")) for _ in range(length)]
+		data = random.choices(b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:", k=length)
 	elif mode == 2:  # ASCII
 		length = round((2 * 2953) ** random.random())
 		data = [random.randrange(128) for _ in range(length)]
