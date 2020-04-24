@@ -1,5 +1,5 @@
 # 
-# QR Code generator library (Python 2, 3)
+# QR Code generator library (Python)
 # 
 # Copyright (c) Project Nayuki. (MIT License)
 # https://www.nayuki.io/page/qr-code-generator-library
@@ -21,7 +21,7 @@
 #   Software.
 # 
 
-import collections, itertools, re, sys
+import collections, itertools, re
 
 
 """
@@ -60,7 +60,7 @@ This module "qrcodegen", public members:
 
 # ---- QR Code symbol class ----
 
-class QrCode(object):
+class QrCode:
 	"""A QR Code symbol, which is a type of two-dimension barcode.
 	Invented by Denso Wave and described in the ISO/IEC 18004 standard.
 	Instances of this class represent an immutable square grid of black and white cells.
@@ -678,7 +678,7 @@ class QrCode(object):
 	
 	# ---- Public helper enumeration ----
 	
-	class Ecc(object):
+	class Ecc:
 		"""The error correction level in a QR Code symbol. Immutable."""
 		# Private constructor
 		def __init__(self, i, fb):
@@ -695,7 +695,7 @@ class QrCode(object):
 
 # ---- Data segment class ----
 
-class QrSegment(object):
+class QrSegment:
 	"""A segment of character/binary/control data in a QR Code symbol.
 	Instances of this class are immutable.
 	The mid-level way to create a segment is to take the payload data
@@ -713,11 +713,8 @@ class QrSegment(object):
 		"""Returns a segment representing the given binary data encoded in byte mode.
 		All input byte lists are acceptable. Any text string can be converted to
 		UTF-8 bytes (s.encode("UTF-8")) and encoded as a byte mode segment."""
-		py3 = sys.version_info.major >= 3
-		if (py3 and isinstance(data, str)) or (not py3 and isinstance(data, unicode)):
+		if isinstance(data, str):
 			raise TypeError("Byte string/list expected")
-		if not py3 and isinstance(data, str):
-			data = bytearray(data)
 		bb = _BitBuffer()
 		for b in data:
 			bb.append_bits(b, 8)
@@ -759,7 +756,7 @@ class QrSegment(object):
 	def make_segments(text):
 		"""Returns a new mutable list of zero or more segments to represent the given Unicode text string.
 		The result may use various segment modes and switch modes to optimize the length of the bit stream."""
-		if not (isinstance(text, str) or (sys.version_info.major < 3 and isinstance(text, unicode))):
+		if not isinstance(text, str):
 			raise TypeError("Text string expected")
 		
 		# Select the most efficient segment encoding automatically
@@ -867,7 +864,7 @@ class QrSegment(object):
 	
 	# ---- Public helper enumeration ----
 	
-	class Mode(object):
+	class Mode:
 		"""Describes how a segment's data bits are interpreted. Immutable."""
 		
 		# Private constructor

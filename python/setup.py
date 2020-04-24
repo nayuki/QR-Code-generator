@@ -1,5 +1,5 @@
 # 
-# QR Code generator Distutils script (Python 2, 3)
+# QR Code generator Distutils script (Python)
 # 
 # Copyright (c) Project Nayuki. (MIT License)
 # https://www.nayuki.io/page/qr-code-generator-library
@@ -26,7 +26,7 @@ import setuptools
 
 setuptools.setup(
 	name = "qrcodegen",
-	description = "High quality QR Code generator library for Python 2 and 3",
+	description = "High quality QR Code generator library for Python",
 	version = "1.6.0",
 	platforms = "OS Independent",
 	license = "MIT License",
@@ -42,7 +42,6 @@ setuptools.setup(
 		"License :: OSI Approved :: MIT License",
 		"Operating System :: OS Independent",
 		"Programming Language :: Python",
-		"Programming Language :: Python :: 2",
 		"Programming Language :: Python :: 3",
 		"Topic :: Multimedia :: Graphics",
 		"Topic :: Software Development :: Libraries :: Python Modules",

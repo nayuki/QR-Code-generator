@@ -1,5 +1,5 @@
 # 
-# QR Code generator demo (Python 2, 3)
+# QR Code generator demo (Python)
 # 
 # Run this command-line program with no arguments. The program computes a bunch of demonstration
 # QR Codes and prints them to the console. Also, the SVG code for one QR Code is printed as a sample.
@@ -24,7 +24,6 @@
 #   Software.
 # 
 
-from __future__ import print_function
 from qrcodegen import QrCode, QrSegment
 
 
@@ -41,7 +40,7 @@ def main():
 
 def do_basic_demo():
 	"""Creates a single QR Code, then prints it to the console."""
-	text = u"Hello, world!"     # User-supplied Unicode text
+	text = "Hello, world!"      # User-supplied Unicode text
 	errcorlvl = QrCode.Ecc.LOW  # Error correction level
 	
 	# Make and print the QR Code symbol
@@ -62,7 +61,7 @@ def do_variety_demo():
 	print_qr(qr)
 	
 	# Unicode text as UTF-8
-	qr = QrCode.encode_text(u"\u3053\u3093\u306B\u3061\u0077\u0061\u3001\u4E16\u754C\uFF01\u0020\u03B1\u03B2\u03B3\u03B4", QrCode.Ecc.QUARTILE)
+	qr = QrCode.encode_text("\u3053\u3093\u306B\u3061\u0077\u0061\u3001\u4E16\u754C\uFF01\u0020\u03B1\u03B2\u03B3\u03B4", QrCode.Ecc.QUARTILE)
 	print_qr(qr)
 	
 	# Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
@@ -93,9 +92,9 @@ def do_segment_demo():
 	print_qr(qr)
 	
 	# Illustration "golden"
-	golden0 = u"Golden ratio \u03C6 = 1."
-	golden1 = u"6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374"
-	golden2 = u"......"
+	golden0 = "Golden ratio \u03C6 = 1."
+	golden1 = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374"
+	golden2 = "......"
 	qr = QrCode.encode_text(golden0 + golden1 + golden2, QrCode.Ecc.LOW)
 	print_qr(qr)
 	
@@ -107,7 +106,7 @@ def do_segment_demo():
 	print_qr(qr)
 	
 	# Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
-	madoka = u"\u300C\u9B54\u6CD5\u5C11\u5973\u307E\u3069\u304B\u2606\u30DE\u30AE\u30AB\u300D\u3063\u3066\u3001\u3000\u0418\u0410\u0418\u3000\uFF44\uFF45\uFF53\uFF55\u3000\u03BA\u03B1\uFF1F"
+	madoka = "\u300C\u9B54\u6CD5\u5C11\u5973\u307E\u3069\u304B\u2606\u30DE\u30AE\u30AB\u300D\u3063\u3066\u3001\u3000\u0418\u0410\u0418\u3000\uFF44\uFF45\uFF53\uFF55\u3000\u03BA\u03B1\uFF1F"
 	qr = QrCode.encode_text(madoka, QrCode.Ecc.LOW)
 	print_qr(qr)
 	
@@ -157,11 +156,11 @@ def do_mask_demo():
 	
 	# Chinese text as UTF-8
 	segs = QrSegment.make_segments(
-		u"\u7DAD\u57FA\u767E\u79D1\uFF08\u0057\u0069\u006B\u0069\u0070\u0065\u0064\u0069\u0061\uFF0C"
-		 "\u8046\u807D\u0069\u002F\u02CC\u0077\u026A\u006B\u1D7B\u02C8\u0070\u0069\u02D0\u0064\u0069"
-		 "\u002E\u0259\u002F\uFF09\u662F\u4E00\u500B\u81EA\u7531\u5167\u5BB9\u3001\u516C\u958B\u7DE8"
-		 "\u8F2F\u4E14\u591A\u8A9E\u8A00\u7684\u7DB2\u8DEF\u767E\u79D1\u5168\u66F8\u5354\u4F5C\u8A08"
-		 "\u756B")
+		"\u7DAD\u57FA\u767E\u79D1\uFF08\u0057\u0069\u006B\u0069\u0070\u0065\u0064\u0069\u0061\uFF0C"
+		"\u8046\u807D\u0069\u002F\u02CC\u0077\u026A\u006B\u1D7B\u02C8\u0070\u0069\u02D0\u0064\u0069"
+		"\u002E\u0259\u002F\uFF09\u662F\u4E00\u500B\u81EA\u7531\u5167\u5BB9\u3001\u516C\u958B\u7DE8"
+		"\u8F2F\u4E14\u591A\u8A9E\u8A00\u7684\u7DB2\u8DEF\u767E\u79D1\u5168\u66F8\u5354\u4F5C\u8A08"
+		"\u756B")
 	print_qr(QrCode.encode_segments(segs, QrCode.Ecc.MEDIUM, mask=0))  # Force mask 0
 	print_qr(QrCode.encode_segments(segs, QrCode.Ecc.MEDIUM, mask=1))  # Force mask 1
 	print_qr(QrCode.encode_segments(segs, QrCode.Ecc.MEDIUM, mask=5))  # Force mask 5
@@ -176,7 +175,7 @@ def print_qr(qrcode):
 	border = 4
 	for y in range(-border, qrcode.get_size() + border):
 		for x in range(-border, qrcode.get_size() + border):
-			print(u"\u2588 "[1 if qrcode.get_module(x,y) else 0] * 2, end="")
+			print("\u2588 "[1 if qrcode.get_module(x,y) else 0] * 2, end="")
 		print()
 	print()
 

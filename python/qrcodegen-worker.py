@@ -1,5 +1,5 @@
 # 
-# QR Code generator test worker (Python 2, 3)
+# QR Code generator test worker (Python)
 # 
 # This program reads data and encoding parameters from standard input and writes
 # QR Code bitmaps to standard output. The I/O format is one integer per line.
@@ -28,11 +28,10 @@
 
 import sys
 import qrcodegen
-py3 = sys.version_info.major >= 3
 
 
 def read_int():
-	return int((input if py3 else raw_input)())
+	return int(input())
 
 
 def main():

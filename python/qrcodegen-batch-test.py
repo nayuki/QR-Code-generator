@@ -1,5 +1,5 @@
 # 
-# QR Code generator batch test (Python 3)
+# QR Code generator batch test (Python)
 # 
 # Runs various versions of the QR Code generator test worker as subprocesses,
 # feeds each one the same random input, and compares their output for equality.
@@ -25,13 +25,10 @@
 # 
 
 import itertools, random, subprocess, sys, time
-if sys.version_info.major < 3:
-	raise RuntimeError("Requires Python 3+")
 
 
 CHILD_PROGRAMS = [
-	["python2", "-B", "../python/qrcodegen-worker.py"],  # Python 2 program
-	["python3", "-B", "../python/qrcodegen-worker.py"],  # Python 3 program
+	["python3", "-B", "../python/qrcodegen-worker.py"],  # Python program
 	["java", "-cp", "../java/src/main/java", "-ea:io.nayuki.qrcodegen...", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
 	["node", "../typescript-javascript/qrcodegen-worker.js"],  # TypeScript program
 	["../c/qrcodegen-worker"],  # C program
