@@ -856,14 +856,14 @@ class QrSegment:
 	# (Public) Describes precisely all strings that are encodable in numeric mode.
 	# To test whether a string s is encodable: ok = NUMERIC_REGEX.fullmatch(s) is not None
 	# A string is encodable iff each character is in the range 0 to 9.
-	NUMERIC_REGEX = re.compile(r"[0-9]*\Z")
+	NUMERIC_REGEX = re.compile(r"[0-9]*")
 	
 	# (Public) Describes precisely all strings that are encodable in alphanumeric mode.
 	# To test whether a string s is encodable: ok = ALPHANUMERIC_REGEX.fullmatch(s) is not None
 	# A string is encodable iff each character is in the following set: 0 to 9, A to Z
 	# (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 
-	ALPHANUMERIC_REGEX = re.compile(r"[A-Z0-9 $%*+./:-]*\Z")
+	ALPHANUMERIC_REGEX = re.compile(r"[A-Z0-9 $%*+./:-]*")
 	
 	# (Private) Dictionary of "0"->0, "A"->10, "$"->37, etc.
 	_ALPHANUMERIC_ENCODING_TABLE = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
