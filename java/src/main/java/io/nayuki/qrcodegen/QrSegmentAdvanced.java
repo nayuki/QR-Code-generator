@@ -64,14 +64,14 @@ public final class QrSegmentAdvanced {
 		// Check arguments
 		Objects.requireNonNull(text);
 		Objects.requireNonNull(ecl);
-		if (!(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION))
+		if (not_Valid_Version(minVersion, maxVersion))
 			throw new IllegalArgumentException("Invalid value");
 		
 		// Iterate through version numbers, and make tentative segments
 		List<QrSegment> segs = null;
 		int[] codePoints = toCodePoints(text);
 		for (int version = minVersion; ; version++) {
-			if (version == minVersion || version == 10 || version == 27)
+			if (is_valid_version(minVersion, version))
 				segs = makeSegmentsOptimally(codePoints, version);
 			assert segs != null;
 			
@@ -87,6 +87,16 @@ public final class QrSegmentAdvanced {
 				throw new DataTooLongException(msg);
 			}
 		}
+	}
+
+
+	private static boolean is_valid_version(int minVersion, int version) {
+		return version == minVersion || version == 10 || version == 27;
+	}
+
+
+	private static boolean not_Valid_Version(int minVersion, int maxVersion) {
+		return !(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION);
 	}
 	
 	
@@ -277,8 +287,7 @@ public final class QrSegmentAdvanced {
 	 */
 	public static boolean isEncodableAsKanji(String text) {
 		Objects.requireNonNull(text);
-		return text.chars().allMatch(
-			c -> isKanji((char)c));
+		return text.chars().allMatch(c -> isKanji((char)c));
 	}
 	
 	
