@@ -198,8 +198,6 @@ public final class QrCode {
 		return new QrCode(version, ecl, dataCodewords, mask);
 	}
 	
-	
-	
 	/*---- Instance fields ----*/
 	
 	// Public immutable scalar parameters:
