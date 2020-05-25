@@ -542,7 +542,7 @@ public final class QrCode {
 	// The function modules must be marked and the codeword bits must be drawn
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
-	// QR Code needs exactly one (not zero, two, etc.) mask applied.
+	// QR Code needs exactly one (not zero, two, etc.) mask applied. 				switch-statement refactoring
 	private void applyMask(int msk) {
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
@@ -589,9 +589,9 @@ public final class QrCode {
 		return msk;  // The caller shall assign this value to the final-declared field
 	}
 	
-	
+
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
-	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score. 		duplication code extract
 	private int getPenaltyScore() {
 		int result = 0;
 		
@@ -600,6 +600,7 @@ public final class QrCode {
 			boolean runColor = false;
 			int runX = 0;
 			int[] runHistory = new int[7];
+			result += havingSameColor();
 			for (int x = 0; x < size; x++) {
 				if (modules[y][x] == runColor) {
 					runX++;
@@ -640,7 +641,7 @@ public final class QrCode {
 			result += finderPenaltyTerminateAndCount(runColor, runY, runHistory) * PENALTY_N3;
 		}
 		
-		// 2*2 blocks of modules having same color
+		// 2*2 blocks of modules having same color. 								extract method to reduce method size
 		for (int y = 0; y < size - 1; y++) {
 			for (int x = 0; x < size - 1; x++) {
 				boolean color = modules[y][x];
@@ -694,7 +695,7 @@ public final class QrCode {
 	
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
-	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
+	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table. 							replace integer to understandable word
 	private static int getNumRawDataModules(int ver) {
 		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
