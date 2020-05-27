@@ -238,32 +238,32 @@ public final class QrCode {
 	 * error correction level, data codeword bytes, and mask number.
 	 * <p>This is a low-level API that most users should not use directly. A mid-level
 	 * API is the {@link #encodeSegments(List,Ecc,int,int,int,boolean)} function.</p>
-	 * @param ver the version number to use, which must be in the range 1 to 40 (inclusive)
-	 * @param ecl the error correction level to use
+	 * @param version the version number to use, which must be in the range 1 to 40 (inclusive)
+	 * @param errorCorrectionLevel the error correction level to use
 	 * @param dataCodewords the bytes representing segments to encode (without ECC)
-	 * @param msk the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice
+	 * @param mask the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice
 	 * @throws NullPointerException if the byte array or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the version or mask value is out of range,
 	 * or if the data is the wrong length for the specified version and error correction level
 	 */
-	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int msk) {
+	public QrCode(int version, Ecc errorCorrectionLevel, byte[] dataCodewords, int mask) {
 		// Check arguments and initialize fields
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
+		if (version < MIN_VERSION || version > MAX_VERSION)
 			throw new IllegalArgumentException("Version value out of range");
-		if (msk < -1 || msk > 7)
+		if (mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Mask value out of range");
-		version = ver;
-		size = ver * 4 + 17;
-		errorCorrectionLevel = Objects.requireNonNull(ecl);
+		this.version = version;
+		this.size = version * 4 + 17;
+		this.errorCorrectionLevel = Objects.requireNonNull(errorCorrectionLevel);
 		Objects.requireNonNull(dataCodewords);
-		modules    = new boolean[size][size];  // Initially all white
-		isFunction = new boolean[size][size];
+		this.modules    = new boolean[size][size];  // Initially all white
+		this.isFunction = new boolean[size][size];
 		
 		// Compute ECC, draw modules, do masking
 		drawFunctionPatterns();
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
-		this.mask = handleConstructorMasking(msk);
+		this.mask = handleConstructorMasking(mask);
 		isFunction = null;
 	}
 	
@@ -543,7 +543,7 @@ public final class QrCode {
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
-	private void applyMask(int msk) {
+	private void applyMask(int msk) {	
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
 		for (int y = 0; y < size; y++) {
@@ -592,7 +592,7 @@ public final class QrCode {
 	
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
-	private int getPenaltyScore() {
+	private int getPenaltyScore() {	
 		int result = 0;
 		
 		// Adjacent modules in row having same color, and finder-like patterns
@@ -695,7 +695,7 @@ public final class QrCode {
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
-	private static int getNumRawDataModules(int ver) {
+	private static int getNumRawDataModules(int ver) {	
 		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
 		
