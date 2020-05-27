@@ -354,8 +354,9 @@ public final class QrCode {
 	private void drawFunctionPatterns() {
 		// Draw horizontal and vertical timing patterns
 		for (int i = 0; i < size; i++) {
-			setFunctionModule(6, i, i % 2 == 0);
-			setFunctionModule(i, 6, i % 2 == 0);
+			final boolean isBlack = i % 2 == 0;
+			setFunctionModule(6, i, isBlack);
+			setFunctionModule(i, 6, isBlack);
 		}
 		
 		// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
