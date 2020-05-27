@@ -23,12 +23,20 @@
 
 package io.nayuki.qrcodegen;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
+
 import io.nayuki.qrcodegen.QrSegment.Mode;
 
 
@@ -132,6 +140,20 @@ public final class QrSegmentAdvanced {
 		int[] prevCosts = headCosts.clone();
 		
 		// Calculate costs using dynamic programming
+		prevCosts = calculate_cost(codePoints, modeTypes, numModes, headCosts, charModes, prevCosts);
+		
+		// Find optimal ending mode
+		Mode curMode = find_optimal(modeTypes, numModes, prevCosts);
+		
+		// Get optimal mode for each code point by tracing backwards
+		Mode[] result = new Mode[charModes.length];
+		get_optimal(modeTypes, numModes, charModes, curMode, result);
+		return result;
+	}
+
+
+	private static int[] calculate_cost(int[] codePoints, final Mode[] modeTypes, final int numModes,
+			final int[] headCosts, Mode[][] charModes, int[] prevCosts) {
 		for (int i = 0; i < codePoints.length; i++) {
 			int cPoint = codePoints[i];
 			int[] curCosts = new int[numModes];
@@ -157,8 +179,8 @@ public final class QrSegmentAdvanced {
 			for (int j = 0; j < numModes; j++) {  // To mode
 				for (int k = 0; k < numModes; k++) {  // From mode
 					int newCost = (curCosts[k] + 5) / 6 * 6 + headCosts[j];
-					boolean is_notNull_or_lower = charModes[i][k] != null && (charModes[i][j] == null || newCost < curCosts[j]);
-					if (is_notNull_or_lower) {
+					boolean is_lower = charModes[i][k] != null && (charModes[i][j] == null || newCost < curCosts[j]);
+					if (is_lower) {
 						curCosts[j] = newCost;
 						charModes[i][j] = modeTypes[k];
 					}
@@ -167,18 +189,12 @@ public final class QrSegmentAdvanced {
 			
 			prevCosts = curCosts;
 		}
-		
-		// Find optimal ending mode
-		Mode curMode = null;
-		for (int i = 0, minCost = 0; i < numModes; i++) {
-			if (curMode == null || prevCosts[i] < minCost) {
-				minCost = prevCosts[i];
-				curMode = modeTypes[i];
-			}
-		}
-		
-		// Get optimal mode for each code point by tracing backwards
-		Mode[] result = new Mode[charModes.length];
+		return prevCosts;
+	}
+
+
+	private static void get_optimal(final Mode[] modeTypes, final int numModes, Mode[][] charModes, Mode curMode,
+			Mode[] result) {
 		for (int i = result.length - 1; i >= 0; i--) {
 			for (int j = 0; j < numModes; j++) {
 				if (modeTypes[j] == curMode) {
@@ -188,7 +204,18 @@ public final class QrSegmentAdvanced {
 				}
 			}
 		}
-		return result;
+	}
+
+
+	private static Mode find_optimal(final Mode[] modeTypes, final int numModes, int[] prevCosts) {
+		Mode curMode = null;
+		for (int i = 0, minCost = 0; i < numModes; i++) {
+			if (curMode == null || prevCosts[i] < minCost) {
+				minCost = prevCosts[i];
+				curMode = modeTypes[i];
+			}
+		}
+		return curMode;
 	}
 
 
@@ -247,12 +274,12 @@ public final class QrSegmentAdvanced {
 	
 	
 	// Returns the number of UTF-8 bytes needed to encode the given Unicode code point.
-	private static int countUtf8Bytes(int cp) {
-		if      (cp <        0) throw new IllegalArgumentException("Invalid code point");
-		else if (cp <     0x80) return 1;
-		else if (cp <    0x800) return 2;
-		else if (cp <  0x10000) return 3;
-		else if (cp < 0x110000) return 4;
+	private static int countUtf8Bytes(int currentPoint) {
+		if      (currentPoint <        0) throw new IllegalArgumentException("Invalid code point");
+		else if (currentPoint <     0x80) return 1;
+		else if (currentPoint <    0x800) return 2;
+		else if (currentPoint <  0x10000) return 3;
+		else if (currentPoint < 0x110000) return 4;
 		else                    throw new IllegalArgumentException("Invalid code point");
 	}
 	
@@ -306,8 +333,8 @@ public final class QrSegmentAdvanced {
 		return c < UNICODE_TO_QR_KANJI.length && UNICODE_TO_QR_KANJI[c] != -1;
 	}
 	
-	
-	// Data derived from ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/SHIFTJIS.TXT
+//	Data derived from ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/SHIFTJIS.TXT
+//	private static final String PACKED_QR_KANJI_TO_UNICODE = readPacked_KANJI();
 	private static final String PACKED_QR_KANJI_TO_UNICODE =
 		"MAAwATAC/wz/DjD7/xr/G/8f/wEwmzCcALT/QACo/z7/4/8/MP0w/jCdMJ4wA07dMAUwBjAHMPwgFSAQ/w8AXDAcIBb/XCAmICUgGCAZIBwgHf8I/wkwFDAV/zv/Pf9b/10wCDAJMAowCzAMMA0wDjAPMBAwEf8LIhIAsQDX//8A9/8dImD/HP8eImYiZyIeIjQmQiZA" +
 		"ALAgMiAzIQP/5f8EAKIAo/8F/wP/Bv8K/yAApyYGJgUlyyXPJc4lxyXGJaEloCWzJbIlvSW8IDswEiGSIZAhkSGTMBP/////////////////////////////IggiCyKGIocigiKDIioiKf////////////////////8iJyIoAKwh0iHUIgAiA///////////////////" +
@@ -427,14 +454,27 @@ public final class QrSegmentAdvanced {
 		Arrays.fill(UNICODE_TO_QR_KANJI, (short)-1);
 		byte[] bytes = Base64.getDecoder().decode(PACKED_QR_KANJI_TO_UNICODE);
 		for (int i = 0; i < bytes.length; i += 2) {
-			char c = (char)(((bytes[i] & 0xFF) << 8) | (bytes[i + 1] & 0xFF));
-			if (c == 0xFFFF)
+			char convertChar = (char)(((bytes[i] & 0xFF) << 8) | (bytes[i + 1] & 0xFF));
+			if (convertChar == 0xFFFF)
 				continue;
-			assert UNICODE_TO_QR_KANJI[c] == -1;
-			UNICODE_TO_QR_KANJI[c] = (short)(i / 2);
+			assert UNICODE_TO_QR_KANJI[convertChar] == -1;
+			UNICODE_TO_QR_KANJI[convertChar] = (short)(i / 2);
 		}
 	}
 	
+//	private static String readPacked_KANJI() {
+//		String str = "";
+//		try {
+//			File file = new File("./packet_KanJI.txt");
+//			Scanner scan = new Scanner(file);
+//			str +=scan.nextLine();
+//			scan.close();
+//		}
+//		catch(FileNotFoundException e){
+//		}
+//		
+//		return str;
+//	}
 	
 	
 	/*---- Miscellaneous ----*/
