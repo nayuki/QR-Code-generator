@@ -52,6 +52,12 @@ import java.util.Objects;
  */
 public final class QrCode {
 	
+	private static final int FINDER_SIZE = 3;
+
+	private static final int TIMING_COORDINATE = 6;
+
+
+
 	/*---- Static factory functions (high level) ----*/
 	
 	/**
@@ -354,15 +360,14 @@ public final class QrCode {
 	private void drawFunctionPatterns() {
 		// Draw horizontal and vertical timing patterns
 		for (int i = 0; i < size; i++) {
-			final boolean isBlack = i % 2 == 0;
-			setFunctionModule(6, i, isBlack);
-			setFunctionModule(i, 6, isBlack);
+			setFunctionModule(TIMING_COORDINATE, i, i % 2 == 0);
+			setFunctionModule(i, TIMING_COORDINATE, i % 2 == 0);
 		}
 		
 		// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
-		drawFinderPattern(3, 3);
-		drawFinderPattern(size - 4, 3);
-		drawFinderPattern(3, size - 4);
+		drawFinderPattern(FINDER_SIZE, FINDER_SIZE);
+		drawFinderPattern(size - 1 - FINDER_SIZE, FINDER_SIZE);
+		drawFinderPattern(FINDER_SIZE, size - 1 - FINDER_SIZE);
 		
 		// Draw numerous alignment patterns
 		int[] alignPatPos = getAlignmentPatternPositions();
