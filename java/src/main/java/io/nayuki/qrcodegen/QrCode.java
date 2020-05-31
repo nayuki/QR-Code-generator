@@ -374,8 +374,11 @@ public final class QrCode {
 		int numAlign = alignPatPos.length;
 		for (int i = 0; i < numAlign; i++) {
 			for (int j = 0; j < numAlign; j++) {
-				// Don't draw on the three finder corners
-				if (!(i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0))
+				final boolean isLeftTop = i == 0 && j == 0;
+				final boolean isLeftBottom = i == 0 && j == numAlign - 1;
+				final boolean isRightTop = i == numAlign - 1 && j == 0;
+				final boolean onThreeFinderCorners = isLeftTop || isLeftBottom || isRightTop;
+				if (!onThreeFinderCorners)
 					drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
 			}
 		}
