@@ -614,7 +614,7 @@ public final class QrCode {
 	
 	private int twobytwoHavingSameColor(boolean[][] modules) {
 		int result = 0;
-		// 2*2 blocks of modules having same color. 
+		// 2*2 blocks of modules having same color
 		for (int y = 0; y < size - 1; y++) {
 			for (int x = 0; x < size - 1; x++) {
 				boolean color = modules[y][x];
