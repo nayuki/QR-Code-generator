@@ -155,7 +155,85 @@ public final class QrCode {
 		if (!isVersionInRange || isMaskValid)
 			throw new IllegalArgumentException("Invalid value");
 		
-		// Find the minimal version number to use
+		
+		int version = findMinimalVersion(segments, errorCorrectionLevel, minVersion, maxVersion);
+		
+		int dataUsedBits = QrSegment.getTotalBits(segments, version);
+		
+		errorCorrectionLevel = findMaximalErrorCorrectionLevel(errorCorrectionLevel, boostEcl, version, dataUsedBits);
+		
+		
+		BitBuffer bitBuffer = segmentsToBitBuffer(segments, version);
+		assert bitBuffer.bitLength() == dataUsedBits;
+		
+		
+		int dataCapacityBits = getNumDataCodewords(version, errorCorrectionLevel) * 8;
+		assert bitBuffer.bitLength() <= dataCapacityBits;
+		addTerminator(bitBuffer, dataCapacityBits);
+		
+		
+		addPad(bitBuffer, dataCapacityBits);
+		
+		
+		byte[] dataCodewords = bitBufferToCodewords(bitBuffer);
+		
+		// Create the QR Code object
+		return new QrCode(version, errorCorrectionLevel, dataCodewords, mask);
+	}
+
+
+	// Pack bits into bytes in big endian
+	private static byte[] bitBufferToCodewords(BitBuffer bitBuffer) {
+		byte[] dataCodewords = new byte[bitBuffer.bitLength() / 8];
+		for (int i = 0; i < bitBuffer.bitLength(); i++)
+			dataCodewords[i >>> 3] |= bitBuffer.getBit(i) << (7 - (i & 7));
+		return dataCodewords;
+	}
+
+
+	// Pad with alternating bytes until data capacity is reached
+	private static void addPad(BitBuffer bitBuffer, int dataCapacityBits) {
+		for (int padByte = 0xEC; bitBuffer.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+			bitBuffer.appendBits(padByte, 8);
+	}
+
+
+	/*---- Private helper methods for encodeSegments ----*/
+
+	// Add terminator and pad up to a byte if applicable
+	private static void addTerminator(BitBuffer bitBuffer, int dataCapacityBits) {
+		bitBuffer.appendBits(0, Math.min(4, dataCapacityBits - bitBuffer.bitLength()));
+		bitBuffer.appendBits(0, (8 - bitBuffer.bitLength() % 8) % 8);
+		assert bitBuffer.bitLength() % 8 == 0;
+	}
+	
+	// Concatenate all segments to create the data bit string
+	private static BitBuffer segmentsToBitBuffer(List<QrSegment> segments, int version) {
+		BitBuffer bitBuffer = new BitBuffer();
+		for (QrSegment segment : segments) {
+			bitBuffer.appendBits(segment.mode.modeBits, 4);
+			bitBuffer.appendBits(segment.numChars, segment.mode.numCharCountBits(version));
+			bitBuffer.appendData(segment.data);
+		}
+		return bitBuffer;
+	}
+
+
+	// Increase the error correction level while the data still fits in the current version number
+	private static Ecc findMaximalErrorCorrectionLevel(Ecc errorCorrectionLevel, boolean boostEcl, int version,
+			int dataUsedBits) {
+		for (Ecc newEcl : Ecc.values()) {  // From low to high
+			final boolean canIncreaseErrorCorrectionLevel = dataUsedBits <= getNumDataCodewords(version, newEcl) * 8;
+			if (boostEcl && canIncreaseErrorCorrectionLevel)
+				errorCorrectionLevel = newEcl;
+		}
+		return errorCorrectionLevel;
+	}
+
+
+	//Returns the minimal version number to use
+	private static int findMinimalVersion(List<QrSegment> segments, Ecc errorCorrectionLevel, int minVersion,
+			int maxVersion) {
 		int version, dataUsedBits;
 		for (version = minVersion; ; version++) {
 			int dataCapacityBits = getNumDataCodewords(version, errorCorrectionLevel) * 8;  // Number of data bits available
@@ -170,41 +248,7 @@ public final class QrCode {
 			}
 		}
 		assert dataUsedBits != -1;
-		
-		// Increase the error correction level while the data still fits in the current version number
-		for (Ecc newEcl : Ecc.values()) {  // From low to high
-			final boolean canIncreaseErrorCorrectionLevel = dataUsedBits <= getNumDataCodewords(version, newEcl) * 8;
-			if (boostEcl && canIncreaseErrorCorrectionLevel)
-				errorCorrectionLevel = newEcl;
-		}
-		
-		// Concatenate all segments to create the data bit string
-		BitBuffer bitBuffer = new BitBuffer();
-		for (QrSegment segment : segments) {
-			bitBuffer.appendBits(segment.mode.modeBits, 4);
-			bitBuffer.appendBits(segment.numChars, segment.mode.numCharCountBits(version));
-			bitBuffer.appendData(segment.data);
-		}
-		assert bitBuffer.bitLength() == dataUsedBits;
-		
-		// Add terminator and pad up to a byte if applicable
-		int dataCapacityBits = getNumDataCodewords(version, errorCorrectionLevel) * 8;
-		assert bitBuffer.bitLength() <= dataCapacityBits;
-		bitBuffer.appendBits(0, Math.min(4, dataCapacityBits - bitBuffer.bitLength()));
-		bitBuffer.appendBits(0, (8 - bitBuffer.bitLength() % 8) % 8);
-		assert bitBuffer.bitLength() % 8 == 0;
-		
-		// Pad with alternating bytes until data capacity is reached
-		for (int padByte = 0xEC; bitBuffer.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-			bitBuffer.appendBits(padByte, 8);
-		
-		// Pack bits into bytes in big endian
-		byte[] dataCodewords = new byte[bitBuffer.bitLength() / 8];
-		for (int i = 0; i < bitBuffer.bitLength(); i++)
-			dataCodewords[i >>> 3] |= bitBuffer.getBit(i) << (7 - (i & 7));
-		
-		// Create the QR Code object
-		return new QrCode(version, errorCorrectionLevel, dataCodewords, mask);
+		return version;
 	}
 	
 	/*---- Instance fields ----*/
