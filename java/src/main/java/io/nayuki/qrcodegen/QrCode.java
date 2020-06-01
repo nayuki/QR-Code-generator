@@ -546,9 +546,15 @@ public final class QrCode {
 	private void applyMask(int msk) {
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
-		for (int y = 0; y < size; y++) {
+		for (int y = 0; y < size; y++) {	
 			for (int x = 0; x < size; x++) {
 				boolean invert;
+				Msk0 msk0 = new Msk0();
+				Command mskCommand = new msk0Command(msk0);
+				
+				Button button = new Button(mskCommand);
+				invert = button.pressed(y, x, msk);
+				/*
 				switch (msk) {
 				case 0:  invert = (x + y) % 2 == 0;                    break;
 				case 1:  invert = y % 2 == 0;                          break;
@@ -560,6 +566,7 @@ public final class QrCode {
 				case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;  break;
 				default:  throw new AssertionError();
 				}
+				*/
 				modules[y][x] ^= invert & !isFunction[y][x];
 			}
 		}
