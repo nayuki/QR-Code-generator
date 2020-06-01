@@ -52,6 +52,12 @@ import java.util.Objects;
  */
 public final class QrCode {
 	
+	private static final int FINDER_SIZE = 3;
+
+	private static final int TIMING_COORDINATE = 6;
+
+
+
 	/*---- Static factory functions (high level) ----*/
 	
 	/**
@@ -128,8 +134,8 @@ public final class QrCode {
 	 * between modes (such as alphanumeric and byte) to encode text in less space.
 	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
 	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
-	 * @param segs the segments to encode
-	 * @param ecl the error correction level to use (not {@code null}) (boostable)
+	 * @param segments the segments to encode
+	 * @param errorCorrectionLevel the error correction level to use (not {@code null}) (boostable)
 	 * @param minVersion the minimum allowed version of the QR Code (at least 1)
 	 * @param maxVersion the maximum allowed version of the QR Code (at most 40)
 	 * @param mask the mask number to use (between 0 and 7 (inclusive)), or &#x2212;1 for automatic mask
@@ -141,61 +147,64 @@ public final class QrCode {
 	 * @throws DataTooLongException if the segments fail to fit in
 	 * the maxVersion QR Code at the ECL, which means they are too long
 	 */
-	public static QrCode encodeSegments(List<QrSegment> segs, Ecc ecl, int minVersion, int maxVersion, int mask, boolean boostEcl) {
-		Objects.requireNonNull(segs);
-		Objects.requireNonNull(ecl);
-		if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
+	public static QrCode encodeSegments(List<QrSegment> segments, Ecc errorCorrectionLevel, int minVersion, int maxVersion, int mask, boolean boostEcl) {
+		Objects.requireNonNull(segments);
+		Objects.requireNonNull(errorCorrectionLevel);
+		final boolean isVersionInRange = MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION;
+		final boolean isMaskValid = mask < -1 || mask > 7;
+		if (!isVersionInRange || isMaskValid)
 			throw new IllegalArgumentException("Invalid value");
 		
 		// Find the minimal version number to use
 		int version, dataUsedBits;
 		for (version = minVersion; ; version++) {
-			int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
-			dataUsedBits = QrSegment.getTotalBits(segs, version);
+			int dataCapacityBits = getNumDataCodewords(version, errorCorrectionLevel) * 8;  // Number of data bits available
+			dataUsedBits = QrSegment.getTotalBits(segments, version);
 			if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
 				break;  // This version number is found to be suitable
 			if (version >= maxVersion) {  // All versions in the range could not fit the given data
-				String msg = "Segment too long";
+				String message = "Segment too long";
 				if (dataUsedBits != -1)
-					msg = String.format("Data length = %d bits, Max capacity = %d bits", dataUsedBits, dataCapacityBits);
-				throw new DataTooLongException(msg);
+					message = String.format("Data length = %d bits, Max capacity = %d bits", dataUsedBits, dataCapacityBits);
+				throw new DataTooLongException(message);
 			}
 		}
 		assert dataUsedBits != -1;
 		
 		// Increase the error correction level while the data still fits in the current version number
 		for (Ecc newEcl : Ecc.values()) {  // From low to high
-			if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
-				ecl = newEcl;
+			final boolean canIncreaseErrorCorrectionLevel = dataUsedBits <= getNumDataCodewords(version, newEcl) * 8;
+			if (boostEcl && canIncreaseErrorCorrectionLevel)
+				errorCorrectionLevel = newEcl;
 		}
 		
 		// Concatenate all segments to create the data bit string
-		BitBuffer bb = new BitBuffer();
-		for (QrSegment seg : segs) {
-			bb.appendBits(seg.mode.modeBits, 4);
-			bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
-			bb.appendData(seg.data);
+		BitBuffer bitBuffer = new BitBuffer();
+		for (QrSegment segment : segments) {
+			bitBuffer.appendBits(segment.mode.modeBits, 4);
+			bitBuffer.appendBits(segment.numChars, segment.mode.numCharCountBits(version));
+			bitBuffer.appendData(segment.data);
 		}
-		assert bb.bitLength() == dataUsedBits;
+		assert bitBuffer.bitLength() == dataUsedBits;
 		
 		// Add terminator and pad up to a byte if applicable
-		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
-		assert bb.bitLength() <= dataCapacityBits;
-		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength()));
-		bb.appendBits(0, (8 - bb.bitLength() % 8) % 8);
-		assert bb.bitLength() % 8 == 0;
+		int dataCapacityBits = getNumDataCodewords(version, errorCorrectionLevel) * 8;
+		assert bitBuffer.bitLength() <= dataCapacityBits;
+		bitBuffer.appendBits(0, Math.min(4, dataCapacityBits - bitBuffer.bitLength()));
+		bitBuffer.appendBits(0, (8 - bitBuffer.bitLength() % 8) % 8);
+		assert bitBuffer.bitLength() % 8 == 0;
 		
 		// Pad with alternating bytes until data capacity is reached
-		for (int padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-			bb.appendBits(padByte, 8);
+		for (int padByte = 0xEC; bitBuffer.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+			bitBuffer.appendBits(padByte, 8);
 		
 		// Pack bits into bytes in big endian
-		byte[] dataCodewords = new byte[bb.bitLength() / 8];
-		for (int i = 0; i < bb.bitLength(); i++)
-			dataCodewords[i >>> 3] |= bb.getBit(i) << (7 - (i & 7));
+		byte[] dataCodewords = new byte[bitBuffer.bitLength() / 8];
+		for (int i = 0; i < bitBuffer.bitLength(); i++)
+			dataCodewords[i >>> 3] |= bitBuffer.getBit(i) << (7 - (i & 7));
 		
 		// Create the QR Code object
-		return new QrCode(version, ecl, dataCodewords, mask);
+		return new QrCode(version, errorCorrectionLevel, dataCodewords, mask);
 	}
 	
 	/*---- Instance fields ----*/
@@ -236,32 +245,32 @@ public final class QrCode {
 	 * error correction level, data codeword bytes, and mask number.
 	 * <p>This is a low-level API that most users should not use directly. A mid-level
 	 * API is the {@link #encodeSegments(List,Ecc,int,int,int,boolean)} function.</p>
-	 * @param ver the version number to use, which must be in the range 1 to 40 (inclusive)
-	 * @param ecl the error correction level to use
+	 * @param version the version number to use, which must be in the range 1 to 40 (inclusive)
+	 * @param errorCorrectionLevel the error correction level to use
 	 * @param dataCodewords the bytes representing segments to encode (without ECC)
-	 * @param msk the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice
+	 * @param mask the mask pattern to use, which is either &#x2212;1 for automatic choice or from 0 to 7 for fixed choice
 	 * @throws NullPointerException if the byte array or error correction level is {@code null}
 	 * @throws IllegalArgumentException if the version or mask value is out of range,
 	 * or if the data is the wrong length for the specified version and error correction level
 	 */
-	public QrCode(int ver, Ecc ecl, byte[] dataCodewords, int msk) {
+	public QrCode(int version, Ecc errorCorrectionLevel, byte[] dataCodewords, int mask) {
 		// Check arguments and initialize fields
-		if (ver < MIN_VERSION || ver > MAX_VERSION)
+		if (version < MIN_VERSION || version > MAX_VERSION)
 			throw new IllegalArgumentException("Version value out of range");
-		if (msk < -1 || msk > 7)
+		if (mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Mask value out of range");
-		version = ver;
-		size = ver * 4 + 17;
-		errorCorrectionLevel = Objects.requireNonNull(ecl);
+		this.version = version;
+		this.size = version * 4 + 17;
+		this.errorCorrectionLevel = Objects.requireNonNull(errorCorrectionLevel);
 		Objects.requireNonNull(dataCodewords);
-		modules    = new boolean[size][size];  // Initially all white
-		isFunction = new boolean[size][size];
+		this.modules    = new boolean[size][size];  // Initially all white
+		this.isFunction = new boolean[size][size];
 		
 		// Compute ECC, draw modules, do masking
 		drawFunctionPatterns();
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
-		this.mask = handleConstructorMasking(msk);
+		this.mask = handleConstructorMasking(mask);
 		isFunction = null;
 	}
 	
@@ -352,22 +361,25 @@ public final class QrCode {
 	private void drawFunctionPatterns() {
 		// Draw horizontal and vertical timing patterns
 		for (int i = 0; i < size; i++) {
-			setFunctionModule(6, i, i % 2 == 0);
-			setFunctionModule(i, 6, i % 2 == 0);
+			setFunctionModule(TIMING_COORDINATE, i, i % 2 == 0);
+			setFunctionModule(i, TIMING_COORDINATE, i % 2 == 0);
 		}
 		
 		// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
-		drawFinderPattern(3, 3);
-		drawFinderPattern(size - 4, 3);
-		drawFinderPattern(3, size - 4);
+		drawFinderPattern(FINDER_SIZE, FINDER_SIZE);
+		drawFinderPattern(size - 1 - FINDER_SIZE, FINDER_SIZE);
+		drawFinderPattern(FINDER_SIZE, size - 1 - FINDER_SIZE);
 		
 		// Draw numerous alignment patterns
 		int[] alignPatPos = getAlignmentPatternPositions();
 		int numAlign = alignPatPos.length;
 		for (int i = 0; i < numAlign; i++) {
 			for (int j = 0; j < numAlign; j++) {
-				// Don't draw on the three finder corners
-				if (!(i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0))
+				final boolean isLeftTop = i == 0 && j == 0;
+				final boolean isLeftBottom = i == 0 && j == numAlign - 1;
+				final boolean isRightTop = i == numAlign - 1 && j == 0;
+				final boolean onThreeFinderCorners = isLeftTop || isLeftBottom || isRightTop;
+				if (!onThreeFinderCorners)
 					drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
 			}
 		}
@@ -541,7 +553,7 @@ public final class QrCode {
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
-	private void applyMask(int msk) {
+	private void applyMask(int msk) {	
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
 		for (int y = 0; y < size; y++) {
@@ -590,7 +602,7 @@ public final class QrCode {
 	
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
-	private int getPenaltyScore() {
+	private int getPenaltyScore() {	
 		int result = 0;
 		
 		// Adjacent modules in row having same color, and finder-like patterns
@@ -693,7 +705,7 @@ public final class QrCode {
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
-	private static int getNumRawDataModules(int ver) {
+	private static int getNumRawDataModules(int ver) {	
 		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
 		
