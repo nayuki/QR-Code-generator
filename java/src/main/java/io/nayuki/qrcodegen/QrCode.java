@@ -172,7 +172,7 @@ public final class QrCode {
 		addTerminator(bitBuffer, dataCapacityBits);
 		
 		
-		addPad(bitBuffer, dataCapacityBits);
+		bitBuffer.addPad(dataCapacityBits);
 		
 		
 		byte[] dataCodewords = bitBufferToCodewords(bitBuffer);
@@ -191,12 +191,6 @@ public final class QrCode {
 		return dataCodewords;
 	}
 
-
-	// Pad with alternating bytes until data capacity is reached
-	private static void addPad(BitBuffer bitBuffer, int dataCapacityBits) {
-		for (int padByte = 0xEC; bitBuffer.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
-			bitBuffer.appendBits(padByte, 8);
-	}
 
 	// Add terminator and pad up to a byte if applicable
 	private static void addTerminator(BitBuffer bitBuffer, int dataCapacityBits) {
