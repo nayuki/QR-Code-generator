@@ -542,35 +542,24 @@ public final class QrCode {
 	// The function modules must be marked and the codeword bits must be drawn
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
-	// QR Code needs exactly one (not zero, two, etc.) mask applied.					Command pattern
+	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 	private void applyMask(int msk) {
+
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
-		for (int y = 0; y < size; y++) {	
+		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
 				boolean invert;
-				Msk0 msk0 = new Msk0();
-				Command mskCommand = new msk0Command(msk0);
-				
+
+				Command mskCommand = MskCommandFactory.getCommand(msk);
 				Button button = new Button(mskCommand);
 				invert = button.pressed(y, x, msk);
-				/*
-				switch (msk) {
-				case 0:  invert = (x + y) % 2 == 0;                    break;
-				case 1:  invert = y % 2 == 0;                          break;
-				case 2:  invert = x % 3 == 0;                          break;
-				case 3:  invert = (x + y) % 3 == 0;                    break;
-				case 4:  invert = (x / 3 + y / 2) % 2 == 0;            break;
-				case 5:  invert = x * y % 2 + x * y % 3 == 0;          break;
-				case 6:  invert = (x * y % 2 + x * y % 3) % 2 == 0;    break;
-				case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;  break;
-				default:  throw new AssertionError();
-				}
-				*/
+
 				modules[y][x] ^= invert & !isFunction[y][x];
 			}
 		}
 	}
+	
 
 
 	// A messy helper function for the constructor. This QR Code must be in an unmasked state when this
@@ -619,21 +608,6 @@ public final class QrCode {
 		return result;
 	}
 	
-	private int twobytwoHavingSameColor(boolean[][] modules) {
-		int result = 0;
-		// 2*2 blocks of modules having same color
-		for (int y = 0; y < size - 1; y++) {
-			for (int x = 0; x < size - 1; x++) {
-				boolean color = modules[y][x];
-				if (  color == modules[y][x + 1] &&
-						color == modules[y + 1][x] &&
-						color == modules[y + 1][x + 1])
-					result += PENALTY_N2;
-			}
-		}
-		return result;
-	}
-	
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
 	private int getPenaltyScore() {
@@ -676,6 +650,21 @@ public final class QrCode {
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
 		int k = (Math.abs(black * 20 - total * 10) + total - 1) / total - 1;
 		result += k * PENALTY_N4;
+		return result;
+	}
+
+	private int twobytwoHavingSameColor(boolean[][] modules) {
+		int result = 0;
+		// 2*2 blocks of modules having same color. 
+		for (int y = 0; y < size - 1; y++) {
+			for (int x = 0; x < size - 1; x++) {
+				boolean color = modules[y][x];
+				if (  color == modules[y][x + 1] &&
+						color == modules[y + 1][x] &&
+						color == modules[y + 1][x + 1])
+					result += PENALTY_N2;
+			}
+		}
 		return result;
 	}
 
