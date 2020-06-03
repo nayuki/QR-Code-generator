@@ -626,24 +626,32 @@ public final class QrCode {
 	// A messy helper function for the constructor. This QR Code must be in an unmasked state when this
 	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
 	// This method applies and returns the actual mask chosen, from 0 to 7.
-	private int handleConstructorMasking(int msk) {
-		if (msk == -1) {  // Automatically choose best mask
-			int minPenalty = Integer.MAX_VALUE;
-			for (int i = 0; i < 8; i++) {
-				applyMask(i);
-				drawFormatBits(i);
-				int penalty = getPenaltyScore();
-				if (penalty < minPenalty) {
-					msk = i;
-					minPenalty = penalty;
-				}
-				applyMask(i);  // Undoes the mask due to XOR
-			}
+	private int handleConstructorMasking(int mask) {
+		if (mask == -1) {  
+			mask = findBestMask();
 		}
-		assert 0 <= msk && msk <= 7;
-		applyMask(msk);  // Apply the final choice of mask
-		drawFormatBits(msk);  // Overwrite old format bits
-		return msk;  // The caller shall assign this value to the final-declared field
+		assert 0 <= mask && mask <= 7;
+		applyMask(mask);  // Apply the final choice of mask
+		drawFormatBits(mask);  // Overwrite old format bits
+		return mask;  // The caller shall assign this value to the final-declared field
+	}
+
+
+	// Automatically choose best mask
+	private int findBestMask() {	
+		int mask = -1;
+		int minPenalty = Integer.MAX_VALUE;
+		for (int i = 0; i < 8; i++) {
+			applyMask(i);
+			drawFormatBits(i);
+			int penalty = getPenaltyScore();
+			if (penalty < minPenalty) {
+				mask = i;
+				minPenalty = penalty;
+			}
+			applyMask(i);  // Undoes the mask due to XOR
+		}
+		return mask;
 	}
 	
 	
