@@ -141,5 +141,13 @@ public final class BitBuffer implements Cloneable {
 			dataCodewords[i >>> 3] |= getBit(i) << (7 - (i & 7));
 		return dataCodewords;
 	}
+
+
+	// Add terminator and pad up to a byte if applicable
+	public void addTerminator(int dataCapacityBits) {
+		appendBits(0, Math.min(4, dataCapacityBits - bitLength()));
+		appendBits(0, (8 - bitLength() % 8) % 8);
+		assert bitLength() % 8 == 0;
+	}
 	
 }

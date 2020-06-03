@@ -169,7 +169,7 @@ public final class QrCode {
 		
 		int dataCapacityBits = getNumDataCodewords(version, errorCorrectionLevel) * 8;
 		assert bitBuffer.bitLength() <= dataCapacityBits;
-		addTerminator(bitBuffer, dataCapacityBits);
+		bitBuffer.addTerminator(dataCapacityBits);
 		
 		
 		bitBuffer.addPad(dataCapacityBits);
@@ -184,12 +184,6 @@ public final class QrCode {
 	/*---- Private helper methods for encodeSegments ----*/
 
 	
-	// Add terminator and pad up to a byte if applicable
-	private static void addTerminator(BitBuffer bitBuffer, int dataCapacityBits) {
-		bitBuffer.appendBits(0, Math.min(4, dataCapacityBits - bitBuffer.bitLength()));
-		bitBuffer.appendBits(0, (8 - bitBuffer.bitLength() % 8) % 8);
-		assert bitBuffer.bitLength() % 8 == 0;
-	}
 	
 	// Concatenate all segments to create the data bit string
 	private static BitBuffer segmentsToBitBuffer(List<QrSegment> segments, int version) {
