@@ -151,8 +151,8 @@ public final class QrCode {
 		Objects.requireNonNull(segments);
 		Objects.requireNonNull(errorCorrectionLevel);
 		final boolean isVersionInRange = MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION;
-		final boolean isMaskValid = mask < -1 || mask > 7;
-		if (!isVersionInRange || isMaskValid)
+		final boolean isMaskOutOfRange = mask < -1 || mask > 7;
+		if (!isVersionInRange || isMaskOutOfRange)
 			throw new IllegalArgumentException("Invalid value");
 		
 		
@@ -181,6 +181,7 @@ public final class QrCode {
 		return new QrCode(version, errorCorrectionLevel, dataCodewords, mask);
 	}
 
+	/*---- Private helper methods for encodeSegments ----*/
 
 	// Pack bits into bytes in big endian
 	private static byte[] bitBufferToCodewords(BitBuffer bitBuffer) {
@@ -196,9 +197,6 @@ public final class QrCode {
 		for (int padByte = 0xEC; bitBuffer.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bitBuffer.appendBits(padByte, 8);
 	}
-
-
-	/*---- Private helper methods for encodeSegments ----*/
 
 	// Add terminator and pad up to a byte if applicable
 	private static void addTerminator(BitBuffer bitBuffer, int dataCapacityBits) {
