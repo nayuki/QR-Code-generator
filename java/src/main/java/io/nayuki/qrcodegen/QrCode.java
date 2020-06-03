@@ -412,7 +412,16 @@ public final class QrCode {
 		drawFinderPattern(size - 1 - FINDER_SIZE, FINDER_SIZE);
 		drawFinderPattern(FINDER_SIZE, size - 1 - FINDER_SIZE);
 		
-		// Draw numerous alignment patterns
+		drawAlignmentsPatterns();
+		
+		// Draw configuration data
+		drawFormatBits(0);  // Dummy mask value; overwritten later in the constructor
+		drawVersion();
+	}
+
+
+	// Draw numerous alignment patterns
+	private void drawAlignmentsPatterns() {
 		int[] alignPatPos = getAlignmentPatternPositions();
 		int numAlign = alignPatPos.length;
 		for (int i = 0; i < numAlign; i++) {
@@ -425,10 +434,6 @@ public final class QrCode {
 					drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
 			}
 		}
-		
-		// Draw configuration data
-		drawFormatBits(0);  // Dummy mask value; overwritten later in the constructor
-		drawVersion();
 	}
 	
 	
