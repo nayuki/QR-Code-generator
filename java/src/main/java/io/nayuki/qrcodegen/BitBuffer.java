@@ -125,5 +125,12 @@ public final class BitBuffer implements Cloneable {
 			throw new AssertionError(e);
 		}
 	}
+
+
+	// Pad with alternating bytes until data capacity is reached
+	void addPad(int dataCapacityBits) {
+		for (int padByte = 0xEC; bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+			appendBits(padByte, 8);
+	}
 	
 }
