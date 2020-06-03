@@ -175,7 +175,7 @@ public final class QrCode {
 		bitBuffer.addPad(dataCapacityBits);
 		
 		
-		byte[] dataCodewords = bitBufferToCodewords(bitBuffer);
+		byte[] dataCodewords = bitBuffer.toCodewords();
 		
 		// Create the QR Code object
 		return new QrCode(version, errorCorrectionLevel, dataCodewords, mask);
@@ -183,15 +183,7 @@ public final class QrCode {
 
 	/*---- Private helper methods for encodeSegments ----*/
 
-	// Pack bits into bytes in big endian
-	private static byte[] bitBufferToCodewords(BitBuffer bitBuffer) {
-		byte[] dataCodewords = new byte[bitBuffer.bitLength() / 8];
-		for (int i = 0; i < bitBuffer.bitLength(); i++)
-			dataCodewords[i >>> 3] |= bitBuffer.getBit(i) << (7 - (i & 7));
-		return dataCodewords;
-	}
-
-
+	
 	// Add terminator and pad up to a byte if applicable
 	private static void addTerminator(BitBuffer bitBuffer, int dataCapacityBits) {
 		bitBuffer.appendBits(0, Math.min(4, dataCapacityBits - bitBuffer.bitLength()));

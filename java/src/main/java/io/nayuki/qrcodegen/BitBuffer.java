@@ -128,9 +128,18 @@ public final class BitBuffer implements Cloneable {
 
 
 	// Pad with alternating bytes until data capacity is reached
-	void addPad(int dataCapacityBits) {
+	public void addPad(int dataCapacityBits) {
 		for (int padByte = 0xEC; bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			appendBits(padByte, 8);
+	}
+
+
+	// Pack bits into bytes in big endian
+	public byte[] toCodewords() {
+		byte[] dataCodewords = new byte[bitLength() / 8];
+		for (int i = 0; i < bitLength(); i++)
+			dataCodewords[i >>> 3] |= getBit(i) << (7 - (i & 7));
+		return dataCodewords;
 	}
 	
 }
