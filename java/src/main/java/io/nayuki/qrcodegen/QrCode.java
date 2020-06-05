@@ -580,7 +580,9 @@ public final class QrCode {
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
+
 	private void applyMask(int msk) {
+
 
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
@@ -650,7 +652,10 @@ public final class QrCode {
 	
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+
 	private int getPenaltyScore() {
+
+
 		
 		int result = 0;
 
@@ -735,7 +740,7 @@ public final class QrCode {
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
-	private static int getNumRawDataModules(int ver) {
+	private static int getNumRawDataModules(int ver) {	
 		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
 
