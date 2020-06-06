@@ -109,25 +109,27 @@ public final class QrSegment {
 	 * @return a segment (not {@code null}) containing the text
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-encodable characters
-	 */
-	public static QrSegment makeAlphanumeric(String text) {
+	 */	
+	public QrSegment makeAlphanumeric(String text) {
 		Objects.requireNonNull(text);
-		if (!ALPHANUMERIC_REGEX.matcher(text).matches())
+		if (!QrSegment.ALPHANUMERIC_REGEX.matcher(text).matches())
 			throw new IllegalArgumentException("String contains unencodable characters in alphanumeric mode");
 		
 		BitBuffer bitBuffer = new BitBuffer();
+		changeAlphaNumericStringToSegment(text, bitBuffer);
+		return new QrSegment(QrSegment.Mode.ALPHANUMERIC, text.length(), bitBuffer);
+	}
+
+	public static void changeAlphaNumericStringToSegment(String text, BitBuffer bitBuffer) {
 		int i;
 		for (i = 0; i <= text.length() - 2; i += 2) {  // Process groups of 2
-			int temp = ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
-			temp += ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
+			int temp = QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
+			temp += QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
 			bitBuffer.appendBits(temp, 11);
 		}
 		if (i < text.length())  // 1 character remaining
-			bitBuffer.appendBits(ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
-		return new QrSegment(Mode.ALPHANUMERIC, text.length(), bitBuffer);
+			bitBuffer.appendBits(QrSegment.ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
 	}
-	
-	
 	/**
 	 * Returns a list of zero or more segments to represent the specified Unicode text string.
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
