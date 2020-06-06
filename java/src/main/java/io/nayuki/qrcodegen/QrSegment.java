@@ -62,8 +62,12 @@ public final class QrSegment {
 		Objects.requireNonNull(data);
 		BitBuffer bitBuffer = new BitBuffer();
 		for (byte one_byte : data)
-			bitBuffer.appendBits(one_byte & 0xFF, 8);
+			changeByteToSegment(bitBuffer, one_byte);
 		return new QrSegment(QrSegment.Mode.BYTE, data.length, bitBuffer);
+	}
+	
+	public static void changeByteToSegment(BitBuffer bitBuffer, byte one_byte) {
+		bitBuffer.appendBits(one_byte & 0xFF, 8);
 	}
 	
 	
