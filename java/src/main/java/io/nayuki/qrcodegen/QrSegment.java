@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import QrSegment.Mode;
+
 
 /**
  * A segment of character/binary/control data in a QR Code symbol.
@@ -189,15 +191,14 @@ public final class QrSegment {
 	 * @throws NullPointerException if the mode or data is {@code null}
 	 * @throws IllegalArgumentException if the character count is negative
 	 */
-	public QrSegment(Mode md, int numCh, BitBuffer data) {
-		mode = Objects.requireNonNull(md);
+	public QrSegment(Mode _mode, int _numberOfCharacters, BitBuffer data) {
+		mode = Objects.requireNonNull(_mode);
 		Objects.requireNonNull(data);
-		if (numCh < 0)
+		if (_numberOfCharacters < 0)
 			throw new IllegalArgumentException("Invalid value");
-		numChars = numCh;
+		numberOfCharacters = _numberOfCharacters;
 		this.data = data.clone();  // Make defensive copy
 	}
-	
 	
 	/*---- Methods ----*/
 	
