@@ -125,15 +125,15 @@ public final class QrSegment {
 		Objects.requireNonNull(text);
 		
 		// Select the most efficient segment encoding automatically
-		List<QrSegment> result = new ArrayList<>();
+		List<QrSegment> segments = new ArrayList<>();
 		if (text.equals(""));  // Leave result empty
 		else if (NUMERIC_REGEX.matcher(text).matches())
-			result.add(makeNumeric(text));
+			segments.add(makeNumeric(text));
 		else if (ALPHANUMERIC_REGEX.matcher(text).matches())
-			result.add(makeAlphanumeric(text));
+			segments.add(makeAlphanumeric(text));
 		else
-			result.add(makeBytes(text.getBytes(StandardCharsets.UTF_8)));
-		return result;
+			segments.add(makeBytes(text.getBytes(StandardCharsets.UTF_8)));
+		return segments;
 	}
 	
 	
