@@ -229,6 +229,20 @@ public final class QrSegment {
 		return (int)result;
 	}
 	
+	static int getTotalBits(List<QrSegment> segments, int version) {
+		Objects.requireNonNull(segments);
+		long TotalBits = 0;
+		for (QrSegment segment : segments) {
+			Objects.requireNonNull(segment);
+			int characterCountBits = segment.mode.numCharCountBits(version);
+			if (segment.numberOfCharacters >= (1 << characterCountBits))
+				return -1;  // The segment's length doesn't fit the field's bit width
+			TotalBits += 4L + characterCountBits + segment.data.bitLength();
+			if (TotalBits > Integer.MAX_VALUE)
+				return -1;  // The sum will overflow an int type
+		}
+		return (int)TotalBits;
+	}
 	
 	/*---- Constants ----*/
 	
