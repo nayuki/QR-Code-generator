@@ -78,20 +78,28 @@ public final class QrSegment {
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-digit characters
 	 */
-	public static QrSegment makeNumeric(String digits) {
+	public QrSegment makeNumeric(String digits) {
 		Objects.requireNonNull(digits);
-		if (!NUMERIC_REGEX.matcher(digits).matches())
+		if (containNonNumericCharaters(digits))
 			throw new IllegalArgumentException("String contains non-numeric characters");
 		
 		BitBuffer bitBuffer = new BitBuffer();
+		changeNumericToSegment(digits, bitBuffer);
+		return new QrSegment(QrSegment.Mode.NUMERIC, digits.length(), bitBuffer);
+	}
+	
+	public static void changeNumericToSegment(String digits, BitBuffer bitBuffer) {
 		for (int i = 0; i < digits.length(); ) {  // Consume up to 3 digits per iteration
 			int n = Math.min(digits.length() - i, 3);
 			bitBuffer.appendBits(Integer.parseInt(digits.substring(i, i + n)), n * 3 + 1);
 			i += n;
 		}
-		return new QrSegment(Mode.NUMERIC, digits.length(), bitBuffer);
 	}
 	
+	public static boolean containNonNumericCharaters(String digits) {
+		return !QrSegment.NUMERIC_REGEX.matcher(digits).matches();
+	}
+	/**
 	
 	/**
 	 * Returns a segment representing the specified text string encoded in alphanumeric mode.
