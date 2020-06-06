@@ -57,11 +57,11 @@ public final class QrCodeGeneratorWorker {
 		boolean isAscii = true;
 		byte[] data = new byte[length];
 		for (int i = 0; i < data.length; i++) {
-			int b = input.nextInt();
-			if (b < 0 || b > 255)
+			int one_byte = input.nextInt();
+			if (one_byte < 0 || one_byte > 255)
 				throw new RuntimeException();
-			data[i] = (byte)b;
-			isAscii &= b < 128;
+			data[i] = (byte)one_byte;
+			isAscii &= one_byte < 128;
 		}
 		
 		// Read encoding parameters
@@ -75,19 +75,19 @@ public final class QrCodeGeneratorWorker {
 			throw new RuntimeException();
 		
 		// Make segments for encoding
-		List<QrSegment> segs;
+		List<QrSegment> segments;
 		if (isAscii)
-			segs = QrSegment.makeSegments(new String(data, StandardCharsets.US_ASCII));
+			segments = QrSegment.makeSegments(new String(data, StandardCharsets.US_ASCII));
 		else
-			segs = Arrays.asList(QrSegment.makeBytes(data));
+			segments = Arrays.asList(QrSegment.makeBytes(data));
 		
 		try {  // Try to make QR Code symbol
-			QrCode qr = QrCode.encodeSegments(segs, QrCode.Ecc.values()[errCorLvl], minVersion, maxVersion, mask, boostEcl != 0);
+			QrCode qrCode = QrCode.encodeSegments(segments, QrCode.Ecc.values()[errCorLvl], minVersion, maxVersion, mask, boostEcl != 0);
 			// Print grid of modules
-			System.out.println(qr.version);
-			for (int y = 0; y < qr.size; y++) {
-				for (int x = 0; x < qr.size; x++)
-					System.out.println(qr.getModule(x, y) ? 1 : 0);
+			System.out.println(qrCode.version);
+			for (int y = 0; y < qrCode.size; y++) {
+				for (int x = 0; x < qrCode.size; x++)
+					System.out.println(qrCode.getModule(x, y) ? 1 : 0);
 			}
 			
 		} catch (DataTooLongException e) {
