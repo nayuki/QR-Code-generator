@@ -71,7 +71,17 @@ public final class QrSegment {
 		return segments;
 	}
 	
+	public static List<QrSegment> makeSegments(String text) {
+		Objects.requireNonNull(text);
+		// Select the most efficient segment encoding automatically
+		List<QrSegment> segments = new ArrayList<>();
+			
+		MakeSegment makeSegment = MakeSegmentFactory.getMakeSegment(text);
+		
+		segments.add(makeSegment.excute(text));
 	
+		return segments;
+	}
 	/**
 	 * Returns a segment representing an Extended Channel Interpretation
 	 * (ECI) designator with the specified assignment value.
