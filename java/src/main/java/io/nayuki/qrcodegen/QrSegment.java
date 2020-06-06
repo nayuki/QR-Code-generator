@@ -144,18 +144,18 @@ public final class QrSegment {
 	 * @return a segment (not {@code null}) containing the data
 	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)
 	 */
-	public static QrSegment makeEci(int assignVal) {
+	public static QrSegment makeEci(int assignValue) {
 		BitBuffer bitBuffer = new BitBuffer();
-		if (assignVal < 0)
+		if (assignValue < 0)
 			throw new IllegalArgumentException("ECI assignment value out of range");
-		else if (assignVal < (1 << 7))
-			bitBuffer.appendBits(assignVal, 8);
-		else if (assignVal < (1 << 14)) {
+		else if (assignValue < (1 << 7))
+			bitBuffer.appendBits(assignValue, 8);
+		else if (assignValue < (1 << 14)) {
 			bitBuffer.appendBits(2, 2);
-			bitBuffer.appendBits(assignVal, 14);
-		} else if (assignVal < 1_000_000) {
+			bitBuffer.appendBits(assignValue, 14);
+		} else if (assignValue < 1_000_000) {
 			bitBuffer.appendBits(6, 3);
-			bitBuffer.appendBits(assignVal, 21);
+			bitBuffer.appendBits(assignValue, 21);
 		} else
 			throw new IllegalArgumentException("ECI assignment value out of range");
 		return new QrSegment(Mode.ECI, 0, bitBuffer);
