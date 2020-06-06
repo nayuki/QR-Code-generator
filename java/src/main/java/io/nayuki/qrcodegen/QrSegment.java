@@ -50,28 +50,6 @@ public final class QrSegment {
 	/*---- Static factory functions (mid level) ----*/
 	
 	/**
-	 * Returns a segment representing the specified binary data
-	 * encoded in byte mode. All input byte arrays are acceptable.
-	 * <p>Any text string can be converted to UTF-8 bytes ({@code
-	 * s.getBytes(StandardCharsets.UTF_8)}) and encoded as a byte mode segment.</p>
-	 * @param data the binary data (not {@code null})
-	 * @return a segment (not {@code null}) containing the data
-	 * @throws NullPointerException if the array is {@code null}
-	 */
-	public static QrSegment makeBytes(byte[] data) {
-		Objects.requireNonNull(data);
-		BitBuffer bitBuffer = new BitBuffer();
-		for (byte one_byte : data)
-			changeByteToSegment(bitBuffer, one_byte);
-		return new QrSegment(QrSegment.Mode.BYTE, data.length, bitBuffer);
-	}
-	
-	public static void changeByteToSegment(BitBuffer bitBuffer, byte one_byte) {
-		bitBuffer.appendBits(one_byte & 0xFF, 8);
-	}
-	
-	
-	/**
 	 * Returns a segment representing the specified string of decimal digits encoded in numeric mode.
 	 * @param digits the text (not {@code null}), with only digits from 0 to 9 allowed
 	 * @return a segment (not {@code null}) containing the text
