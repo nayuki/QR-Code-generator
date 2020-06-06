@@ -58,10 +58,10 @@ public final class QrSegment {
 	 */
 	public static QrSegment makeBytes(byte[] data) {
 		Objects.requireNonNull(data);
-		BitBuffer bb = new BitBuffer();
+		BitBuffer bitBuffer = new BitBuffer();
 		for (byte b : data)
-			bb.appendBits(b & 0xFF, 8);
-		return new QrSegment(Mode.BYTE, data.length, bb);
+			bitBuffer.appendBits(b & 0xFF, 8);
+		return new QrSegment(Mode.BYTE, data.length, bitBuffer);
 	}
 	
 	
@@ -77,13 +77,13 @@ public final class QrSegment {
 		if (!NUMERIC_REGEX.matcher(digits).matches())
 			throw new IllegalArgumentException("String contains non-numeric characters");
 		
-		BitBuffer bb = new BitBuffer();
+		BitBuffer bitBuffer = new BitBuffer();
 		for (int i = 0; i < digits.length(); ) {  // Consume up to 3 digits per iteration
 			int n = Math.min(digits.length() - i, 3);
-			bb.appendBits(Integer.parseInt(digits.substring(i, i + n)), n * 3 + 1);
+			bitBuffer.appendBits(Integer.parseInt(digits.substring(i, i + n)), n * 3 + 1);
 			i += n;
 		}
-		return new QrSegment(Mode.NUMERIC, digits.length(), bb);
+		return new QrSegment(Mode.NUMERIC, digits.length(), bitBuffer);
 	}
 	
 	
@@ -101,16 +101,16 @@ public final class QrSegment {
 		if (!ALPHANUMERIC_REGEX.matcher(text).matches())
 			throw new IllegalArgumentException("String contains unencodable characters in alphanumeric mode");
 		
-		BitBuffer bb = new BitBuffer();
+		BitBuffer bitBuffer = new BitBuffer();
 		int i;
 		for (i = 0; i <= text.length() - 2; i += 2) {  // Process groups of 2
 			int temp = ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
 			temp += ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
-			bb.appendBits(temp, 11);
+			bitBuffer.appendBits(temp, 11);
 		}
 		if (i < text.length())  // 1 character remaining
-			bb.appendBits(ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
-		return new QrSegment(Mode.ALPHANUMERIC, text.length(), bb);
+			bitBuffer.appendBits(ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
+		return new QrSegment(Mode.ALPHANUMERIC, text.length(), bitBuffer);
 	}
 	
 	
@@ -145,20 +145,20 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)
 	 */
 	public static QrSegment makeEci(int assignVal) {
-		BitBuffer bb = new BitBuffer();
+		BitBuffer bitBuffer = new BitBuffer();
 		if (assignVal < 0)
 			throw new IllegalArgumentException("ECI assignment value out of range");
 		else if (assignVal < (1 << 7))
-			bb.appendBits(assignVal, 8);
+			bitBuffer.appendBits(assignVal, 8);
 		else if (assignVal < (1 << 14)) {
-			bb.appendBits(2, 2);
-			bb.appendBits(assignVal, 14);
+			bitBuffer.appendBits(2, 2);
+			bitBuffer.appendBits(assignVal, 14);
 		} else if (assignVal < 1_000_000) {
-			bb.appendBits(6, 3);
-			bb.appendBits(assignVal, 21);
+			bitBuffer.appendBits(6, 3);
+			bitBuffer.appendBits(assignVal, 21);
 		} else
 			throw new IllegalArgumentException("ECI assignment value out of range");
-		return new QrSegment(Mode.ECI, 0, bb);
+		return new QrSegment(Mode.ECI, 0, bitBuffer);
 	}
 	
 	
