@@ -68,7 +68,7 @@ public final class QrSegmentAdvanced {
 	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated
 	 * @throws DataTooLongException if the text fails to fit in the maxVersion QR Code at the ECL
 	 */
-	public static List<QrSegment> makeSegmentsOptimally(String text, QrCode.Ecc ecl, int minVersion, int maxVersion) {
+	public static List<QrSegment> makeSegmentsOptimally(String text, Ecc ecl, int minVersion, int maxVersion) {
 		// Check arguments
 		Objects.requireNonNull(text);
 		Objects.requireNonNull(ecl);
