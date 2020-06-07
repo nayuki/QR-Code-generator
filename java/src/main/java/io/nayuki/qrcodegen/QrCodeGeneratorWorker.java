@@ -82,7 +82,7 @@ public final class QrCodeGeneratorWorker {
 			segments = Arrays.asList(QrSegment.makeBytes(data));
 		
 		try {  // Try to make QR Code symbol
-			QrCode qr = QrCode.encodeSegments(segments, QrCode.Ecc.values()[errCorLvl], minVersion, maxVersion, mask, boostEcl != 0);
+			QrCode qr = QrCode.encodeSegments(segments, Ecc.values()[errCorLvl], minVersion, maxVersion, mask, boostEcl != 0);
 			// Print grid of modules
 			System.out.println(qr.version);
 			for (int y = 0; y < qr.size; y++) {
