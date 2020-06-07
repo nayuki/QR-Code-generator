@@ -73,6 +73,7 @@ public final class QrCodeGeneratorDemo {
 		QrCode qrCode;
 		
 		// Numeric mode encoding (3.33 bits per digit)
+
 		qrCode = QrCode.encodeText("314159265358979323846264338327950288419716939937510", Ecc.MEDIUM);
 		writePng(qrCode.toImage(13, 1), "pi-digits-QR.png");
 		
@@ -83,6 +84,7 @@ public final class QrCodeGeneratorDemo {
 		// Unicode text as UTF-8
 		qrCode = QrCode.encodeText("占쎄괭占쎄뎐占쎄쾽占쎄굶wa占쎄낌�닟占쎈르塋딉옙 �뀭汝뷸Ь�걣", Ecc.QUARTILE);
 		writePng(qrCode.toImage(10, 3), "unicode-QR.png");
+
 		
 		// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 		qrCode = QrCode.encodeText(
@@ -93,7 +95,9 @@ public final class QrCodeGeneratorDemo {
 			+ "for the hot day made her feel very sleepy and stupid), whether the pleasure of making a "
 			+ "daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly "
 			+ "a White Rabbit with pink eyes ran close by her.", Ecc.HIGH);
+
 		writePng(qrCode.toImage(6, 10), "alice-wonderland-QR.png");
+
 	}
 	
 	
@@ -105,26 +109,33 @@ public final class QrCodeGeneratorDemo {
 		// Illustration "silver"
 		String silver0 = "THE SQUARE ROOT OF 2 IS 1.";
 		String silver1 = "41421356237309504880168872420969807856967187537694807317667973799";
+
 		qrCode = QrCode.encodeText(silver0 + silver1, Ecc.LOW);
 		writePng(qrCode.toImage(10, 3), "sqrt2-monolithic-QR.png");
+
 		
 		segments = Arrays.asList(
 			QrSegment.makeAlphanumeric(silver0),
 			QrSegment.makeNumeric(silver1));
+
 		qrCode = QrCode.encodeSegments(segments, Ecc.LOW);
 		writePng(qrCode.toImage(10, 3), "sqrt2-segmented-QR.png");
+
 		
 		// Illustration "golden"
 		String golden0 = "Golden ratio 占쏙옙 = 1.";
 		String golden1 = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374";
 		String golden2 = "......";
+
 		qrCode = QrCode.encodeText(golden0 + golden1 + golden2, Ecc.LOW);
 		writePng(qrCode.toImage(8, 5), "phi-monolithic-QR.png");
+
 		
 		segments = Arrays.asList(
 			QrSegment.makeBytes(golden0.getBytes(StandardCharsets.UTF_8)),
 			QrSegment.makeNumeric(golden1),
 			QrSegment.makeAlphanumeric(golden2));
+
 		qrCode = QrCode.encodeSegments(segments, Ecc.LOW);
 		writePng(qrCode.toImage(8, 5), "phi-segmented-QR.png");
 		
@@ -136,6 +147,8 @@ public final class QrCodeGeneratorDemo {
 		segments = Arrays.asList(QrSegmentAdvanced.makeKanji(madoka));
 		qrCode = QrCode.encodeSegments(segments, Ecc.LOW);
 		writePng(qrCode.toImage(9, 4), "madoka-kanji-QR.png");
+
+
 	}
 	
 	
@@ -145,6 +158,7 @@ public final class QrCodeGeneratorDemo {
 		List<QrSegment> segments;
 		
 		// Project Nayuki URL
+
 		segments = QrSegment.makeSegments("https://www.nayuki.io/");
 		qrCode = QrCode.encodeSegments(segments, Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, -1, true);  // Automatic mask
 		writePng(qrCode.toImage(8, 6), "project-nayuki-automask-QR.png");
@@ -161,6 +175,7 @@ public final class QrCodeGeneratorDemo {
 		writePng(qrCode.toImage(10, 3), "unicode-mask5-QR.png");
 		qrCode = QrCode.encodeSegments(segments, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 7, true);  // Force mask 7
 		writePng(qrCode.toImage(10, 3), "unicode-mask7-QR.png");
+
 	}
 	
 	
