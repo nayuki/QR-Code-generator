@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import QrSegment.Mode;
+
 
 /**
  * A segment of character/binary/control data in a QR Code symbol.
@@ -46,7 +48,6 @@ import java.util.regex.Pattern;
 public final class QrSegment {
 	
 	/*---- Static factory functions (mid level) ----*/
-	
 	/**
 	 * Returns a segment representing the specified binary data
 	 * encoded in byte mode. All input byte arrays are acceptable.
@@ -57,11 +58,9 @@ public final class QrSegment {
 	 * @throws NullPointerException if the array is {@code null}
 	 */
 	public static QrSegment makeBytes(byte[] data) {
-		Objects.requireNonNull(data);
-		BitBuffer bb = new BitBuffer();
-		for (byte b : data)
-			bb.appendBits(b & 0xFF, 8);
-		return new QrSegment(Mode.BYTE, data.length, bb);
+		MakeBytesToSegment makeBytesToSegment = new MakeBytesToSegment();
+		
+		return makeBytesToSegment.excuteForBytedata(data);
 	}
 	
 	
@@ -73,17 +72,9 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the string contains non-digit characters
 	 */
 	public static QrSegment makeNumeric(String digits) {
-		Objects.requireNonNull(digits);
-		if (!NUMERIC_REGEX.matcher(digits).matches())
-			throw new IllegalArgumentException("String contains non-numeric characters");
+		MakeSegment makeSegment = new MakeNumericToSegment();
 		
-		BitBuffer bb = new BitBuffer();
-		for (int i = 0; i < digits.length(); ) {  // Consume up to 3 digits per iteration
-			int n = Math.min(digits.length() - i, 3);
-			bb.appendBits(Integer.parseInt(digits.substring(i, i + n)), n * 3 + 1);
-			i += n;
-		}
-		return new QrSegment(Mode.NUMERIC, digits.length(), bb);
+		return makeSegment.excute(digits);
 	}
 	
 	
@@ -97,23 +88,10 @@ public final class QrSegment {
 	 * @throws IllegalArgumentException if the string contains non-encodable characters
 	 */
 	public static QrSegment makeAlphanumeric(String text) {
-		Objects.requireNonNull(text);
-		if (!ALPHANUMERIC_REGEX.matcher(text).matches())
-			throw new IllegalArgumentException("String contains unencodable characters in alphanumeric mode");
+		MakeSegment makeSegment = new MakeAlphaNumericToSegment();
 		
-		BitBuffer bb = new BitBuffer();
-		int i;
-		for (i = 0; i <= text.length() - 2; i += 2) {  // Process groups of 2
-			int temp = ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)) * 45;
-			temp += ALPHANUMERIC_CHARSET.indexOf(text.charAt(i + 1));
-			bb.appendBits(temp, 11);
-		}
-		if (i < text.length())  // 1 character remaining
-			bb.appendBits(ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
-		return new QrSegment(Mode.ALPHANUMERIC, text.length(), bb);
+		return makeSegment.excute(text);
 	}
-	
-	
 	/**
 	 * Returns a list of zero or more segments to represent the specified Unicode text string.
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
@@ -121,22 +99,18 @@ public final class QrSegment {
 	 * @return a new mutable list (not {@code null}) of segments (not {@code null}) containing the text
 	 * @throws NullPointerException if the text is {@code null}
 	 */
+	
 	public static List<QrSegment> makeSegments(String text) {
 		Objects.requireNonNull(text);
-		
 		// Select the most efficient segment encoding automatically
-		List<QrSegment> result = new ArrayList<>();
-		if (text.equals(""));  // Leave result empty
-		else if (NUMERIC_REGEX.matcher(text).matches())
-			result.add(makeNumeric(text));
-		else if (ALPHANUMERIC_REGEX.matcher(text).matches())
-			result.add(makeAlphanumeric(text));
-		else
-			result.add(makeBytes(text.getBytes(StandardCharsets.UTF_8)));
-		return result;
+		List<QrSegment> segments = new ArrayList<>();
+			
+		MakeSegment makeSegment = MakeSegmentFactory.getMakeSegment(text);
+		
+		segments.add(makeSegment.excute(text));
+	
+		return segments;
 	}
-	
-	
 	/**
 	 * Returns a segment representing an Extended Channel Interpretation
 	 * (ECI) designator with the specified assignment value.
@@ -144,21 +118,21 @@ public final class QrSegment {
 	 * @return a segment (not {@code null}) containing the data
 	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)
 	 */
-	public static QrSegment makeEci(int assignVal) {
-		BitBuffer bb = new BitBuffer();
-		if (assignVal < 0)
+	public static QrSegment makeEci(int assignValue) {
+		BitBuffer bitBuffer = new BitBuffer();
+		if (assignValue < 0)
 			throw new IllegalArgumentException("ECI assignment value out of range");
-		else if (assignVal < (1 << 7))
-			bb.appendBits(assignVal, 8);
-		else if (assignVal < (1 << 14)) {
-			bb.appendBits(2, 2);
-			bb.appendBits(assignVal, 14);
-		} else if (assignVal < 1_000_000) {
-			bb.appendBits(6, 3);
-			bb.appendBits(assignVal, 21);
+		else if (assignValue < (1 << 7))
+			bitBuffer.appendBits(assignValue, 8);
+		else if (assignValue < (1 << 14)) {
+			bitBuffer.appendBits(2, 2);
+			bitBuffer.appendBits(assignValue, 14);
+		} else if (assignValue < 1_000_000) {
+			bitBuffer.appendBits(6, 3);
+			bitBuffer.appendBits(assignValue, 21);
 		} else
 			throw new IllegalArgumentException("ECI assignment value out of range");
-		return new QrSegment(Mode.ECI, 0, bb);
+		return new QrSegment(Mode.ECI, 0, bitBuffer);
 	}
 	
 	
@@ -189,15 +163,14 @@ public final class QrSegment {
 	 * @throws NullPointerException if the mode or data is {@code null}
 	 * @throws IllegalArgumentException if the character count is negative
 	 */
-	public QrSegment(Mode md, int numCh, BitBuffer data) {
-		mode = Objects.requireNonNull(md);
+	public QrSegment(Mode _mode, int _numberOfCharacters, BitBuffer data) {
+		mode = Objects.requireNonNull(_mode);
 		Objects.requireNonNull(data);
-		if (numCh < 0)
+		if (_numberOfCharacters < 0)
 			throw new IllegalArgumentException("Invalid value");
-		numChars = numCh;
+		numberOfCharacters = _numberOfCharacters;
 		this.data = data.clone();  // Make defensive copy
 	}
-	
 	
 	/*---- Methods ----*/
 	
@@ -213,21 +186,20 @@ public final class QrSegment {
 	// Calculates the number of bits needed to encode the given segments at the given version.
 	// Returns a non-negative number if successful. Otherwise returns -1 if a segment has too
 	// many characters to fit its length field, or the total bits exceeds Integer.MAX_VALUE.
-	static int getTotalBits(List<QrSegment> segs, int version) {
-		Objects.requireNonNull(segs);
-		long result = 0;
-		for (QrSegment seg : segs) {
-			Objects.requireNonNull(seg);
-			int ccbits = seg.mode.numCharCountBits(version);
-			if (seg.numChars >= (1 << ccbits))
+	static int getTotalBits(List<QrSegment> segments, int version) {
+		Objects.requireNonNull(segments);
+		long TotalBits = 0;
+		for (QrSegment segment : segments) {
+			Objects.requireNonNull(segment);
+			int characterCountBits = segment.mode.numCharCountBits(version);
+			if (segment.numberOfCharacters >= (1 << characterCountBits))
 				return -1;  // The segment's length doesn't fit the field's bit width
-			result += 4L + ccbits + seg.data.bitLength();
-			if (result > Integer.MAX_VALUE)
+			TotalBits += 4L + characterCountBits + segment.data.bitLength();
+			if (TotalBits > Integer.MAX_VALUE)
 				return -1;  // The sum will overflow an int type
 		}
-		return (int)result;
+		return (int)TotalBits;
 	}
-	
 	
 	/*---- Constants ----*/
 	

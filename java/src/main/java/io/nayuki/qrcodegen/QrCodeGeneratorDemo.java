@@ -55,13 +55,13 @@ public final class QrCodeGeneratorDemo {
 		String text = "Hello, world!";          // User-supplied Unicode text
 		Ecc errCorLvl = Ecc.LOW;  // Error correction level
 		
-		QrCode qr = QrCode.encodeText(text, errCorLvl);  // Make the QR Code symbol
+		QrCode qrCode = QrCode.encodeText(text, errCorLvl);  // Make the QR Code symbol
 		
-		BufferedImage img = qr.toImage(10, 4);           // Convert to bitmap image
+		BufferedImage img = qrCode.toImage(10, 4);           // Convert to bitmap image
 		File imgFile = new File("hello-world-QR.png");   // File path for output
 		ImageIO.write(img, "png", imgFile);              // Write image to file
 		
-		String svg = qr.toSvgString(4);                  // Convert to SVG XML code
+		String svg = qrCode.toSvgString(4);                  // Convert to SVG XML code
 		File svgFile = new File("hello-world-QR.svg");   // File path for output
 		Files.write(svgFile.toPath(),                    // Write image to file
 			svg.getBytes(StandardCharsets.UTF_8));
@@ -70,22 +70,24 @@ public final class QrCodeGeneratorDemo {
 	
 	// Creates a variety of QR Codes that exercise different features of the library, and writes each one to file.
 	private static void doVarietyDemo() throws IOException {
-		QrCode qr;
+		QrCode qrCode;
 		
 		// Numeric mode encoding (3.33 bits per digit)
-		qr = QrCode.encodeText("314159265358979323846264338327950288419716939937510", Ecc.MEDIUM);
-		writePng(qr.toImage(13, 1), "pi-digits-QR.png");
+
+		qrCode = QrCode.encodeText("314159265358979323846264338327950288419716939937510", Ecc.MEDIUM);
+		writePng(qrCode.toImage(13, 1), "pi-digits-QR.png");
 		
 		// Alphanumeric mode encoding (5.5 bits per character)
-		qr = QrCode.encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", Ecc.HIGH);
-		writePng(qr.toImage(10, 2), "alphanumeric-QR.png");
+		qrCode = QrCode.encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", Ecc.HIGH);
+		writePng(qrCode.toImage(10, 2), "alphanumeric-QR.png");
 		
 		// Unicode text as UTF-8
-		qr = QrCode.encodeText("こんにちwa、世界！ αβγδ", Ecc.QUARTILE);
-		writePng(qr.toImage(10, 3), "unicode-QR.png");
+		qrCode = QrCode.encodeText("占쎄괭占쎄뎐占쎄쾽占쎄굶wa占쎄낌�닟占쎈르塋딉옙 �뀭汝뷸Ь�걣", Ecc.QUARTILE);
+		writePng(qrCode.toImage(10, 3), "unicode-QR.png");
+
 		
 		// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
-		qr = QrCode.encodeText(
+		qrCode = QrCode.encodeText(
 			"Alice was beginning to get very tired of sitting by her sister on the bank, "
 			+ "and of having nothing to do: once or twice she had peeped into the book her sister was reading, "
 			+ "but it had no pictures or conversations in it, 'and what is the use of a book,' thought Alice "
@@ -93,74 +95,87 @@ public final class QrCodeGeneratorDemo {
 			+ "for the hot day made her feel very sleepy and stupid), whether the pleasure of making a "
 			+ "daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly "
 			+ "a White Rabbit with pink eyes ran close by her.", Ecc.HIGH);
-		writePng(qr.toImage(6, 10), "alice-wonderland-QR.png");
+
+		writePng(qrCode.toImage(6, 10), "alice-wonderland-QR.png");
+
 	}
 	
 	
 	// Creates QR Codes with manually specified segments for better compactness.
 	private static void doSegmentDemo() throws IOException {
-		QrCode qr;
-		List<QrSegment> segs;
+		QrCode qrCode;
+		List<QrSegment> segments;
 		
 		// Illustration "silver"
 		String silver0 = "THE SQUARE ROOT OF 2 IS 1.";
 		String silver1 = "41421356237309504880168872420969807856967187537694807317667973799";
-		qr = QrCode.encodeText(silver0 + silver1, Ecc.LOW);
-		writePng(qr.toImage(10, 3), "sqrt2-monolithic-QR.png");
+
+		qrCode = QrCode.encodeText(silver0 + silver1, Ecc.LOW);
+		writePng(qrCode.toImage(10, 3), "sqrt2-monolithic-QR.png");
+
 		
-		segs = Arrays.asList(
+		segments = Arrays.asList(
 			QrSegment.makeAlphanumeric(silver0),
 			QrSegment.makeNumeric(silver1));
-		qr = QrCode.encodeSegments(segs, Ecc.LOW);
-		writePng(qr.toImage(10, 3), "sqrt2-segmented-QR.png");
+
+		qrCode = QrCode.encodeSegments(segments, Ecc.LOW);
+		writePng(qrCode.toImage(10, 3), "sqrt2-segmented-QR.png");
+
 		
 		// Illustration "golden"
-		String golden0 = "Golden ratio φ = 1.";
+		String golden0 = "Golden ratio 占쏙옙 = 1.";
 		String golden1 = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374";
 		String golden2 = "......";
-		qr = QrCode.encodeText(golden0 + golden1 + golden2, Ecc.LOW);
-		writePng(qr.toImage(8, 5), "phi-monolithic-QR.png");
+
+		qrCode = QrCode.encodeText(golden0 + golden1 + golden2, Ecc.LOW);
+		writePng(qrCode.toImage(8, 5), "phi-monolithic-QR.png");
+
 		
-		segs = Arrays.asList(
+		segments = Arrays.asList(
 			QrSegment.makeBytes(golden0.getBytes(StandardCharsets.UTF_8)),
 			QrSegment.makeNumeric(golden1),
 			QrSegment.makeAlphanumeric(golden2));
-		qr = QrCode.encodeSegments(segs, Ecc.LOW);
-		writePng(qr.toImage(8, 5), "phi-segmented-QR.png");
+
+		qrCode = QrCode.encodeSegments(segments, Ecc.LOW);
+		writePng(qrCode.toImage(8, 5), "phi-segmented-QR.png");
 		
 		// Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
-		String madoka = "「魔法少女まどか☆マギカ」って、　ИАИ　ｄｅｓｕ　κα？";
-		qr = QrCode.encodeText(madoka, Ecc.LOW);
-		writePng(qr.toImage(9, 4), "madoka-utf8-QR.png");
+		String madoka = "占쎈슞異몌쫲類앹빼阿잙뀍寃뀐옙寃묕옙嫄�占쎌겳占쎄묻占쎄텤占쎄텠占쎈씞寃귨옙寃랃옙怨ο옙占쏙옙�꺂癒믪꼨占쏙옙影�袁ы맀影�蹂⑺맟占쏙옙鰲��뀭塋딉옙";
+		qrCode = QrCode.encodeText(madoka, Ecc.LOW);
+		writePng(qrCode.toImage(9, 4), "madoka-utf8-QR.png");
 		
-		segs = Arrays.asList(QrSegmentAdvanced.makeKanji(madoka));
-		qr = QrCode.encodeSegments(segs, Ecc.LOW);
-		writePng(qr.toImage(9, 4), "madoka-kanji-QR.png");
+		segments = Arrays.asList(QrSegmentAdvanced.makeKanji(madoka));
+		qrCode = QrCode.encodeSegments(segments, Ecc.LOW);
+		writePng(qrCode.toImage(9, 4), "madoka-kanji-QR.png");
+
+
 	}
 	
 	
 	// Creates QR Codes with the same size and contents but different mask patterns.
 	private static void doMaskDemo() throws IOException {
-		QrCode qr;
-		List<QrSegment> segs;
+		QrCode qrCode;
+		List<QrSegment> segments;
 		
 		// Project Nayuki URL
-		segs = QrSegment.makeSegments("https://www.nayuki.io/");
-		qr = QrCode.encodeSegments(segs, Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, -1, true);  // Automatic mask
-		writePng(qr.toImage(8, 6), "project-nayuki-automask-QR.png");
-		qr = QrCode.encodeSegments(segs, Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 3, true);  // Force mask 3
-		writePng(qr.toImage(8, 6), "project-nayuki-mask3-QR.png");
+
+		segments = QrSegment.makeSegments("https://www.nayuki.io/");
+		qrCode = QrCode.encodeSegments(segments, Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, -1, true);  // Automatic mask
+		writePng(qrCode.toImage(8, 6), "project-nayuki-automask-QR.png");
+		qrCode = QrCode.encodeSegments(segments, Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 3, true);  // Force mask 3
+		writePng(qrCode.toImage(8, 6), "project-nayuki-mask3-QR.png");
 		
 		// Chinese text as UTF-8
-		segs = QrSegment.makeSegments("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫");
-		qr = QrCode.encodeSegments(segs, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 0, true);  // Force mask 0
-		writePng(qr.toImage(10, 3), "unicode-mask0-QR.png");
-		qr = QrCode.encodeSegments(segs, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 1, true);  // Force mask 1
-		writePng(qr.toImage(10, 3), "unicode-mask1-QR.png");
-		qr = QrCode.encodeSegments(segs, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 5, true);  // Force mask 5
-		writePng(qr.toImage(10, 3), "unicode-mask5-QR.png");
-		qr = QrCode.encodeSegments(segs, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 7, true);  // Force mask 7
-		writePng(qr.toImage(10, 3), "unicode-mask7-QR.png");
+		segments = QrSegment.makeSegments("力놂옙占쎌쓢占쎌뇥�뇖臾뺥렩Wikipedia塋딅슜嫄앾옙寃켲/占쎈샆�뎚藥�戮먮뒰i占쎈쫨i.占쏙옙/塋딅맚�궦鼇앾옙占쎈뿨�닅占쎈뎨占쎈�깍Ⅴ諛ㅿ옙怨⑸�띰옙堉�歷뜯몼�꽎鼇앸떱姨�亦껋쉮占쏙옙�돦力녠엽�윭占쎌뇥�뇖臾덈�뀐옙�럱占쎈쐭俑앹뮂怡ワ옙鍮�");
+		qrCode = QrCode.encodeSegments(segments, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 0, true);  // Force mask 0
+		writePng(qrCode.toImage(10, 3), "unicode-mask0-QR.png");
+		qrCode = QrCode.encodeSegments(segments, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 1, true);  // Force mask 1
+		writePng(qrCode.toImage(10, 3), "unicode-mask1-QR.png");
+		qrCode = QrCode.encodeSegments(segments, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 5, true);  // Force mask 5
+		writePng(qrCode.toImage(10, 3), "unicode-mask5-QR.png");
+		qrCode = QrCode.encodeSegments(segments, Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 7, true);  // Force mask 7
+		writePng(qrCode.toImage(10, 3), "unicode-mask7-QR.png");
+
 	}
 	
 	
