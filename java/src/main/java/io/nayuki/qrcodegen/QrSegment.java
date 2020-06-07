@@ -29,12 +29,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import QrSegment.Mode;
+
 
 /**
  * A segment of character/binary/control data in a QR Code symbol.
  * Instances of this class are immutable.
  * <p>The mid-level way to create a segment is to take the payload data and call a
- * static factory function such as {@link MakeNumericToSegment#makeNumericToSegment(String)}. The low-level
+ * static factory function such as {@link QrSegment#makeNumeric(String)}. The low-level
  * way to create a segment is to custom-make the bit buffer and call the {@link
  * QrSegment#QrSegment(Mode,int,BitBuffer) constructor} with appropriate values.</p>
  * <p>This segment class imposes no length restrictions, but QR Codes have restrictions.
@@ -46,7 +48,6 @@ import java.util.regex.Pattern;
 public final class QrSegment {
 	
 	/*---- Static factory functions (mid level) ----*/
-	
 	/**
 	 * Returns a segment representing the specified binary data
 	 * encoded in byte mode. All input byte arrays are acceptable.
@@ -91,7 +92,6 @@ public final class QrSegment {
 		
 		return makeSegment.excute(text);
 	}
-	
 	/**
 	 * Returns a list of zero or more segments to represent the specified Unicode text string.
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
@@ -99,6 +99,7 @@ public final class QrSegment {
 	 * @return a new mutable list (not {@code null}) of segments (not {@code null}) containing the text
 	 * @throws NullPointerException if the text is {@code null}
 	 */
+	
 	public static List<QrSegment> makeSegments(String text) {
 		Objects.requireNonNull(text);
 		// Select the most efficient segment encoding automatically
@@ -110,12 +111,10 @@ public final class QrSegment {
 	
 		return segments;
 	}
-	
-	
 	/**
 	 * Returns a segment representing an Extended Channel Interpretation
 	 * (ECI) designator with the specified assignment value.
-	 * @param assignValue the ECI assignment number (see the AIM ECI specification)
+	 * @param assignVal the ECI assignment number (see the AIM ECI specification)
 	 * @return a segment (not {@code null}) containing the data
 	 * @throws IllegalArgumentException if the value is outside the range [0, 10<sup>6</sup>)
 	 */
@@ -146,7 +145,7 @@ public final class QrSegment {
 	/** The length of this segment's unencoded data. Measured in characters for
 	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
 	 * Always zero or positive. Not the same as the data's bit length. */
-	public final int numberOfCharacters;
+	public final int numChars;
 	
 	// The data bits of this segment. Not null. Accessed through getData().
 	final BitBuffer data;
@@ -158,8 +157,8 @@ public final class QrSegment {
 	 * Constructs a QR Code segment with the specified attributes and data.
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
 	 * but the constraint isn't checked. The specified bit buffer is cloned and stored.
-	 * @param _mode the mode (not {@code null})
-	 * @param _numberOfCharacters the data length in characters or bytes, which is non-negative
+	 * @param md the mode (not {@code null})
+	 * @param numCh the data length in characters or bytes, which is non-negative
 	 * @param data the data bits (not {@code null})
 	 * @throws NullPointerException if the mode or data is {@code null}
 	 * @throws IllegalArgumentException if the character count is negative
@@ -172,7 +171,6 @@ public final class QrSegment {
 		numberOfCharacters = _numberOfCharacters;
 		this.data = data.clone();  // Make defensive copy
 	}
-	
 	
 	/*---- Methods ----*/
 	
@@ -194,39 +192,28 @@ public final class QrSegment {
 		for (QrSegment segment : segments) {
 			Objects.requireNonNull(segment);
 			int characterCountBits = segment.mode.numCharCountBits(version);
-			if (DoesNotSegmentLengthFitTheFieldBitWidth(segment, characterCountBits))
+			if (segment.numberOfCharacters >= (1 << characterCountBits))
 				return -1;  // The segment's length doesn't fit the field's bit width
 			TotalBits += 4L + characterCountBits + segment.data.bitLength();
-			if (IsTotalBitsOutOfIntegerRange(TotalBits))
+			if (TotalBits > Integer.MAX_VALUE)
 				return -1;  // The sum will overflow an int type
 		}
 		return (int)TotalBits;
 	}
-
-
-	public static boolean IsTotalBitsOutOfIntegerRange(long result) {
-		return result > Integer.MAX_VALUE;
-	}
-
-
-	public static boolean DoesNotSegmentLengthFitTheFieldBitWidth(QrSegment segment, int characterCountBits) {
-		return segment.numberOfCharacters >= (1 << characterCountBits);
-	}
-	
 	
 	/*---- Constants ----*/
 	
 	/** Describes precisely all strings that are encodable in numeric mode. To test whether a
 	 * string {@code s} is encodable: {@code boolean ok = NUMERIC_REGEX.matcher(s).matches();}.
 	 * A string is encodable iff each character is in the range 0 to 9.
-	 * @see MakeNumericToSegment#makeNumericToSegment(String) */
+	 * @see #makeNumeric(String) */
 	public static final Pattern NUMERIC_REGEX = Pattern.compile("[0-9]*");
 	
 	/** Describes precisely all strings that are encodable in alphanumeric mode. To test whether a
 	 * string {@code s} is encodable: {@code boolean ok = ALPHANUMERIC_REGEX.matcher(s).matches();}.
 	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
 	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-	 * @see MakeAlphaNumericToSegment#makeAlphaNumericToSegment(String) */
+	 * @see #makeAlphanumeric(String) */
 	public static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[A-Z0-9 $%*+./:-]*");
 	
 	// The set of all legal characters in alphanumeric mode, where
