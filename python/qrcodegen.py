@@ -20,7 +20,7 @@
 #   out of or in connection with the Software or the use or other dealings in the
 #   Software.
 # 
-
+from __future__ import annotations          # fix for python3.7
 import collections, itertools, re
 from typing import List, Optional, Tuple
 
