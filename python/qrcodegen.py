@@ -731,7 +731,7 @@ class QrSegment:
 	@staticmethod
 	def make_numeric(digits: str) -> QrSegment:
 		"""Returns a segment representing the given string of decimal digits encoded in numeric mode."""
-		if QrSegment.NUMERIC_REGEX.match(digits) is None:
+		if QrSegment.NUMERIC_REGEX.fullmatch(digits) is None:
 			raise ValueError("String contains non-numeric characters")
 		bb = _BitBuffer()
 		i = 0
@@ -747,7 +747,7 @@ class QrSegment:
 		"""Returns a segment representing the given text string encoded in alphanumeric mode.
 		The characters allowed are: 0 to 9, A to Z (uppercase only), space,
 		dollar, percent, asterisk, plus, hyphen, period, slash, colon."""
-		if QrSegment.ALPHANUMERIC_REGEX.match(text) is None:
+		if QrSegment.ALPHANUMERIC_REGEX.fullmatch(text) is None:
 			raise ValueError("String contains unencodable characters in alphanumeric mode")
 		bb = _BitBuffer()
 		for i in range(0, len(text) - 1, 2):  # Process groups of 2
@@ -769,9 +769,9 @@ class QrSegment:
 		# Select the most efficient segment encoding automatically
 		if text == "":
 			return []
-		elif QrSegment.NUMERIC_REGEX.match(text) is not None:
+		elif QrSegment.NUMERIC_REGEX.fullmatch(text) is not None:
 			return [QrSegment.make_numeric(text)]
-		elif QrSegment.ALPHANUMERIC_REGEX.match(text) is not None:
+		elif QrSegment.ALPHANUMERIC_REGEX.fullmatch(text) is not None:
 			return [QrSegment.make_alphanumeric(text)]
 		else:
 			return [QrSegment.make_bytes(text.encode("UTF-8"))]
