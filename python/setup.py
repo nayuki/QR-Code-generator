@@ -29,6 +29,7 @@ setuptools.setup(
 	description = "High quality QR Code generator library for Python",
 	version = "1.6.0",
 	platforms = "OS Independent",
+	python_requires = '>=3',
 	license = "MIT License",
 	
 	author = "Project Nayuki",
