@@ -21,6 +21,7 @@
 #   Software.
 # 
 
+from __future__ import annotations
 import collections, itertools, re
 from typing import List, Optional, Tuple
 
