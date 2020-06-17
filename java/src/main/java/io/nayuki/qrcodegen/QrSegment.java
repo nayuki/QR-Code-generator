@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import QrSegment.Mode;
 
 
 /**
@@ -145,7 +144,7 @@ public final class QrSegment {
 	/** The length of this segment's unencoded data. Measured in characters for
 	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
 	 * Always zero or positive. Not the same as the data's bit length. */
-	public final int numChars;
+	public final int numberOfCharacters;
 	
 	// The data bits of this segment. Not null. Accessed through getData().
 	final BitBuffer data;
