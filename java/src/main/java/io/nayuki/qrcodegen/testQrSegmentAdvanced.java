@@ -99,4 +99,19 @@ public class testQrSegmentAdvanced {
 			assertEquals(QrSegmentAdvanced.is_alphanumeric(forcnt), false);
 		}
 	}
+	
+	/**
+	*Purpose: 'toCodePoints' function is convert String to integer, if String is in UTF-8. 
+	*		  In UTF-8 has variable character why I haven't check all UTF-8's string. 
+	*		  So, I just test character that are excluded at UTF-8.  
+	*		  For checking exception occurs when a character other than UTF-8 is entered.
+	*Input: "A�"
+	*Expected:
+	*	occur IllegalArgumentException
+	 */	
+	@Test(expected = IllegalArgumentException.class)
+	public void toCodePoints_test() {
+		String not_UTF = "A�";
+		testing.makeSegmentsOptimally(not_UTF, Ecc.LOW, 1, 40);
+	}
 }
