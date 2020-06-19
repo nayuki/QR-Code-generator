@@ -71,4 +71,32 @@ public class testQrSegmentAdvanced {
 		testing.makeSegmentsOptimally(nullstring, Ecc.LOW, 1, 40);
 	}
 
+	/**
+	*Purpose: This program has several mode and making these. When making these mode, find suitable mode using flag. So, i test this functions.
+	*		  is_numeric -> 0 ~ 9 's UTF-8 number, is_alphanumeric -> "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:" stinrg set,  
+	*Input: "0123456780", "A", "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"
+	*Expected:
+	*	All is correct
+	 */	
+	@Test
+	public void is_Corredt_Mode_test() {
+		int[] correctStr = "09".codePoints().toArray();
+		for (int forcnt : correctStr){
+			assertEquals(QrSegmentAdvanced.is_numeric(forcnt), true);
+		}
+		int[] wrongStr = "a".codePoints().toArray();
+		for (int forcnt : wrongStr){
+			assertEquals(QrSegmentAdvanced.is_numeric(forcnt), false);
+		}
+		
+		correctStr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:".codePoints().toArray();
+		for (int forcnt : correctStr){
+			assertEquals(QrSegmentAdvanced.is_alphanumeric(forcnt), true);
+		}
+		
+		wrongStr = "\\".codePoints().toArray();
+		for (int forcnt : wrongStr){
+			assertEquals(QrSegmentAdvanced.is_alphanumeric(forcnt), false);
+		}
+	}
 }
