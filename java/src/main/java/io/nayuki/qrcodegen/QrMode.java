@@ -7,7 +7,7 @@ public abstract class QrMode {
 	int modeBits;
 	
 	// Number of character count bits for three different version ranges.
-	protected int[] numBitsCharCount;
+	protected int[] numBitsCharCount = new int[4];
 	
 	int headCost;
 	/*-- Method --*/
