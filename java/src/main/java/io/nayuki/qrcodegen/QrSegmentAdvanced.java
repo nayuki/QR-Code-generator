@@ -98,12 +98,12 @@ public final class QrSegmentAdvanced {
 	}
 
 
-	private static boolean is_valid_version(int minVersion, int version) {
+	public static boolean is_valid_version(int minVersion, int version) {
 		return version == minVersion || version == 10 || version == 27;
 	}
 
 
-	private static boolean not_Valid_Version(int minVersion, int maxVersion) {
+	public static boolean not_Valid_Version(int minVersion, int maxVersion) {
 		return !(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION);
 	}
 	
@@ -217,12 +217,12 @@ public final class QrSegmentAdvanced {
 	}
 
 
-	private static boolean is_numeric(int convertedPoint) {
+	public static boolean is_numeric(int convertedPoint) {
 		return '0' <= convertedPoint && convertedPoint <= '9';
 	}
 
 
-	private static boolean is_alphanumeric(int convertedPoint) {
+	public static boolean is_alphanumeric(int convertedPoint) {
 		return QrSegment.ALPHANUMERIC_CHARSET.indexOf(convertedPoint) != -1;
 	}
 	
