@@ -190,7 +190,7 @@ public final class QrCode {
 		BitBuffer bitBuffer = new BitBuffer();
 		for (QrSegment segment : segments) {
 			bitBuffer.appendBits(segment.mode.modeBits, 4);
-			bitBuffer.appendBits(segment.numChars, segment.mode.numCharCountBits(version));
+			bitBuffer.appendBits(segment.numberOfCharacters, segment.mode.numCharCountBits(version));
 			bitBuffer.appendData(segment.data);
 		}
 		return bitBuffer;
@@ -258,7 +258,13 @@ public final class QrCode {
 	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
 	private boolean[][] isFunction;
 	
+	public void setModules(int size) {
+		this.modules = new boolean [size][size];
+	}
 	
+	public void setIsFunction(int size) {
+		this.isFunction = new boolean [size][size];
+	}
 	
 	/*---- Constructor (low level) ----*/
 	
@@ -581,9 +587,7 @@ public final class QrCode {
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 
-	private void applyMask(int msk) {
-
-
+	public void applyMask(int msk) {
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
 		for (int y = 0; y < size; y++) {
@@ -593,7 +597,7 @@ public final class QrCode {
 				Command mskCommand = MskCommandFactory.getCommand(msk);
 				Button button = new Button(mskCommand);
 				invert = button.pressed(y, x, msk);
-
+				
 				modules[y][x] ^= invert & !isFunction[y][x];
 			}
 		}
@@ -612,7 +616,10 @@ public final class QrCode {
 		drawFormatBits(mask);  // Overwrite old format bits
 		return mask;  // The caller shall assign this value to the final-declared field
 	}
-
+	
+	public int executeHandleConstructorMasking(int mask) {
+		return handleConstructorMasking(mask);
+	}
 
 	// Automatically choose best mask
 	private int findBestMask() {	
@@ -749,7 +756,11 @@ public final class QrCode {
 		assert 208 <= result && result <= 29648;
 		return result;
 	}
-
+	
+	public int excuteGetNumRawDataModules(int ver) {
+		return getNumRawDataModules(ver);
+	}
+	
 	private static int calculateNumOfModules(int ver) {
 		int size = ver * 4 + 17;
 		int result = size * size;   // Number of modules in the whole QR Code square
@@ -794,7 +805,9 @@ public final class QrCode {
 		return result;
 	}
 
-
+	public byte[] executeReedSolomonComputeDivisor(int degree) {
+		return reedSolomonComputeDivisor(degree);
+	}
 	// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
 	private static byte[] reedSolomonComputeRemainder(byte[] data, byte[] divisor) {
 		Objects.requireNonNull(data);

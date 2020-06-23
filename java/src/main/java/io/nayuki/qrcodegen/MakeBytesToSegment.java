@@ -34,3 +34,4 @@ public class MakeBytesToSegment  implements MakeSegment {
 		bitBuffer.appendBits(bits & 0xFF, 8);
 	}
 }
+
