@@ -43,133 +43,145 @@ Examples
 
 Java language:
 
-    import java.awt.image.BufferedImage;
-    import java.io.File;
-    import java.util.List;
-    import javax.imageio.ImageIO;
-    import io.nayuki.qrcodegen.*;
-    
-    // Simple operation
-    QrCode qr0 = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
-    BufferedImage img = qr0.toImage(4, 10);
-    ImageIO.write(img, "png", new File("qr-code.png"));
-    
-    // Manual operation
-    List<QrSegment> segs = QrSegment.makeSegments("3141592653589793238462643383");
-    QrCode qr1 = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 5, 5, 2, false);
-    for (int y = 0; y < qr1.size; y++) {
-        for (int x = 0; x < qr1.size; x++) {
-            (... paint qr1.getModule(x, y) ...)
-        }
+```java
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.List;
+import javax.imageio.ImageIO;
+import io.nayuki.qrcodegen.*;
+
+// Simple operation
+QrCode qr0 = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
+BufferedImage img = qr0.toImage(4, 10);
+ImageIO.write(img, "png", new File("qr-code.png"));
+
+// Manual operation
+List<QrSegment> segs = QrSegment.makeSegments("3141592653589793238462643383");
+QrCode qr1 = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 5, 5, 2, false);
+for (int y = 0; y < qr1.size; y++) {
+    for (int x = 0; x < qr1.size; x++) {
+        (... paint qr1.getModule(x, y) ...)
     }
+}
+```
 
 TypeScript/JavaScript languages:
 
-    // Name abbreviated for the sake of these examples here
-    var QRC = qrcodegen.QrCode;
-    
-    // Simple operation
-    var qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
-    var svg = qr0.toSvgString(4);
-    
-    // Manual operation
-    var segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
-    var qr1 = QRC.encodeSegments(segs, QRC.Ecc.HIGH, 5, 5, 2, false);
-    for (var y = 0; y < qr1.size; y++) {
-        for (var x = 0; x < qr1.size; x++) {
-            (... paint qr1.getModule(x, y) ...)
-        }
+```javascript
+// Name abbreviated for the sake of these examples here
+var QRC = qrcodegen.QrCode;
+
+// Simple operation
+var qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
+var svg = qr0.toSvgString(4);
+
+// Manual operation
+var segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
+var qr1 = QRC.encodeSegments(segs, QRC.Ecc.HIGH, 5, 5, 2, false);
+for (var y = 0; y < qr1.size; y++) {
+    for (var x = 0; x < qr1.size; x++) {
+        (... paint qr1.getModule(x, y) ...)
     }
+}
+```
 
 Python language:
 
-    from qrcodegen import *
-    
-    # Simple operation
-    qr0 = QrCode.encode_text("Hello, world!", QrCode.Ecc.MEDIUM)
-    svg = qr0.to_svg_str(4)
-    
-    # Manual operation
-    segs = QrSegment.make_segments("3141592653589793238462643383")
-    qr1 = QrCode.encode_segments(segs, QrCode.Ecc.HIGH, 5, 5, 2, False)
-    for y in range(qr1.get_size()):
-        for x in range(qr1.get_size()):
-            (... paint qr1.get_module(x, y) ...)
+```python
+from qrcodegen import *
+
+# Simple operation
+qr0 = QrCode.encode_text("Hello, world!", QrCode.Ecc.MEDIUM)
+svg = qr0.to_svg_str(4)
+
+# Manual operation
+segs = QrSegment.make_segments("3141592653589793238462643383")
+qr1 = QrCode.encode_segments(segs, QrCode.Ecc.HIGH, 5, 5, 2, False)
+for y in range(qr1.get_size()):
+    for x in range(qr1.get_size()):
+        (... paint qr1.get_module(x, y) ...)
+```
 
 C++ language:
 
-    #include <string>
-    #include <vector>
-    #include "QrCode.hpp"
-    using namespace qrcodegen;
-    
-    // Simple operation
-    QrCode qr0 = QrCode::encodeText("Hello, world!", QrCode::Ecc::MEDIUM);
-    std::string svg = qr0.toSvgString(4);
-    
-    // Manual operation
-    std::vector<QrSegment> segs =
-        QrSegment::makeSegments("3141592653589793238462643383");
-    QrCode qr1 = QrCode::encodeSegments(
-        segs, QrCode::Ecc::HIGH, 5, 5, 2, false);
-    for (int y = 0; y < qr1.getSize(); y++) {
-        for (int x = 0; x < qr1.getSize(); x++) {
-            (... paint qr1.getModule(x, y) ...)
-        }
+```cpp
+#include <string>
+#include <vector>
+#include "QrCode.hpp"
+using namespace qrcodegen;
+
+// Simple operation
+QrCode qr0 = QrCode::encodeText("Hello, world!", QrCode::Ecc::MEDIUM);
+std::string svg = qr0.toSvgString(4);
+
+// Manual operation
+std::vector<QrSegment> segs =
+    QrSegment::makeSegments("3141592653589793238462643383");
+QrCode qr1 = QrCode::encodeSegments(
+    segs, QrCode::Ecc::HIGH, 5, 5, 2, false);
+for (int y = 0; y < qr1.getSize(); y++) {
+    for (int x = 0; x < qr1.getSize(); x++) {
+        (... paint qr1.getModule(x, y) ...)
     }
+}
+```
 
 C language:
 
-    #include <stdbool.h>
-    #include <stdint.h>
-    #include "qrcodegen.h"
-    
-    // Text data
-    uint8_t qr0[qrcodegen_BUFFER_LEN_MAX];
-    uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
-    bool ok = qrcodegen_encodeText("Hello, world!",
-        tempBuffer, qr0, qrcodegen_Ecc_MEDIUM,
-        qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX,
-        qrcodegen_Mask_AUTO, true);
-    if (!ok)
-        return;
-    
-    int size = qrcodegen_getSize(qr0);
-    for (int y = 0; y < size; y++) {
-        for (int x = 0; x < size; x++) {
-            (... paint qrcodegen_getModule(qr0, x, y) ...)
-        }
+```c
+#include <stdbool.h>
+#include <stdint.h>
+#include "qrcodegen.h"
+
+// Text data
+uint8_t qr0[qrcodegen_BUFFER_LEN_MAX];
+uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
+bool ok = qrcodegen_encodeText("Hello, world!",
+    tempBuffer, qr0, qrcodegen_Ecc_MEDIUM,
+    qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX,
+    qrcodegen_Mask_AUTO, true);
+if (!ok)
+    return;
+
+int size = qrcodegen_getSize(qr0);
+for (int y = 0; y < size; y++) {
+    for (int x = 0; x < size; x++) {
+        (... paint qrcodegen_getModule(qr0, x, y) ...)
     }
-    
-    // Binary data
-    uint8_t dataAndTemp[qrcodegen_BUFFER_LEN_FOR_VERSION(7)]
-        = {0xE3, 0x81, 0x82};
-    uint8_t qr1[qrcodegen_BUFFER_LEN_FOR_VERSION(7)];
-    ok = qrcodegen_encodeBinary(dataAndTemp, 3, qr1,
-        qrcodegen_Ecc_HIGH, 2, 7, qrcodegen_Mask_4, false);
+}
+
+// Binary data
+uint8_t dataAndTemp[qrcodegen_BUFFER_LEN_FOR_VERSION(7)]
+    = {0xE3, 0x81, 0x82};
+uint8_t qr1[qrcodegen_BUFFER_LEN_FOR_VERSION(7)];
+ok = qrcodegen_encodeBinary(dataAndTemp, 3, qr1,
+    qrcodegen_Ecc_HIGH, 2, 7, qrcodegen_Mask_4, false);
+```
 
 Rust language:
 
-    extern crate qrcodegen;
-    use qrcodegen::QrCode;
-    use qrcodegen::QrCodeEcc;
-    use qrcodegen::QrSegment;
-    
-    // Simple operation
-    let qr = QrCode::encode_text("Hello, world!",
-        QrCodeEcc::Medium).unwrap();
-    let svg = qr.to_svg_string(4);
-    
-    // Manual operation
-    let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
-    let segs = QrSegment::make_segments(&chrs);
-    let qr = QrCode::encode_segments_advanced(
-        &segs, QrCodeEcc::High, 5, 5, Some(Mask::new(2)), false).unwrap();
-    for y in 0 .. qr.size() {
-        for x in 0 .. qr.size() {
-            (... paint qr.get_module(x, y) ...)
-        }
+```rust
+extern crate qrcodegen;
+use qrcodegen::QrCode;
+use qrcodegen::QrCodeEcc;
+use qrcodegen::QrSegment;
+
+// Simple operation
+let qr = QrCode::encode_text("Hello, world!",
+    QrCodeEcc::Medium).unwrap();
+let svg = qr.to_svg_string(4);
+
+// Manual operation
+let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
+let segs = QrSegment::make_segments(&chrs);
+let qr = QrCode::encode_segments_advanced(
+    &segs, QrCodeEcc::High, 5, 5, Some(Mask::new(2)), false).unwrap();
+for y in 0 .. qr.size() {
+    for x in 0 .. qr.size() {
+        (... paint qr.get_module(x, y) ...)
     }
+}
+```
 
 
 License
