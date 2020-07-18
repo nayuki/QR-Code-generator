@@ -349,7 +349,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 			applyMask(i);  // Undoes the mask due to XOR
 		}
 	}
-	if (msk < 0 || msk > 7)
+	if (msk < 0)
 		throw std::logic_error("Assertion error");
 	this->mask = msk;
 	applyMask(msk);  // Apply the final choice of mask
