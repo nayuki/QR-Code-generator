@@ -170,7 +170,7 @@ class QrSegment final {
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
 	 * but the constraint isn't checked. The given bit buffer is copied and stored.
 	 */
-	public: QrSegment(Mode md, int numCh, const std::vector<bool> &dt);
+	public: QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt);
 	
 	
 	/* 
@@ -178,7 +178,7 @@ class QrSegment final {
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
 	 * but the constraint isn't checked. The given bit buffer is moved and stored.
 	 */
-	public: QrSegment(Mode md, int numCh, std::vector<bool> &&dt);
+	public: QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt);
 	
 	
 	/*---- Methods ----*/
