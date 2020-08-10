@@ -35,7 +35,7 @@ CXXFLAGS += -std=c++11
 # CXXFLAGS += -g -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -fsanitize=undefined,address
 
 # Version information
-VERSION = 1.5.0
+VERSION = 1.6.0
 
 # ---- Controlling make ----
 
