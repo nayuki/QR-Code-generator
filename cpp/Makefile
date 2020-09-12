@@ -65,7 +65,7 @@ clean:
 
 # Executable files
 %: %.o $(LIBFILE)
-	$(CXX) $(CXXFLAGS) -o $@ $< -L . -l $(LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $< -L . -l $(LIB)
 
 # The library
 $(LIBFILE): $(LIBOBJ)
