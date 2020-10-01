@@ -1,4 +1,4 @@
-QR Code generator library(C,C++,Ruby,Java)
+QR Code generator library(C,C++,Rust,Javascript,Java)
 =========================
 
 
