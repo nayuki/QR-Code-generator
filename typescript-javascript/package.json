@@ -1,0 +1,31 @@
+{
+    "name": "@gfortaine/qr-code-generator",
+    "version": "1.0.4",
+    "description": "QR Code generator library in multiple languages",
+    "main": "qrcodegen.js",
+    "scripts": {
+        "build": "npm run build:types",
+        "build:types": "tsc --strict --lib DOM,DOM.Iterable,ES6 qrcodegen.ts",
+        "prepublishOnly": "npm run build",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "typescript": "^3.9.7"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nayuki/QR-Code-generator.git"
+    },
+    "keywords": [
+        "qr",
+        "qrcode",
+        "generator",
+        "svg"
+    ],
+    "author": "Project Nayuki (me@nayuki.io)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/nayuki/QR-Code-generator/issues"
+    },
+    "homepage": "https://github.com/nayuki/QR-Code-generator#readme"
+}

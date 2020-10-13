@@ -1,0 +1,8 @@
+{
+  "name": "qr-code-generator",
+  "description": "QR Code generator library in multiple languages",
+  "private": true,
+  "workspaces": [
+    "typescript-javascript"
+  ]
+}
