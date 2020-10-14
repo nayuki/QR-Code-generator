@@ -207,7 +207,7 @@ impl QrCode {
 		assert!(minversion.value() <= maxversion.value(), "Invalid value");
 		
 		// Find the minimal version number to use
-		let mut version = minversion;
+		let mut version: Version = minversion;
 		let datausedbits: usize = loop {
 			// Number of data bits available
 			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
@@ -245,9 +245,9 @@ impl QrCode {
 		// Add terminator and pad up to a byte if applicable
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 		assert!(bb.0.len() <= datacapacitybits);
-		let numzerobits = std::cmp::min(4, datacapacitybits - bb.0.len());
+		let numzerobits: usize = std::cmp::min(4, datacapacitybits - bb.0.len());
 		bb.append_bits(0, numzerobits as u8);
-		let numzerobits = bb.0.len().wrapping_neg() & 7;
+		let numzerobits: usize = bb.0.len().wrapping_neg() & 7;
 		bb.append_bits(0, numzerobits as u8);
 		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
 		
@@ -539,8 +539,8 @@ impl QrCode {
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
 	fn add_ecc_and_interleave(&self, data: &[u8]) -> Vec<u8> {
-		let ver = self.version;
-		let ecl = self.errorcorrectionlevel;
+		let ver: Version = self.version;
+		let ecl: QrCodeEcc = self.errorcorrectionlevel;
 		assert_eq!(data.len(), QrCode::get_num_data_codewords(ver, ecl), "Illegal argument");
 		
 		// Calculate parameter numbers
@@ -720,7 +720,7 @@ impl QrCode {
 	// Each position is in the range [0,177), and are used on both the x and y axes.
 	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
 	fn get_alignment_pattern_positions(&self) -> Vec<i32> {
-		let ver = self.version.value();
+		let ver: u8 = self.version.value();
 		if ver == 1 {
 			vec![]
 		} else {
@@ -1047,7 +1047,7 @@ impl QrSegment {
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for &c in text {
-			let i = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
+			let i: usize = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
 				.expect("String contains unencodable characters in alphanumeric mode");
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
@@ -1140,7 +1140,7 @@ impl QrSegment {
 	fn get_total_bits(segs: &[Self], version: Version) -> Option<usize> {
 		let mut result: usize = 0;
 		for seg in segs {
-			let ccbits = seg.mode.num_char_count_bits(version);
+			let ccbits: u8 = seg.mode.num_char_count_bits(version);
 			// ccbits can be as large as 16, but usize can be as small as 16
 			if let Some(limit) = 1usize.checked_shl(u32::from(ccbits)) {
 				if seg.numchars >= limit {
