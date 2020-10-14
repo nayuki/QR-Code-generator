@@ -184,7 +184,7 @@ impl QrCode {
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
 	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Result<Self,DataTooLong> {
-		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
+		QrCode::encode_segments_advanced(segs, ecl, Version::MIN, Version::MAX, None, true)
 	}
 	
 	
@@ -883,13 +883,6 @@ impl FinderPenalty {
 
 /*---- Constants and tables ----*/
 
-/// The minimum version number supported in the QR Code Model 2 standard.
-pub const QrCode_MIN_VERSION: Version = Version( 1);
-
-/// The maximum version number supported in the QR Code Model 2 standard.
-pub const QrCode_MAX_VERSION: Version = Version(40);
-
-
 // For use in get_penalty_score(), when evaluating which mask is best.
 const PENALTY_N1: i32 =  3;
 const PENALTY_N2: i32 =  3;
@@ -1252,8 +1245,8 @@ impl BitBuffer {
 /// 
 /// - Decrease the error correction level if it was greater than `QrCodeEcc::Low`.
 /// - If the `encode_segments_advanced()` function was called, then increase the maxversion
-///   argument if it was less than `QrCode_MAX_VERSION`. (This advice does not apply to the
-///   other factory functions because they search all versions up to `QrCode_MAX_VERSION`.)
+///   argument if it was less than `Version::MAX`. (This advice does not apply to the
+///   other factory functions because they search all versions up to `Version::MAX`.)
 /// - Split the text data into better or optimal segments in order to reduce the number of bits required.
 /// - Change the text or binary data to be shorter.
 /// - Change the text to fit the character set of a particular segment mode (e.g. alphanumeric).
@@ -1279,11 +1272,17 @@ impl std::fmt::Display for DataTooLong {
 pub struct Version(u8);
 
 impl Version {
+	/// The minimum version number supported in the QR Code Model 2 standard.
+	pub const MIN: Version = Version( 1);
+	
+	/// The maximum version number supported in the QR Code Model 2 standard.
+	pub const MAX: Version = Version(40);
+	
 	/// Creates a version object from the given number.
 	/// 
 	/// Panics if the number is outside the range [1, 40].
 	pub fn new(ver: u8) -> Self {
-		assert!(QrCode_MIN_VERSION.value() <= ver && ver <= QrCode_MAX_VERSION.value(), "Version number out of range");
+		assert!(Version::MIN.value() <= ver && ver <= Version::MAX.value(), "Version number out of range");
 		Self(ver)
 	}
 	

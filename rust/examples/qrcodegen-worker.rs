@@ -59,9 +59,9 @@ fn main() {
 		let mask       = read_int();
 		let boostecl   = read_int();
 		assert!(0 <= errcorlvl && errcorlvl <= 3);
-		assert!(i16::from(qrcodegen::QrCode_MIN_VERSION.value()) <= minversion
+		assert!(i16::from(Version::MIN.value()) <= minversion
 			&& minversion <= maxversion
-			&& maxversion <= i16::from(qrcodegen::QrCode_MAX_VERSION.value()));
+			&& maxversion <= i16::from(Version::MAX.value()));
 		assert!(-1 <= mask && mask <= 7);
 		assert!(boostecl >> 1 == 0);
 		
