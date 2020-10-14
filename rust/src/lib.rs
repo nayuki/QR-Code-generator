@@ -1147,7 +1147,8 @@ impl QrSegment {
 					return None;  // The segment's length doesn't fit the field's bit width
 				}
 			}
-			result = result.checked_add(4 + usize::from(ccbits) + seg.data.len())?;
+			result = result.checked_add(4 + usize::from(ccbits))?;
+			result = result.checked_add(seg.data.len())?;
 		}
 		Some(result)
 	}
