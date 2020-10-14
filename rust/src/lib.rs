@@ -438,7 +438,7 @@ impl QrCode {
 		// Calculate error correction code and pack bits
 		let bits: u32 = {
 			// errcorrlvl is uint2, mask is uint3
-			let data: u32 = self.errorcorrectionlevel.format_bits() << 3 | u32::from(mask.value());
+			let data: u32 = u32::from(self.errorcorrectionlevel.format_bits() << 3 | mask.value());
 			let mut rem: u32 = data;
 			for _ in 0 .. 10 {
 				rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -949,7 +949,7 @@ impl QrCodeEcc {
 	
 	
 	// Returns an unsigned 2-bit integer (in the range 0 to 3).
-	fn format_bits(self) -> u32 {
+	fn format_bits(self) -> u8 {
 		use QrCodeEcc::*;
 		match self {
 			Low      => 1,
