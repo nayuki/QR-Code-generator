@@ -1141,8 +1141,11 @@ impl QrSegment {
 		let mut result: usize = 0;
 		for seg in segs {
 			let ccbits = seg.mode.num_char_count_bits(version);
-			if seg.numchars >= 1 << ccbits {
-				return None;  // The segment's length doesn't fit the field's bit width
+			// ccbits can be as large as 16, but usize can be as small as 16
+			if let Some(limit) = 1usize.checked_shl(u32::from(ccbits)) {
+				if seg.numchars >= limit {
+					return None;  // The segment's length doesn't fit the field's bit width
+				}
 			}
 			result = result.checked_add(4 + usize::from(ccbits) + seg.data.len())?;
 		}
