@@ -296,7 +296,7 @@ impl QrCode {
 		
 		// Do masking
 		if mask.is_none() {  // Automatically choose best mask
-			let mut minpenalty: i32 = std::i32::MAX;
+			let mut minpenalty = std::i32::MAX;
 			for i in 0u8 .. 8 {
 				let newmask = Mask::new(i);
 				result.apply_mask(newmask);
@@ -617,10 +617,9 @@ impl QrCode {
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 	fn apply_mask(&mut self, mask: Mask) {
-		let mask: u8 = mask.value();
 		for y in 0 .. self.size {
 			for x in 0 .. self.size {
-				let invert: bool = match mask {
+				let invert: bool = match mask.value() {
 					0 => (x + y) % 2 == 0,
 					1 => y % 2 == 0,
 					2 => x % 3 == 0,

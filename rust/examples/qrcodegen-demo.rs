@@ -128,8 +128,8 @@ fn do_segment_demo() {
 		0x0000, 0x0208, 0x01FF, 0x0008,
 	];
 	let mut bb = qrcodegen::BitBuffer(Vec::new());
-	for c in &kanjichars {
-		bb.append_bits(*c, 13);
+	for &c in &kanjichars {
+		bb.append_bits(c, 13);
 	}
 	let segs = vec![
 		QrSegment::new(qrcodegen::QrSegmentMode::Kanji, kanjichars.len(), bb.0),
