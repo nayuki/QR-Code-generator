@@ -1,11 +1,11 @@
 {
     "name": "@gfortaine/qr-code-generator",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "description": "QR Code generator library in multiple languages",
     "main": "qrcodegen.js",
     "scripts": {
         "build": "npm run build:types",
-        "build:types": "tsc --strict --lib DOM,DOM.Iterable,ES6 qrcodegen.ts",
+        "build:types": "tsc --strict --alwaysStrict false --lib DOM,DOM.Iterable,ES6 qrcodegen.ts",
         "prepublishOnly": "npm run build",
         "test": "echo \"Error: no test specified\" && exit 1"
     },

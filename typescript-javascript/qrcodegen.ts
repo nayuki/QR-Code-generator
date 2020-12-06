@@ -21,7 +21,6 @@
  *   Software.
  */
 
-"use strict";
 
 
 namespace qrcodegen {
