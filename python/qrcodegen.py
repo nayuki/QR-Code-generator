@@ -168,6 +168,16 @@ class QrCode:
 		return QrCode(version, ecl, datacodewords, mask)
 	
 	
+	# ---- Private fields ----
+	
+	_version: int
+	_size: int
+	_errcorlvl: QrCode.Ecc
+	_mask: int
+	_modules: List[List[bool]]
+	_isfunction: List[List[bool]]
+	
+	
 	# ---- Constructor (low level) ----
 	
 	def __init__(self, version: int, errcorlvl: QrCode.Ecc, datacodewords: List[int], mask: int) -> None:
@@ -681,6 +691,9 @@ class QrCode:
 	# ---- Public helper enumeration ----
 	
 	class Ecc:
+		ordinal: int
+		formatbits: int
+		
 		"""The error correction level in a QR Code symbol. Immutable."""
 		# Private constructor
 		def __init__(self, i: int, fb: int) -> None:
@@ -798,6 +811,13 @@ class QrSegment:
 		return QrSegment(QrSegment.Mode.ECI, 0, bb)
 	
 	
+	# ---- Private fields ----
+	
+	_mode: QrSegment.Mode
+	_numchars: int
+	_bitdata: List[int]
+	
+	
 	# ---- Constructor (low level) ----
 	
 	def __init__(self, mode: QrSegment.Mode, numch: int, bitdata: List[int]) -> None:
@@ -874,6 +894,9 @@ class QrSegment:
 	
 	class Mode:
 		"""Describes how a segment's data bits are interpreted. Immutable."""
+		
+		_modebits: int
+		_charcounts: Tuple[int,int,int]
 		
 		# Private constructor
 		def __init__(self, modebits: int, charcounts: Tuple[int,int,int]):
