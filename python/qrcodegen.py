@@ -170,11 +170,27 @@ class QrCode:
 	
 	# ---- Private fields ----
 	
+	# The version number of this QR Code, which is between 1 and 40 (inclusive).
+	# This determines the size of this barcode.
 	_version: int
+	
+	# The width and height of this QR Code, measured in modules, between
+	# 21 and 177 (inclusive). This is equal to version * 4 + 17.
 	_size: int
+	
+	# The error correction level used in this QR Code.
 	_errcorlvl: QrCode.Ecc
+	
+	# The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
+	# Even if a QR Code is created with automatic masking requested (mask = -1),
+	# the resulting object still has a mask value between 0 and 7.
 	_mask: int
+	
+	# The modules of this QR Code (False = white, True = black).
+	# Immutable after constructor finishes. Accessed through get_module().
 	_modules: List[List[bool]]
+	
+	# Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
 	_isfunction: List[List[bool]]
 	
 	
@@ -194,22 +210,12 @@ class QrCode:
 		if not isinstance(errcorlvl, QrCode.Ecc):
 			raise TypeError("QrCode.Ecc expected")
 		
-		# The version number of this QR Code, which is between 1 and 40 (inclusive).
-		# This determines the size of this barcode.
 		self._version = version
-		
-		# The width and height of this QR Code, measured in modules, between
-		# 21 and 177 (inclusive). This is equal to version * 4 + 17.
 		self._size = version * 4 + 17
-		
-		# The error correction level used in this QR Code.
 		self._errcorlvl = errcorlvl
 		
 		# Initialize both grids to be size*size arrays of Boolean false
-		# The modules of this QR Code (False = white, True = black).
-		# Immutable after constructor finishes. Accessed through get_module().
 		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all white
-		# Indicates function modules that are not subjected to masking. Discarded when constructor finishes
 		self._isfunction = [[False] * self._size for _ in range(self._size)]
 		
 		# Compute ECC, draw modules
@@ -231,10 +237,6 @@ class QrCode:
 		assert 0 <= mask <= 7
 		self._apply_mask(mask)  # Apply the final choice of mask
 		self._draw_format_bits(mask)  # Overwrite old format bits
-		
-		# The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
-		# Even if a QR Code is created with automatic masking requested (mask = -1),
-		# the resulting object still has a mask value between 0 and 7.
 		self._mask = mask
 		
 		del self._isfunction
@@ -691,14 +693,14 @@ class QrCode:
 	# ---- Public helper enumeration ----
 	
 	class Ecc:
-		ordinal: int
-		formatbits: int
+		ordinal: int  # (Public) In the range 0 to 3 (unsigned 2-bit integer)
+		formatbits: int  # (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
 		
 		"""The error correction level in a QR Code symbol. Immutable."""
 		# Private constructor
 		def __init__(self, i: int, fb: int) -> None:
-			self.ordinal = i  # (Public) In the range 0 to 3 (unsigned 2-bit integer)
-			self.formatbits = fb  # (Package-private) In the range 0 to 3 (unsigned 2-bit integer)
+			self.ordinal = i
+			self.formatbits = fb
 		
 		# Placeholders
 		LOW     : QrCode.Ecc
@@ -813,8 +815,16 @@ class QrSegment:
 	
 	# ---- Private fields ----
 	
+	# The mode indicator of this segment. Accessed through get_mode().
 	_mode: QrSegment.Mode
+	
+	# The length of this segment's unencoded data. Measured in characters for
+	# numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
+	# Always zero or positive. Not the same as the data's bit length.
+	# Accessed through get_num_chars().
 	_numchars: int
+	
+	# The data bits of this segment. Accessed through get_data().
 	_bitdata: List[int]
 	
 	
@@ -828,17 +838,8 @@ class QrSegment:
 			raise TypeError("QrSegment.Mode expected")
 		if numch < 0:
 			raise ValueError()
-		
-		# The mode indicator of this segment. Accessed through get_mode().
 		self._mode = mode
-		
-		# The length of this segment's unencoded data. Measured in characters for
-		# numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
-		# Always zero or positive. Not the same as the data's bit length.
-		# Accessed through get_num_chars().
 		self._numchars = numch
-		
-		# The data bits of this segment. Accessed through get_data().
 		self._bitdata = list(bitdata)  # Make defensive copy
 	
 	
@@ -895,13 +896,13 @@ class QrSegment:
 	class Mode:
 		"""Describes how a segment's data bits are interpreted. Immutable."""
 		
-		_modebits: int
-		_charcounts: Tuple[int,int,int]
+		_modebits: int  # The mode indicator bits, which is a uint4 value (range 0 to 15)
+		_charcounts: Tuple[int,int,int]  # Number of character count bits for three different version ranges
 		
 		# Private constructor
 		def __init__(self, modebits: int, charcounts: Tuple[int,int,int]):
-			self._modebits = modebits  # The mode indicator bits, which is a uint4 value (range 0 to 15)
-			self._charcounts = charcounts  # Number of character count bits for three different version ranges
+			self._modebits = modebits
+			self._charcounts = charcounts
 		
 		# Package-private method
 		def get_mode_bits(self) -> int:
