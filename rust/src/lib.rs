@@ -613,7 +613,7 @@ impl QrCode {
 	
 	// XORs the codeword modules in this QR Code with the given mask pattern.
 	// The function modules must be marked and the codeword bits must be drawn
-	// before masking. Due to the arithmetic of XOR, calling applyMask() with
+	// before masking. Due to the arithmetic of XOR, calling apply_mask() with
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 	fn apply_mask(&mut self, mask: Mask) {

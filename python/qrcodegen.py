@@ -446,7 +446,7 @@ class QrCode:
 	def _apply_mask(self, mask: int) -> None:
 		"""XORs the codeword modules in this QR Code with the given mask pattern.
 		The function modules must be marked and the codeword bits must be drawn
-		before masking. Due to the arithmetic of XOR, calling applyMask() with
+		before masking. Due to the arithmetic of XOR, calling _apply_mask() with
 		the same mask value a second time will undo the mask. A final well-formed
 		QR Code needs exactly one (not zero, two, etc.) mask applied."""
 		if not (0 <= mask <= 7):
@@ -644,7 +644,7 @@ class QrCode:
 	MIN_VERSION =  1  # The minimum version number supported in the QR Code Model 2 standard
 	MAX_VERSION = 40  # The maximum version number supported in the QR Code Model 2 standard
 	
-	# For use in getPenaltyScore(), when evaluating which mask is best.
+	# For use in _get_penalty_score(), when evaluating which mask is best.
 	_PENALTY_N1 =  3
 	_PENALTY_N2 =  3
 	_PENALTY_N3 = 40
