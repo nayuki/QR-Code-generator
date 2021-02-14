@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "qrcodegen.h"
+#include "c/qrcodegen.h"
 
 
 // Function prototypes
@@ -309,18 +309,3 @@ static void printQr(const uint8_t qrcode[]) {
 	}
 	fputs("\n", stdout);
 }
-
-// Alternative printing the QR Code to the console utilitizing
-// Unicode character U+2588,█ "Full block" from the block elements
-// Note that the output may not be supported by your terminal
-//static void printQr(const uint8_t qrcode[]) {
-//	int size = qrcodegen_getSize(qrcode);
-//	int border = 4;
-//	for (int y = -border; y < size + border; y++) {
-//		for (int x = -border; x < size + border; x++) {
-//			fputs((qrcodegen_getModule(qrcode, x, y) ? "██" : "  "), stdout);
-//		}
-//		fputs("\n", stdout);
-//	}
-//	fputs("\n", stdout);
-//}
