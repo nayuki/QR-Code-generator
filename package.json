@@ -1,0 +1,25 @@
+{
+  "name": "qr-code-generator",
+  "version": "1.0.0",
+  "description": "QR Code generator library in multiple languages",
+  "main": "javascript/qrcodegen.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AronRubin/QR-Code-generator.git"
+  },
+  "keywords": [
+    "qr",
+    "qrcode",
+    "generator",
+    "svg"
+  ],
+  "author": "Project Nayuki (me@nayuki.io)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AronRubin/QR-Code-generator/issues"
+  },
+  "homepage": "https://github.com/AronRubin/QR-Code-generator#readme"
+}
