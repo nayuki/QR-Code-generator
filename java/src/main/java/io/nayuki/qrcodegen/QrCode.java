@@ -263,7 +263,7 @@ public final class QrCode {
 		drawFunctionPatterns();
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
-		this.mask = handleConstructorMasking(msk);
+		mask = handleConstructorMasking(msk);
 		isFunction = null;
 	}
 	

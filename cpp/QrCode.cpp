@@ -351,7 +351,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 	}
 	if (msk < 0 || msk > 7)
 		throw std::logic_error("Assertion error");
-	this->mask = msk;
+	mask = msk;
 	applyMask(msk);  // Apply the final choice of mask
 	drawFormatBits(msk);  // Overwrite old format bits
 	
