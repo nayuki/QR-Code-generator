@@ -23,7 +23,8 @@
 
 from __future__ import annotations
 import collections, itertools, re
-from typing import List, Optional, Tuple
+from collections.abc import Sequence
+from typing import Callable, Dict, List, Optional, Tuple
 
 
 """
@@ -260,7 +261,7 @@ class QrCode:
 		"""Returns this QR Code's mask, in the range [0, 7]."""
 		return self._mask
 	
-	def get_module(self, x, y) -> bool:
+	def get_module(self, x: int, y: int) -> bool:
 		"""Returns the color of the module (pixel) at the given coordinates, which is False
 		for white or True for black. The top left corner has the coordinates (x=0, y=0).
 		If the given coordinates are out of bounds, then False (white) is returned."""
@@ -316,7 +317,7 @@ class QrCode:
 		self._draw_version()
 	
 	
-	def _draw_format_bits(self, mask) -> None:
+	def _draw_format_bits(self, mask: int) -> None:
 		"""Draws two copies of the format bits (with its own error correction code)
 		based on the given mask and this object's error correction level field."""
 		# Calculate error correction code and pack bits
@@ -366,7 +367,7 @@ class QrCode:
 			self._set_function_module(b, a, bit)
 	
 	
-	def _draw_finder_pattern(self, x, y) -> None:
+	def _draw_finder_pattern(self, x: int, y: int) -> None:
 		"""Draws a 9*9 finder pattern including the border separator,
 		with the center module at (x, y). Modules can be out of bounds."""
 		for dy in range(-4, 5):
@@ -377,7 +378,7 @@ class QrCode:
 					self._set_function_module(xx, yy, max(abs(dx), abs(dy)) not in (2, 4))
 	
 	
-	def _draw_alignment_pattern(self, x, y) -> None:
+	def _draw_alignment_pattern(self, x: int, y: int) -> None:
 		"""Draws a 5*5 alignment pattern, with the center module
 		at (x, y). All modules must be in bounds."""
 		for dy in range(-2, 3):
@@ -548,7 +549,7 @@ class QrCode:
 	
 	
 	@staticmethod
-	def _get_num_raw_data_modules(ver) -> int:
+	def _get_num_raw_data_modules(ver: int) -> int:
 		"""Returns the number of data bits that can be stored in a QR Code of the given version number, after
 		all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 		The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table."""
@@ -565,7 +566,7 @@ class QrCode:
 	
 	
 	@staticmethod
-	def _get_num_data_codewords(ver, ecl: QrCode.Ecc) -> int:
+	def _get_num_data_codewords(ver: int, ecl: QrCode.Ecc) -> int:
 		"""Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 		QR Code of the given version number and error correction level, with remainder bits discarded.
 		This stateless pure function could be implemented as a (40*4)-cell lookup table."""
@@ -653,16 +654,16 @@ class QrCode:
 	
 	# ---- Constants and tables ----
 	
-	MIN_VERSION =  1  # The minimum version number supported in the QR Code Model 2 standard
-	MAX_VERSION = 40  # The maximum version number supported in the QR Code Model 2 standard
+	MIN_VERSION: int =  1  # The minimum version number supported in the QR Code Model 2 standard
+	MAX_VERSION: int = 40  # The maximum version number supported in the QR Code Model 2 standard
 	
 	# For use in _get_penalty_score(), when evaluating which mask is best.
-	_PENALTY_N1 =  3
-	_PENALTY_N2 =  3
-	_PENALTY_N3 = 40
-	_PENALTY_N4 = 10
+	_PENALTY_N1: int =  3
+	_PENALTY_N2: int =  3
+	_PENALTY_N3: int = 40
+	_PENALTY_N4: int = 10
 	
-	_ECC_CODEWORDS_PER_BLOCK = (
+	_ECC_CODEWORDS_PER_BLOCK: Sequence[Sequence[int]] = (
 		# Version: (note that index 0 is for padding, and is set to an illegal value)
 		# 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
 		(-1,  7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30),  # Low
@@ -670,7 +671,7 @@ class QrCode:
 		(-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30),  # Quartile
 		(-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30))  # High
 	
-	_NUM_ERROR_CORRECTION_BLOCKS = (
+	_NUM_ERROR_CORRECTION_BLOCKS: Sequence[Sequence[int]] = (
 		# Version: (note that index 0 is for padding, and is set to an illegal value)
 		# 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
 		(-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4,  4,  4,  4,  4,  6,  6,  6,  6,  7,  8,  8,  9,  9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25),  # Low
@@ -678,7 +679,7 @@ class QrCode:
 		(-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8,  8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68),  # Quartile
 		(-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81))  # High
 	
-	_MASK_PATTERNS = (
+	_MASK_PATTERNS: Sequence[Callable[[int,int],int]] = (
 		(lambda x, y:  (x + y) % 2                  ),
 		(lambda x, y:  y % 2                        ),
 		(lambda x, y:  x % 3                        ),
@@ -878,17 +879,16 @@ class QrSegment:
 	# (Public) Describes precisely all strings that are encodable in numeric mode.
 	# To test whether a string s is encodable: ok = NUMERIC_REGEX.fullmatch(s) is not None
 	# A string is encodable iff each character is in the range 0 to 9.
-	NUMERIC_REGEX = re.compile(r"[0-9]*")
+	NUMERIC_REGEX: re.Pattern = re.compile(r"[0-9]*")
 	
 	# (Public) Describes precisely all strings that are encodable in alphanumeric mode.
 	# To test whether a string s is encodable: ok = ALPHANUMERIC_REGEX.fullmatch(s) is not None
 	# A string is encodable iff each character is in the following set: 0 to 9, A to Z
 	# (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-
-	ALPHANUMERIC_REGEX = re.compile(r"[A-Z0-9 $%*+./:-]*")
+	ALPHANUMERIC_REGEX: re.Pattern = re.compile(r"[A-Z0-9 $%*+./:-]*")
 	
 	# (Private) Dictionary of "0"->0, "A"->10, "$"->37, etc.
-	_ALPHANUMERIC_ENCODING_TABLE = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
+	_ALPHANUMERIC_ENCODING_TABLE: Dict[str,int] = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
 	
 	
 	# ---- Public helper enumeration ----
