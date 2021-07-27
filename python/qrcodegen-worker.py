@@ -27,6 +27,7 @@
 # 
 
 import sys
+from typing import List, Sequence
 import qrcodegen
 
 
@@ -38,26 +39,26 @@ def main() -> None:
 	while True:
 		
 		# Read data or exit
-		length = read_int()
+		length: int = read_int()
 		if length == -1:
 			break
 		data = bytearray(read_int() for _ in range(length))
 		
 		# Read encoding parameters
-		errcorlvl  = read_int()
-		minversion = read_int()
-		maxversion = read_int()
-		mask       = read_int()
-		boostecl   = read_int()
+		errcorlvl : int = read_int()
+		minversion: int = read_int()
+		maxversion: int = read_int()
+		mask      : int = read_int()
+		boostecl  : int = read_int()
 		
 		# Make segments for encoding
 		if all((b < 128) for b in data):  # Is ASCII
-			segs = qrcodegen.QrSegment.make_segments(data.decode("ASCII"))
+			segs: List[qrcodegen.QrSegment] = qrcodegen.QrSegment.make_segments(data.decode("ASCII"))
 		else:
 			segs = [qrcodegen.QrSegment.make_bytes(data)]
 		
 		try:  # Try to make QR Code symbol
-			qr = qrcodegen.QrCode.encode_segments(segs, ECC_LEVELS[errcorlvl], minversion, maxversion, mask, boostecl != 0)
+			qr: qrcodegen.QrCode = qrcodegen.QrCode.encode_segments(segs, ECC_LEVELS[errcorlvl], minversion, maxversion, mask, boostecl != 0)
 			# Print grid of modules
 			print(qr.get_version())
 			for y in range(qr.get_size()):
@@ -69,7 +70,7 @@ def main() -> None:
 		sys.stdout.flush()
 
 
-ECC_LEVELS = (
+ECC_LEVELS: Sequence[qrcodegen.QrCode.Ecc] = (
 	qrcodegen.QrCode.Ecc.LOW,
 	qrcodegen.QrCode.Ecc.MEDIUM,
 	qrcodegen.QrCode.Ecc.QUARTILE,

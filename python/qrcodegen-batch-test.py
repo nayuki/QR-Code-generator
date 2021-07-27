@@ -68,7 +68,9 @@ def main() -> None:
 
 
 def do_trial() -> None:
-	mode = random.randrange(4)
+	mode: int = random.randrange(4)
+	length: int
+	data: List[int]
 	if mode == 0:  # Numeric
 		length = round((2 * 7089) ** random.random())
 		data = random.choices(b"0123456789", k=length)
@@ -88,12 +90,12 @@ def do_trial() -> None:
 	for b in data:
 		write_all(b)
 	
-	errcorlvl = random.randrange(4)
-	minversion = random.randint(1, 40)
-	maxversion = random.randint(1, 40)
+	errcorlvl: int = random.randrange(4)
+	minversion: int = random.randint(1, 40)
+	maxversion: int = random.randint(1, 40)
 	if minversion > maxversion:
 		minversion, maxversion = maxversion, minversion
-	mask = -1
+	mask: int = -1
 	if random.random() < 0.5:
 		mask = random.randrange(8)
 	boostecl = int(random.random() < 0.2)
@@ -106,11 +108,11 @@ def do_trial() -> None:
 	write_all(boostecl)
 	flush_all()
 	
-	version = read_verify()
+	version: int = read_verify()
 	print(" version={}".format(version), end="")
 	if version == -1:
 		return
-	size = version * 4 + 17
+	size: int = version * 4 + 17
 	for _ in range(size**2):
 		read_verify()
 
@@ -124,7 +126,7 @@ def flush_all() -> None:
 		not_none(proc.stdin).flush()
 
 def read_verify() -> int:
-	val = not_none(subprocs[0].stdout).readline().rstrip("\r\n")
+	val: str = not_none(subprocs[0].stdout).readline().rstrip("\r\n")
 	for proc in subprocs[1 : ]:
 		if not_none(proc.stdout).readline().rstrip("\r\n") != val:
 			raise ValueError("Mismatch")

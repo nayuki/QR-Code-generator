@@ -184,7 +184,7 @@ impl QrCode {
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
 	pub fn encode_segments(segs: &[QrSegment], ecl: QrCodeEcc) -> Result<Self,DataTooLong> {
-		QrCode::encode_segments_advanced(segs, ecl, QrCode_MIN_VERSION, QrCode_MAX_VERSION, None, true)
+		QrCode::encode_segments_advanced(segs, ecl, Version::MIN, Version::MAX, None, true)
 	}
 	
 	
@@ -207,7 +207,7 @@ impl QrCode {
 		assert!(minversion.value() <= maxversion.value(), "Invalid value");
 		
 		// Find the minimal version number to use
-		let mut version = minversion;
+		let mut version: Version = minversion;
 		let datausedbits: usize = loop {
 			// Number of data bits available
 			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
@@ -245,9 +245,9 @@ impl QrCode {
 		// Add terminator and pad up to a byte if applicable
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 		assert!(bb.0.len() <= datacapacitybits);
-		let numzerobits = std::cmp::min(4, datacapacitybits - bb.0.len());
+		let numzerobits: usize = std::cmp::min(4, datacapacitybits - bb.0.len());
 		bb.append_bits(0, numzerobits as u8);
-		let numzerobits = bb.0.len().wrapping_neg() & 7;
+		let numzerobits: usize = bb.0.len().wrapping_neg() & 7;
 		bb.append_bits(0, numzerobits as u8);
 		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
 		
@@ -296,7 +296,7 @@ impl QrCode {
 		
 		// Do masking
 		if mask.is_none() {  // Automatically choose best mask
-			let mut minpenalty: i32 = std::i32::MAX;
+			let mut minpenalty = std::i32::MAX;
 			for i in 0u8 .. 8 {
 				let newmask = Mask::new(i);
 				result.apply_mask(newmask);
@@ -438,7 +438,7 @@ impl QrCode {
 		// Calculate error correction code and pack bits
 		let bits: u32 = {
 			// errcorrlvl is uint2, mask is uint3
-			let data: u32 = self.errorcorrectionlevel.format_bits() << 3 | u32::from(mask.value());
+			let data: u32 = u32::from(self.errorcorrectionlevel.format_bits() << 3 | mask.value());
 			let mut rem: u32 = data;
 			for _ in 0 .. 10 {
 				rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -539,8 +539,8 @@ impl QrCode {
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
 	fn add_ecc_and_interleave(&self, data: &[u8]) -> Vec<u8> {
-		let ver = self.version;
-		let ecl = self.errorcorrectionlevel;
+		let ver: Version = self.version;
+		let ecl: QrCodeEcc = self.errorcorrectionlevel;
 		assert_eq!(data.len(), QrCode::get_num_data_codewords(ver, ecl), "Illegal argument");
 		
 		// Calculate parameter numbers
@@ -613,14 +613,13 @@ impl QrCode {
 	
 	// XORs the codeword modules in this QR Code with the given mask pattern.
 	// The function modules must be marked and the codeword bits must be drawn
-	// before masking. Due to the arithmetic of XOR, calling applyMask() with
+	// before masking. Due to the arithmetic of XOR, calling apply_mask() with
 	// the same mask value a second time will undo the mask. A final well-formed
 	// QR Code needs exactly one (not zero, two, etc.) mask applied.
 	fn apply_mask(&mut self, mask: Mask) {
-		let mask: u8 = mask.value();
 		for y in 0 .. self.size {
 			for x in 0 .. self.size {
-				let invert: bool = match mask {
+				let invert: bool = match mask.value() {
 					0 => (x + y) % 2 == 0,
 					1 => y % 2 == 0,
 					2 => x % 3 == 0,
@@ -720,7 +719,7 @@ impl QrCode {
 	// Each position is in the range [0,177), and are used on both the x and y axes.
 	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
 	fn get_alignment_pattern_positions(&self) -> Vec<i32> {
-		let ver = self.version.value();
+		let ver: u8 = self.version.value();
 		if ver == 1 {
 			vec![]
 		} else {
@@ -884,13 +883,6 @@ impl FinderPenalty {
 
 /*---- Constants and tables ----*/
 
-/// The minimum version number supported in the QR Code Model 2 standard.
-pub const QrCode_MIN_VERSION: Version = Version( 1);
-
-/// The maximum version number supported in the QR Code Model 2 standard.
-pub const QrCode_MAX_VERSION: Version = Version(40);
-
-
 // For use in get_penalty_score(), when evaluating which mask is best.
 const PENALTY_N1: i32 =  3;
 const PENALTY_N2: i32 =  3;
@@ -949,7 +941,7 @@ impl QrCodeEcc {
 	
 	
 	// Returns an unsigned 2-bit integer (in the range 0 to 3).
-	fn format_bits(self) -> u32 {
+	fn format_bits(self) -> u8 {
 		use QrCodeEcc::*;
 		match self {
 			Low      => 1,
@@ -1047,7 +1039,7 @@ impl QrSegment {
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for &c in text {
-			let i = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
+			let i: usize = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
 				.expect("String contains unencodable characters in alphanumeric mode");
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
@@ -1140,11 +1132,15 @@ impl QrSegment {
 	fn get_total_bits(segs: &[Self], version: Version) -> Option<usize> {
 		let mut result: usize = 0;
 		for seg in segs {
-			let ccbits = seg.mode.num_char_count_bits(version);
-			if seg.numchars >= 1 << ccbits {
-				return None;  // The segment's length doesn't fit the field's bit width
+			let ccbits: u8 = seg.mode.num_char_count_bits(version);
+			// ccbits can be as large as 16, but usize can be as small as 16
+			if let Some(limit) = 1usize.checked_shl(u32::from(ccbits)) {
+				if seg.numchars >= limit {
+					return None;  // The segment's length doesn't fit the field's bit width
+				}
 			}
-			result = result.checked_add(4 + usize::from(ccbits) + seg.data.len())?;
+			result = result.checked_add(4 + usize::from(ccbits))?;
+			result = result.checked_add(seg.data.len())?;
 		}
 		Some(result)
 	}
@@ -1249,8 +1245,8 @@ impl BitBuffer {
 /// 
 /// - Decrease the error correction level if it was greater than `QrCodeEcc::Low`.
 /// - If the `encode_segments_advanced()` function was called, then increase the maxversion
-///   argument if it was less than `QrCode_MAX_VERSION`. (This advice does not apply to the
-///   other factory functions because they search all versions up to `QrCode_MAX_VERSION`.)
+///   argument if it was less than `Version::MAX`. (This advice does not apply to the
+///   other factory functions because they search all versions up to `Version::MAX`.)
 /// - Split the text data into better or optimal segments in order to reduce the number of bits required.
 /// - Change the text or binary data to be shorter.
 /// - Change the text to fit the character set of a particular segment mode (e.g. alphanumeric).
@@ -1276,11 +1272,17 @@ impl std::fmt::Display for DataTooLong {
 pub struct Version(u8);
 
 impl Version {
+	/// The minimum version number supported in the QR Code Model 2 standard.
+	pub const MIN: Version = Version( 1);
+	
+	/// The maximum version number supported in the QR Code Model 2 standard.
+	pub const MAX: Version = Version(40);
+	
 	/// Creates a version object from the given number.
 	/// 
 	/// Panics if the number is outside the range [1, 40].
 	pub fn new(ver: u8) -> Self {
-		assert!(QrCode_MIN_VERSION.value() <= ver && ver <= QrCode_MAX_VERSION.value(), "Version number out of range");
+		assert!(Version::MIN.value() <= ver && ver <= Version::MAX.value(), "Version number out of range");
 		Self(ver)
 	}
 	

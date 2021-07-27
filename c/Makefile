@@ -65,11 +65,11 @@ clean:
 
 # Executable files
 %: %.o $(LIBFILE)
-	$(CC) $(CFLAGS) -o $@ $< -L . -l $(LIB)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< -L . -l $(LIB)
 
 # Special executable
 qrcodegen-test: qrcodegen-test.c $(LIBOBJ:%.o=%.c)
-	$(CC) $(CFLAGS) -DQRCODEGEN_TEST -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -DQRCODEGEN_TEST -o $@ $^
 
 # The library
 $(LIBFILE): $(LIBOBJ)

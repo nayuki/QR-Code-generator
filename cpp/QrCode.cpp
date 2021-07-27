@@ -279,7 +279,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		throw std::logic_error("Assertion error");
 	
 	// Increase the error correction level while the data still fits in the current version number
-	for (Ecc newEcl : vector<Ecc>{Ecc::MEDIUM, Ecc::QUARTILE, Ecc::HIGH}) {  // From low to high
+	for (Ecc newEcl : {Ecc::MEDIUM, Ecc::QUARTILE, Ecc::HIGH}) {  // From low to high
 		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
 			ecl = newEcl;
 	}
@@ -310,7 +310,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	// Pack bits into bytes in big endian
 	vector<uint8_t> dataCodewords(bb.size() / 8);
 	for (size_t i = 0; i < bb.size(); i++)
-		dataCodewords[i >> 3] |= (bb.at(i) ? 1 : 0) << (7 - (i & 7));
+		dataCodewords.at(i >> 3) |= (bb.at(i) ? 1 : 0) << (7 - (i & 7));
 	
 	// Create the QR Code object
 	return QrCode(version, ecl, dataCodewords, mask);
@@ -351,7 +351,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 	}
 	if (msk < 0 || msk > 7)
 		throw std::logic_error("Assertion error");
-	this->mask = msk;
+	mask = msk;
 	applyMask(msk);  // Apply the final choice of mask
 	drawFormatBits(msk);  // Overwrite old format bits
 	
