@@ -88,7 +88,7 @@ class QrCode:
 		for version in range(minversion, maxversion + 1):
 			datacapacitybits: int = QrCode._get_num_data_codewords(version, ecl) * 8  # Number of data bits available
 			datausedbits: Optional[int] = QrSegment.get_total_bits(segs, version)
-			if datausedbits is not None and datausedbits <= datacapacitybits:
+			if (datausedbits is not None) and (datausedbits <= datacapacitybits):
 				break  # This version number is found to be suitable
 			if version >= maxversion:  # All versions in the range could not fit the given data
 				msg: str = "Segment too long"
@@ -100,7 +100,7 @@ class QrCode:
 		
 		# Increase the error correction level while the data still fits in the current version number
 		for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):  # From low to high
-			if boostecl and datausedbits <= QrCode._get_num_data_codewords(version, newecl) * 8:
+			if boostecl and (datausedbits <= QrCode._get_num_data_codewords(version, newecl) * 8):
 				ecl = newecl
 		
 		# Concatenate all segments to create the data bit string
@@ -391,7 +391,7 @@ class QrCode:
 		for i in range(len(blocks[0])):
 			for (j, blk) in enumerate(blocks):
 				# Skip the padding byte in short blocks
-				if i != shortblocklen - blockecclen or j >= numshortblocks:
+				if (i != shortblocklen - blockecclen) or (j >= numshortblocks):
 					result.append(blk[i])
 		assert len(result) == rawcodewords
 		return result
@@ -412,7 +412,7 @@ class QrCode:
 					x: int = right - j  # Actual x coordinate
 					upward: bool = (right + 1) & 2 == 0
 					y: int = (self._size - 1 - vert) if upward else vert  # Actual y coordinate
-					if not self._isfunction[y][x] and i < len(data) * 8:
+					if (not self._isfunction[y][x]) and (i < len(data) * 8):
 						self._modules[y][x] = _get_bit(data[i >> 3], 7 - (i & 7))
 						i += 1
 					# If this QR Code has any remainder bits (0 to 7), they were assigned as
@@ -579,7 +579,7 @@ class QrCode:
 	def _reed_solomon_multiply(x: int, y: int) -> int:
 		"""Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 		are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8."""
-		if x >> 8 != 0 or y >> 8 != 0:
+		if (x >> 8 != 0) or (y >> 8 != 0):
 			raise ValueError("Byte out of range")
 		# Russian peasant multiplication
 		z: int = 0
@@ -901,7 +901,7 @@ class _BitBuffer(list):
 	def append_bits(self, val: int, n: int) -> None:
 		"""Appends the given number of low-order bits of the given
 		value to this buffer. Requires n >= 0 and 0 <= val < 2^n."""
-		if n < 0 or val >> n != 0:
+		if (n < 0) or (val >> n != 0):
 			raise ValueError("Value out of range")
 		self.extend(((val >> i) & 1) for i in reversed(range(n)))
 
