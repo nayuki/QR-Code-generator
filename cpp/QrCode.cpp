@@ -157,7 +157,7 @@ QrSegment QrSegment::makeEci(long assignVal) {
 
 
 QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt) :
-		mode(md),
+		mode(&md),
 		numChars(numCh),
 		data(dt) {
 	if (numCh < 0)
@@ -166,7 +166,7 @@ QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt) :
 
 
 QrSegment::QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt) :
-		mode(md),
+		mode(&md),
 		numChars(numCh),
 		data(std::move(dt)) {
 	if (numCh < 0)
@@ -177,7 +177,7 @@ QrSegment::QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt) :
 int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 	int result = 0;
 	for (const QrSegment &seg : segs) {
-		int ccbits = seg.mode.numCharCountBits(version);
+		int ccbits = seg.mode->numCharCountBits(version);
 		if (seg.numChars >= (1L << ccbits))
 			return -1;  // The segment's length doesn't fit the field's bit width
 		if (4 + ccbits > INT_MAX - result)
@@ -210,8 +210,8 @@ bool QrSegment::isNumeric(const char *text) {
 }
 
 
-QrSegment::Mode QrSegment::getMode() const {
-	return mode;
+const QrSegment::Mode &QrSegment::getMode() const {
+	return *mode;
 }
 
 

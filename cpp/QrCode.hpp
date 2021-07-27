@@ -151,7 +151,7 @@ class QrSegment final {
 	/*---- Instance fields ----*/
 	
 	/* The mode indicator of this segment. Accessed through getMode(). */
-	private: Mode mode;
+	private: const Mode *mode;
 	
 	/* The length of this segment's unencoded data. Measured in characters for
 	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
@@ -186,7 +186,7 @@ class QrSegment final {
 	/* 
 	 * Returns the mode field of this segment.
 	 */
-	public: Mode getMode() const;
+	public: const Mode &getMode() const;
 	
 	
 	/* 
