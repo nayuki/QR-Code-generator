@@ -24,7 +24,7 @@
 from __future__ import annotations
 import collections, itertools, re
 from collections.abc import Sequence
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 
 """
@@ -93,13 +93,11 @@ class QrCode:
 	
 	
 	@staticmethod
-	def encode_binary(data: bytes, ecl: QrCode.Ecc) -> QrCode:
+	def encode_binary(data: Union[bytes,Sequence[int]], ecl: QrCode.Ecc) -> QrCode:
 		"""Returns a QR Code representing the given binary data at the given error correction level.
 		This function always encodes using the binary segment mode, not any text mode. The maximum number of
 		bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 		The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version."""
-		if not isinstance(data, (bytes, bytearray)):
-			raise TypeError("Byte string/list expected")
 		return QrCode.encode_segments([QrSegment.make_bytes(data)], ecl)
 	
 	
@@ -197,7 +195,7 @@ class QrCode:
 	
 	# ---- Constructor (low level) ----
 	
-	def __init__(self, version: int, errcorlvl: QrCode.Ecc, datacodewords: List[int], mask: int) -> None:
+	def __init__(self, version: int, errcorlvl: QrCode.Ecc, datacodewords: Union[bytes,Sequence[int]], mask: int) -> None:
 		"""Creates a new QR Code with the given version number,
 		error correction level, data codeword bytes, and mask number.
 		This is a low-level API that most users should not use directly.
@@ -221,7 +219,7 @@ class QrCode:
 		
 		# Compute ECC, draw modules
 		self._draw_function_patterns()
-		allcodewords = self._add_ecc_and_interleave(datacodewords)
+		allcodewords = self._add_ecc_and_interleave(list(datacodewords))
 		self._draw_codewords(allcodewords)
 		
 		# Do masking
@@ -733,12 +731,10 @@ class QrSegment:
 	# ---- Static factory functions (mid level) ----
 	
 	@staticmethod
-	def make_bytes(data) -> QrSegment:
+	def make_bytes(data: Union[bytes,Sequence[int]]) -> QrSegment:
 		"""Returns a segment representing the given binary data encoded in byte mode.
 		All input byte lists are acceptable. Any text string can be converted to
 		UTF-8 bytes (s.encode("UTF-8")) and encoded as a byte mode segment."""
-		if isinstance(data, str):
-			raise TypeError("Byte string/list expected")
 		bb = _BitBuffer()
 		for b in data:
 			bb.append_bits(b, 8)
