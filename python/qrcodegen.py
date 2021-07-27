@@ -159,7 +159,7 @@ class QrCode:
 			bb.append_bits(padbyte, 8)
 		
 		# Pack bits into bytes in big endian
-		datacodewords = [0] * (len(bb) // 8)
+		datacodewords = bytearray([0] * (len(bb) // 8))
 		for (i, bit) in enumerate(bb):
 			datacodewords[i >> 3] |= bit << (7 - (i & 7))
 		
@@ -219,7 +219,7 @@ class QrCode:
 		
 		# Compute ECC, draw modules
 		self._draw_function_patterns()
-		allcodewords = self._add_ecc_and_interleave(list(datacodewords))
+		allcodewords = self._add_ecc_and_interleave(bytearray(datacodewords))
 		self._draw_codewords(allcodewords)
 		
 		# Do masking
@@ -394,7 +394,7 @@ class QrCode:
 	
 	# ---- Private helper methods for constructor: Codewords and masking ----
 	
-	def _add_ecc_and_interleave(self, data: List[int]) -> List[int]:
+	def _add_ecc_and_interleave(self, data: bytearray) -> bytes:
 		"""Returns a new byte string representing the given data with the appropriate error correction
 		codewords appended to it, based on this object's version and error correction level."""
 		version = self._version
@@ -421,7 +421,7 @@ class QrCode:
 		assert k == len(data)
 		
 		# Interleave (not concatenate) the bytes from every block into a single sequence
-		result = []
+		result = bytearray()
 		for i in range(len(blocks[0])):
 			for (j, blk) in enumerate(blocks):
 				# Skip the padding byte in short blocks
@@ -431,7 +431,7 @@ class QrCode:
 		return result
 	
 	
-	def _draw_codewords(self, data: List[int]) -> None:
+	def _draw_codewords(self, data: bytes) -> None:
 		"""Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
 		data area of this QR Code. Function modules need to be marked off before this is called."""
 		assert len(data) == QrCode._get_num_raw_data_modules(self._version) // 8
@@ -574,14 +574,14 @@ class QrCode:
 	
 	
 	@staticmethod
-	def _reed_solomon_compute_divisor(degree: int) -> List[int]:
+	def _reed_solomon_compute_divisor(degree: int) -> bytes:
 		"""Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
 		implemented as a lookup table over all possible parameter values, instead of as an algorithm."""
 		if not (1 <= degree <= 255):
 			raise ValueError("Degree out of range")
 		# Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
 		# For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array [255, 8, 93].
-		result = [0] * (degree - 1) + [1]  # Start off with the monomial x^0
+		result = bytearray([0] * (degree - 1) + [1])  # Start off with the monomial x^0
 		
 		# Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
 		# and drop the highest monomial term which is always 1x^degree.
@@ -598,9 +598,9 @@ class QrCode:
 	
 	
 	@staticmethod
-	def _reed_solomon_compute_remainder(data: List[int], divisor: List[int]) -> List[int]:
+	def _reed_solomon_compute_remainder(data: bytes, divisor: bytes) -> bytes:
 		"""Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials."""
-		result = [0] * len(divisor)
+		result = bytearray([0] * len(divisor))
 		for b in data:  # Polynomial division
 			factor = b ^ result.pop(0)
 			result.append(0)
