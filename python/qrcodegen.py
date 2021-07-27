@@ -88,7 +88,7 @@ class QrCode:
 		Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
 		QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
 		ecl argument if it can be done without increasing the version."""
-		segs = QrSegment.make_segments(text)
+		segs: List[QrSegment] = QrSegment.make_segments(text)
 		return QrCode.encode_segments(segs, ecl)
 	
 	
@@ -120,12 +120,12 @@ class QrCode:
 		
 		# Find the minimal version number to use
 		for version in range(minversion, maxversion + 1):
-			datacapacitybits = QrCode._get_num_data_codewords(version, ecl) * 8  # Number of data bits available
-			datausedbits = QrSegment.get_total_bits(segs, version)
+			datacapacitybits: int = QrCode._get_num_data_codewords(version, ecl) * 8  # Number of data bits available
+			datausedbits: Optional[int] = QrSegment.get_total_bits(segs, version)
 			if datausedbits is not None and datausedbits <= datacapacitybits:
 				break  # This version number is found to be suitable
 			if version >= maxversion:  # All versions in the range could not fit the given data
-				msg = "Segment too long"
+				msg: str = "Segment too long"
 				if datausedbits is not None:
 					msg = "Data length = {} bits, Max capacity = {} bits".format(datausedbits, datacapacitybits)
 				raise DataTooLongError(msg)
@@ -219,12 +219,12 @@ class QrCode:
 		
 		# Compute ECC, draw modules
 		self._draw_function_patterns()
-		allcodewords = self._add_ecc_and_interleave(bytearray(datacodewords))
+		allcodewords: bytes = self._add_ecc_and_interleave(bytearray(datacodewords))
 		self._draw_codewords(allcodewords)
 		
 		# Do masking
 		if mask == -1:  # Automatically choose best mask
-			minpenalty = 1 << 32
+			minpenalty: int = 1 << 32
 			for i in range(8):
 				self._apply_mask(i)
 				self._draw_format_bits(i)
@@ -273,7 +273,7 @@ class QrCode:
 		of border modules. The string always uses Unix newlines (\n), regardless of the platform."""
 		if border < 0:
 			raise ValueError("Border must be non-negative")
-		parts = []
+		parts: List[str] = []
 		for y in range(self._size):
 			for x in range(self._size):
 				if self.get_module(x, y):
@@ -302,9 +302,9 @@ class QrCode:
 		self._draw_finder_pattern(3, self._size - 4)
 		
 		# Draw numerous alignment patterns
-		alignpatpos = self._get_alignment_pattern_positions()
-		numalign = len(alignpatpos)
-		skips = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
+		alignpatpos: List[int] = self._get_alignment_pattern_positions()
+		numalign: int = len(alignpatpos)
+		skips: Sequence[Tuple[int,int]] = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
 		for i in range(numalign):
 			for j in range(numalign):
 				if (i, j) not in skips:  # Don't draw on the three finder corners
@@ -319,11 +319,11 @@ class QrCode:
 		"""Draws two copies of the format bits (with its own error correction code)
 		based on the given mask and this object's error correction level field."""
 		# Calculate error correction code and pack bits
-		data = self._errcorlvl.formatbits << 3 | mask  # errCorrLvl is uint2, mask is uint3
-		rem = data
+		data: int = self._errcorlvl.formatbits << 3 | mask  # errCorrLvl is uint2, mask is uint3
+		rem: int = data
 		for _ in range(10):
 			rem = (rem << 1) ^ ((rem >> 9) * 0x537)
-		bits = (data << 10 | rem) ^ 0x5412  # uint15
+		bits: int = (data << 10 | rem) ^ 0x5412  # uint15
 		assert bits >> 15 == 0
 		
 		# Draw first copy
@@ -350,17 +350,17 @@ class QrCode:
 			return
 		
 		# Calculate error correction code and pack bits
-		rem = self._version  # version is uint6, in the range [7, 40]
+		rem: int = self._version  # version is uint6, in the range [7, 40]
 		for _ in range(12):
 			rem = (rem << 1) ^ ((rem >> 11) * 0x1F25)
-		bits = self._version << 12 | rem  # uint18
+		bits: int = self._version << 12 | rem  # uint18
 		assert bits >> 18 == 0
 		
 		# Draw two copies
 		for i in range(18):
-			bit = _get_bit(bits, i)
-			a = self._size - 11 + i % 3
-			b = i // 3
+			bit: bool = _get_bit(bits, i)
+			a: int = self._size - 11 + i % 3
+			b: int = i // 3
 			self._set_function_module(a, b, bit)
 			self._set_function_module(b, a, bit)
 	
@@ -397,24 +397,24 @@ class QrCode:
 	def _add_ecc_and_interleave(self, data: bytearray) -> bytes:
 		"""Returns a new byte string representing the given data with the appropriate error correction
 		codewords appended to it, based on this object's version and error correction level."""
-		version = self._version
+		version: int = self._version
 		assert len(data) == QrCode._get_num_data_codewords(version, self._errcorlvl)
 		
 		# Calculate parameter numbers
-		numblocks = QrCode._NUM_ERROR_CORRECTION_BLOCKS[self._errcorlvl.ordinal][version]
-		blockecclen = QrCode._ECC_CODEWORDS_PER_BLOCK  [self._errcorlvl.ordinal][version]
-		rawcodewords = QrCode._get_num_raw_data_modules(version) // 8
-		numshortblocks = numblocks - rawcodewords % numblocks
-		shortblocklen = rawcodewords // numblocks
+		numblocks: int = QrCode._NUM_ERROR_CORRECTION_BLOCKS[self._errcorlvl.ordinal][version]
+		blockecclen: int = QrCode._ECC_CODEWORDS_PER_BLOCK  [self._errcorlvl.ordinal][version]
+		rawcodewords: int = QrCode._get_num_raw_data_modules(version) // 8
+		numshortblocks: int = numblocks - rawcodewords % numblocks
+		shortblocklen: int = rawcodewords // numblocks
 		
 		# Split data into blocks and append ECC to each block
-		blocks = []
-		rsdiv = QrCode._reed_solomon_compute_divisor(blockecclen)
-		k = 0
+		blocks: List[bytes] = []
+		rsdiv: bytes = QrCode._reed_solomon_compute_divisor(blockecclen)
+		k: int = 0
 		for i in range(numblocks):
-			dat = data[k : k + shortblocklen - blockecclen + (0 if i < numshortblocks else 1)]
+			dat: bytearray = data[k : k + shortblocklen - blockecclen + (0 if i < numshortblocks else 1)]
 			k += len(dat)
-			ecc = QrCode._reed_solomon_compute_remainder(dat, rsdiv)
+			ecc: bytes = QrCode._reed_solomon_compute_remainder(dat, rsdiv)
 			if i < numshortblocks:
 				dat.append(0)
 			blocks.append(dat + ecc)
@@ -436,16 +436,16 @@ class QrCode:
 		data area of this QR Code. Function modules need to be marked off before this is called."""
 		assert len(data) == QrCode._get_num_raw_data_modules(self._version) // 8
 		
-		i = 0  # Bit index into the data
+		i: int = 0  # Bit index into the data
 		# Do the funny zigzag scan
 		for right in range(self._size - 1, 0, -2):  # Index of right column in each column pair
 			if right <= 6:
 				right -= 1
 			for vert in range(self._size):  # Vertical counter
 				for j in range(2):
-					x = right - j  # Actual x coordinate
-					upward = (right + 1) & 2 == 0
-					y = (self._size - 1 - vert) if upward else vert  # Actual y coordinate
+					x: int = right - j  # Actual x coordinate
+					upward: bool = (right + 1) & 2 == 0
+					y: int = (self._size - 1 - vert) if upward else vert  # Actual y coordinate
 					if not self._isfunction[y][x] and i < len(data) * 8:
 						self._modules[y][x] = _get_bit(data[i >> 3], 7 - (i & 7))
 						i += 1
@@ -462,7 +462,7 @@ class QrCode:
 		QR Code needs exactly one (not zero, two, etc.) mask applied."""
 		if not (0 <= mask <= 7):
 			raise ValueError("Mask value out of range")
-		masker = QrCode._MASK_PATTERNS[mask]
+		masker: Callable[[int,int],int] = QrCode._MASK_PATTERNS[mask]
 		for y in range(self._size):
 			for x in range(self._size):
 				self._modules[y][x] ^= (masker(x, y) == 0) and (not self._isfunction[y][x])
@@ -471,14 +471,14 @@ class QrCode:
 	def _get_penalty_score(self) -> int:
 		"""Calculates and returns the penalty score based on state of this QR Code's current modules.
 		This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score."""
-		result = 0
-		size = self._size
-		modules = self._modules
+		result: int = 0
+		size: int = self._size
+		modules: List[List[bool]] = self._modules
 		
 		# Adjacent modules in row having same color, and finder-like patterns
 		for y in range(size):
-			runcolor = False
-			runx = 0
+			runcolor: bool = False
+			runx: int = 0
 			runhistory = collections.deque([0] * 7, 7)
 			for x in range(size):
 				if modules[y][x] == runcolor:
@@ -521,10 +521,10 @@ class QrCode:
 					result += QrCode._PENALTY_N2
 		
 		# Balance of black and white modules
-		black = sum((1 if cell else 0) for row in modules for cell in row)
-		total = size**2  # Note that size is odd, so black/total != 1/2
+		black: int = sum((1 if cell else 0) for row in modules for cell in row)
+		total: int = size**2  # Note that size is odd, so black/total != 1/2
 		# Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
-		k = (abs(black * 20 - total * 10) + total - 1) // total - 1
+		k: int = (abs(black * 20 - total * 10) + total - 1) // total - 1
 		result += k * QrCode._PENALTY_N4
 		return result
 	
@@ -535,14 +535,14 @@ class QrCode:
 		"""Returns an ascending list of positions of alignment patterns for this version number.
 		Each position is in the range [0,177), and are used on both the x and y axes.
 		This could be implemented as lookup table of 40 variable-length lists of integers."""
-		ver = self._version
+		ver: int = self._version
 		if ver == 1:
 			return []
 		else:
-			numalign = ver // 7 + 2
-			step = 26 if (ver == 32) else \
+			numalign: int = ver // 7 + 2
+			step: int = 26 if (ver == 32) else \
 				(ver*4 + numalign*2 + 1) // (numalign*2 - 2) * 2
-			result = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
+			result: List[int] = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
 			return list(reversed(result))
 	
 	
@@ -553,9 +553,9 @@ class QrCode:
 		The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table."""
 		if not (QrCode.MIN_VERSION <= ver <= QrCode.MAX_VERSION):
 			raise ValueError("Version number out of range")
-		result = (16 * ver + 128) * ver + 64
+		result: int = (16 * ver + 128) * ver + 64
 		if ver >= 2:
-			numalign = ver // 7 + 2
+			numalign: int = ver // 7 + 2
 			result -= (25 * numalign - 10) * numalign - 55
 			if ver >= 7:
 				result -= 36
@@ -586,7 +586,7 @@ class QrCode:
 		# Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
 		# and drop the highest monomial term which is always 1x^degree.
 		# Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
-		root = 1
+		root: int = 1
 		for _ in range(degree):  # Unused variable i
 			# Multiply the current product by (x - r^i)
 			for j in range(degree):
@@ -602,7 +602,7 @@ class QrCode:
 		"""Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials."""
 		result = bytearray([0] * len(divisor))
 		for b in data:  # Polynomial division
-			factor = b ^ result.pop(0)
+			factor: int = b ^ result.pop(0)
 			result.append(0)
 			for (i, coef) in enumerate(divisor):
 				result[i] ^= QrCode._reed_solomon_multiply(coef, factor)
@@ -616,7 +616,7 @@ class QrCode:
 		if x >> 8 != 0 or y >> 8 != 0:
 			raise ValueError("Byte out of range")
 		# Russian peasant multiplication
-		z = 0
+		z: int = 0
 		for i in reversed(range(8)):
 			z = (z << 1) ^ ((z >> 7) * 0x11D)
 			z ^= ((y >> i) & 1) * x
@@ -627,9 +627,9 @@ class QrCode:
 	def _finder_penalty_count_patterns(self, runhistory: collections.deque) -> int:
 		"""Can only be called immediately after a white run is added, and
 		returns either 0, 1, or 2. A helper function for _get_penalty_score()."""
-		n = runhistory[1]
+		n: int = runhistory[1]
 		assert n <= self._size * 3
-		core = n > 0 and (runhistory[2] == runhistory[4] == runhistory[5] == n) and runhistory[3] == n * 3
+		core: bool = n > 0 and (runhistory[2] == runhistory[4] == runhistory[5] == n) and runhistory[3] == n * 3
 		return (1 if (core and runhistory[0] >= n * 4 and runhistory[6] >= n) else 0) \
 		     + (1 if (core and runhistory[6] >= n * 4 and runhistory[0] >= n) else 0)
 	
@@ -747,9 +747,9 @@ class QrSegment:
 		if QrSegment.NUMERIC_REGEX.fullmatch(digits) is None:
 			raise ValueError("String contains non-numeric characters")
 		bb = _BitBuffer()
-		i = 0
+		i: int = 0
 		while i < len(digits):  # Consume up to 3 digits per iteration
-			n = min(len(digits) - i, 3)
+			n: int = min(len(digits) - i, 3)
 			bb.append_bits(int(digits[i : i + n]), n * 3 + 1)
 			i += n
 		return QrSegment(QrSegment.Mode.NUMERIC, len(digits), bb)
@@ -764,7 +764,7 @@ class QrSegment:
 			raise ValueError("String contains unencodable characters in alphanumeric mode")
 		bb = _BitBuffer()
 		for i in range(0, len(text) - 1, 2):  # Process groups of 2
-			temp = QrSegment._ALPHANUMERIC_ENCODING_TABLE[text[i]] * 45
+			temp: int = QrSegment._ALPHANUMERIC_ENCODING_TABLE[text[i]] * 45
 			temp += QrSegment._ALPHANUMERIC_ENCODING_TABLE[text[i + 1]]
 			bb.append_bits(temp, 11)
 		if len(text) % 2 > 0:  # 1 character remaining
@@ -863,7 +863,7 @@ class QrSegment:
 		returns None if a segment has too many characters to fit its length field."""
 		result = 0
 		for seg in segs:
-			ccbits = seg.get_mode().num_char_count_bits(version)
+			ccbits: int = seg.get_mode().num_char_count_bits(version)
 			if seg.get_num_chars() >= (1 << ccbits):
 				return None  # The segment's length doesn't fit the field's bit width
 			result += 4 + ccbits + len(seg._bitdata)
