@@ -104,7 +104,7 @@ class QrCode:
 	# ---- Static factory functions (mid level) ----
 	
 	@staticmethod
-	def encode_segments(segs: List[QrSegment], ecl: QrCode.Ecc, minversion: int = 1, maxversion: int = 40, mask: int = -1, boostecl: bool = True) -> QrCode:
+	def encode_segments(segs: Sequence[QrSegment], ecl: QrCode.Ecc, minversion: int = 1, maxversion: int = 40, mask: int = -1, boostecl: bool = True) -> QrCode:
 		"""Returns a QR Code representing the given segments with the given encoding parameters.
 		The smallest possible QR Code version within the given range is automatically
 		chosen for the output. Iff boostecl is true, then the ECC level of the result
@@ -827,7 +827,7 @@ class QrSegment:
 	
 	# ---- Constructor (low level) ----
 	
-	def __init__(self, mode: QrSegment.Mode, numch: int, bitdata: List[int]) -> None:
+	def __init__(self, mode: QrSegment.Mode, numch: int, bitdata: Sequence[int]) -> None:
 		"""Creates a new QR Code segment with the given attributes and data.
 		The character count (numch) must agree with the mode and the bit buffer length,
 		but the constraint isn't checked. The given bit buffer is cloned and stored."""
