@@ -27,40 +27,6 @@ from collections.abc import Sequence
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 
-"""
-This module "qrcodegen", public members:
-- Class QrCode:
-  - Function encode_text(str text, QrCode.Ecc ecl) -> QrCode
-  - Function encode_binary(bytes data, QrCode.Ecc ecl) -> QrCode
-  - Function encode_segments(list<QrSegment> segs, QrCode.Ecc ecl,
-        int minversion=1, int maxversion=40, mask=-1, boostecl=true) -> QrCode
-  - Constants int MIN_VERSION, MAX_VERSION
-  - Constructor QrCode(int version, QrCode.Ecc ecl, bytes datacodewords, int mask)
-  - Method get_version() -> int
-  - Method get_size() -> int
-  - Method get_error_correction_level() -> QrCode.Ecc
-  - Method get_mask() -> int
-  - Method get_module(int x, int y) -> bool
-  - Method to_svg_str(int border) -> str
-  - Enum Ecc:
-    - Constants LOW, MEDIUM, QUARTILE, HIGH
-    - Field int ordinal
-- Class QrSegment:
-  - Function make_bytes(bytes data) -> QrSegment
-  - Function make_numeric(str digits) -> QrSegment
-  - Function make_alphanumeric(str text) -> QrSegment
-  - Function make_segments(str text) -> list<QrSegment>
-  - Function make_eci(int assignval) -> QrSegment
-  - Constructor QrSegment(QrSegment.Mode mode, int numch, list<int> bitdata)
-  - Method get_mode() -> QrSegment.Mode
-  - Method get_num_chars() -> int
-  - Method get_data() -> list<int>
-  - Constants regex NUMERIC_REGEX, ALPHANUMERIC_REGEX
-  - Enum Mode:
-    - Constants NUMERIC, ALPHANUMERIC, BYTE, KANJI, ECI
-"""
-
-
 # ---- QR Code symbol class ----
 
 class QrCode:
