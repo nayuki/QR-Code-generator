@@ -88,7 +88,7 @@
 /// 
 /// Invented by Denso Wave and described in the ISO/IEC 18004 standard.
 /// 
-/// Instances of this struct represent an immutable square grid of black and white cells.
+/// Instances of this struct represent an immutable square grid of black and light cells.
 /// The impl provides static factory functions to create a QR Code from text or binary data.
 /// The struct and impl cover the QR Code Model 2 specification, supporting all versions
 /// (sizes) from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
@@ -126,7 +126,7 @@ pub struct QrCode {
 	
 	// Grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code (false = white, true = black).
+	// The modules of this QR Code (false = light, true = black).
 	// Immutable after constructor finishes. Accessed through get_module().
 	modules: Vec<bool>,
 	
@@ -285,7 +285,7 @@ impl QrCode {
 			size: size as i32,
 			mask: Mask::new(0),  // Dummy value
 			errorcorrectionlevel: ecl,
-			modules   : vec![false; size * size],  // Initially all white
+			modules   : vec![false; size * size],  // Initially all light
 			isfunction: vec![false; size * size],
 		};
 		
@@ -347,10 +347,10 @@ impl QrCode {
 	
 	
 	/// Returns the color of the module (pixel) at the given coordinates,
-	/// which is `false` for white or `true` for black.
+	/// which is `false` for light or `true` for black.
 	/// 
 	/// The top left corner has the coordinates (x=0, y=0). If the given
-	/// coordinates are out of bounds, then `false` (white) is returned.
+	/// coordinates are out of bounds, then `false` (light) is returned.
 	pub fn get_module(&self, x: i32, y: i32) -> bool {
 		0 <= x && x < self.size && 0 <= y && y < self.size && self.module(x, y)
 	}
@@ -602,7 +602,7 @@ impl QrCode {
 						i += 1;
 					}
 					// If this QR Code has any remainder bits (0 to 7), they were assigned as
-					// 0/false/white by the constructor and are left unchanged by this method
+					// 0/false/light by the constructor and are left unchanged by this method
 				}
 			}
 			right -= 2;
@@ -703,7 +703,7 @@ impl QrCode {
 			}
 		}
 		
-		// Balance of black and white modules
+		// Balance of black and light modules
 		let black: i32 = self.modules.iter().copied().map(i32::from).sum();
 		let total: i32 = size * size;  // Note that size is odd, so black/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
@@ -846,7 +846,7 @@ impl FinderPenalty {
 	// Pushes the given value to the front and drops the last value.
 	pub fn add_history(&mut self, mut currentrunlength: i32) {
 		if self.run_history[0] == 0 {
-			currentrunlength += self.qr_size;  // Add white border to initial run
+			currentrunlength += self.qr_size;  // Add light border to initial run
 		}
 		let rh = &mut self.run_history;
 		for i in (0 .. rh.len()-1).rev() {
@@ -856,7 +856,7 @@ impl FinderPenalty {
 	}
 	
 	
-	// Can only be called immediately after a white run is added, and returns either 0, 1, or 2.
+	// Can only be called immediately after a light run is added, and returns either 0, 1, or 2.
 	pub fn count_patterns(&self) -> i32 {
 		let rh = &self.run_history;
 		let n = rh[1];
@@ -873,7 +873,7 @@ impl FinderPenalty {
 			self.add_history(currentrunlength);
 			currentrunlength = 0;
 		}
-		currentrunlength += self.qr_size;  // Add white border to final run
+		currentrunlength += self.qr_size;  // Add light border to final run
 		self.add_history(currentrunlength);
 		self.count_patterns()
 	}

@@ -64,7 +64,7 @@ testable void reedSolomonComputeRemainder(const uint8_t data[], int dataLen,
 testable uint8_t reedSolomonMultiply(uint8_t x, uint8_t y);
 
 testable void initializeFunctionModules(int version, uint8_t qrcode[]);
-static void drawWhiteFunctionModules(uint8_t qrcode[], int version);
+static void drawLightFunctionModules(uint8_t qrcode[], int version);
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]);
 testable int getAlignmentPatternPositions(int version, uint8_t result[7]);
 static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[]);
@@ -259,7 +259,7 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	addEccAndInterleave(qrcode, version, ecl, tempBuffer);
 	initializeFunctionModules(version, qrcode);
 	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, qrcode);
-	drawWhiteFunctionModules(qrcode, version);
+	drawLightFunctionModules(qrcode, version);
 	initializeFunctionModules(version, tempBuffer);
 	
 	// Handle masking
@@ -413,7 +413,7 @@ testable uint8_t reedSolomonMultiply(uint8_t x, uint8_t y) {
 
 /*---- Drawing function modules ----*/
 
-// Clears the given QR Code grid with white modules for the given
+// Clears the given QR Code grid with light modules for the given
 // version's size, then marks every function module as black.
 testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 	// Initialize QR Code
@@ -449,10 +449,10 @@ testable void initializeFunctionModules(int version, uint8_t qrcode[]) {
 }
 
 
-// Draws white function modules and possibly some black modules onto the given QR Code, without changing
+// Draws light function modules and possibly some black modules onto the given QR Code, without changing
 // non-function modules. This does not draw the format bits. This requires all function modules to be previously
 // marked black (namely by initializeFunctionModules()), because this may skip redrawing black function modules.
-static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
+static void drawLightFunctionModules(uint8_t qrcode[], int version) {
 	// Draw horizontal and vertical timing patterns
 	int qrsize = qrcodegen_getSize(qrcode);
 	for (int i = 7; i < qrsize - 7; i += 2) {
@@ -512,7 +512,7 @@ static void drawWhiteFunctionModules(uint8_t qrcode[], int version) {
 
 // Draws two copies of the format bits (with its own error correction code) based
 // on the given mask and error correction level. This always draws all modules of
-// the format bits, unlike drawWhiteFunctionModules() which might skip black modules.
+// the format bits, unlike drawLightFunctionModules() which might skip black modules.
 static void drawFormatBits(enum qrcodegen_Ecc ecl, enum qrcodegen_Mask mask, uint8_t qrcode[]) {
 	// Calculate error correction code and pack bits
 	assert(0 <= (int)mask && (int)mask <= 7);
@@ -573,7 +573,7 @@ static void fillRectangle(int left, int top, int width, int height, uint8_t qrco
 /*---- Drawing data modules and masking ----*/
 
 // Draws the raw codewords (including data and ECC) onto the given QR Code. This requires the initial state of
-// the QR Code to be black at function modules and white at codeword modules (including unused remainder bits).
+// the QR Code to be black at function modules and light at codeword modules (including unused remainder bits).
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 	int qrsize = qrcodegen_getSize(qrcode);
 	int i = 0;  // Bit index into the data
@@ -592,7 +592,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 					i++;
 				}
 				// If this QR Code has any remainder bits (0 to 7), they were assigned as
-				// 0/false/white by the constructor and are left unchanged by this method
+				// 0/false/light by the constructor and are left unchanged by this method
 			}
 		}
 	}
@@ -693,7 +693,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 		}
 	}
 	
-	// Balance of black and white modules
+	// Balance of black and light modules
 	int black = 0;
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0; x < qrsize; x++) {
@@ -709,7 +709,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 }
 
 
-// Can only be called immediately after a white run is added, and
+// Can only be called immediately after a light run is added, and
 // returns either 0, 1, or 2. A helper function for getPenaltyScore().
 static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize) {
 	int n = runHistory[1];
@@ -728,7 +728,7 @@ static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLe
 		finderPenaltyAddHistory(currentRunLength, runHistory, qrsize);
 		currentRunLength = 0;
 	}
-	currentRunLength += qrsize;  // Add white border to final run
+	currentRunLength += qrsize;  // Add light border to final run
 	finderPenaltyAddHistory(currentRunLength, runHistory, qrsize);
 	return finderPenaltyCountPatterns(runHistory, qrsize);
 }
@@ -737,7 +737,7 @@ static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLe
 // Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
 static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7], int qrsize) {
 	if (runHistory[0] == 0)
-		currentRunLength += qrsize;  // Add white border to initial run
+		currentRunLength += qrsize;  // Add light border to initial run
 	memmove(&runHistory[1], &runHistory[0], 6 * sizeof(runHistory[0]));
 	runHistory[0] = currentRunLength;
 }

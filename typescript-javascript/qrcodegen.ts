@@ -36,7 +36,7 @@ namespace qrcodegen {
 	/* 
 	 * A QR Code symbol, which is a type of two-dimension barcode.
 	 * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
-	 * Instances of this class represent an immutable square grid of black and white cells.
+	 * Instances of this class represent an immutable square grid of black and light cells.
 	 * The class provides static factory functions to create a QR Code from text or binary data.
 	 * The class covers the QR Code Model 2 specification, supporting all versions (sizes)
 	 * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
@@ -155,7 +155,7 @@ namespace qrcodegen {
 		// 21 and 177 (inclusive). This is equal to version * 4 + 17.
 		public readonly size: int;
 		
-		// The modules of this QR Code (false = white, true = black).
+		// The modules of this QR Code (false = light, true = black).
 		// Immutable after constructor finishes. Accessed through getModule().
 		private readonly modules   : Array<Array<boolean>> = [];
 		
@@ -196,7 +196,7 @@ namespace qrcodegen {
 			for (let i = 0; i < this.size; i++)
 				row.push(false);
 			for (let i = 0; i < this.size; i++) {
-				this.modules   .push(row.slice());  // Initially all white
+				this.modules   .push(row.slice());  // Initially all light
 				this.isFunction.push(row.slice());
 			}
 			
@@ -232,8 +232,8 @@ namespace qrcodegen {
 		/*-- Accessor methods --*/
 		
 		// Returns the color of the module (pixel) at the given coordinates, which is false
-		// for white or true for black. The top left corner has the coordinates (x=0, y=0).
-		// If the given coordinates are out of bounds, then false (white) is returned.
+		// for light or true for black. The top left corner has the coordinates (x=0, y=0).
+		// If the given coordinates are out of bounds, then false (light) is returned.
 		public getModule(x: int, y: int): boolean {
 			return 0 <= x && x < this.size && 0 <= y && y < this.size && this.modules[y][x];
 		}
@@ -243,7 +243,7 @@ namespace qrcodegen {
 		
 		// Draws this QR Code, with the given module scale and border modules, onto the given HTML
 		// canvas element. The canvas's width and height is resized to (this.size + border * 2) * scale.
-		// The drawn image is be purely black and white, and fully opaque.
+		// The drawn image is be purely black and light, and fully opaque.
 		// The scale must be a positive integer and the border must be a non-negative integer.
 		public drawCanvas(scale: int, border: int, canvas: HTMLCanvasElement): void {
 			if (scale <= 0 || border < 0)
@@ -467,7 +467,7 @@ namespace qrcodegen {
 							i++;
 						}
 						// If this QR Code has any remainder bits (0 to 7), they were assigned as
-						// 0/false/white by the constructor and are left unchanged by this method
+						// 0/false/light by the constructor and are left unchanged by this method
 					}
 				}
 			}
@@ -566,7 +566,7 @@ namespace qrcodegen {
 				}
 			}
 			
-			// Balance of black and white modules
+			// Balance of black and light modules
 			let black: int = 0;
 			for (const row of this.modules)
 				black = row.reduce((sum, color) => sum + (color ? 1 : 0), black);
@@ -686,7 +686,7 @@ namespace qrcodegen {
 		}
 		
 		
-		// Can only be called immediately after a white run is added, and
+		// Can only be called immediately after a light run is added, and
 		// returns either 0, 1, or 2. A helper function for getPenaltyScore().
 		private finderPenaltyCountPatterns(runHistory: Array<int>): int {
 			const n: int = runHistory[1];
@@ -704,7 +704,7 @@ namespace qrcodegen {
 				this.finderPenaltyAddHistory(currentRunLength, runHistory);
 				currentRunLength = 0;
 			}
-			currentRunLength += this.size;  // Add white border to final run
+			currentRunLength += this.size;  // Add light border to final run
 			this.finderPenaltyAddHistory(currentRunLength, runHistory);
 			return this.finderPenaltyCountPatterns(runHistory);
 		}
@@ -713,7 +713,7 @@ namespace qrcodegen {
 		// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
 		private finderPenaltyAddHistory(currentRunLength: int, runHistory: Array<int>): void {
 			if (runHistory[0] == 0)
-				currentRunLength += this.size;  // Add white border to initial run
+				currentRunLength += this.size;  // Add light border to initial run
 			runHistory.pop();
 			runHistory.unshift(currentRunLength);
 		}

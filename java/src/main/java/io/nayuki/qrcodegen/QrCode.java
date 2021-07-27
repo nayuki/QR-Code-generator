@@ -32,7 +32,7 @@ import java.util.Objects;
 /**
  * A QR Code symbol, which is a type of two-dimension barcode.
  * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
- * <p>Instances of this class represent an immutable square grid of black and white cells.
+ * <p>Instances of this class represent an immutable square grid of black and light cells.
  * The class provides static factory functions to create a QR Code from text or binary data.
  * The class covers the QR Code Model 2 specification, supporting all versions (sizes)
  * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.</p>
@@ -222,7 +222,7 @@ public final class QrCode {
 	
 	// Private grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code (false = white, true = black).
+	// The modules of this QR Code (false = light, true = black).
 	// Immutable after constructor finishes. Accessed through getModule().
 	private boolean[][] modules;
 	
@@ -256,7 +256,7 @@ public final class QrCode {
 		size = ver * 4 + 17;
 		errorCorrectionLevel = Objects.requireNonNull(ecl);
 		Objects.requireNonNull(dataCodewords);
-		modules    = new boolean[size][size];  // Initially all white
+		modules    = new boolean[size][size];  // Initially all light
 		isFunction = new boolean[size][size];
 		
 		// Compute ECC, draw modules, do masking
@@ -273,12 +273,12 @@ public final class QrCode {
 	
 	/**
 	 * Returns the color of the module (pixel) at the specified coordinates, which is {@code false}
-	 * for white or {@code true} for black. The top left corner has the coordinates (x=0, y=0).
-	 * If the specified coordinates are out of bounds, then {@code false} (white) is returned.
+	 * for light or {@code true} for black. The top left corner has the coordinates (x=0, y=0).
+	 * If the specified coordinates are out of bounds, then {@code false} (light) is returned.
 	 * @param x the x coordinate, where 0 is the left edge and size&#x2212;1 is the right edge
 	 * @param y the y coordinate, where 0 is the top edge and size&#x2212;1 is the bottom edge
 	 * @return {@code true} if the coordinates are in bounds and the module
-	 * at that location is black, or {@code false} (white) otherwise
+	 * at that location is black, or {@code false} (light) otherwise
 	 */
 	public boolean getModule(int x, int y) {
 		return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
@@ -287,7 +287,7 @@ public final class QrCode {
 	
 	/**
 	 * Returns a raster image depicting this QR Code, with the specified module scale and border modules.
-	 * <p>For example, toImage(scale=10, border=4) means to pad the QR Code with 4 white
+	 * <p>For example, toImage(scale=10, border=4) means to pad the QR Code with 4 light
 	 * border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
 	 * The resulting image only contains the hex colors 000000 and FFFFFF.
 	 * @param scale the side length (measured in pixels, must be positive) of each module
@@ -530,7 +530,7 @@ public final class QrCode {
 						i++;
 					}
 					// If this QR Code has any remainder bits (0 to 7), they were assigned as
-					// 0/false/white by the constructor and are left unchanged by this method
+					// 0/false/light by the constructor and are left unchanged by this method
 				}
 			}
 		}
@@ -651,7 +651,7 @@ public final class QrCode {
 			}
 		}
 		
-		// Balance of black and white modules
+		// Balance of black and light modules
 		int black = 0;
 		for (boolean[] row : modules) {
 			for (boolean color : row) {
@@ -786,7 +786,7 @@ public final class QrCode {
 	}
 	
 	
-	// Can only be called immediately after a white run is added, and
+	// Can only be called immediately after a light run is added, and
 	// returns either 0, 1, or 2. A helper function for getPenaltyScore().
 	private int finderPenaltyCountPatterns(int[] runHistory) {
 		int n = runHistory[1];
@@ -803,7 +803,7 @@ public final class QrCode {
 			finderPenaltyAddHistory(currentRunLength, runHistory);
 			currentRunLength = 0;
 		}
-		currentRunLength += size;  // Add white border to final run
+		currentRunLength += size;  // Add light border to final run
 		finderPenaltyAddHistory(currentRunLength, runHistory);
 		return finderPenaltyCountPatterns(runHistory);
 	}
@@ -812,7 +812,7 @@ public final class QrCode {
 	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
 	private void finderPenaltyAddHistory(int currentRunLength, int[] runHistory) {
 		if (runHistory[0] == 0)
-			currentRunLength += size;  // Add white border to initial run
+			currentRunLength += size;  // Add light border to initial run
 		System.arraycopy(runHistory, 0, runHistory, 1, runHistory.length - 1);
 		runHistory[0] = currentRunLength;
 	}

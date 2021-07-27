@@ -32,7 +32,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 class QrCode:
 	"""A QR Code symbol, which is a type of two-dimension barcode.
 	Invented by Denso Wave and described in the ISO/IEC 18004 standard.
-	Instances of this class represent an immutable square grid of black and white cells.
+	Instances of this class represent an immutable square grid of black and light cells.
 	The class provides static factory functions to create a QR Code from text or binary data.
 	The class covers the QR Code Model 2 specification, supporting all versions (sizes)
 	from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
@@ -151,7 +151,7 @@ class QrCode:
 	# the resulting object still has a mask value between 0 and 7.
 	_mask: int
 	
-	# The modules of this QR Code (False = white, True = black).
+	# The modules of this QR Code (False = light, True = black).
 	# Immutable after constructor finishes. Accessed through get_module().
 	_modules: List[List[bool]]
 	
@@ -180,7 +180,7 @@ class QrCode:
 		self._errcorlvl = errcorlvl
 		
 		# Initialize both grids to be size*size arrays of Boolean false
-		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all white
+		self._modules    = [[False] * self._size for _ in range(self._size)]  # Initially all light
 		self._isfunction = [[False] * self._size for _ in range(self._size)]
 		
 		# Compute ECC, draw modules
@@ -227,8 +227,8 @@ class QrCode:
 	
 	def get_module(self, x: int, y: int) -> bool:
 		"""Returns the color of the module (pixel) at the given coordinates, which is False
-		for white or True for black. The top left corner has the coordinates (x=0, y=0).
-		If the given coordinates are out of bounds, then False (white) is returned."""
+		for light or True for black. The top left corner has the coordinates (x=0, y=0).
+		If the given coordinates are out of bounds, then False (light) is returned."""
 		return (0 <= x < self._size) and (0 <= y < self._size) and self._modules[y][x]
 	
 	
@@ -416,7 +416,7 @@ class QrCode:
 						self._modules[y][x] = _get_bit(data[i >> 3], 7 - (i & 7))
 						i += 1
 					# If this QR Code has any remainder bits (0 to 7), they were assigned as
-					# 0/false/white by the constructor and are left unchanged by this method
+					# 0/false/light by the constructor and are left unchanged by this method
 		assert i == len(data) * 8
 	
 	
@@ -486,7 +486,7 @@ class QrCode:
 				if modules[y][x] == modules[y][x + 1] == modules[y + 1][x] == modules[y + 1][x + 1]:
 					result += QrCode._PENALTY_N2
 		
-		# Balance of black and white modules
+		# Balance of black and light modules
 		black: int = sum((1 if cell else 0) for row in modules for cell in row)
 		total: int = size**2  # Note that size is odd, so black/total != 1/2
 		# Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
@@ -591,7 +591,7 @@ class QrCode:
 	
 	
 	def _finder_penalty_count_patterns(self, runhistory: collections.deque) -> int:
-		"""Can only be called immediately after a white run is added, and
+		"""Can only be called immediately after a light run is added, and
 		returns either 0, 1, or 2. A helper function for _get_penalty_score()."""
 		n: int = runhistory[1]
 		assert n <= self._size * 3
@@ -605,14 +605,14 @@ class QrCode:
 		if currentruncolor:  # Terminate black run
 			self._finder_penalty_add_history(currentrunlength, runhistory)
 			currentrunlength = 0
-		currentrunlength += self._size  # Add white border to final run
+		currentrunlength += self._size  # Add light border to final run
 		self._finder_penalty_add_history(currentrunlength, runhistory)
 		return self._finder_penalty_count_patterns(runhistory)
 	
 	
 	def _finder_penalty_add_history(self, currentrunlength: int, runhistory: collections.deque) -> None:
 		if runhistory[0] == 0:
-			currentrunlength += self._size  # Add white border to initial run
+			currentrunlength += self._size  # Add light border to initial run
 		runhistory.appendleft(currentrunlength)
 	
 	

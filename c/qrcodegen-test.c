@@ -374,7 +374,7 @@ static void testInitializeFunctionModulesEtc(void) {
 		else
 			assert(size == ver * 4 + 17);
 		
-		bool hasWhite = false;
+		bool hasLight = false;
 		bool hasBlack = false;
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
@@ -382,10 +382,10 @@ static void testInitializeFunctionModulesEtc(void) {
 				if (color)
 					hasBlack = true;
 				else
-					hasWhite = true;
+					hasLight = true;
 			}
 		}
-		assert(hasWhite && hasBlack);
+		assert(hasLight && hasBlack);
 		free(qrcode);
 		numTestCases++;
 	}
@@ -424,11 +424,11 @@ static void testGetSetModule(void) {
 	initializeFunctionModules(23, qrcode);
 	int size = qrcodegen_getSize(qrcode);
 	
-	for (int y = 0; y < size; y++) {  // Clear all to white
+	for (int y = 0; y < size; y++) {  // Clear all to light
 		for (int x = 0; x < size; x++)
 			setModule(qrcode, x, y, false);
 	}
-	for (int y = 0; y < size; y++) {  // Check all white
+	for (int y = 0; y < size; y++) {  // Check all light
 		for (int x = 0; x < size; x++)
 			assert(qrcodegen_getModule(qrcode, x, y) == false);
 	}
@@ -441,7 +441,7 @@ static void testGetSetModule(void) {
 			assert(qrcodegen_getModule(qrcode, x, y) == true);
 	}
 	
-	// Set some out of bounds modules to white
+	// Set some out of bounds modules to light
 	setModuleBounded(qrcode, -1, -1, false);
 	setModuleBounded(qrcode, -1, 0, false);
 	setModuleBounded(qrcode, 0, -1, false);
@@ -453,13 +453,13 @@ static void testGetSetModule(void) {
 			assert(qrcodegen_getModule(qrcode, x, y) == true);
 	}
 	
-	// Set some modules to white
+	// Set some modules to light
 	setModule(qrcode, 3, 8, false);
 	setModule(qrcode, 61, 49, false);
 	for (int y = 0; y < size; y++) {  // Check most black
 		for (int x = 0; x < size; x++) {
-			bool white = (x == 3 && y == 8) || (x == 61 && y == 49);
-			assert(qrcodegen_getModule(qrcode, x, y) != white);
+			bool light = (x == 3 && y == 8) || (x == 61 && y == 49);
+			assert(qrcodegen_getModule(qrcode, x, y) != light);
 		}
 	}
 	numTestCases++;

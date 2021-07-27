@@ -220,7 +220,7 @@ class QrSegment final {
 /* 
  * A QR Code symbol, which is a type of two-dimension barcode.
  * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
- * Instances of this class represent an immutable square grid of black and white cells.
+ * Instances of this class represent an immutable square grid of black and light cells.
  * The class provides static factory functions to create a QR Code from text or binary data.
  * The class covers the QR Code Model 2 specification, supporting all versions (sizes)
  * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
@@ -314,7 +314,7 @@ class QrCode final {
 	
 	// Private grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code (false = white, true = black).
+	// The modules of this QR Code (false = light, true = black).
 	// Immutable after constructor finishes. Accessed through getModule().
 	private: std::vector<std::vector<bool> > modules;
 	
@@ -363,8 +363,8 @@ class QrCode final {
 	
 	/* 
 	 * Returns the color of the module (pixel) at the given coordinates, which is false
-	 * for white or true for black. The top left corner has the coordinates (x=0, y=0).
-	 * If the given coordinates are out of bounds, then false (white) is returned.
+	 * for light or true for black. The top left corner has the coordinates (x=0, y=0).
+	 * If the given coordinates are out of bounds, then false (light) is returned.
 	 */
 	public: bool getModule(int x, int y) const;
 	
@@ -472,7 +472,7 @@ class QrCode final {
 	private: static std::uint8_t reedSolomonMultiply(std::uint8_t x, std::uint8_t y);
 	
 	
-	// Can only be called immediately after a white run is added, and
+	// Can only be called immediately after a light run is added, and
 	// returns either 0, 1, or 2. A helper function for getPenaltyScore().
 	private: int finderPenaltyCountPatterns(const std::array<int,7> &runHistory) const;
 	

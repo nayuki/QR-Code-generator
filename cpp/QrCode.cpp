@@ -327,7 +327,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 		throw std::domain_error("Mask value out of range");
 	size = ver * 4 + 17;
 	size_t sz = static_cast<size_t>(size);
-	modules    = vector<vector<bool> >(sz, vector<bool>(sz));  // Initially all white
+	modules    = vector<vector<bool> >(sz, vector<bool>(sz));  // Initially all light
 	isFunction = vector<vector<bool> >(sz, vector<bool>(sz));
 	
 	// Compute ECC, draw modules
@@ -584,7 +584,7 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 					i++;
 				}
 				// If this QR Code has any remainder bits (0 to 7), they were assigned as
-				// 0/false/white by the constructor and are left unchanged by this method
+				// 0/false/light by the constructor and are left unchanged by this method
 			}
 		}
 	}
@@ -676,7 +676,7 @@ long QrCode::getPenaltyScore() const {
 		}
 	}
 	
-	// Balance of black and white modules
+	// Balance of black and light modules
 	int black = 0;
 	for (const vector<bool> &row : modules) {
 		for (bool color : row) {
@@ -797,7 +797,7 @@ int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunL
 		finderPenaltyAddHistory(currentRunLength, runHistory);
 		currentRunLength = 0;
 	}
-	currentRunLength += size;  // Add white border to final run
+	currentRunLength += size;  // Add light border to final run
 	finderPenaltyAddHistory(currentRunLength, runHistory);
 	return finderPenaltyCountPatterns(runHistory);
 }
@@ -805,7 +805,7 @@ int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunL
 
 void QrCode::finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory) const {
 	if (runHistory.at(0) == 0)
-		currentRunLength += size;  // Add white border to initial run
+		currentRunLength += size;  // Add light border to initial run
 	std::copy_backward(runHistory.cbegin(), runHistory.cend() - 1, runHistory.end());
 	runHistory.at(0) = currentRunLength;
 }
