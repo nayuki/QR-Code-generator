@@ -55,8 +55,8 @@ uint8_t reedSolomonMultiply(uint8_t x, uint8_t y);
 void initializeFunctionModules(int version, uint8_t qrcode[]);
 int getAlignmentPatternPositions(int version, uint8_t result[7]);
 bool getModule(const uint8_t qrcode[], int x, int y);
-void setModule(uint8_t qrcode[], int x, int y, bool isBlack);
-void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
+void setModule(uint8_t qrcode[], int x, int y, bool isDark);
+void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark);
 int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
 int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
 
@@ -375,17 +375,17 @@ static void testInitializeFunctionModulesEtc(void) {
 			assert(size == ver * 4 + 17);
 		
 		bool hasLight = false;
-		bool hasBlack = false;
+		bool hasDark = false;
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
 				bool color = qrcodegen_getModule(qrcode, x, y);
 				if (color)
-					hasBlack = true;
+					hasDark = true;
 				else
 					hasLight = true;
 			}
 		}
-		assert(hasLight && hasBlack);
+		assert(hasLight && hasDark);
 		free(qrcode);
 		numTestCases++;
 	}
@@ -432,11 +432,11 @@ static void testGetSetModule(void) {
 		for (int x = 0; x < size; x++)
 			assert(qrcodegen_getModule(qrcode, x, y) == false);
 	}
-	for (int y = 0; y < size; y++) {  // Set all to black
+	for (int y = 0; y < size; y++) {  // Set all to dark
 		for (int x = 0; x < size; x++)
 			setModule(qrcode, x, y, true);
 	}
-	for (int y = 0; y < size; y++) {  // Check all black
+	for (int y = 0; y < size; y++) {  // Check all dark
 		for (int x = 0; x < size; x++)
 			assert(qrcodegen_getModule(qrcode, x, y) == true);
 	}
@@ -448,7 +448,7 @@ static void testGetSetModule(void) {
 	setModuleBounded(qrcode, size, 5, false);
 	setModuleBounded(qrcode, 72, size, false);
 	setModuleBounded(qrcode, size, size, false);
-	for (int y = 0; y < size; y++) {  // Check all black
+	for (int y = 0; y < size; y++) {  // Check all dark
 		for (int x = 0; x < size; x++)
 			assert(qrcodegen_getModule(qrcode, x, y) == true);
 	}
@@ -456,7 +456,7 @@ static void testGetSetModule(void) {
 	// Set some modules to light
 	setModule(qrcode, 3, 8, false);
 	setModule(qrcode, 61, 49, false);
-	for (int y = 0; y < size; y++) {  // Check most black
+	for (int y = 0; y < size; y++) {  // Check most dark
 		for (int x = 0; x < size; x++) {
 			bool light = (x == 3 && y == 8) || (x == 61 && y == 49);
 			assert(qrcodegen_getModule(qrcode, x, y) != light);

@@ -36,7 +36,7 @@ extern "C" {
 /* 
  * This library creates QR Code symbols, which is a type of two-dimension barcode.
  * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
- * A QR Code structure is an immutable square grid of black and light cells.
+ * A QR Code structure is an immutable square grid of dark and light cells.
  * The library provides functions to create a QR Code from text or binary data.
  * The library covers the QR Code Model 2 specification, supporting all versions (sizes)
  * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
@@ -300,7 +300,7 @@ int qrcodegen_getSize(const uint8_t qrcode[]);
 
 /* 
  * Returns the color of the module (pixel) at the given coordinates, which is false
- * for light or true for black. The top left corner has the coordinates (x=0, y=0).
+ * for light or true for dark. The top left corner has the coordinates (x=0, y=0).
  * If the given coordinates are out of bounds, then false (light) is returned.
  */
 bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y);

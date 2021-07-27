@@ -466,7 +466,7 @@ void QrCode::drawFormatBits(int msk) {
 		setFunctionModule(size - 1 - i, 8, getBit(bits, i));
 	for (int i = 8; i < 15; i++)
 		setFunctionModule(8, size - 15 + i, getBit(bits, i));
-	setFunctionModule(8, size - 8, true);  // Always black
+	setFunctionModule(8, size - 8, true);  // Always dark
 }
 
 
@@ -513,10 +513,10 @@ void QrCode::drawAlignmentPattern(int x, int y) {
 }
 
 
-void QrCode::setFunctionModule(int x, int y, bool isBlack) {
+void QrCode::setFunctionModule(int x, int y, bool isDark) {
 	size_t ux = static_cast<size_t>(x);
 	size_t uy = static_cast<size_t>(y);
-	modules   .at(uy).at(ux) = isBlack;
+	modules   .at(uy).at(ux) = isDark;
 	isFunction.at(uy).at(ux) = true;
 }
 
@@ -676,17 +676,17 @@ long QrCode::getPenaltyScore() const {
 		}
 	}
 	
-	// Balance of black and light modules
-	int black = 0;
+	// Balance of dark and light modules
+	int dark = 0;
 	for (const vector<bool> &row : modules) {
 		for (bool color : row) {
 			if (color)
-				black++;
+				dark++;
 		}
 	}
-	int total = size * size;  // Note that size is odd, so black/total != 1/2
-	// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
-	int k = static_cast<int>((std::abs(black * 20L - total * 10L) + total - 1) / total) - 1;
+	int total = size * size;  // Note that size is odd, so dark/total != 1/2
+	// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
+	int k = static_cast<int>((std::abs(dark * 20L - total * 10L) + total - 1) / total) - 1;
 	result += k * PENALTY_N4;
 	return result;
 }
@@ -793,7 +793,7 @@ int QrCode::finderPenaltyCountPatterns(const std::array<int,7> &runHistory) cons
 
 
 int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, std::array<int,7> &runHistory) const {
-	if (currentRunColor) {  // Terminate black run
+	if (currentRunColor) {  // Terminate dark run
 		finderPenaltyAddHistory(currentRunLength, runHistory);
 		currentRunLength = 0;
 	}

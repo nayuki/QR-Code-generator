@@ -36,7 +36,7 @@ namespace qrcodegen {
 	/* 
 	 * A QR Code symbol, which is a type of two-dimension barcode.
 	 * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
-	 * Instances of this class represent an immutable square grid of black and light cells.
+	 * Instances of this class represent an immutable square grid of dark and light cells.
 	 * The class provides static factory functions to create a QR Code from text or binary data.
 	 * The class covers the QR Code Model 2 specification, supporting all versions (sizes)
 	 * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
@@ -155,7 +155,7 @@ namespace qrcodegen {
 		// 21 and 177 (inclusive). This is equal to version * 4 + 17.
 		public readonly size: int;
 		
-		// The modules of this QR Code (false = light, true = black).
+		// The modules of this QR Code (false = light, true = dark).
 		// Immutable after constructor finishes. Accessed through getModule().
 		private readonly modules   : Array<Array<boolean>> = [];
 		
@@ -232,7 +232,7 @@ namespace qrcodegen {
 		/*-- Accessor methods --*/
 		
 		// Returns the color of the module (pixel) at the given coordinates, which is false
-		// for light or true for black. The top left corner has the coordinates (x=0, y=0).
+		// for light or true for dark. The top left corner has the coordinates (x=0, y=0).
 		// If the given coordinates are out of bounds, then false (light) is returned.
 		public getModule(x: int, y: int): boolean {
 			return 0 <= x && x < this.size && 0 <= y && y < this.size && this.modules[y][x];
@@ -243,7 +243,7 @@ namespace qrcodegen {
 		
 		// Draws this QR Code, with the given module scale and border modules, onto the given HTML
 		// canvas element. The canvas's width and height is resized to (this.size + border * 2) * scale.
-		// The drawn image is be purely black and light, and fully opaque.
+		// The drawn image is be purely dark and light, and fully opaque.
 		// The scale must be a positive integer and the border must be a non-negative integer.
 		public drawCanvas(scale: int, border: int, canvas: HTMLCanvasElement): void {
 			if (scale <= 0 || border < 0)
@@ -341,7 +341,7 @@ namespace qrcodegen {
 				this.setFunctionModule(this.size - 1 - i, 8, getBit(bits, i));
 			for (let i = 8; i < 15; i++)
 				this.setFunctionModule(8, this.size - 15 + i, getBit(bits, i));
-			this.setFunctionModule(8, this.size - 8, true);  // Always black
+			this.setFunctionModule(8, this.size - 8, true);  // Always dark
 		}
 		
 		
@@ -397,8 +397,8 @@ namespace qrcodegen {
 		
 		// Sets the color of a module and marks it as a function module.
 		// Only used by the constructor. Coordinates must be in bounds.
-		private setFunctionModule(x: int, y: int, isBlack: boolean): void {
-			this.modules[y][x] = isBlack;
+		private setFunctionModule(x: int, y: int, isDark: boolean): void {
+			this.modules[y][x] = isDark;
 			this.isFunction[y][x] = true;
 		}
 		
@@ -566,13 +566,13 @@ namespace qrcodegen {
 				}
 			}
 			
-			// Balance of black and light modules
-			let black: int = 0;
+			// Balance of dark and light modules
+			let dark: int = 0;
 			for (const row of this.modules)
-				black = row.reduce((sum, color) => sum + (color ? 1 : 0), black);
-			const total: int = this.size * this.size;  // Note that size is odd, so black/total != 1/2
-			// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
-			const k: int = Math.ceil(Math.abs(black * 20 - total * 10) / total) - 1;
+				dark = row.reduce((sum, color) => sum + (color ? 1 : 0), dark);
+			const total: int = this.size * this.size;  // Note that size is odd, so dark/total != 1/2
+			// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
+			const k: int = Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1;
 			result += k * QrCode.PENALTY_N4;
 			return result;
 		}
@@ -700,7 +700,7 @@ namespace qrcodegen {
 		
 		// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
 		private finderPenaltyTerminateAndCount(currentRunColor: boolean, currentRunLength: int, runHistory: Array<int>): int {
-			if (currentRunColor) {  // Terminate black run
+			if (currentRunColor) {  // Terminate dark run
 				this.finderPenaltyAddHistory(currentRunLength, runHistory);
 				currentRunLength = 0;
 			}

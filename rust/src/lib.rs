@@ -88,7 +88,7 @@
 /// 
 /// Invented by Denso Wave and described in the ISO/IEC 18004 standard.
 /// 
-/// Instances of this struct represent an immutable square grid of black and light cells.
+/// Instances of this struct represent an immutable square grid of dark and light cells.
 /// The impl provides static factory functions to create a QR Code from text or binary data.
 /// The struct and impl cover the QR Code Model 2 specification, supporting all versions
 /// (sizes) from 1 to 40, all 4 error correction levels, and 4 character encoding modes.
@@ -126,7 +126,7 @@ pub struct QrCode {
 	
 	// Grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code (false = light, true = black).
+	// The modules of this QR Code (false = light, true = dark).
 	// Immutable after constructor finishes. Accessed through get_module().
 	modules: Vec<bool>,
 	
@@ -347,7 +347,7 @@ impl QrCode {
 	
 	
 	/// Returns the color of the module (pixel) at the given coordinates,
-	/// which is `false` for light or `true` for black.
+	/// which is `false` for light or `true` for dark.
 	/// 
 	/// The top left corner has the coordinates (x=0, y=0). If the given
 	/// coordinates are out of bounds, then `false` (light) is returned.
@@ -466,7 +466,7 @@ impl QrCode {
 		for i in 8 .. 15 {
 			self.set_function_module(8, size - 15 + i, get_bit(bits, i));
 		}
-		self.set_function_module(8, size - 8, true);  // Always black
+		self.set_function_module(8, size - 8, true);  // Always dark
 	}
 	
 	
@@ -528,8 +528,8 @@ impl QrCode {
 	
 	// Sets the color of a module and marks it as a function module.
 	// Only used by the constructor. Coordinates must be in bounds.
-	fn set_function_module(&mut self, x: i32, y: i32, isblack: bool) {
-		*self.module_mut(x, y) = isblack;
+	fn set_function_module(&mut self, x: i32, y: i32, isdark: bool) {
+		*self.module_mut(x, y) = isdark;
 		self.isfunction[(y * self.size + x) as usize] = true;
 	}
 	
@@ -703,11 +703,11 @@ impl QrCode {
 			}
 		}
 		
-		// Balance of black and light modules
-		let black: i32 = self.modules.iter().copied().map(i32::from).sum();
-		let total: i32 = size * size;  // Note that size is odd, so black/total != 1/2
-		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
-		let k: i32 = ((black * 20 - total * 10).abs() + total - 1) / total - 1;
+		// Balance of dark and light modules
+		let dark: i32 = self.modules.iter().copied().map(i32::from).sum();
+		let total: i32 = size * size;  // Note that size is odd, so dark/total != 1/2
+		// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
+		let k: i32 = ((dark * 20 - total * 10).abs() + total - 1) / total - 1;
 		result += k * PENALTY_N4;
 		result
 	}
@@ -869,7 +869,7 @@ impl FinderPenalty {
 	
 	// Must be called at the end of a line (row or column) of modules.
 	pub fn terminate_and_count(mut self, currentruncolor: bool, mut currentrunlength: i32) -> i32 {
-		if currentruncolor {  // Terminate black run
+		if currentruncolor {  // Terminate dark run
 			self.add_history(currentrunlength);
 			currentrunlength = 0;
 		}

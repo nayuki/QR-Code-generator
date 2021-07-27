@@ -32,7 +32,7 @@ import java.util.Objects;
 /**
  * A QR Code symbol, which is a type of two-dimension barcode.
  * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
- * <p>Instances of this class represent an immutable square grid of black and light cells.
+ * <p>Instances of this class represent an immutable square grid of dark and light cells.
  * The class provides static factory functions to create a QR Code from text or binary data.
  * The class covers the QR Code Model 2 specification, supporting all versions (sizes)
  * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.</p>
@@ -222,7 +222,7 @@ public final class QrCode {
 	
 	// Private grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code (false = light, true = black).
+	// The modules of this QR Code (false = light, true = dark).
 	// Immutable after constructor finishes. Accessed through getModule().
 	private boolean[][] modules;
 	
@@ -273,12 +273,12 @@ public final class QrCode {
 	
 	/**
 	 * Returns the color of the module (pixel) at the specified coordinates, which is {@code false}
-	 * for light or {@code true} for black. The top left corner has the coordinates (x=0, y=0).
+	 * for light or {@code true} for dark. The top left corner has the coordinates (x=0, y=0).
 	 * If the specified coordinates are out of bounds, then {@code false} (light) is returned.
 	 * @param x the x coordinate, where 0 is the left edge and size&#x2212;1 is the right edge
 	 * @param y the y coordinate, where 0 is the top edge and size&#x2212;1 is the bottom edge
 	 * @return {@code true} if the coordinates are in bounds and the module
-	 * at that location is black, or {@code false} (light) otherwise
+	 * at that location is dark, or {@code false} (light) otherwise
 	 */
 	public boolean getModule(int x, int y) {
 		return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
@@ -405,7 +405,7 @@ public final class QrCode {
 			setFunctionModule(size - 1 - i, 8, getBit(bits, i));
 		for (int i = 8; i < 15; i++)
 			setFunctionModule(8, size - 15 + i, getBit(bits, i));
-		setFunctionModule(8, size - 8, true);  // Always black
+		setFunctionModule(8, size - 8, true);  // Always dark
 	}
 	
 	
@@ -459,8 +459,8 @@ public final class QrCode {
 	
 	// Sets the color of a module and marks it as a function module.
 	// Only used by the constructor. Coordinates must be in bounds.
-	private void setFunctionModule(int x, int y, boolean isBlack) {
-		modules[y][x] = isBlack;
+	private void setFunctionModule(int x, int y, boolean isDark) {
+		modules[y][x] = isDark;
 		isFunction[y][x] = true;
 	}
 	
@@ -651,17 +651,17 @@ public final class QrCode {
 			}
 		}
 		
-		// Balance of black and light modules
-		int black = 0;
+		// Balance of dark and light modules
+		int dark = 0;
 		for (boolean[] row : modules) {
 			for (boolean color : row) {
 				if (color)
-					black++;
+					dark++;
 			}
 		}
-		int total = size * size;  // Note that size is odd, so black/total != 1/2
-		// Compute the smallest integer k >= 0 such that (45-5k)% <= black/total <= (55+5k)%
-		int k = (Math.abs(black * 20 - total * 10) + total - 1) / total - 1;
+		int total = size * size;  // Note that size is odd, so dark/total != 1/2
+		// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
+		int k = (Math.abs(dark * 20 - total * 10) + total - 1) / total - 1;
 		result += k * PENALTY_N4;
 		return result;
 	}
@@ -702,7 +702,7 @@ public final class QrCode {
 		int size = ver * 4 + 17;
 		int result = size * size;   // Number of modules in the whole QR Code square
 		result -= 8 * 8 * 3;        // Subtract the three finders with separators
-		result -= 15 * 2 + 1;       // Subtract the format information and black module
+		result -= 15 * 2 + 1;       // Subtract the format information and dark module
 		result -= (size - 16) * 2;  // Subtract the timing patterns (excluding finders)
 		// The five lines above are equivalent to: int result = (16 * ver + 128) * ver + 64;
 		if (ver >= 2) {
@@ -799,7 +799,7 @@ public final class QrCode {
 	
 	// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
 	private int finderPenaltyTerminateAndCount(boolean currentRunColor, int currentRunLength, int[] runHistory) {
-		if (currentRunColor) {  // Terminate black run
+		if (currentRunColor) {  // Terminate dark run
 			finderPenaltyAddHistory(currentRunLength, runHistory);
 			currentRunLength = 0;
 		}
