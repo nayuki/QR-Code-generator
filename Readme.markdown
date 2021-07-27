@@ -175,7 +175,7 @@ Rust language:
 License
 -------
 
-Copyright © 2020 Project Nayuki. (MIT License)  
+Copyright © 2021 Project Nayuki. (MIT License)  
 [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
