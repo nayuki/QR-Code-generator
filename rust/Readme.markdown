@@ -18,7 +18,7 @@ Core features:
 * Available in 6 programming languages, all with nearly equal functionality: Java, TypeScript/JavaScript, Python, Rust, C++, C
 * Significantly shorter code but more documentation comments compared to competing libraries
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-* Output formats: Raw modules/pixels of the QR symbol, SVG XML string
+* Output format: Raw modules/pixels of the QR symbol
 * Detects finder-like penalty patterns more accurately than other implementations
 * Encodes numeric and special-alphanumeric text in less space than general text
 * Open source code under the permissive MIT License
@@ -42,7 +42,7 @@ Examples
     // Simple operation
     let qr = QrCode::encode_text("Hello, world!",
         QrCodeEcc::Medium).unwrap();
-    let svg = qr.to_svg_string(4);
+    let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
     
     // Manual operation
     let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();

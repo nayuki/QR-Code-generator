@@ -38,7 +38,7 @@
 //! - Available in 6 programming languages, all with nearly equal functionality: Java, TypeScript/JavaScript, Python, Rust, C++, C
 //! - Significantly shorter code but more documentation comments compared to competing libraries
 //! - Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-//! - Output formats: Raw modules/pixels of the QR symbol, SVG XML string
+//! - Output format: Raw modules/pixels of the QR symbol
 //! - Detects finder-like penalty patterns more accurately than other implementations
 //! - Encodes numeric and special-alphanumeric text in less space than general text
 //! - Open source code under the permissive MIT License
@@ -64,7 +64,7 @@
 //! ```
 //! let qr = QrCode::encode_text("Hello, world!",
 //!     QrCodeEcc::Medium).unwrap();
-//! let svg = qr.to_svg_string(4);
+//! let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
 //! ```
 //! 
 //! Manual operation:
@@ -365,36 +365,6 @@ impl QrCode {
 	// Returns a mutable reference to the module's color at the given coordinates, which must be in bounds.
 	fn module_mut(&mut self, x: i32, y: i32) -> &mut bool {
 		&mut self.modules[(y * self.size + x) as usize]
-	}
-	
-	
-	/// Returns a string of SVG code for an image depicting
-	/// this QR Code, with the given number of border modules.
-	/// 
-	/// The string always uses Unix newlines (\n), regardless of the platform.
-	pub fn to_svg_string(&self, border: i32) -> String {
-		assert!(border >= 0, "Border must be non-negative");
-		let mut result = String::new();
-		result += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-		result += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
-		let dimension = self.size.checked_add(border.checked_mul(2).unwrap()).unwrap();
-		result += &format!(
-			"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 {0} {0}\" stroke=\"none\">\n", dimension);
-		result += "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n";
-		result += "\t<path d=\"";
-		for y in 0 .. self.size {
-			for x in 0 .. self.size {
-				if self.get_module(x, y) {
-					if x != 0 || y != 0 {
-						result += " ";
-					}
-					result += &format!("M{},{}h1v1h-1z", x + border, y + border);
-				}
-			}
-		}
-		result += "\" fill=\"#000000\"/>\n";
-		result += "</svg>\n";
-		result
 	}
 	
 	

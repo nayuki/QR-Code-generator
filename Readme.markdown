@@ -158,7 +158,7 @@ Rust language:
     // Simple operation
     let qr = QrCode::encode_text("Hello, world!",
         QrCodeEcc::Medium).unwrap();
-    let svg = qr.to_svg_string(4);
+    let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
     
     // Manual operation
     let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
