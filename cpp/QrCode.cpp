@@ -385,34 +385,6 @@ bool QrCode::getModule(int x, int y) const {
 }
 
 
-std::string QrCode::toSvgString(int border) const {
-	if (border < 0)
-		throw std::domain_error("Border must be non-negative");
-	if (border > INT_MAX / 2 || border * 2 > INT_MAX - size)
-		throw std::overflow_error("Border too large");
-	
-	std::ostringstream sb;
-	sb << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-	sb << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
-	sb << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 ";
-	sb << (size + border * 2) << " " << (size + border * 2) << "\" stroke=\"none\">\n";
-	sb << "\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n";
-	sb << "\t<path d=\"";
-	for (int y = 0; y < size; y++) {
-		for (int x = 0; x < size; x++) {
-			if (getModule(x, y)) {
-				if (x != 0 || y != 0)
-					sb << " ";
-				sb << "M" << (x + border) << "," << (y + border) << "h1v1h-1z";
-			}
-		}
-	}
-	sb << "\" fill=\"#000000\"/>\n";
-	sb << "</svg>\n";
-	return sb.str();
-}
-
-
 void QrCode::drawFunctionPatterns() {
 	// Draw horizontal and vertical timing patterns
 	for (int i = 0; i < size; i++) {
