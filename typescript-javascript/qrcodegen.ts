@@ -241,26 +241,6 @@ namespace qrcodegen {
 		
 		/*-- Public instance methods --*/
 		
-		// Draws this QR Code, with the given module scale and border modules, onto the given HTML
-		// canvas element. The canvas's width and height is resized to (this.size + border * 2) * scale.
-		// The drawn image is be purely dark and light, and fully opaque.
-		// The scale must be a positive integer and the border must be a non-negative integer.
-		public drawCanvas(scale: int, border: int, canvas: HTMLCanvasElement): void {
-			if (scale <= 0 || border < 0)
-				throw "Value out of range";
-			const width: int = (this.size + border * 2) * scale;
-			canvas.width = width;
-			canvas.height = width;
-			let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-			for (let y = -border; y < this.size + border; y++) {
-				for (let x = -border; x < this.size + border; x++) {
-					ctx.fillStyle = this.getModule(x, y) ? "#000000" : "#FFFFFF";
-					ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
-				}
-			}
-		}
-		
-		
 		// Returns a string of SVG code for an image depicting this QR Code, with the given number
 		// of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 		public toSvgString(border: int): string {

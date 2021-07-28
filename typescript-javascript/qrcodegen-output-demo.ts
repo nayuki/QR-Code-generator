@@ -46,7 +46,7 @@ namespace app {
 		const text: string = "Hello, world!";  // User-supplied Unicode text
 		const errCorLvl: qrcodegen.QrCode.Ecc = qrcodegen.QrCode.Ecc.LOW;  // Error correction level
 		const qr: qrcodegen.QrCode = qrcodegen.QrCode.encodeText(text, errCorLvl);  // Make the QR Code symbol
-		qr.drawCanvas(10, 4, appendCanvas("hello-world-QR"));  // Draw it on screen
+		drawCanvas(qr, 10, 4, appendCanvas("hello-world-QR"));  // Draw it on screen
 	}
 	
 	
@@ -58,15 +58,15 @@ namespace app {
 		
 		// Numeric mode encoding (3.33 bits per digit)
 		qr = QrCode.encodeText("314159265358979323846264338327950288419716939937510", QrCode.Ecc.MEDIUM);
-		qr.drawCanvas(13, 1, appendCanvas("pi-digits-QR"));
+		drawCanvas(qr, 13, 1, appendCanvas("pi-digits-QR"));
 		
 		// Alphanumeric mode encoding (5.5 bits per character)
 		qr = QrCode.encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", QrCode.Ecc.HIGH);
-		qr.drawCanvas(10, 2, appendCanvas("alphanumeric-QR"));
+		drawCanvas(qr, 10, 2, appendCanvas("alphanumeric-QR"));
 		
 		// Unicode text as UTF-8
 		qr = QrCode.encodeText("\u3053\u3093\u306B\u3061wa\u3001\u4E16\u754C\uFF01 \u03B1\u03B2\u03B3\u03B4", QrCode.Ecc.QUARTILE);
-		qr.drawCanvas(10, 3, appendCanvas("unicode-QR"));
+		drawCanvas(qr, 10, 3, appendCanvas("unicode-QR"));
 		
 		// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 		qr = QrCode.encodeText(
@@ -77,7 +77,7 @@ namespace app {
 			+ "for the hot day made her feel very sleepy and stupid), whether the pleasure of making a "
 			+ "daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly "
 			+ "a White Rabbit with pink eyes ran close by her.", QrCode.Ecc.HIGH);
-		qr.drawCanvas(6, 10, appendCanvas("alice-wonderland-QR"));
+		drawCanvas(qr, 6, 10, appendCanvas("alice-wonderland-QR"));
 	}
 	
 	
@@ -93,32 +93,32 @@ namespace app {
 		const silver0: string = "THE SQUARE ROOT OF 2 IS 1.";
 		const silver1: string = "41421356237309504880168872420969807856967187537694807317667973799";
 		qr = QrCode.encodeText(silver0 + silver1, QrCode.Ecc.LOW);
-		qr.drawCanvas(10, 3, appendCanvas("sqrt2-monolithic-QR"));
+		drawCanvas(qr, 10, 3, appendCanvas("sqrt2-monolithic-QR"));
 		
 		segs = [
 			QrSegment.makeAlphanumeric(silver0),
 			QrSegment.makeNumeric(silver1)];
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
-		qr.drawCanvas(10, 3, appendCanvas("sqrt2-segmented-QR"));
+		drawCanvas(qr, 10, 3, appendCanvas("sqrt2-segmented-QR"));
 		
 		// Illustration "golden"
 		const golden0: string = "Golden ratio \u03C6 = 1.";
 		const golden1: string = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374";
 		const golden2: string = "......";
 		qr = QrCode.encodeText(golden0 + golden1 + golden2, QrCode.Ecc.LOW);
-		qr.drawCanvas(8, 5, appendCanvas("phi-monolithic-QR"));
+		drawCanvas(qr, 8, 5, appendCanvas("phi-monolithic-QR"));
 		
 		segs = [
 			QrSegment.makeBytes(toUtf8ByteArray(golden0)),
 			QrSegment.makeNumeric(golden1),
 			QrSegment.makeAlphanumeric(golden2)];
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
-		qr.drawCanvas(8, 5, appendCanvas("phi-segmented-QR"));
+		drawCanvas(qr, 8, 5, appendCanvas("phi-segmented-QR"));
 		
 		// Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 		const madoka: string = "\u300C\u9B54\u6CD5\u5C11\u5973\u307E\u3069\u304B\u2606\u30DE\u30AE\u30AB\u300D\u3063\u3066\u3001\u3000\u0418\u0410\u0418\u3000\uFF44\uFF45\uFF53\uFF55\u3000\u03BA\u03B1\uFF1F";
 		qr = QrCode.encodeText(madoka, QrCode.Ecc.LOW);
-		qr.drawCanvas(9, 4, appendCanvas("madoka-utf8-QR"));
+		drawCanvas(qr, 9, 4, appendCanvas("madoka-utf8-QR"));
 		
 		const kanjiCharBits: Array<number> = [  // Kanji mode encoding (13 bits per character)
 			0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1,
@@ -153,7 +153,7 @@ namespace app {
 		];
 		segs = [new QrSegment(QrSegment.Mode.KANJI, kanjiCharBits.length / 13, kanjiCharBits)];
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
-		qr.drawCanvas(9, 4, appendCanvas("madoka-kanji-QR"));
+		drawCanvas(qr, 9, 4, appendCanvas("madoka-kanji-QR"));
 	}
 	
 	
@@ -167,21 +167,21 @@ namespace app {
 		// Project Nayuki URL
 		segs = qrcodegen.QrSegment.makeSegments("https://www.nayuki.io/");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, -1, true);  // Automatic mask
-		qr.drawCanvas(8, 6, appendCanvas("project-nayuki-automask-QR"));
+		drawCanvas(qr, 8, 6, appendCanvas("project-nayuki-automask-QR"));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 3, true);  // Force mask 3
-		qr.drawCanvas(8, 6, appendCanvas("project-nayuki-mask3-QR"));
+		drawCanvas(qr, 8, 6, appendCanvas("project-nayuki-mask3-QR"));
 		
 		// Chinese text as UTF-8
 		segs = qrcodegen.QrSegment.makeSegments("\u7DAD\u57FA\u767E\u79D1\uFF08Wikipedia\uFF0C\u8046\u807Di/\u02CCw\u026Ak\u1D7B\u02C8pi\u02D0di.\u0259/\uFF09\u662F\u4E00"
 			+ "\u500B\u81EA\u7531\u5167\u5BB9\u3001\u516C\u958B\u7DE8\u8F2F\u4E14\u591A\u8A9E\u8A00\u7684\u7DB2\u8DEF\u767E\u79D1\u5168\u66F8\u5354\u4F5C\u8A08\u756B");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 0, true);  // Force mask 0
-		qr.drawCanvas(10, 3, appendCanvas("unicode-mask0-QR"));
+		drawCanvas(qr, 10, 3, appendCanvas("unicode-mask0-QR"));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 1, true);  // Force mask 1
-		qr.drawCanvas(10, 3, appendCanvas("unicode-mask1-QR"));
+		drawCanvas(qr, 10, 3, appendCanvas("unicode-mask1-QR"));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 5, true);  // Force mask 5
-		qr.drawCanvas(10, 3, appendCanvas("unicode-mask5-QR"));
+		drawCanvas(qr, 10, 3, appendCanvas("unicode-mask5-QR"));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 7, true);  // Force mask 7
-		qr.drawCanvas(10, 3, appendCanvas("unicode-mask7-QR"));
+		drawCanvas(qr, 10, 3, appendCanvas("unicode-mask7-QR"));
 	}
 	
 	
@@ -197,6 +197,26 @@ namespace app {
 		let result = document.createElement("canvas");
 		outputElem.appendChild(result);
 		return result;
+	}
+	
+	
+	// Draws the given QR Code, with the given module scale and border modules, onto the given HTML
+	// canvas element. The canvas's width and height is resized to (qr.size + border * 2) * scale.
+	// The drawn image is be purely dark and light, and fully opaque.
+	// The scale must be a positive integer and the border must be a non-negative integer.
+	function drawCanvas(qr: qrcodegen.QrCode, scale: number, border: number, canvas: HTMLCanvasElement): void {
+		if (scale <= 0 || border < 0)
+			throw "Value out of range";
+		const width: number = (qr.size + border * 2) * scale;
+		canvas.width = width;
+		canvas.height = width;
+		let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+		for (let y = -border; y < qr.size + border; y++) {
+			for (let x = -border; x < qr.size + border; x++) {
+				ctx.fillStyle = qr.getModule(x, y) ? "#000000" : "#FFFFFF";
+				ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
+			}
+		}
 	}
 	
 	

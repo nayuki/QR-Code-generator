@@ -92,7 +92,7 @@ namespace app {
 			const scale: number = parseInt(getInput("scale-input").value, 10);
 			if (scale <= 0 || scale > 30)
 				return;
-			qr.drawCanvas(scale, border, canvas);
+			drawCanvas(qr, scale, border, canvas);
 			canvas.style.removeProperty("display");
 		} else {
 			const code: string = qr.toSvgString(border);
@@ -145,6 +145,26 @@ namespace app {
 			`encoding mode = ${describeSegments(segs)}, ` +
 			`error correction = level ${"LMQH".charAt(qr.errorCorrectionLevel.ordinal)}, ` +
 			`data bits = ${qrcodegen.QrSegment.getTotalBits(segs, qr.version) as number}.`;
+	}
+	
+	
+	// Draws the given QR Code, with the given module scale and border modules, onto the given HTML
+	// canvas element. The canvas's width and height is resized to (qr.size + border * 2) * scale.
+	// The drawn image is be purely dark and light, and fully opaque.
+	// The scale must be a positive integer and the border must be a non-negative integer.
+	function drawCanvas(qr: qrcodegen.QrCode, scale: number, border: number, canvas: HTMLCanvasElement): void {
+		if (scale <= 0 || border < 0)
+			throw "Value out of range";
+		const width: number = (qr.size + border * 2) * scale;
+		canvas.width = width;
+		canvas.height = width;
+		let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+		for (let y = -border; y < qr.size + border; y++) {
+			for (let x = -border; x < qr.size + border; x++) {
+				ctx.fillStyle = qr.getModule(x, y) ? "#000000" : "#FFFFFF";
+				ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
+			}
+		}
 	}
 	
 	
