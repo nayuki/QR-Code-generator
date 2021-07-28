@@ -70,7 +70,7 @@ TypeScript/JavaScript languages:
     
     // Simple operation
     var qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
-    var svg = qr0.toSvgString(4);
+    var svg = toSvgString(qr0, 4);  // See qrcodegen-input-demo
     
     // Manual operation
     var segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
