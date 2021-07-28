@@ -241,7 +241,7 @@ final class QrTemplate {
 		else {
 			int numAlign = version / 7 + 2;
 			int step = (version == 32) ? 26 :
-				(version*4 + numAlign*2 + 1) / (numAlign*2 - 2) * 2;
+				(version * 4 + numAlign * 2 + 1) / (numAlign * 2 - 2) * 2;
 			int[] result = new int[numAlign];
 			result[0] = 6;
 			for (int i = result.length - 1, pos = size - 7; i >= 1; i--, pos -= step)
