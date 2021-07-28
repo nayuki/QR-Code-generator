@@ -154,8 +154,8 @@ struct qrcodegen_Segment {
  * - The input text must be encoded in UTF-8 and contain no NULs.
  * - The variables ecl and mask must correspond to enum constant values.
  * - Requires 1 <= minVersion <= maxVersion <= 40.
- * - The arrays tempBuffer and qrcode must each have a length
- *   of at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
+ * - The arrays tempBuffer and qrcode must each have a length of at least
+ *   qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion), and cannot overlap.
  * - After the function returns, tempBuffer contains no useful data.
  * - If successful, the resulting QR Code may use numeric,
  *   alphanumeric, or byte mode to encode the text.
@@ -178,8 +178,8 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
  *   valid UTF-8 text, but is not required by the QR Code standard.
  * - The variables ecl and mask must correspond to enum constant values.
  * - Requires 1 <= minVersion <= maxVersion <= 40.
- * - The arrays dataAndTemp and qrcode must each have a length
- *   of at least qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion).
+ * - The arrays dataAndTemp and qrcode must each have a length of at least
+ *   qrcodegen_BUFFER_LEN_FOR_VERSION(maxVersion), and cannot overlap.
  * - After the function returns, the contents of dataAndTemp may have changed,
  *   and does not represent useful data anymore.
  * - If successful, the resulting QR Code will use byte mode to encode the data.
