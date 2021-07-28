@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 
 
@@ -57,7 +58,7 @@ public final class QrCodeGeneratorDemo {
 		
 		QrCode qr = QrCode.encodeText(text, errCorLvl);  // Make the QR Code symbol
 		
-		BufferedImage img = qr.toImage(10, 4);           // Convert to bitmap image
+		BufferedImage img = toImage(qr, 10, 4);          // Convert to bitmap image
 		File imgFile = new File("hello-world-QR.png");   // File path for output
 		ImageIO.write(img, "png", imgFile);              // Write image to file
 		
@@ -74,15 +75,15 @@ public final class QrCodeGeneratorDemo {
 		
 		// Numeric mode encoding (3.33 bits per digit)
 		qr = QrCode.encodeText("314159265358979323846264338327950288419716939937510", QrCode.Ecc.MEDIUM);
-		writePng(qr.toImage(13, 1), "pi-digits-QR.png");
+		writePng(toImage(qr, 13, 1), "pi-digits-QR.png");
 		
 		// Alphanumeric mode encoding (5.5 bits per character)
 		qr = QrCode.encodeText("DOLLAR-AMOUNT:$39.87 PERCENTAGE:100.00% OPERATIONS:+-*/", QrCode.Ecc.HIGH);
-		writePng(qr.toImage(10, 2), "alphanumeric-QR.png");
+		writePng(toImage(qr, 10, 2), "alphanumeric-QR.png");
 		
 		// Unicode text as UTF-8
 		qr = QrCode.encodeText("こんにちwa、世界！ αβγδ", QrCode.Ecc.QUARTILE);
-		writePng(qr.toImage(10, 3), "unicode-QR.png");
+		writePng(toImage(qr, 10, 3), "unicode-QR.png");
 		
 		// Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 		qr = QrCode.encodeText(
@@ -93,7 +94,7 @@ public final class QrCodeGeneratorDemo {
 			+ "for the hot day made her feel very sleepy and stupid), whether the pleasure of making a "
 			+ "daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly "
 			+ "a White Rabbit with pink eyes ran close by her.", QrCode.Ecc.HIGH);
-		writePng(qr.toImage(6, 10), "alice-wonderland-QR.png");
+		writePng(toImage(qr, 6, 10), "alice-wonderland-QR.png");
 	}
 	
 	
@@ -106,32 +107,32 @@ public final class QrCodeGeneratorDemo {
 		String silver0 = "THE SQUARE ROOT OF 2 IS 1.";
 		String silver1 = "41421356237309504880168872420969807856967187537694807317667973799";
 		qr = QrCode.encodeText(silver0 + silver1, QrCode.Ecc.LOW);
-		writePng(qr.toImage(10, 3), "sqrt2-monolithic-QR.png");
+		writePng(toImage(qr, 10, 3), "sqrt2-monolithic-QR.png");
 		
 		segs = Arrays.asList(
 			QrSegment.makeAlphanumeric(silver0),
 			QrSegment.makeNumeric(silver1));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
-		writePng(qr.toImage(10, 3), "sqrt2-segmented-QR.png");
+		writePng(toImage(qr, 10, 3), "sqrt2-segmented-QR.png");
 		
 		// Illustration "golden"
 		String golden0 = "Golden ratio φ = 1.";
 		String golden1 = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374";
 		String golden2 = "......";
 		qr = QrCode.encodeText(golden0 + golden1 + golden2, QrCode.Ecc.LOW);
-		writePng(qr.toImage(8, 5), "phi-monolithic-QR.png");
+		writePng(toImage(qr, 8, 5), "phi-monolithic-QR.png");
 		
 		segs = Arrays.asList(
 			QrSegment.makeBytes(golden0.getBytes(StandardCharsets.UTF_8)),
 			QrSegment.makeNumeric(golden1),
 			QrSegment.makeAlphanumeric(golden2));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
-		writePng(qr.toImage(8, 5), "phi-segmented-QR.png");
+		writePng(toImage(qr, 8, 5), "phi-segmented-QR.png");
 		
 		// Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 		String madoka = "「魔法少女まどか☆マギカ」って、　ИАИ　ｄｅｓｕ　κα？";
 		qr = QrCode.encodeText(madoka, QrCode.Ecc.LOW);
-		writePng(qr.toImage(9, 4), "madoka-utf8-QR.png");
+		writePng(toImage(qr, 9, 4), "madoka-utf8-QR.png");
 		
 		int[] kanjiChars = {  // Kanji mode encoding (13 bits per character)
 			0x0035, 0x1002, 0x0FC0, 0x0AED, 0x0AD7,
@@ -146,7 +147,7 @@ public final class QrCodeGeneratorDemo {
 			bb.appendBits(c, 13);
 		segs = Arrays.asList(new QrSegment(QrSegment.Mode.KANJI, kanjiChars.length, bb.data, bb.bitLength));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
-		writePng(qr.toImage(9, 4), "madoka-kanji-QR.png");
+		writePng(toImage(qr, 9, 4), "madoka-kanji-QR.png");
 	}
 	
 	
@@ -158,25 +159,56 @@ public final class QrCodeGeneratorDemo {
 		// Project Nayuki URL
 		segs = QrSegment.makeSegments("https://www.nayuki.io/");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, -1, true);  // Automatic mask
-		writePng(qr.toImage(8, 6), "project-nayuki-automask-QR.png");
+		writePng(toImage(qr, 8, 6), "project-nayuki-automask-QR.png");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 3, true);  // Force mask 3
-		writePng(qr.toImage(8, 6), "project-nayuki-mask3-QR.png");
+		writePng(toImage(qr, 8, 6), "project-nayuki-mask3-QR.png");
 		
 		// Chinese text as UTF-8
 		segs = QrSegment.makeSegments("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 0, true);  // Force mask 0
-		writePng(qr.toImage(10, 3), "unicode-mask0-QR.png");
+		writePng(toImage(qr, 10, 3), "unicode-mask0-QR.png");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 1, true);  // Force mask 1
-		writePng(qr.toImage(10, 3), "unicode-mask1-QR.png");
+		writePng(toImage(qr, 10, 3), "unicode-mask1-QR.png");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 5, true);  // Force mask 5
-		writePng(qr.toImage(10, 3), "unicode-mask5-QR.png");
+		writePng(toImage(qr, 10, 3), "unicode-mask5-QR.png");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.MEDIUM, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 7, true);  // Force mask 7
-		writePng(qr.toImage(10, 3), "unicode-mask7-QR.png");
+		writePng(toImage(qr, 10, 3), "unicode-mask7-QR.png");
 	}
 	
 	
 	
 	/*---- Utilities ----*/
+	
+	/**
+	 * Returns a raster image depicting the specified QR Code, with the specified module scale and border modules.
+	 * <p>For example, toImage(qr, scale=10, border=4) means to pad the QR Code with 4 light
+	 * border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
+	 * The resulting image only contains the hex colors 000000 and FFFFFF.
+	 * @param qr the QR Code to render (not {@code null})
+	 * @param scale the side length (measured in pixels, must be positive) of each module
+	 * @param border the number of border modules to add, which must be non-negative
+	 * @return a new image representing the QR Code, with padding and scaling
+	 * @throws NullPointerException if the QR Code is {@code null}
+	 * @throws IllegalArgumentException if the scale or border is out of range, or if
+	 * {scale, border, size} cause the image dimensions to exceed Integer.MAX_VALUE
+	 */
+	private static BufferedImage toImage(QrCode qr, int scale, int border) {
+		Objects.requireNonNull(qr);
+		if (scale <= 0 || border < 0)
+			throw new IllegalArgumentException("Value out of range");
+		if (border > Integer.MAX_VALUE / 2 || qr.size + border * 2L > Integer.MAX_VALUE / scale)
+			throw new IllegalArgumentException("Scale or border too large");
+		
+		BufferedImage result = new BufferedImage((qr.size + border * 2) * scale, (qr.size + border * 2) * scale, BufferedImage.TYPE_INT_RGB);
+		for (int y = 0; y < result.getHeight(); y++) {
+			for (int x = 0; x < result.getWidth(); x++) {
+				boolean color = qr.getModule(x / scale - border, y / scale - border);
+				result.setRGB(x, y, color ? 0x000000 : 0xFFFFFF);
+			}
+		}
+		return result;
+	}
+	
 	
 	// Helper function to reduce code duplication.
 	private static void writePng(BufferedImage img, String filepath) throws IOException {

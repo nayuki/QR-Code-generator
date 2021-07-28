@@ -18,7 +18,7 @@ Features
 Core features:
 
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-* Output formats: Raw modules/pixels of the QR symbol, SVG XML string, `BufferedImage` raster bitmap
+* Output formats: Raw modules/pixels of the QR symbol, SVG XML string
 * Encodes numeric and special-alphanumeric text in less space than general text
 * Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes
 * Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts
@@ -44,7 +44,7 @@ Examples
     
     // Simple operation
     QrCode qr0 = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
-    BufferedImage img = qr0.toImage(4, 10);
+    BufferedImage img = toImage(qr0, 4, 10);  // See QrCodeGeneratorDemo
     ImageIO.write(img, "png", new File("qr-code.png"));
     
     // Manual operation

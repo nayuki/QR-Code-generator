@@ -9,7 +9,7 @@
  * <p>Core features:</p>
  * <ul>
  *   <li><p>Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard</p></li>
- *   <li><p>Output formats: Raw modules/pixels of the QR symbol, SVG XML string, {@code BufferedImage} raster bitmap</p></li>
+ *   <li><p>Output formats: Raw modules/pixels of the QR symbol, SVG XML string</p></li>
  *   <li><p>Encodes numeric and special-alphanumeric text in less space than general text</p></li>
  *   <li><p>Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes</p></li>
  *   <li><p>Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts</p></li>
@@ -32,7 +32,7 @@
  *import io.nayuki.fastqrcodegen.*;
  *
  *QrCode qr = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
- *BufferedImage img = qr.toImage(4, 10);
+ *BufferedImage img = toImage(qr, 4, 10);  // See QrCodeGeneratorDemo
  *ImageIO.write(img, "png", new File("qr-code.png"));</pre>
  * <p>Manual operation:</p>
  * <pre style="margin-left:2em">import java.util.List;

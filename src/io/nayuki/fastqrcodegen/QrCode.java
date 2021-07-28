@@ -23,7 +23,6 @@
 
 package io.nayuki.fastqrcodegen;
 
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -275,34 +274,6 @@ public final class QrCode {
 			return getBit(modules[i >>> 5], i) != 0;
 		} else
 			return false;
-	}
-	
-	
-	/**
-	 * Returns a raster image depicting this QR Code, with the specified module scale and border modules.
-	 * <p>For example, toImage(scale=10, border=4) means to pad the QR Code with 4 light
-	 * border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
-	 * The resulting image only contains the hex colors 000000 and FFFFFF.
-	 * @param scale the side length (measured in pixels, must be positive) of each module
-	 * @param border the number of border modules to add, which must be non-negative
-	 * @return a new image representing this QR Code, with padding and scaling
-	 * @throws IllegalArgumentException if the scale or border is out of range, or if
-	 * {scale, border, size} cause the image dimensions to exceed Integer.MAX_VALUE
-	 */
-	public BufferedImage toImage(int scale, int border) {
-		if (scale <= 0 || border < 0)
-			throw new IllegalArgumentException("Value out of range");
-		if (border > Integer.MAX_VALUE / 2 || size + border * 2L > Integer.MAX_VALUE / scale)
-			throw new IllegalArgumentException("Scale or border too large");
-		
-		BufferedImage result = new BufferedImage((size + border * 2) * scale, (size + border * 2) * scale, BufferedImage.TYPE_INT_RGB);
-		for (int y = 0; y < result.getHeight(); y++) {
-			for (int x = 0; x < result.getWidth(); x++) {
-				boolean color = getModule(x / scale - border, y / scale - border);
-				result.setRGB(x, y, color ? 0x000000 : 0xFFFFFF);
-			}
-		}
-		return result;
 	}
 	
 	
