@@ -30,7 +30,7 @@ from typing import List, Optional, TypeVar
 
 CHILD_PROGRAMS: List[List[str]] = [
 	["python3", "-B", "../python/qrcodegen-worker.py"],  # Python program
-	["java", "-cp", "../java/src/main/java", "-ea:io.nayuki.qrcodegen...", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
+	["java", "-cp", "../java/bin", "-ea:io.nayuki.qrcodegen...", "io/nayuki/qrcodegen/QrCodeGeneratorWorker"],  # Java program
 	["node", "../typescript-javascript/qrcodegen-worker.js"],  # TypeScript program
 	["../c/qrcodegen-worker"],  # C program
 	["../cpp/QrCodeGeneratorWorker"],  # C++ program
