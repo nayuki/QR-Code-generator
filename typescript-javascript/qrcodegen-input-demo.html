@@ -29,6 +29,12 @@
 			html {
 				font-family: sans-serif;
 			}
+			h1 {
+				text-align: center;
+			}
+			table {
+				border-collapse: collapse;
+			}
 			td {
 				vertical-align: top;
 				padding-top: 0.2em;
@@ -38,6 +44,10 @@
 				white-space: pre;
 				padding-right: 0.5em;
 			}
+			input[type=number], input[type=text], textarea {
+				font-size: inherit;
+				font-family: inherit;
+			}
 			input[type=radio], input[type=checkbox] {
 				margin: 0em;
 				padding: 0em;
@@ -45,6 +55,11 @@
 			input[type=radio] + label, input[type=checkbox] + label {
 				margin-right: 0.8em;
 				padding-left: 0.2em;
+			}
+			hr {
+				margin: 2em 0em;
+				border: none;
+				border-top: 0.1em solid #A0A0A0;
 			}
 		</style>
 	</head>
@@ -56,12 +71,12 @@
 			<p>(Are the JavaScript files missing?)</p>
 			<p>(The JavaScript code needs to be compiled from the TypeScript code.)</p>
 		</div>
-		<form id="loaded" style="display:none" action="#" method="get" onsubmit="return false;">
-			<table class="noborder" style="width:100%">
+		<form id="loaded" style="display:none" onsubmit="event.preventDefault();">
+			<table>
 				<tbody>
 					<tr>
 						<td><strong>Text string:</strong></td>
-						<td style="width:100%"><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:100%; max-width:30em; height:5em; font-family:inherit"></textarea></td>
+						<td><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:30em; height:5em"></textarea></td>
 					</tr>
 					<tr>
 						<td><strong>QR Code:</strong></td>
