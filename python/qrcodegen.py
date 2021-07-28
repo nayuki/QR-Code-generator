@@ -689,7 +689,7 @@ class QrSegment:
 	@staticmethod
 	def make_numeric(digits: str) -> QrSegment:
 		"""Returns a segment representing the given string of decimal digits encoded in numeric mode."""
-		if QrSegment.NUMERIC_REGEX.fullmatch(digits) is None:
+		if not QrSegment.is_numeric(digits):
 			raise ValueError("String contains non-numeric characters")
 		bb = _BitBuffer()
 		i: int = 0
@@ -705,7 +705,7 @@ class QrSegment:
 		"""Returns a segment representing the given text string encoded in alphanumeric mode.
 		The characters allowed are: 0 to 9, A to Z (uppercase only), space,
 		dollar, percent, asterisk, plus, hyphen, period, slash, colon."""
-		if QrSegment.ALPHANUMERIC_REGEX.fullmatch(text) is None:
+		if not QrSegment.is_alphanumeric(text):
 			raise ValueError("String contains unencodable characters in alphanumeric mode")
 		bb = _BitBuffer()
 		for i in range(0, len(text) - 1, 2):  # Process groups of 2
@@ -727,9 +727,9 @@ class QrSegment:
 		# Select the most efficient segment encoding automatically
 		if text == "":
 			return []
-		elif QrSegment.NUMERIC_REGEX.fullmatch(text) is not None:
+		elif QrSegment.is_numeric(text):
 			return [QrSegment.make_numeric(text)]
-		elif QrSegment.ALPHANUMERIC_REGEX.fullmatch(text) is not None:
+		elif QrSegment.is_alphanumeric(text):
 			return [QrSegment.make_alphanumeric(text)]
 		else:
 			return [QrSegment.make_bytes(text.encode("UTF-8"))]
@@ -753,6 +753,21 @@ class QrSegment:
 		else:
 			raise ValueError("ECI assignment value out of range")
 		return QrSegment(QrSegment.Mode.ECI, 0, bb)
+	
+	
+	# Tests whether the given string can be encoded as a segment in numeric mode.
+	# A string is encodable iff each character is in the range 0 to 9.
+	@staticmethod
+	def is_numeric(text: str) -> bool:
+		return QrSegment._NUMERIC_REGEX.fullmatch(text) is not None
+	
+	
+	# Tests whether the given string can be encoded as a segment in alphanumeric mode.
+	# A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	# (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	@staticmethod
+	def is_alphanumeric(text: str) -> bool:
+		return QrSegment._ALPHANUMERIC_REGEX.fullmatch(text) is not None
 	
 	
 	# ---- Private fields ----
@@ -817,18 +832,13 @@ class QrSegment:
 	
 	# ---- Constants ----
 	
-	# (Public) Describes precisely all strings that are encodable in numeric mode.
-	# To test whether a string s is encodable: ok = NUMERIC_REGEX.fullmatch(s) is not None
-	# A string is encodable iff each character is in the range 0 to 9.
-	NUMERIC_REGEX: re.Pattern = re.compile(r"[0-9]*")
+	# Describes precisely all strings that are encodable in numeric mode.
+	_NUMERIC_REGEX: re.Pattern = re.compile(r"[0-9]*")
 	
-	# (Public) Describes precisely all strings that are encodable in alphanumeric mode.
-	# To test whether a string s is encodable: ok = ALPHANUMERIC_REGEX.fullmatch(s) is not None
-	# A string is encodable iff each character is in the following set: 0 to 9, A to Z
-	# (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-	ALPHANUMERIC_REGEX: re.Pattern = re.compile(r"[A-Z0-9 $%*+./:-]*")
+	# Describes precisely all strings that are encodable in alphanumeric mode.
+	_ALPHANUMERIC_REGEX: re.Pattern = re.compile(r"[A-Z0-9 $%*+./:-]*")
 	
-	# (Private) Dictionary of "0"->0, "A"->10, "$"->37, etc.
+	# Dictionary of "0"->0, "A"->10, "$"->37, etc.
 	_ALPHANUMERIC_ENCODING_TABLE: Dict[str,int] = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
 	
 	

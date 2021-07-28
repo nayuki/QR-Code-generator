@@ -74,7 +74,7 @@ public final class QrSegment {
 	 */
 	public static QrSegment makeNumeric(String digits) {
 		Objects.requireNonNull(digits);
-		if (!NUMERIC_REGEX.matcher(digits).matches())
+		if (!isNumeric(digits))
 			throw new IllegalArgumentException("String contains non-numeric characters");
 		
 		BitBuffer bb = new BitBuffer();
@@ -98,7 +98,7 @@ public final class QrSegment {
 	 */
 	public static QrSegment makeAlphanumeric(String text) {
 		Objects.requireNonNull(text);
-		if (!ALPHANUMERIC_REGEX.matcher(text).matches())
+		if (!isAlphanumeric(text))
 			throw new IllegalArgumentException("String contains unencodable characters in alphanumeric mode");
 		
 		BitBuffer bb = new BitBuffer();
@@ -127,9 +127,9 @@ public final class QrSegment {
 		// Select the most efficient segment encoding automatically
 		List<QrSegment> result = new ArrayList<>();
 		if (text.equals(""));  // Leave result empty
-		else if (NUMERIC_REGEX.matcher(text).matches())
+		else if (isNumeric(text))
 			result.add(makeNumeric(text));
-		else if (ALPHANUMERIC_REGEX.matcher(text).matches())
+		else if (isAlphanumeric(text))
 			result.add(makeAlphanumeric(text));
 		else
 			result.add(makeBytes(text.getBytes(StandardCharsets.UTF_8)));
@@ -159,6 +159,33 @@ public final class QrSegment {
 		} else
 			throw new IllegalArgumentException("ECI assignment value out of range");
 		return new QrSegment(Mode.ECI, 0, bb);
+	}
+	
+	
+	/**
+	 * Tests whether the specified string can be encoded as a segment in numeric mode.
+	 * A string is encodable iff each character is in the range 0 to 9.
+	 * @param text the string to test for encodability (not {@code null})
+	 * @return {@code true} iff each character is in the range 0 to 9.
+	 * @throws NullPointerException if the string is {@code null}
+	 * @see #makeNumeric(String)
+	 */
+	public static boolean isNumeric(String text) {
+		return NUMERIC_REGEX.matcher(text).matches();
+	}
+	
+	
+	/**
+	 * Tests whether the specified string can be encoded as a segment in alphanumeric mode.
+	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	 * @param text the string to test for encodability (not {@code null})
+	 * @return {@code true} iff each character is in the alphanumeric mode character set
+	 * @throws NullPointerException if the string is {@code null}
+	 * @see #makeAlphanumeric(String)
+	 */
+	public static boolean isAlphanumeric(String text) {
+		return ALPHANUMERIC_REGEX.matcher(text).matches();
 	}
 	
 	
@@ -231,18 +258,11 @@ public final class QrSegment {
 	
 	/*---- Constants ----*/
 	
-	/** Describes precisely all strings that are encodable in numeric mode. To test whether a
-	 * string {@code s} is encodable: {@code boolean ok = NUMERIC_REGEX.matcher(s).matches();}.
-	 * A string is encodable iff each character is in the range 0 to 9.
-	 * @see #makeNumeric(String) */
-	public static final Pattern NUMERIC_REGEX = Pattern.compile("[0-9]*");
+	// Describes precisely all strings that are encodable in numeric mode.
+	private static final Pattern NUMERIC_REGEX = Pattern.compile("[0-9]*");
 	
-	/** Describes precisely all strings that are encodable in alphanumeric mode. To test whether a
-	 * string {@code s} is encodable: {@code boolean ok = ALPHANUMERIC_REGEX.matcher(s).matches();}.
-	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
-	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-	 * @see #makeAlphanumeric(String) */
-	public static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[A-Z0-9 $%*+./:-]*");
+	// Describes precisely all strings that are encodable in alphanumeric mode.
+	private static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[A-Z0-9 $%*+./:-]*");
 	
 	// The set of all legal characters in alphanumeric mode, where
 	// each character value maps to the index in the string.

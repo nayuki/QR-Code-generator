@@ -756,7 +756,7 @@ namespace qrcodegen {
 		
 		// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 		public static makeNumeric(digits: string): QrSegment {
-			if (!this.NUMERIC_REGEX.test(digits))
+			if (!QrSegment.isNumeric(digits))
 				throw "String contains non-numeric characters";
 			let bb: Array<bit> = []
 			for (let i = 0; i < digits.length; ) {  // Consume up to 3 digits per iteration
@@ -772,7 +772,7 @@ namespace qrcodegen {
 		// The characters allowed are: 0 to 9, A to Z (uppercase only), space,
 		// dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 		public static makeAlphanumeric(text: string): QrSegment {
-			if (!this.ALPHANUMERIC_REGEX.test(text))
+			if (!QrSegment.isAlphanumeric(text))
 				throw "String contains unencodable characters in alphanumeric mode";
 			let bb: Array<bit> = []
 			let i: int;
@@ -793,9 +793,9 @@ namespace qrcodegen {
 			// Select the most efficient segment encoding automatically
 			if (text == "")
 				return [];
-			else if (this.NUMERIC_REGEX.test(text))
+			else if (QrSegment.isNumeric(text))
 				return [QrSegment.makeNumeric(text)];
-			else if (this.ALPHANUMERIC_REGEX.test(text))
+			else if (QrSegment.isAlphanumeric(text))
 				return [QrSegment.makeAlphanumeric(text)];
 			else
 				return [QrSegment.makeBytes(QrSegment.toUtf8ByteArray(text))];
@@ -819,6 +819,21 @@ namespace qrcodegen {
 			} else
 				throw "ECI assignment value out of range";
 			return new QrSegment(QrSegment.Mode.ECI, 0, bb);
+		}
+		
+		
+		// Tests whether the given string can be encoded as a segment in numeric mode.
+		// A string is encodable iff each character is in the range 0 to 9.
+		public static isNumeric(text: string): boolean {
+			return QrSegment.NUMERIC_REGEX.test(text);
+		}
+		
+		
+		// Tests whether the given string can be encoded as a segment in alphanumeric mode.
+		// A string is encodable iff each character is in the following set: 0 to 9, A to Z
+		// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+		public static isAlphanumeric(text: string): boolean {
+			return QrSegment.ALPHANUMERIC_REGEX.test(text);
 		}
 		
 		
@@ -885,16 +900,11 @@ namespace qrcodegen {
 		
 		/*-- Constants --*/
 		
-		// Describes precisely all strings that are encodable in numeric mode. To test
-		// whether a string s is encodable: let ok: boolean = NUMERIC_REGEX.test(s);
-		// A string is encodable iff each character is in the range 0 to 9.
-		public static readonly NUMERIC_REGEX: RegExp = /^[0-9]*$/;
+		// Describes precisely all strings that are encodable in numeric mode.
+		private static readonly NUMERIC_REGEX: RegExp = /^[0-9]*$/;
 		
-		// Describes precisely all strings that are encodable in alphanumeric mode. To test
-		// whether a string s is encodable: let ok: boolean = ALPHANUMERIC_REGEX.test(s);
-		// A string is encodable iff each character is in the following set: 0 to 9, A to Z
-		// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-		public static readonly ALPHANUMERIC_REGEX: RegExp = /^[A-Z0-9 $%*+.\/:-]*$/;
+		// Describes precisely all strings that are encodable in alphanumeric mode.
+		private static readonly ALPHANUMERIC_REGEX: RegExp = /^[A-Z0-9 $%*+.\/:-]*$/;
 		
 		// The set of all legal characters in alphanumeric mode,
 		// where each character value maps to the index in the string.
