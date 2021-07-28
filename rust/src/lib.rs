@@ -695,7 +695,7 @@ impl QrCode {
 		} else {
 			let numalign = i32::from(ver) / 7 + 2;
 			let step: i32 = if ver == 32 { 26 } else
-				{(i32::from(ver)*4 + numalign*2 + 1) / (numalign*2 - 2) * 2};
+				{(i32::from(ver) * 4 + numalign * 2 + 1) / (numalign * 2 - 2) * 2};
 			let mut result: Vec<i32> = (0 .. numalign - 1).map(
 				|i| self.size - 7 - i * step).collect();
 			result.push(6);
