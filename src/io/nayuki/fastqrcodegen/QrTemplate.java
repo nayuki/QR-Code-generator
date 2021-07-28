@@ -107,7 +107,7 @@ final class QrTemplate {
 			darkenFunctionModule(size - 1 - i, 8, 0);
 		for (int i = 8; i < 15; i++)
 			darkenFunctionModule(8, size - 15 + i, 0);
-		darkenFunctionModule(8, size - 8, 1);  // Always black
+		darkenFunctionModule(8, size - 8, 1);  // Always dark
 	}
 	
 	
@@ -221,7 +221,7 @@ final class QrTemplate {
 	
 	
 	// Marks the module at the given coordinates as a function module.
-	// Also either sets that module black or keeps its color unchanged.
+	// Also either sets that module dark or keeps its color unchanged.
 	private void darkenFunctionModule(int x, int y, int enable) {
 		assert 0 <= x && x < size;
 		assert 0 <= y && y < size;
