@@ -132,7 +132,7 @@ public final class QrCodeGeneratorDemo {
 		// Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 		String madoka = "「魔法少女まどか☆マギカ」って、　ИАИ　ｄｅｓｕ　κα？";
 		qr = QrCode.encodeText(madoka, QrCode.Ecc.LOW);
-		writePng(toImage(qr, 9, 4), "madoka-utf8-QR.png");
+		writePng(toImage(qr, 9, 4, 0xFFFFE0, 0x303080), "madoka-utf8-QR.png");
 		
 		int[] kanjiChars = {  // Kanji mode encoding (13 bits per character)
 			0x0035, 0x1002, 0x0FC0, 0x0AED, 0x0AD7,
@@ -147,7 +147,7 @@ public final class QrCodeGeneratorDemo {
 			bb.appendBits(c, 13);
 		segs = Arrays.asList(new QrSegment(QrSegment.Mode.KANJI, kanjiChars.length, bb.data, bb.bitLength));
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.LOW);
-		writePng(toImage(qr, 9, 4), "madoka-kanji-QR.png");
+		writePng(toImage(qr, 9, 4, 0xE0F0FF, 0x404040), "madoka-kanji-QR.png");
 	}
 	
 	
@@ -159,9 +159,9 @@ public final class QrCodeGeneratorDemo {
 		// Project Nayuki URL
 		segs = QrSegment.makeSegments("https://www.nayuki.io/");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, -1, true);  // Automatic mask
-		writePng(toImage(qr, 8, 6), "project-nayuki-automask-QR.png");
+		writePng(toImage(qr, 8, 6, 0xE0FFE0, 0x206020), "project-nayuki-automask-QR.png");
 		qr = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, QrCode.MIN_VERSION, QrCode.MAX_VERSION, 3, true);  // Force mask 3
-		writePng(toImage(qr, 8, 6), "project-nayuki-mask3-QR.png");
+		writePng(toImage(qr, 8, 6, 0xFFE0E0, 0x602020), "project-nayuki-mask3-QR.png");
 		
 		// Chinese text as UTF-8
 		segs = QrSegment.makeSegments("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫");
@@ -179,20 +179,27 @@ public final class QrCodeGeneratorDemo {
 	
 	/*---- Utilities ----*/
 	
+	private static BufferedImage toImage(QrCode qr, int scale, int border) {
+		return toImage(qr, scale, border, 0xFFFFFF, 0x000000);
+	}
+	
+	
 	/**
-	 * Returns a raster image depicting the specified QR Code, with the specified module scale and border modules.
-	 * <p>For example, toImage(qr, scale=10, border=4) means to pad the QR Code with 4 light
-	 * border modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
-	 * The resulting image only contains the hex colors 000000 and FFFFFF.
+	 * Returns a raster image depicting the specified QR Code, with
+	 * the specified module scale, border modules, and module colors.
+	 * <p>For example, scale=10 and border=4 means to pad the QR Code with 4 light border
+	 * modules on all four sides, and use 10&#xD7;10 pixels to represent each module.
 	 * @param qr the QR Code to render (not {@code null})
 	 * @param scale the side length (measured in pixels, must be positive) of each module
 	 * @param border the number of border modules to add, which must be non-negative
+	 * @param lightColor the color to use for light modules, in 0xRRGGBB format
+	 * @param darkColor the color to use for dark modules, in 0xRRGGBB format
 	 * @return a new image representing the QR Code, with padding and scaling
 	 * @throws NullPointerException if the QR Code is {@code null}
 	 * @throws IllegalArgumentException if the scale or border is out of range, or if
 	 * {scale, border, size} cause the image dimensions to exceed Integer.MAX_VALUE
 	 */
-	private static BufferedImage toImage(QrCode qr, int scale, int border) {
+	private static BufferedImage toImage(QrCode qr, int scale, int border, int lightColor, int darkColor) {
 		Objects.requireNonNull(qr);
 		if (scale <= 0 || border < 0)
 			throw new IllegalArgumentException("Value out of range");
@@ -203,7 +210,7 @@ public final class QrCodeGeneratorDemo {
 		for (int y = 0; y < result.getHeight(); y++) {
 			for (int x = 0; x < result.getWidth(); x++) {
 				boolean color = qr.getModule(x / scale - border, y / scale - border);
-				result.setRGB(x, y, color ? 0x000000 : 0xFFFFFF);
+				result.setRGB(x, y, color ? darkColor : lightColor);
 			}
 		}
 		return result;
