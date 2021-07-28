@@ -1116,17 +1116,19 @@ impl QrSegment {
 	}
 	
 	
-	// Tests whether the given string can be encoded as a segment in numeric mode.
-	// A string is encodable iff each character is in the range 0 to 9.
-	fn is_numeric(text: &[char]) -> bool {
+	/// Tests whether the given string can be encoded as a segment in numeric mode.
+	/// 
+	/// A string is encodable iff each character is in the range 0 to 9.
+	pub fn is_numeric(text: &[char]) -> bool {
 		text.iter().all(|&c| '0' <= c && c <= '9')
 	}
 	
 	
-	// Tests whether the given string can be encoded as a segment in alphanumeric mode.
-	// A string is encodable iff each character is in the following set: 0 to 9, A to Z
-	// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-	fn is_alphanumeric(text: &[char]) -> bool {
+	/// Tests whether the given string can be encoded as a segment in alphanumeric mode.
+	/// 
+	/// A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	/// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+	pub fn is_alphanumeric(text: &[char]) -> bool {
 		text.iter().all(|c| ALPHANUMERIC_CHARSET.contains(c))
 	}
 	
