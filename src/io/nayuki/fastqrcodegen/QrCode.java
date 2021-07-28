@@ -253,7 +253,7 @@ public final class QrCode {
 		// Compute ECC, draw modules, do masking
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(tpl.dataOutputBitIndexes, allCodewords);
-		this.mask = handleConstructorMasking(tpl.masks, msk);
+		mask = handleConstructorMasking(tpl.masks, msk);
 	}
 	
 	
