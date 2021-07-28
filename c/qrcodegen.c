@@ -805,10 +805,10 @@ static bool getBit(int x, int i) {
 /*---- Segment handling ----*/
 
 // Public function - see documentation comment in header file.
-bool qrcodegen_isAlphanumeric(const char *text) {
+bool qrcodegen_isNumeric(const char *text) {
 	assert(text != NULL);
 	for (; *text != '\0'; text++) {
-		if (strchr(ALPHANUMERIC_CHARSET, *text) == NULL)
+		if (*text < '0' || *text > '9')
 			return false;
 	}
 	return true;
@@ -816,10 +816,10 @@ bool qrcodegen_isAlphanumeric(const char *text) {
 
 
 // Public function - see documentation comment in header file.
-bool qrcodegen_isNumeric(const char *text) {
+bool qrcodegen_isAlphanumeric(const char *text) {
 	assert(text != NULL);
 	for (; *text != '\0'; text++) {
-		if (*text < '0' || *text > '9')
+		if (strchr(ALPHANUMERIC_CHARSET, *text) == NULL)
 			return false;
 	}
 	return true;

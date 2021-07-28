@@ -191,19 +191,19 @@ int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 }
 
 
-bool QrSegment::isAlphanumeric(const char *text) {
+bool QrSegment::isNumeric(const char *text) {
 	for (; *text != '\0'; text++) {
-		if (std::strchr(ALPHANUMERIC_CHARSET, *text) == nullptr)
+		char c = *text;
+		if (c < '0' || c > '9')
 			return false;
 	}
 	return true;
 }
 
 
-bool QrSegment::isNumeric(const char *text) {
+bool QrSegment::isAlphanumeric(const char *text) {
 	for (; *text != '\0'; text++) {
-		char c = *text;
-		if (c < '0' || c > '9')
+		if (std::strchr(ALPHANUMERIC_CHARSET, *text) == nullptr)
 			return false;
 	}
 	return true;

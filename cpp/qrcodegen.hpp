@@ -133,18 +133,18 @@ class QrSegment final {
 	/*---- Public static helper functions ----*/
 	
 	/* 
+	 * Tests whether the given string can be encoded as a segment in numeric mode.
+	 * A string is encodable iff each character is in the range 0 to 9.
+	 */
+	public: static bool isNumeric(const char *text);
+	
+	
+	/* 
 	 * Tests whether the given string can be encoded as a segment in alphanumeric mode.
 	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
 	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 */
 	public: static bool isAlphanumeric(const char *text);
-	
-	
-	/* 
-	 * Tests whether the given string can be encoded as a segment in numeric mode.
-	 * A string is encodable iff each character is in the range 0 to 9.
-	 */
-	public: static bool isNumeric(const char *text);
 	
 	
 	
