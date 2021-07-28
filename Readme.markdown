@@ -87,7 +87,7 @@ Python language:
     
     # Simple operation
     qr0 = QrCode.encode_text("Hello, world!", QrCode.Ecc.MEDIUM)
-    svg = qr0.to_svg_str(4)
+    svg = to_svg_str(qr0, 4)  # See qrcodegen-demo
     
     # Manual operation
     segs = QrSegment.make_segments("3141592653589793238462643383")
