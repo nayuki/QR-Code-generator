@@ -18,7 +18,7 @@ Core features:
 * Available in 6 programming languages, all with nearly equal functionality: Java, TypeScript/JavaScript, Python, Rust, C++, C
 * Significantly shorter code but more documentation comments compared to competing libraries
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-* Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages except C), `BufferedImage` raster bitmap (Java only), HTML5 canvas (TypeScript/JavaScript only)
+* Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages except C), HTML5 canvas (TypeScript/JavaScript only)
 * Detects finder-like penalty patterns more accurately than other implementations
 * Encodes numeric and special-alphanumeric text in less space than general text
 * Open source code under the permissive MIT License
@@ -51,7 +51,7 @@ Java language:
     
     // Simple operation
     QrCode qr0 = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
-    BufferedImage img = qr0.toImage(4, 10);
+    BufferedImage img = toImage(qr0, 4, 10);  // See QrCodeGeneratorDemo
     ImageIO.write(img, "png", new File("qr-code.png"));
     
     // Manual operation
