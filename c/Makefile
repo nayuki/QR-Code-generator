@@ -53,7 +53,7 @@ CFLAGS += -std=c99 -O
 LIB = qrcodegen
 LIBFILE = lib$(LIB).a
 LIBOBJ = qrcodegen.o
-MAINS = qrcodegen-demo qrcodegen-test qrcodegen-worker
+MAINS = qrcodegen-demo qrcodegen-test
 
 # Build all binaries
 all: $(LIBFILE) $(MAINS)

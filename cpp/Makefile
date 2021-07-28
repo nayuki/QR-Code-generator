@@ -53,7 +53,7 @@ CXXFLAGS += -std=c++11 -O
 LIB = qrcodegen
 LIBFILE = lib$(LIB).a
 LIBOBJ = qrcodegen.o
-MAINS = QrCodeGeneratorDemo QrCodeGeneratorWorker
+MAINS = QrCodeGeneratorDemo
 
 # Build all binaries
 all: $(LIBFILE) $(MAINS)
