@@ -32,7 +32,7 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
-#include "QrCode.hpp"
+#include "qrcodegen.hpp"
 
 using qrcodegen::QrCode;
 using qrcodegen::QrSegment;

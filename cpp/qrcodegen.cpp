@@ -29,7 +29,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <utility>
-#include "QrCode.hpp"
+#include "qrcodegen.hpp"
 
 using std::int8_t;
 using std::uint8_t;
