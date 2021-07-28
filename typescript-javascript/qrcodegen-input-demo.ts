@@ -29,7 +29,7 @@ namespace app {
 	function initialize(): void {
 		getElem("loading").style.display = "none";
 		getElem("loaded").style.removeProperty("display");
-		let elems = document.querySelectorAll("input[type=number], textarea");
+		let elems = document.querySelectorAll("input[type=number], input[type=text], textarea");
 		for (let el of elems) {
 			if (el.id.indexOf("version-") != 0)
 				(el as any).oninput = redrawQrCode;
@@ -86,20 +86,24 @@ namespace app {
 		
 		// Draw image output
 		const border: number = parseInt(getInput("border-input").value, 10);
+		const lightColor: string = getInput("light-color-input").value;
+		const darkColor : string = getInput("dark-color-input" ).value;
 		if (border < 0 || border > 100)
 			return;
 		if (bitmapOutput) {
 			const scale: number = parseInt(getInput("scale-input").value, 10);
 			if (scale <= 0 || scale > 30)
 				return;
-			drawCanvas(qr, scale, border, "#FFFFFF", "#000000", canvas);
+			drawCanvas(qr, scale, border, lightColor, darkColor, canvas);
 			canvas.style.removeProperty("display");
 		} else {
-			const code: string = toSvgString(qr, border, "#FFFFFF", "#000000");
+			const code: string = toSvgString(qr, border, lightColor, darkColor);
 			const viewBox: string = (/ viewBox="([^"]*)"/.exec(code) as RegExpExecArray)[1];
 			const pathD: string = (/ d="([^"]*)"/.exec(code) as RegExpExecArray)[1];
 			svg.setAttribute("viewBox", viewBox);
 			(svg.querySelector("path") as Element).setAttribute("d", pathD);
+			(svg.querySelector("rect") as Element).setAttribute("fill", lightColor);
+			(svg.querySelector("path") as Element).setAttribute("fill", darkColor);
 			svg.style.removeProperty("display");
 			svgXml.value = code;
 		}
