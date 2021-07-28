@@ -62,9 +62,9 @@ public final class QrCodeGeneratorDemo {
 		File imgFile = new File("hello-world-QR.png");   // File path for output
 		ImageIO.write(img, "png", imgFile);              // Write image to file
 		
-		String svg = toSvgString(qr, 4);                 // Convert to SVG XML code
-		File svgFile = new File("hello-world-QR.svg");   // File path for output
-		Files.write(svgFile.toPath(),                    // Write image to file
+		String svg = toSvgString(qr, 4, "#FFFFFF", "#000000");  // Convert to SVG XML code
+		File svgFile = new File("hello-world-QR.svg");          // File path for output
+		Files.write(svgFile.toPath(),                           // Write image to file
 			svg.getBytes(StandardCharsets.UTF_8));
 	}
 	
@@ -217,12 +217,16 @@ public final class QrCodeGeneratorDemo {
 	 * number of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 	 * @param qr the QR Code to render (not {@code null})
 	 * @param border the number of border modules to add, which must be non-negative
+	 * @param lightColor the color to use for light modules, in any format supported by CSS, not {@code null}
+	 * @param darkColor the color to use for dark modules, in any format supported by CSS, not {@code null}
 	 * @return a string representing the QR Code as an SVG XML document
-	 * @throws NullPointerException if the QR Code is {@code null}
+	 * @throws NullPointerException if any object is {@code null}
 	 * @throws IllegalArgumentException if the border is negative
 	 */
-	private static String toSvgString(QrCode qr, int border) {
+	private static String toSvgString(QrCode qr, int border, String lightColor, String darkColor) {
 		Objects.requireNonNull(qr);
+		Objects.requireNonNull(lightColor);
+		Objects.requireNonNull(darkColor);
 		if (border < 0)
 			throw new IllegalArgumentException("Border must be non-negative");
 		long brd = border;
@@ -231,7 +235,7 @@ public final class QrCodeGeneratorDemo {
 			.append("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n")
 			.append(String.format("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 %1$d %1$d\" stroke=\"none\">\n",
 				qr.size + brd * 2))
-			.append("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n")
+			.append("\t<rect width=\"100%\" height=\"100%\" fill=\"" + lightColor + "\"/>\n")
 			.append("\t<path d=\"");
 		for (int y = 0; y < qr.size; y++) {
 			for (int x = 0; x < qr.size; x++) {
@@ -243,7 +247,7 @@ public final class QrCodeGeneratorDemo {
 			}
 		}
 		return sb
-			.append("\" fill=\"#000000\"/>\n")
+			.append("\" fill=\"" + darkColor + "\"/>\n")
 			.append("</svg>\n")
 			.toString();
 	}

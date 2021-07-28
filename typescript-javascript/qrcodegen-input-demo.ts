@@ -95,7 +95,7 @@ namespace app {
 			drawCanvas(qr, scale, border, "#FFFFFF", "#000000", canvas);
 			canvas.style.removeProperty("display");
 		} else {
-			const code: string = toSvgString(qr, border);
+			const code: string = toSvgString(qr, border, "#FFFFFF", "#000000");
 			const viewBox: string = (/ viewBox="([^"]*)"/.exec(code) as RegExpExecArray)[1];
 			const pathD: string = (/ d="([^"]*)"/.exec(code) as RegExpExecArray)[1];
 			svg.setAttribute("viewBox", viewBox);
@@ -170,7 +170,7 @@ namespace app {
 	
 	// Returns a string of SVG code for an image depicting the given QR Code, with the given number
 	// of border modules. The string always uses Unix newlines (\n), regardless of the platform.
-	function toSvgString(qr: qrcodegen.QrCode, border: number): string {
+	function toSvgString(qr: qrcodegen.QrCode, border: number, lightColor: string, darkColor: string): string {
 		if (border < 0)
 			throw "Border must be non-negative";
 		let parts: Array<string> = [];
@@ -183,8 +183,8 @@ namespace app {
 		return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ${qr.size + border * 2} ${qr.size + border * 2}" stroke="none">
-	<rect width="100%" height="100%" fill="#FFFFFF"/>
-	<path d="${parts.join(" ")}" fill="#000000"/>
+	<rect width="100%" height="100%" fill="${lightColor}"/>
+	<path d="${parts.join(" ")}" fill="${darkColor}"/>
 </svg>
 `
 		}
