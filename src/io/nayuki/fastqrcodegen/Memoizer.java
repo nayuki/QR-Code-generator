@@ -24,10 +24,10 @@
 package io.nayuki.fastqrcodegen;
 
 import java.lang.ref.SoftReference;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 
@@ -35,7 +35,7 @@ import java.util.function.Function;
 final class Memoizer<T,R> {
 	
 	private final Function<T,R> function;
-	private Map<T,SoftReference<R>> cache = new HashMap<>();
+	Map<T,SoftReference<R>> cache = new ConcurrentHashMap<>();
 	private Set<T> pending = new HashSet<>();
 	
 	
@@ -47,21 +47,30 @@ final class Memoizer<T,R> {
 	
 	// Computes function.apply(arg) or returns a cached copy of a previous call.
 	public R get(T arg) {
+		// Non-blocking fast path
+		{
+			SoftReference<R> ref = cache.get(arg);
+			if (ref != null) {
+				R result = ref.get();
+				if (result != null)
+					return result;
+			}
+		}
+		
+		// Sequential slow path
 		while (true) {
 			synchronized(this) {
-				if (cache.containsKey(arg)) {
-					SoftReference<R> ref = cache.get(arg);
+				SoftReference<R> ref = cache.get(arg);
+				if (ref != null) {
 					R result = ref.get();
 					if (result != null)
 						return result;
 					cache.remove(arg);
 				}
-				// Now cache.containsKey(arg) == false
+				assert !cache.containsKey(arg);
 				
-				if (!pending.contains(arg)) {
-					pending.add(arg);
+				if (pending.add(arg))
 					break;
-				}
 				
 				try {
 					this.wait();
@@ -73,9 +82,7 @@ final class Memoizer<T,R> {
 		
 		try {
 			R result = function.apply(arg);
-			synchronized(this) {
-				cache.put(arg, new SoftReference<>(result));
-			}
+			cache.put(arg, new SoftReference<>(result));
 			return result;
 		} finally {
 			synchronized(this) {
