@@ -18,7 +18,7 @@ Core features:
 * Available in 6 programming languages, all with nearly equal functionality: Java, TypeScript/JavaScript, Python, Rust, C++, C
 * Significantly shorter code but more documentation comments compared to competing libraries
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-* Output formats: Raw modules/pixels of the QR symbol (all languages), SVG XML string (all languages except C), `BufferedImage` raster bitmap (Java only), HTML5 canvas (TypeScript/JavaScript only)
+* Output format: Raw modules/pixels of the QR symbol
 * Detects finder-like penalty patterns more accurately than other implementations
 * Encodes numeric and special-alphanumeric text in less space than general text
 * Open source code under the permissive MIT License
@@ -52,7 +52,7 @@ import io.nayuki.qrcodegen.*;
 
 // Simple operation
 QrCode qr0 = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
-BufferedImage img = qr0.toImage(4, 10);
+BufferedImage img = toImage(qr0, 4, 10);  // See QrCodeGeneratorDemo
 ImageIO.write(img, "png", new File("qr-code.png"));
 
 // Manual operation
@@ -73,7 +73,7 @@ var QRC = qrcodegen.QrCode;
 
 // Simple operation
 var qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
-var svg = qr0.toSvgString(4);
+var svg = toSvgString(qr0, 4);  // See qrcodegen-input-demo
 
 // Manual operation
 var segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
@@ -92,7 +92,7 @@ from qrcodegen import *
 
 # Simple operation
 qr0 = QrCode.encode_text("Hello, world!", QrCode.Ecc.MEDIUM)
-svg = qr0.to_svg_str(4)
+svg = to_svg_str(qr0, 4)  # See qrcodegen-demo
 
 # Manual operation
 segs = QrSegment.make_segments("3141592653589793238462643383")
@@ -112,7 +112,7 @@ using namespace qrcodegen;
 
 // Simple operation
 QrCode qr0 = QrCode::encodeText("Hello, world!", QrCode::Ecc::MEDIUM);
-std::string svg = qr0.toSvgString(4);
+std::string svg = toSvgString(qr0, 4);  // See QrCodeGeneratorDemo
 
 // Manual operation
 std::vector<QrSegment> segs =
@@ -169,7 +169,7 @@ use qrcodegen::QrSegment;
 // Simple operation
 let qr = QrCode::encode_text("Hello, world!",
     QrCodeEcc::Medium).unwrap();
-let svg = qr.to_svg_string(4);
+let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
 
 // Manual operation
 let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
@@ -187,7 +187,7 @@ for y in 0 .. qr.size() {
 License
 -------
 
-Copyright © 2020 Project Nayuki. (MIT License)  
+Copyright © 2021 Project Nayuki. (MIT License)  
 [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
