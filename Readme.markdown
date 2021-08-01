@@ -69,17 +69,17 @@ TypeScript/JavaScript languages:
 
 ```typescript
 // Name abbreviated for the sake of these examples here
-var QRC = qrcodegen.QrCode;
+const QRC = qrcodegen.QrCode;
 
 // Simple operation
-var qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
-var svg = toSvgString(qr0, 4);  // See qrcodegen-input-demo
+const qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
+const svg = toSvgString(qr0, 4);  // See qrcodegen-input-demo
 
 // Manual operation
-var segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
-var qr1 = QRC.encodeSegments(segs, QRC.Ecc.HIGH, 5, 5, 2, false);
-for (var y = 0; y < qr1.size; y++) {
-    for (var x = 0; x < qr1.size; x++) {
+const segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");
+const qr1 = QRC.encodeSegments(segs, QRC.Ecc.HIGH, 5, 5, 2, false);
+for (let y = 0; y < qr1.size; y++) {
+    for (let x = 0; x < qr1.size; x++) {
         (... paint qr1.getModule(x, y) ...)
     }
 }
