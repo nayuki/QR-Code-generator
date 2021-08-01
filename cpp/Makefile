@@ -50,7 +50,7 @@ CXXFLAGS += -std=c++11 -O
 
 # ---- Targets to build ----
 
-LIB = qrcodegen
+LIB = qrcodegencpp
 LIBFILE = lib$(LIB).a
 LIBOBJ = qrcodegen.o
 MAINS = QrCodeGeneratorDemo
