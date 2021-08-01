@@ -67,7 +67,7 @@ for (int y = 0; y < qr1.size; y++) {
 
 TypeScript/JavaScript languages:
 
-```javascript
+```typescript
 // Name abbreviated for the sake of these examples here
 var QRC = qrcodegen.QrCode;
 
@@ -104,7 +104,7 @@ for y in range(qr1.get_size()):
 
 C++ language:
 
-```cpp
+```c++
 #include <string>
 #include <vector>
 #include "QrCode.hpp"
