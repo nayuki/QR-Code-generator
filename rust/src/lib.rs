@@ -54,9 +54,11 @@
 //! 
 //! ```
 //! extern crate qrcodegen;
+//! use qrcodegen::Mask;
 //! use qrcodegen::QrCode;
 //! use qrcodegen::QrCodeEcc;
 //! use qrcodegen::QrSegment;
+//! use qrcodegen::Version;
 //! ```
 //! 
 //! Simple operation:
@@ -72,8 +74,8 @@
 //! ```
 //! let chrs: Vec<char> = "3141592653589793238462643383".chars().collect();
 //! let segs = QrSegment::make_segments(&chrs);
-//! let qr = QrCode::encode_segments_advanced(
-//!     &segs, QrCodeEcc::High, 5, 5, Some(Mask::new(2)), false).unwrap();
+//! let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High,
+//!     Version::new(5), Version::new(5), Some(Mask::new(2)), false).unwrap();
 //! for y in 0 .. qr.size() {
 //!     for x in 0 .. qr.size() {
 //!         (... paint qr.get_module(x, y) ...)
