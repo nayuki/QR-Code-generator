@@ -24,8 +24,6 @@
  *   Software.
  */
 
-package io.nayuki.qrcodegen;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +33,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.imageio.ImageIO;
+import io.nayuki.qrcodegen.QrCode;
+import io.nayuki.qrcodegen.QrSegment;
+import io.nayuki.qrcodegen.QrSegmentAdvanced;
 
 
 public final class QrCodeGeneratorDemo {
