@@ -9,3 +9,4 @@ readme = "Readme.markdown"
 keywords = ["qr-code", "barcode", "encoder", "image"]
 categories = ["encoding", "multimedia::images"]
 license = "MIT"
+exclude = ["examples/*"]
