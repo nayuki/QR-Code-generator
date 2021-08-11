@@ -1,0 +1,27 @@
+name: QR-Code-generator
+
+on:
+  push:
+    branches:
+    - '*'
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches:
+    - '*'
+  workflow_dispatch:
+
+jobs:
+  image:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+      - name: "C"
+        run: make -C c all
+      - name: "C++"
+        run: make -C cpp all
