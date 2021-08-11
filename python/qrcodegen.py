@@ -817,7 +817,7 @@ class QrSegment:
 	
 	# Package-private function
 	@staticmethod
-	def get_total_bits(segs, version: int) -> Optional[int]:
+	def get_total_bits(segs: Sequence[QrSegment], version: int) -> Optional[int]:
 		"""Calculates the number of bits needed to encode the given segments at
 		the given version. Returns a non-negative number if successful. Otherwise
 		returns None if a segment has too many characters to fit its length field."""

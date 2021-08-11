@@ -24,6 +24,7 @@
 #   Software.
 # 
 
+from typing import List
 from qrcodegen import QrCode, QrSegment
 
 
