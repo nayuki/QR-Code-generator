@@ -234,7 +234,7 @@ Donepad:
 	// Pack bits into bytes in big endian
 	datacodewords := make([]uint8, len(bb)/8)
 	for i, bit := range bb {
-		datacodewords[i>>3] |= mathx.BoolToUint8(bit) << (7 - (i & 7))
+		datacodewords[i>>3] |= uint8(mathx.BoolToUint(bit)) << (7 - (i & 7))
 	}
 
 	// Create the QR Code object
@@ -330,8 +330,8 @@ func (q QrCode) module(x, y int32) bool {
 	return q.modules[uint(y*q.size+x)]
 }
 
-// TODO: refactor to match closer to the semantics of rust counterpart
 // Returns a mutable reference to the module's color at the given coordinates, which must be in bounds.
+// TODO: refactor to match closer to the semantics of rust counterpart, expose &bool instead?
 func (q *QrCode) moduleMut(x, y int32, mut bool) {
 	q.modules[uint(y*q.size+x)] = mut
 }
@@ -496,7 +496,7 @@ func (q *QrCode) addEccAndInterleave(data []uint8) []uint8 {
 
 	var k uint
 	for i, max := uint(0), numblocks; i < max; i++ {
-		datlen := shortblocklen - blockecclen + uint(mathx.BoolToUint8(i >= numshortblocks))
+		datlen := shortblocklen - blockecclen + mathx.BoolToUint(i >= numshortblocks)
 		dat := make([]uint8, datlen)
 		_ = copy(dat, data[k:k+datlen])
 		k += datlen
@@ -592,6 +592,7 @@ func (q *QrCode) applyMask(mask Mask) {
 			default:
 				panic("unreachable")
 			}
+			// TODO: refactor to match closer to the semantics of rust counterpart, ^= operator alternative
 			newModule := q.module(x, y) != (invert && !q.isfunction[(y*q.size+x)])
 			q.moduleMut(x, y, newModule)
 		}

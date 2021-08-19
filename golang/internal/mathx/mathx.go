@@ -32,7 +32,7 @@ func AbsInt32(x int32) int32 {
 	return x
 }
 
-func BoolToUint8(b bool) uint8 {
+func BoolToUint(b bool) uint {
 	if b {
 		return 1
 	} else {
