@@ -18,6 +18,7 @@ func main() {
 	doVarietyDemo()
 	doSegmentDemo()
 	doMaskDemo()
+	doErrorBoundDemo()
 }
 
 /*---- Demo suite ----*/
@@ -168,6 +169,64 @@ func doMaskDemo() {
 	m = mask.New(7)
 	qr, _ = qrcodegen.EncodeSegmentsAdvanced(segs, qrcodeecc.Medium, version.Min, version.Max, &m, true) // Force mask 7
 	printQr(qr)
+}
+
+func doErrorBoundDemo() {
+	// numeric only, max 7,089 characters
+	var sbNumeric strings.Builder
+	sbNumeric.Grow(2953)
+	for i := 0; i < 7089; i++ {
+		fmt.Fprintf(&sbNumeric, "1")
+	}
+	numericStr := sbNumeric.String()
+	_, err := qrcodegen.EncodeText(numericStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("ok to encode numeric string <= 7089 characters, %w", err))
+
+	numericStr += "1"
+	_, err = qrcodegen.EncodeText(numericStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("failed to encode numeric string > 7089 characters: %w", err))
+
+	// alphanumeric, max 4,296 characters
+	var sbAlphanumeric strings.Builder
+	sbAlphanumeric.Grow(2953)
+	for i := 0; i < 4296; i++ {
+		fmt.Fprintf(&sbAlphanumeric, "A")
+	}
+	alphanumericStr := sbAlphanumeric.String()
+	_, err = qrcodegen.EncodeText(alphanumericStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("ok to encode alphanumeric string <= 4296 characters, %w", err))
+
+	alphanumericStr += "A"
+	_, err = qrcodegen.EncodeText(alphanumericStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("failed to encode alphanumeric string > 4296 characters: %w", err))
+
+	// binary/byte, max 2,953 characters
+	var sbByte strings.Builder
+	sbByte.Grow(2953)
+	for i := 0; i < 2953; i++ {
+		fmt.Fprintf(&sbByte, "a")
+	}
+	byteStr := sbByte.String()
+	_, err = qrcodegen.EncodeText(byteStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("ok to encode byte string <= 2953 characters, %w", err))
+
+	byteStr += "a"
+	_, err = qrcodegen.EncodeText(byteStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("failed to encode byte string > 2953 characters: %w", err))
+
+	// utf8 kanji, max 984 characters
+	var sbKanji strings.Builder
+	sbKanji.Grow(2953)
+	for i := 0; i < 984; i++ {
+		fmt.Fprintf(&sbKanji, "世")
+	}
+	kanjiStr := sbKanji.String()
+	_, err = qrcodegen.EncodeText(kanjiStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("ok to encode utf8 kanji string <= 984 characters, %w", err))
+
+	kanjiStr += "世"
+	_, err = qrcodegen.EncodeText(kanjiStr, qrcodeecc.Low)
+	fmt.Println(fmt.Errorf("failed to encode utf8 kanji string > 984 characters: %w", err))
 }
 
 /*---- Utilities ----*/
