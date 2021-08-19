@@ -17,14 +17,6 @@ func MinUint(left, right uint) uint {
 	return right
 }
 
-func MinInt(left, right int) int {
-	if left < right {
-		return left
-	}
-
-	return right
-}
-
 func MaxInt32(left, right int32) int32 {
 	if left > right {
 		return left

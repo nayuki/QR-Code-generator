@@ -32,9 +32,10 @@ var (
 )
 
 // alias
-type Version = version.Version
-type QrCodeEcc = qrcodeecc.QrCodeEcc
 type Mask = mask.Mask
+type QrCodeEcc = qrcodeecc.QrCodeEcc
+type QrSegment = qrsegment.QrSegment
+type Version = version.Version
 
 /*---- QrCode functionality ----*/
 
@@ -110,7 +111,7 @@ func EncodeText(text string, ecl QrCodeEcc) (*QrCode, error) {
 // data is too long to fit in any version at the given ECC level.
 func EncodeBinary(data []uint8, ecl QrCodeEcc) (*QrCode, error) {
 	seg := qrsegment.MakeBytes(data)
-	segs := []qrsegment.QrSegment{seg}
+	segs := []QrSegment{seg}
 
 	return EncodeSegments(segs, ecl)
 }
@@ -128,7 +129,7 @@ func EncodeBinary(data []uint8, ecl QrCodeEcc) (*QrCode, error) {
 //
 // Returns a wrapped `QrCode` if successful, or `Err` if the
 // data is too long to fit in any version at the given ECC level.
-func EncodeSegments(segs []qrsegment.QrSegment, ecl QrCodeEcc) (*QrCode, error) {
+func EncodeSegments(segs []QrSegment, ecl QrCodeEcc) (*QrCode, error) {
 	return EncodeSegmentsAdvanced(segs, ecl, version.Min, version.Max, nil, true)
 }
 
@@ -147,7 +148,7 @@ func EncodeSegments(segs []qrsegment.QrSegment, ecl QrCodeEcc) (*QrCode, error) 
 // Returns a wrapped `QrCode` if successful, or `Err` if the data is too
 // long to fit in any version in the given range at the given ECC level.
 func EncodeSegmentsAdvanced(
-	segs []qrsegment.QrSegment,
+	segs []QrSegment,
 	ecl QrCodeEcc,
 	minversion Version,
 	maxversion Version,
@@ -199,14 +200,14 @@ func EncodeSegmentsAdvanced(
 		bb.AppendBits(uint32(seg.NumChars()), seg.Mode().NumCharCountBits(ver))
 		bb = append(bb, seg.Data()...)
 	}
-	if len(bb) != int(datausedbits) {
-		panic("len(bb) != int(datausedbits)")
+	if uint(len(bb)) != datausedbits {
+		panic("uint(len(bb)) != datausedbits")
 	}
 
 	// Add terminator and pad up to a byte if applicable
 	datacapacitybits := getNumDataCodewords(ver, ecl) * 8
-	if len(bb) > int(datacapacitybits) {
-		panic("len(bb) > int(datacapacitybits)")
+	if uint(len(bb)) > datacapacitybits {
+		panic("uint(len(bb)) > datacapacitybits")
 	}
 	numzerobits := mathx.MinUint(4, datacapacitybits-uint(len(bb)))
 	bb.AppendBits(0, uint8(numzerobits))
@@ -340,10 +341,10 @@ func (q *QrCode) moduleMut(x, y int32, mut bool) {
 // Reads this object's version field, and draws and marks all function modules.
 func (q *QrCode) drawFunctionPatterns() {
 	// Draw horizontal and vertical timing patterns
-	size := int(q.size)
-	for i := 0; i < size; i++ {
-		q.setFunctionModule(6, int32(i), i%2 == 0)
-		q.setFunctionModule(int32(i), 6, i%2 == 0)
+	size := q.size
+	for i := int32(0); i < size; i++ {
+		q.setFunctionModule(6, i, i%2 == 0)
+		q.setFunctionModule(i, 6, i%2 == 0)
 	}
 
 	// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
@@ -783,8 +784,8 @@ func reedSolomonComputeRemainder(data []uint8, divisor []uint8) []uint8 {
 		result = append(result, 0)
 
 		// TODO: refactor to match closer to the semantics of rust counterpart, zip()
-		iterLen := mathx.MinInt(len(result), len(divisor))
-		for i := 0; i < iterLen; i++ {
+		iterLen := mathx.MinUint(uint(len(result)), uint(len(divisor)))
+		for i := uint(0); i < iterLen; i++ {
 			// x := result[i]
 			y := divisor[i]
 

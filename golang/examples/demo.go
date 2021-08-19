@@ -190,13 +190,13 @@ func toSvgString(qr *qrcodegen.QrCode, border int32) (string, error) {
 	sb.WriteString("\t<rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/>\n")
 	sb.WriteString("\t<path d=\"")
 
-	for y := 0; y < int(qr.Size()); y++ {
-		for x := 0; x < int(qr.Size()); x++ {
-			if qr.GetModule(int32(x), int32(y)) {
+	for y := int32(0); y < qr.Size(); y++ {
+		for x := int32(0); x < qr.Size(); x++ {
+			if qr.GetModule(x, y) {
 				if x != 0 || y != 0 {
 					sb.WriteString(" ")
 				}
-				sb.WriteString(fmt.Sprintf("M%d,%dh1v1h-1z", x+int(border), y+int(border)))
+				sb.WriteString(fmt.Sprintf("M%d,%dh1v1h-1z", x+border, y+border))
 			}
 		}
 	}
