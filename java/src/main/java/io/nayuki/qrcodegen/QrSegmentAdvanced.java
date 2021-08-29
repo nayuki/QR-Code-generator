@@ -48,7 +48,7 @@ public final class QrSegmentAdvanced {
 	 * in the specified {error correction level, minimum version number, maximum version number}.
 	 * <p>This function can utilize all four text encoding modes: numeric, alphanumeric, byte (UTF-8),
 	 * and kanji. This can be considered as a sophisticated but slower replacement for {@link
-	 * QrSegment#makeSegments(String)}. This requires more input parameters because it searches a
+	 * QrSegment#makeSegments(CharSequence)}. This requires more input parameters because it searches a
 	 * range of versions, like {@link QrCode#encodeSegments(List,QrCode.Ecc,int,int,int,boolean)}.</p>
 	 * @param text the text to be encoded (not {@code null}), which can be any Unicode string
 	 * @param ecl the error correction level to use (not {@code null})
@@ -60,7 +60,7 @@ public final class QrSegmentAdvanced {
 	 * @throws IllegalArgumentException if 1 &#x2264; minVersion &#x2264; maxVersion &#x2264; 40 is violated
 	 * @throws DataTooLongException if the text fails to fit in the maxVersion QR Code at the ECL
 	 */
-	public static List<QrSegment> makeSegmentsOptimally(String text, QrCode.Ecc ecl, int minVersion, int maxVersion) {
+	public static List<QrSegment> makeSegmentsOptimally(CharSequence text, QrCode.Ecc ecl, int minVersion, int maxVersion) {
 		// Check arguments
 		Objects.requireNonNull(text);
 		Objects.requireNonNull(ecl);
@@ -223,7 +223,7 @@ public final class QrSegmentAdvanced {
 	
 	// Returns a new array of Unicode code points (effectively
 	// UTF-32 / UCS-4) representing the given UTF-16 string.
-	private static int[] toCodePoints(String s) {
+	private static int[] toCodePoints(CharSequence s) {
 		int[] result = s.codePoints().toArray();
 		for (int c : result) {
 			if (Character.isSurrogate((char)c))
@@ -257,9 +257,9 @@ public final class QrSegmentAdvanced {
 	 * @return a segment (not {@code null}) containing the text
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-encodable characters
-	 * @see #isEncodableAsKanji(String)
+	 * @see #isEncodableAsKanji(CharSequence)
 	 */
-	public static QrSegment makeKanji(String text) {
+	public static QrSegment makeKanji(CharSequence text) {
 		Objects.requireNonNull(text);
 		BitBuffer bb = new BitBuffer();
 		text.chars().forEachOrdered(c -> {
@@ -281,9 +281,9 @@ public final class QrSegmentAdvanced {
 	 * @param text the string to test for encodability (not {@code null})
 	 * @return {@code true} iff each character is in the kanji mode character set
 	 * @throws NullPointerException if the string is {@code null}
-	 * @see #makeKanji(String)
+	 * @see #makeKanji(CharSequence)
 	 */
-	public static boolean isEncodableAsKanji(String text) {
+	public static boolean isEncodableAsKanji(CharSequence text) {
 		Objects.requireNonNull(text);
 		return text.chars().allMatch(
 			c -> isKanji((char)c));

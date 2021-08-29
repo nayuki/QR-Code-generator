@@ -37,7 +37,7 @@ import java.util.Objects;
  * from 1 to 40, all 4 error correction levels, and 4 character encoding modes.</p>
  * <p>Ways to create a QR Code object:</p>
  * <ul>
- *   <li><p>High level: Take the payload data and call {@link QrCode#encodeText(String,Ecc)}
+ *   <li><p>High level: Take the payload data and call {@link QrCode#encodeText(CharSequence,Ecc)}
  *     or {@link QrCode#encodeBinary(byte[],Ecc)}.</p></li>
  *   <li><p>Mid level: Custom-make the list of {@link QrSegment segments}
  *     and call {@link QrCode#encodeSegments(List,Ecc)} or
@@ -66,7 +66,7 @@ public final class QrCode {
 	 * @throws DataTooLongException if the text fails to fit in the
 	 * largest version QR Code at the ECL, which means it is too long
 	 */
-	public static QrCode encodeText(String text, Ecc ecl) {
+	public static QrCode encodeText(CharSequence text, Ecc ecl) {
 		Objects.requireNonNull(text);
 		Objects.requireNonNull(ecl);
 		List<QrSegment> segs = QrSegment.makeSegments(text);
@@ -102,7 +102,7 @@ public final class QrCode {
 	 * of the result may be higher than the ecl argument if it can be done without increasing the version.
 	 * <p>This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and byte) to encode text in less space.
-	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
+	 * This is a mid-level API; the high-level API is {@link #encodeText(CharSequence,Ecc)}
 	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
 	 * @param ecl the error correction level to use (not {@code null}) (boostable)
@@ -125,7 +125,7 @@ public final class QrCode {
 	 * mask, or &#x2212;1 to automatically choose an appropriate mask (which may be slow).
 	 * <p>This function allows the user to create a custom sequence of segments that switches
 	 * between modes (such as alphanumeric and byte) to encode text in less space.
-	 * This is a mid-level API; the high-level API is {@link #encodeText(String,Ecc)}
+	 * This is a mid-level API; the high-level API is {@link #encodeText(CharSequence,Ecc)}
 	 * and {@link #encodeBinary(byte[],Ecc)}.</p>
 	 * @param segs the segments to encode
 	 * @param ecl the error correction level to use (not {@code null}) (boostable)
