@@ -103,13 +103,17 @@ public final class QrSegmentAdvanced {
 	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
+		if (codePoints.length > 7089)  // Upper bound is the number of characters that fit in QR Code version 40, low error correction, numeric mode
+			throw new DataTooLongException("String too long");
 		final Mode[] modeTypes = {Mode.BYTE, Mode.ALPHANUMERIC, Mode.NUMERIC, Mode.KANJI};  // Do not modify
 		final int numModes = modeTypes.length;
 		
 		// Segment header sizes, measured in 1/6 bits
 		final int[] headCosts = new int[numModes];
-		for (int i = 0; i < numModes; i++)
+		for (int i = 0; i < numModes; i++) {
 			headCosts[i] = (4 + modeTypes[i].numCharCountBits(version)) * 6;
+			assert 0 <= headCosts[i] && headCosts[i] <= (4 + 16) * 6;
+		}
 		
 		// charModes[i][j] represents the mode to encode the code point at
 		// index i such that the final segment ends in modeTypes[j] and the
@@ -154,6 +158,10 @@ public final class QrSegmentAdvanced {
 				}
 			}
 			
+			// A non-tight upper bound is when each of 7089 characters switches to
+			// byte mode (4-bit header + 16-bit count) and requires 4 bytes in UTF-8
+			for (int cost : curCosts)
+				assert 0 <= cost && cost <= (4 + 16 + 32) * 6 * 7089;
 			prevCosts = curCosts;
 		}
 		
