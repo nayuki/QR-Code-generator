@@ -14,7 +14,7 @@
  *   <li><p>Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes</p></li>
  *   <li><p>Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts</p></li>
  *   <li><p>Detects finder-like penalty patterns more accurately than other implementations</p></li>
- *   <li><p>Open source code under the permissive MIT License</p></li>
+ *   <li><p>Open-source code under the permissive MIT License</p></li>
  * </ul>
  * <p>Manual parameters:</p>
  * <ul>

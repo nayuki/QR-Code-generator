@@ -23,7 +23,7 @@ Core features:
 * Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes
 * Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts
 * Detects finder-like penalty patterns more accurately than other implementations
-* Open source code under the permissive MIT License
+* Open-source code under the permissive MIT License
 
 Manual parameters:
 
