@@ -71,7 +71,7 @@ Core features:
 * Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
 * Output format: Raw modules/pixels of the QR symbol
 * Encodes numeric and special-alphanumeric text in less space than general text
-* Open source code under the permissive MIT License
+* Open-source code under the permissive MIT License
 
 Manual parameters:
 

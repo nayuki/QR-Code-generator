@@ -41,7 +41,7 @@
 //! - Output format: Raw modules/pixels of the QR symbol
 //! - Detects finder-like penalty patterns more accurately than other implementations
 //! - Encodes numeric and special-alphanumeric text in less space than general text
-//! - Open source code under the permissive MIT License
+//! - Open-source code under the permissive MIT License
 //! 
 //! Manual parameters:
 //! 
