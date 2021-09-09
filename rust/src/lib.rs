@@ -1035,13 +1035,17 @@ impl QrSegment {
 	pub fn make_segments(text: &[char]) -> Vec<Self> {
 		if text.is_empty() {
 			vec![]
-		} else if QrSegment::is_numeric(text) {
-			vec![QrSegment::make_numeric(text)]
-		} else if QrSegment::is_alphanumeric(text) {
-			vec![QrSegment::make_alphanumeric(text)]
 		} else {
-			let s: String = text.iter().cloned().collect();
-			vec![QrSegment::make_bytes(s.as_bytes())]
+			vec![
+				if QrSegment::is_numeric(text) {
+					QrSegment::make_numeric(text)
+				} else if QrSegment::is_alphanumeric(text) {
+					QrSegment::make_alphanumeric(text)
+				} else {
+					let s: String = text.iter().cloned().collect();
+					QrSegment::make_bytes(s.as_bytes())
+				}
+			]
 		}
 	}
 	
