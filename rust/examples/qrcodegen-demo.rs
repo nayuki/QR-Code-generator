@@ -92,8 +92,8 @@ fn do_segment_demo() {
 	print_qr(&qr);
 	
 	let segs = vec![
-		QrSegment::make_alphanumeric(&to_chars(silver0)),
-		QrSegment::make_numeric(&to_chars(silver1)),
+		QrSegment::make_alphanumeric(silver0),
+		QrSegment::make_numeric(silver1),
 	];
 	let qr = QrCode::encode_segments(&segs, QrCodeEcc::Low).unwrap();
 	print_qr(&qr);
@@ -107,8 +107,8 @@ fn do_segment_demo() {
 	
 	let segs = vec![
 		QrSegment::make_bytes(golden0.as_bytes()),
-		QrSegment::make_numeric(&to_chars(golden1)),
-		QrSegment::make_alphanumeric(&to_chars(golden2)),
+		QrSegment::make_numeric(golden1),
+		QrSegment::make_alphanumeric(golden2),
 	];
 	let qr = QrCode::encode_segments(&segs, QrCodeEcc::Low).unwrap();
 	print_qr(&qr);
@@ -141,14 +141,14 @@ fn do_segment_demo() {
 // Creates QR Codes with the same size and contents but different mask patterns.
 fn do_mask_demo() {
 	// Project Nayuki URL
-	let segs = QrSegment::make_segments(&to_chars("https://www.nayuki.io/"));
+	let segs = QrSegment::make_segments("https://www.nayuki.io/");
 	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High, Version::MIN, Version::MAX, None, true).unwrap();  // Automatic mask
 	print_qr(&qr);
 	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High, Version::MIN, Version::MAX, Some(Mask::new(3)), true).unwrap();  // Force mask 3
 	print_qr(&qr);
 	
 	// Chinese text as UTF-8
-	let segs = QrSegment::make_segments(&to_chars("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫"));
+	let segs = QrSegment::make_segments("維基百科（Wikipedia，聆聽i/ˌwɪkᵻˈpiːdi.ə/）是一個自由內容、公開編輯且多語言的網路百科全書協作計畫");
 	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, Version::MIN, Version::MAX, Some(Mask::new(0)), true).unwrap();  // Force mask 0
 	print_qr(&qr);
 	let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::Medium, Version::MIN, Version::MAX, Some(Mask::new(1)), true).unwrap();  // Force mask 1
@@ -203,10 +203,4 @@ fn print_qr(qr: &QrCode) {
 		println!();
 	}
 	println!();
-}
-
-
-// Converts the given borrowed string slice to a new character vector.
-fn to_chars(text: &str) -> Vec<char> {
-	text.chars().collect()
 }

@@ -152,8 +152,7 @@ impl QrCode {
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the
 	/// data is too long to fit in any version at the given ECC level.
 	pub fn encode_text(text: &str, ecl: QrCodeEcc) -> Result<Self,DataTooLong> {
-		let chrs: Vec<char> = text.chars().collect();
-		let segs: Vec<QrSegment> = QrSegment::make_segments(&chrs);
+		let segs: Vec<QrSegment> = QrSegment::make_segments(text);
 		QrCode::encode_segments(&segs, ecl)
 	}
 	
@@ -979,13 +978,13 @@ impl QrSegment {
 	/// Returns a segment representing the given string of decimal digits encoded in numeric mode.
 	/// 
 	/// Panics if the string contains non-digit characters.
-	pub fn make_numeric(text: &[char]) -> Self {
+	pub fn make_numeric(text: &str) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u8 = 0;
-		for &c in text {
-			assert!('0' <= c && c <= '9', "String contains non-numeric characters");
-			accumdata = accumdata * 10 + (u32::from(c) - u32::from('0'));
+		for b in text.bytes() {
+			assert!(b'0' <= b && b <= b'9', "String contains non-numeric characters");
+			accumdata = accumdata * 10 + (u32::from(b) - u32::from(b'0'));
 			accumcount += 1;
 			if accumcount == 3 {
 				bb.append_bits(accumdata, 10);
@@ -1006,12 +1005,12 @@ impl QrSegment {
 	/// dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	/// 
 	/// Panics if the string contains non-encodable characters.
-	pub fn make_alphanumeric(text: &[char]) -> Self {
+	pub fn make_alphanumeric(text: &str) -> Self {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
-		for &c in text {
-			let i: usize = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
+		for b in text.bytes() {
+			let i: usize = ALPHANUMERIC_CHARSET.iter().position(|&x| x == char::from(b))
 				.expect("String contains unencodable characters in alphanumeric mode");
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
@@ -1032,7 +1031,7 @@ impl QrSegment {
 	/// 
 	/// The result may use various segment modes and switch
 	/// modes to optimize the length of the bit stream.
-	pub fn make_segments(text: &[char]) -> Vec<Self> {
+	pub fn make_segments(text: &str) -> Vec<Self> {
 		if text.is_empty() {
 			vec![]
 		} else {
@@ -1042,8 +1041,7 @@ impl QrSegment {
 				} else if QrSegment::is_alphanumeric(text) {
 					QrSegment::make_alphanumeric(text)
 				} else {
-					let s: String = text.iter().cloned().collect();
-					QrSegment::make_bytes(s.as_bytes())
+					QrSegment::make_bytes(text.as_bytes())
 				}
 			]
 		}
@@ -1125,8 +1123,8 @@ impl QrSegment {
 	/// Tests whether the given string can be encoded as a segment in numeric mode.
 	/// 
 	/// A string is encodable iff each character is in the range 0 to 9.
-	pub fn is_numeric(text: &[char]) -> bool {
-		text.iter().all(|&c| '0' <= c && c <= '9')
+	pub fn is_numeric(text: &str) -> bool {
+		text.bytes().all(|b| b'0' <= b && b <= b'9')
 	}
 	
 	
@@ -1134,8 +1132,8 @@ impl QrSegment {
 	/// 
 	/// A string is encodable iff each character is in the following set: 0 to 9, A to Z
 	/// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
-	pub fn is_alphanumeric(text: &[char]) -> bool {
-		text.iter().all(|c| ALPHANUMERIC_CHARSET.contains(c))
+	pub fn is_alphanumeric(text: &str) -> bool {
+		text.bytes().all(|b| ALPHANUMERIC_CHARSET.contains(&char::from(b)))
 	}
 	
 }
