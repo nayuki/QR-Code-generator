@@ -10,3 +10,8 @@ keywords = ["qr-code", "barcode", "encoder", "image"]
 categories = ["encoding", "multimedia::images"]
 license = "MIT"
 exclude = ["examples/*"]
+edition = "2018"
+
+[features]
+default = ["std"]
+std = []

@@ -1,0 +1,1 @@
+/Users/florian.blasius/Projects/FocusTime/morphUI/forks/QR-Code-generator/rust/target/debug/examples/qrcodegen-demo: /Users/florian.blasius/Projects/FocusTime/morphUI/forks/QR-Code-generator/rust/examples/qrcodegen-demo.rs /Users/florian.blasius/Projects/FocusTime/morphUI/forks/QR-Code-generator/rust/src/lib.rs
