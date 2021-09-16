@@ -353,7 +353,7 @@ impl QrCode {
 	/// The top left corner has the coordinates (x=0, y=0). If the given
 	/// coordinates are out of bounds, then `false` (light) is returned.
 	pub fn get_module(&self, x: i32, y: i32) -> bool {
-		0 <= x && x < self.size && 0 <= y && y < self.size && self.module(x, y)
+		(0 .. self.size).contains(&x) && (0 .. self.size).contains(&y) && self.module(x, y)
 	}
 	
 	
@@ -477,7 +477,7 @@ impl QrCode {
 			for dx in -4 ..= 4 {
 				let xx: i32 = x + dx;
 				let yy: i32 = y + dy;
-				if 0 <= xx && xx < self.size && 0 <= yy && yy < self.size {
+				if (0 .. self.size).contains(&xx) && (0 .. self.size).contains(&yy) {
 					let dist: i32 = std::cmp::max(dx.abs(), dy.abs());  // Chebyshev/infinity norm
 					self.set_function_module(xx, yy, dist != 2 && dist != 4);
 				}
@@ -719,7 +719,7 @@ impl QrCode {
 				result -= 36;
 			}
 		}
-		assert!(208 <= result && result <= 29648);
+		assert!((208 ..= 29648).contains(&result));
 		result
 	}
 	
@@ -743,7 +743,7 @@ impl QrCode {
 	// Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
 	// implemented as a lookup table over all possible parameter values, instead of as an algorithm.
 	fn reed_solomon_compute_divisor(degree: usize) -> Vec<u8> {
-		assert!(1 <= degree && degree <= 255, "Degree out of range");
+		assert!((1 ..= 255).contains(&degree), "Degree out of range");
 		// Polynomial coefficients are stored from highest to lowest power, excluding the leading term which is always 1.
 		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array [255, 8, 93].
 		let mut result = vec![0u8; degree - 1];
@@ -983,7 +983,7 @@ impl QrSegment {
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u8 = 0;
 		for b in text.bytes() {
-			assert!(b'0' <= b && b <= b'9', "String contains non-numeric characters");
+			assert!((b'0' ..= b'9').contains(&b), "String contains non-numeric characters");
 			accumdata = accumdata * 10 + u32::from(b - b'0');
 			accumcount += 1;
 			if accumcount == 3 {
@@ -1124,7 +1124,7 @@ impl QrSegment {
 	/// 
 	/// A string is encodable iff each character is in the range 0 to 9.
 	pub fn is_numeric(text: &str) -> bool {
-		text.bytes().all(|b| b'0' <= b && b <= b'9')
+		text.bytes().all(|b| (b'0' ..= b'9').contains(&b))
 	}
 	
 	
@@ -1258,7 +1258,7 @@ impl Version {
 	/// 
 	/// Panics if the number is outside the range [1, 40].
 	pub fn new(ver: u8) -> Self {
-		assert!(Version::MIN.value() <= ver && ver <= Version::MAX.value(), "Version number out of range");
+		assert!((Version::MIN.value() ..= Version::MAX.value()).contains(&ver), "Version number out of range");
 		Self(ver)
 	}
 	
