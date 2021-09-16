@@ -984,7 +984,7 @@ impl QrSegment {
 		let mut accumcount: u8 = 0;
 		for b in text.bytes() {
 			assert!(b'0' <= b && b <= b'9', "String contains non-numeric characters");
-			accumdata = accumdata * 10 + (u32::from(b) - u32::from(b'0'));
+			accumdata = accumdata * 10 + u32::from(b - b'0');
 			accumcount += 1;
 			if accumcount == 3 {
 				bb.append_bits(accumdata, 10);
@@ -1009,8 +1009,8 @@ impl QrSegment {
 		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
-		for b in text.bytes() {
-			let i: usize = ALPHANUMERIC_CHARSET.iter().position(|&x| x == char::from(b))
+		for c in text.chars() {
+			let i: usize = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
 				.expect("String contains unencodable characters in alphanumeric mode");
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
@@ -1133,7 +1133,7 @@ impl QrSegment {
 	/// A string is encodable iff each character is in the following set: 0 to 9, A to Z
 	/// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	pub fn is_alphanumeric(text: &str) -> bool {
-		text.bytes().all(|b| ALPHANUMERIC_CHARSET.contains(&char::from(b)))
+		text.chars().all(|c| ALPHANUMERIC_CHARSET.contains(&c))
 	}
 	
 }
