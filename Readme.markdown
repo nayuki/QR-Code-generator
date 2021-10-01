@@ -174,8 +174,8 @@ let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
 // Manual operation
 let text: &str = "3141592653589793238462643383";
 let segs = QrSegment::make_segments(text);
-let qr = QrCode::encode_segments_advanced(
-    &segs, QrCodeEcc::High, 5, 5, Some(Mask::new(2)), false).unwrap();
+let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High,
+    Version::new(5), Version::new(5), Some(Mask::new(2)), false).unwrap();
 for y in 0 .. qr.size() {
     for x in 0 .. qr.size() {
         (... paint qr.get_module(x, y) ...)
