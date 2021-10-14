@@ -68,7 +68,7 @@ namespace qrcodegen {
 		// This function always encodes using the binary segment mode, not any text mode. The maximum number of
 		// bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
 		// The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
-		public static encodeBinary(data: Array<byte>, ecl: QrCode.Ecc): QrCode {
+		public static encodeBinary(data: Readonly<Array<byte>>, ecl: QrCode.Ecc): QrCode {
 			const seg: QrSegment = qrcodegen.QrSegment.makeBytes(data);
 			return QrCode.encodeSegments([seg], ecl);
 		}
@@ -85,7 +85,7 @@ namespace qrcodegen {
 		// This function allows the user to create a custom sequence of segments that switches
 		// between modes (such as alphanumeric and byte) to encode text in less space.
 		// This is a mid-level API; the high-level API is encodeText() and encodeBinary().
-		public static encodeSegments(segs: Array<QrSegment>, ecl: QrCode.Ecc,
+		public static encodeSegments(segs: Readonly<Array<QrSegment>>, ecl: QrCode.Ecc,
 				minVersion: int = 1, maxVersion: int = 40,
 				mask: int = -1, boostEcl: boolean = true): QrCode {
 			
@@ -177,7 +177,7 @@ namespace qrcodegen {
 				// The error correction level used in this QR Code.
 				public readonly errorCorrectionLevel: QrCode.Ecc,
 				
-				dataCodewords: Array<byte>,
+				dataCodewords: Readonly<Array<byte>>,
 				
 				// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
 				// Even if a QR Code is created with automatic masking requested (mask = -1),
@@ -363,7 +363,7 @@ namespace qrcodegen {
 		
 		// Returns a new byte string representing the given data with the appropriate error correction
 		// codewords appended to it, based on this object's version and error correction level.
-		private addEccAndInterleave(data: Array<byte>): Array<byte> {
+		private addEccAndInterleave(data: Readonly<Array<byte>>): Array<byte> {
 			const ver: int = this.version;
 			const ecl: QrCode.Ecc = this.errorCorrectionLevel;
 			if (data.length != QrCode.getNumDataCodewords(ver, ecl))
@@ -405,7 +405,7 @@ namespace qrcodegen {
 		
 		// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
 		// data area of this QR Code. Function modules need to be marked off before this is called.
-		private drawCodewords(data: Array<byte>): void {
+		private drawCodewords(data: Readonly<Array<byte>>): void {
 			if (data.length != Math.floor(QrCode.getNumRawDataModules(this.version) / 8))
 				throw "Invalid argument";
 			let i: int = 0;  // Bit index into the data
@@ -613,7 +613,7 @@ namespace qrcodegen {
 		
 		
 		// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
-		private static reedSolomonComputeRemainder(data: Array<byte>, divisor: Array<byte>): Array<byte> {
+		private static reedSolomonComputeRemainder(data: Readonly<Array<byte>>, divisor: Readonly<Array<byte>>): Array<byte> {
 			let result: Array<byte> = divisor.map(_ => 0);
 			for (const b of data) {  // Polynomial division
 				const factor: byte = b ^ (result.shift() as byte);
@@ -644,7 +644,7 @@ namespace qrcodegen {
 		
 		// Can only be called immediately after a light run is added, and
 		// returns either 0, 1, or 2. A helper function for getPenaltyScore().
-		private finderPenaltyCountPatterns(runHistory: Array<int>): int {
+		private finderPenaltyCountPatterns(runHistory: Readonly<Array<int>>): int {
 			const n: int = runHistory[1];
 			if (n > this.size * 3)
 				throw "Assertion error";
@@ -746,7 +746,7 @@ namespace qrcodegen {
 		// Returns a segment representing the given binary data encoded in
 		// byte mode. All input byte arrays are acceptable. Any text string
 		// can be converted to UTF-8 bytes and encoded as a byte mode segment.
-		public static makeBytes(data: Array<byte>): QrSegment {
+		public static makeBytes(data: Readonly<Array<byte>>): QrSegment {
 			let bb: Array<bit> = []
 			for (const b of data)
 				appendBits(b, 8, bb);
@@ -870,7 +870,7 @@ namespace qrcodegen {
 		
 		// (Package-private) Calculates and returns the number of bits needed to encode the given segments at
 		// the given version. The result is infinity if a segment has too many characters to fit its length field.
-		public static getTotalBits(segs: Array<QrSegment>, version: int): number {
+		public static getTotalBits(segs: Readonly<Array<QrSegment>>, version: int): number {
 			let result: number = 0;
 			for (const seg of segs) {
 				const ccbits: int = seg.mode.numCharCountBits(version);
