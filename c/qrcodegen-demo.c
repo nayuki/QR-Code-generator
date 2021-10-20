@@ -128,6 +128,10 @@ static void doSegmentDemo(void) {
 		bool ok;
 		{
 			char *concat = calloc(strlen(silver0) + strlen(silver1) + 1, sizeof(char));
+			if (concat == NULL) {
+				perror("calloc");
+				exit(EXIT_FAILURE);
+			}
 			strcat(concat, silver0);
 			strcat(concat, silver1);
 			ok = qrcodegen_encodeText(concat, tempBuffer, qrcode, qrcodegen_Ecc_LOW,
@@ -139,6 +143,10 @@ static void doSegmentDemo(void) {
 		{
 			uint8_t *segBuf0 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_ALPHANUMERIC, strlen(silver0)) * sizeof(uint8_t));
 			uint8_t *segBuf1 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_NUMERIC, strlen(silver1)) * sizeof(uint8_t));
+			if (segBuf0 == NULL || segBuf1 == NULL) {
+				perror("malloc");
+				exit(EXIT_FAILURE);
+			}
 			struct qrcodegen_Segment segs[] = {
 				qrcodegen_makeAlphanumeric(silver0, segBuf0),
 				qrcodegen_makeNumeric(silver1, segBuf1),
@@ -160,6 +168,10 @@ static void doSegmentDemo(void) {
 		bool ok;
 		{
 			char *concat = calloc(strlen(golden0) + strlen(golden1) + strlen(golden2) + 1, sizeof(char));
+			if (concat == NULL) {
+				perror("calloc");
+				exit(EXIT_FAILURE);
+			}
 			strcat(concat, golden0);
 			strcat(concat, golden1);
 			strcat(concat, golden2);
@@ -171,11 +183,19 @@ static void doSegmentDemo(void) {
 		}
 		{
 			uint8_t *bytes = malloc(strlen(golden0) * sizeof(uint8_t));
+			if (bytes == NULL) {
+				perror("malloc");
+				exit(EXIT_FAILURE);
+			}
 			for (size_t i = 0, len = strlen(golden0); i < len; i++)
 				bytes[i] = (uint8_t)golden0[i];
 			uint8_t *segBuf0 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_BYTE, strlen(golden0)) * sizeof(uint8_t));
 			uint8_t *segBuf1 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_NUMERIC, strlen(golden1)) * sizeof(uint8_t));
 			uint8_t *segBuf2 = malloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_ALPHANUMERIC, strlen(golden2)) * sizeof(uint8_t));
+			if (segBuf0 == NULL || segBuf1 == NULL || segBuf2 == NULL) {
+				perror("malloc");
+				exit(EXIT_FAILURE);
+			}
 			struct qrcodegen_Segment segs[] = {
 				qrcodegen_makeBytes(bytes, strlen(golden0), segBuf0),
 				qrcodegen_makeNumeric(golden1, segBuf1),
@@ -222,6 +242,10 @@ static void doSegmentDemo(void) {
 			};
 			size_t len = sizeof(kanjiChars) / sizeof(kanjiChars[0]);
 			uint8_t *segBuf = calloc(qrcodegen_calcSegmentBufferSize(qrcodegen_Mode_KANJI, len), sizeof(uint8_t));
+			if (segBuf == NULL) {
+				perror("calloc");
+				exit(EXIT_FAILURE);
+			}
 			struct qrcodegen_Segment seg;
 			seg.mode = qrcodegen_Mode_KANJI;
 			seg.numChars = (int)len;
