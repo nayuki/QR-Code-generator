@@ -1010,7 +1010,7 @@ impl QrSegment {
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text.chars() {
-			let i: usize = ALPHANUMERIC_CHARSET.iter().position(|&x| x == c)
+			let i: usize = ALPHANUMERIC_CHARSET.find(c)
 				.expect("String contains unencodable characters in alphanumeric mode");
 			accumdata = accumdata * 45 + (i as u32);
 			accumcount += 1;
@@ -1133,7 +1133,7 @@ impl QrSegment {
 	/// A string is encodable iff each character is in the following set: 0 to 9, A to Z
 	/// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	pub fn is_alphanumeric(text: &str) -> bool {
-		text.chars().all(|c| ALPHANUMERIC_CHARSET.contains(&c))
+		text.chars().all(|c| ALPHANUMERIC_CHARSET.contains(c))
 	}
 	
 }
@@ -1141,9 +1141,7 @@ impl QrSegment {
 
 // The set of all legal characters in alphanumeric mode,
 // where each character value maps to the index in the string.
-static ALPHANUMERIC_CHARSET: [char; 45] = ['0','1','2','3','4','5','6','7','8','9',
-	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-	' ','$','%','*','+','-','.','/',':'];
+static ALPHANUMERIC_CHARSET: &str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
 
 
