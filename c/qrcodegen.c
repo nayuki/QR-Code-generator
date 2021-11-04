@@ -713,7 +713,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 // returns either 0, 1, or 2. A helper function for getPenaltyScore().
 static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize) {
 	int n = runHistory[1];
-	assert(n <= qrsize * 3);
+	assert(n <= qrsize * 3);  (void)qrsize;
 	bool core = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
 	// The maximum QR Code size is 177, hence the dark run length n <= 177.
 	// Arithmetic is promoted to int, so n*4 will not overflow.
