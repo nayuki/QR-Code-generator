@@ -712,6 +712,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 // Can only be called immediately after a white run is added, and
 // returns either 0, 1, or 2. A helper function for getPenaltyScore().
 static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize) {
+	(void)qrsize;
 	int n = runHistory[1];
 	assert(n <= qrsize * 3);
 	bool core = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
