@@ -1124,7 +1124,7 @@ impl QrSegment {
 	/// 
 	/// A string is encodable iff each character is in the range 0 to 9.
 	pub fn is_numeric(text: &str) -> bool {
-		text.bytes().all(|b| (b'0' ..= b'9').contains(&b))
+		text.chars().all(|c| ('0' ..= '9').contains(&c))
 	}
 	
 	
