@@ -262,7 +262,26 @@ public final class QrCode {
 		drawFunctionPatterns();
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
-		mask = handleConstructorMasking(msk);
+		
+		// Do masking
+		if (msk == -1) {  // Automatically choose best mask
+			int minPenalty = Integer.MAX_VALUE;
+			for (int i = 0; i < 8; i++) {
+				applyMask(i);
+				drawFormatBits(i);
+				int penalty = getPenaltyScore();
+				if (penalty < minPenalty) {
+					msk = i;
+					minPenalty = penalty;
+				}
+				applyMask(i);  // Undoes the mask due to XOR
+			}
+		}
+		assert 0 <= msk && msk <= 7;
+		mask = msk;
+		applyMask(msk);  // Apply the final choice of mask
+		drawFormatBits(msk);  // Overwrite old format bits
+		
 		isFunction = null;
 	}
 	
@@ -500,30 +519,6 @@ public final class QrCode {
 				modules[y][x] ^= invert & !isFunction[y][x];
 			}
 		}
-	}
-	
-	
-	// A messy helper function for the constructor. This QR Code must be in an unmasked state when this
-	// method is called. The given argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
-	// This method applies and returns the actual mask chosen, from 0 to 7.
-	private int handleConstructorMasking(int msk) {
-		if (msk == -1) {  // Automatically choose best mask
-			int minPenalty = Integer.MAX_VALUE;
-			for (int i = 0; i < 8; i++) {
-				applyMask(i);
-				drawFormatBits(i);
-				int penalty = getPenaltyScore();
-				if (penalty < minPenalty) {
-					msk = i;
-					minPenalty = penalty;
-				}
-				applyMask(i);  // Undoes the mask due to XOR
-			}
-		}
-		assert 0 <= msk && msk <= 7;
-		applyMask(msk);  // Apply the final choice of mask
-		drawFormatBits(msk);  // Overwrite old format bits
-		return msk;  // The caller shall assign this value to the final-declared field
 	}
 	
 	
