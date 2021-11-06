@@ -121,17 +121,14 @@ namespace qrcodegen {
 				for (const b of seg.getData())
 					bb.push(b);
 			}
-			if (bb.length != dataUsedBits)
-				throw "Assertion error";
+			assert(bb.length == dataUsedBits);
 			
 			// Add terminator and pad up to a byte if applicable
 			const dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;
-			if (bb.length > dataCapacityBits)
-				throw "Assertion error";
+			assert(bb.length <= dataCapacityBits);
 			appendBits(0, Math.min(4, dataCapacityBits - bb.length), bb);
 			appendBits(0, (8 - bb.length % 8) % 8, bb);
-			if (bb.length % 8 != 0)
-				throw "Assertion error";
+			assert(bb.length % 8 == 0);
 			
 			// Pad with alternating bytes until data capacity is reached
 			for (let padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
@@ -221,8 +218,7 @@ namespace qrcodegen {
 					this.applyMask(i);  // Undoes the mask due to XOR
 				}
 			}
-			if (msk < 0 || msk > 7)
-				throw "Assertion error";
+			assert(0 <= msk && msk <= 7);
 			this.mask = msk;
 			this.applyMask(msk);  // Apply the final choice of mask
 			this.drawFormatBits(msk);  // Overwrite old format bits
@@ -282,8 +278,7 @@ namespace qrcodegen {
 			for (let i = 0; i < 10; i++)
 				rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
 			const bits = (data << 10 | rem) ^ 0x5412;  // uint15
-			if (bits >>> 15 != 0)
-				throw "Assertion error";
+			assert(bits >>> 15 == 0);
 			
 			// Draw first copy
 			for (let i = 0; i <= 5; i++)
@@ -314,8 +309,7 @@ namespace qrcodegen {
 			for (let i = 0; i < 12; i++)
 				rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
 			const bits: int = this.version << 12 | rem;  // uint18
-			if (bits >>> 18 != 0)
-				throw "Assertion error";
+			assert(bits >>> 18 == 0);
 			
 			// Draw two copies
 			for (let i = 0; i < 18; i++) {
@@ -399,8 +393,7 @@ namespace qrcodegen {
 						result.push(block[i]);
 				});
 			}
-			if (result.length != rawCodewords)
-				throw "Assertion error";
+			assert(result.length == rawCodewords);
 			return result;
 		}
 		
@@ -429,8 +422,7 @@ namespace qrcodegen {
 					}
 				}
 			}
-			if (i != data.length * 8)
-				throw "Assertion error";
+			assert(i == data.length * 8);
 		}
 		
 		
@@ -531,11 +523,9 @@ namespace qrcodegen {
 			const total: int = this.size * this.size;  // Note that size is odd, so dark/total != 1/2
 			// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 			const k: int = Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1;
-			if (!(0 <= k && k <= 9))
-				throw "Assertion error";
+			assert(0 <= k && k <= 9);
 			result += k * QrCode.PENALTY_N4;
-			if (!(0 <= result && result <= 2568888))  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
-				throw "Assertion error";
+			assert(0 <= result && result <= 2568888);  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
 			return result;
 		}
 		
@@ -573,8 +563,7 @@ namespace qrcodegen {
 				if (ver >= 7)
 					result -= 36;
 			}
-			if (!(208 <= result && result <= 29648))
-				throw "Assertion error";
+			assert(208 <= result && result <= 29648);
 			return result;
 		}
 		
@@ -642,8 +631,7 @@ namespace qrcodegen {
 				z = (z << 1) ^ ((z >>> 7) * 0x11D);
 				z ^= ((y >>> i) & 1) * x;
 			}
-			if (z >>> 8 != 0)
-				throw "Assertion error";
+			assert(z >>> 8 == 0);
 			return z as byte;
 		}
 		
@@ -652,8 +640,7 @@ namespace qrcodegen {
 		// returns either 0, 1, or 2. A helper function for getPenaltyScore().
 		private finderPenaltyCountPatterns(runHistory: Readonly<Array<int>>): int {
 			const n: int = runHistory[1];
-			if (n > this.size * 3)
-				throw "Assertion error";
+			assert(n <= this.size * 3);
 			const core: boolean = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
 			return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
 			     + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
@@ -728,6 +715,13 @@ namespace qrcodegen {
 	// Returns true iff the i'th bit of x is set to 1.
 	function getBit(x: int, i: int): boolean {
 		return ((x >>> i) & 1) != 0;
+	}
+	
+	
+	// Throws an exception if the given condition is false.
+	function assert(cond: boolean): void {
+		if (!cond)
+			throw "Assertion error";
 	}
 	
 	
