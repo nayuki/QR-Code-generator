@@ -594,7 +594,9 @@ public final class QrCode {
 		int total = size * size;  // Note that size is odd, so dark/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 		int k = (Math.abs(dark * 20 - total * 10) + total - 1) / total - 1;
+		assert 0 <= k && k <= 9;
 		result += k * PENALTY_N4;
+		assert 0 <= result && result <= 2568888;  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
 		return result;
 	}
 	

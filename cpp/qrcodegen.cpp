@@ -663,7 +663,11 @@ long QrCode::getPenaltyScore() const {
 	int total = size * size;  // Note that size is odd, so dark/total != 1/2
 	// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 	int k = static_cast<int>((std::abs(dark * 20L - total * 10L) + total - 1) / total) - 1;
+	if (!(0 <= k && k <= 9))
+		throw std::logic_error("Assertion error");
 	result += k * PENALTY_N4;
+	if (!(0 <= result && result <= 2568888L))  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
+		throw std::logic_error("Assertion error");
 	return result;
 }
 

@@ -531,7 +531,11 @@ namespace qrcodegen {
 			const total: int = this.size * this.size;  // Note that size is odd, so dark/total != 1/2
 			// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 			const k: int = Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1;
+			if (!(0 <= k && k <= 9))
+				throw "Assertion error";
 			result += k * QrCode.PENALTY_N4;
+			if (!(0 <= result && result <= 2568888))  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
+				throw "Assertion error";
 			return result;
 		}
 		
