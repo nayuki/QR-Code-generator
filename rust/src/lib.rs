@@ -84,6 +84,9 @@
 //! ```
 
 
+use std::convert::TryFrom;
+
+
 /*---- QrCode functionality ----*/
 
 /// A QR Code symbol, which is a type of two-dimension barcode.
@@ -237,7 +240,7 @@ impl QrCode {
 		let mut bb = BitBuffer(Vec::new());
 		for seg in segs {
 			bb.append_bits(seg.mode.mode_bits(), 4);
-			bb.append_bits(seg.numchars as u32, seg.mode.num_char_count_bits(version));
+			bb.append_bits(u32::try_from(seg.numchars).unwrap(), seg.mode.num_char_count_bits(version));
 			bb.0.extend_from_slice(&seg.data);
 		}
 		debug_assert_eq!(bb.0.len(), datausedbits);
@@ -246,9 +249,9 @@ impl QrCode {
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
 		debug_assert!(bb.0.len() <= datacapacitybits);
 		let numzerobits: usize = std::cmp::min(4, datacapacitybits - bb.0.len());
-		bb.append_bits(0, numzerobits as u8);
+		bb.append_bits(0, u8::try_from(numzerobits).unwrap());
 		let numzerobits: usize = bb.0.len().wrapping_neg() & 7;
-		bb.append_bits(0, numzerobits as u8);
+		bb.append_bits(0, u8::try_from(numzerobits).unwrap());
 		debug_assert_eq!(bb.0.len() % 8, 0);
 		
 		// Pad with alternating bytes until data capacity is reached
@@ -1013,7 +1016,7 @@ impl QrSegment {
 		for c in text.chars() {
 			let i: usize = ALPHANUMERIC_CHARSET.find(c)
 				.expect("String contains unencodable characters in alphanumeric mode");
-			accumdata = accumdata * 45 + (i as u32);
+			accumdata = accumdata * 45 + u32::try_from(i).unwrap();
 			accumcount += 1;
 			if accumcount == 2 {
 				bb.append_bits(accumdata, 11);
