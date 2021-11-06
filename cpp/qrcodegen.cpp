@@ -39,6 +39,8 @@ using std::vector;
 
 namespace qrcodegen {
 
+/*---- Class QrSegment ----*/
+
 QrSegment::Mode::Mode(int mode, int cc0, int cc1, int cc2) :
 		modeBits(mode) {
 	numBitsCharCount[0] = cc0;
@@ -228,6 +230,8 @@ const std::vector<bool> &QrSegment::getData() const {
 const char *QrSegment::ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
 
+
+/*---- Class QrCode ----*/
 
 int QrCode::getFormatBits(Ecc ecl) {
 	switch (ecl) {
@@ -819,6 +823,8 @@ data_too_long::data_too_long(const std::string &msg) :
 	std::length_error(msg) {}
 
 
+
+/*---- Class BitBuffer ----*/
 
 BitBuffer::BitBuffer()
 	: std::vector<bool>() {}
