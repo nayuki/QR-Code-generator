@@ -298,15 +298,15 @@ impl QrCode {
 		if msk.is_none() {  // Automatically choose best mask
 			let mut minpenalty = std::i32::MAX;
 			for i in 0u8 .. 8 {
-				let newmask = Mask::new(i);
-				result.apply_mask(newmask);
-				result.draw_format_bits(newmask);
+				let i = Mask::new(i);
+				result.apply_mask(i);
+				result.draw_format_bits(i);
 				let penalty: i32 = result.get_penalty_score();
 				if penalty < minpenalty {
-					msk = Some(newmask);
+					msk = Some(i);
 					minpenalty = penalty;
 				}
-				result.apply_mask(newmask);  // Undoes the mask due to XOR
+				result.apply_mask(i);  // Undoes the mask due to XOR
 			}
 		}
 		let msk: Mask = msk.unwrap();
