@@ -55,7 +55,7 @@ uint8_t reedSolomonMultiply(uint8_t x, uint8_t y);
 void initializeFunctionModules(int version, uint8_t qrcode[]);
 int getAlignmentPatternPositions(int version, uint8_t result[7]);
 bool getModule(const uint8_t qrcode[], int x, int y);
-void setModule(uint8_t qrcode[], int x, int y, bool isDark);
+void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark);
 void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark);
 int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
 int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
@@ -453,7 +453,7 @@ static void testGetSetModule(void) {
 	
 	for (int y = 0; y < size; y++) {  // Clear all to light
 		for (int x = 0; x < size; x++)
-			setModule(qrcode, x, y, false);
+			setModuleBounded(qrcode, x, y, false);
 	}
 	for (int y = 0; y < size; y++) {  // Check all light
 		for (int x = 0; x < size; x++)
@@ -461,7 +461,7 @@ static void testGetSetModule(void) {
 	}
 	for (int y = 0; y < size; y++) {  // Set all to dark
 		for (int x = 0; x < size; x++)
-			setModule(qrcode, x, y, true);
+			setModuleBounded(qrcode, x, y, true);
 	}
 	for (int y = 0; y < size; y++) {  // Check all dark
 		for (int x = 0; x < size; x++)
@@ -481,8 +481,8 @@ static void testGetSetModule(void) {
 	}
 	
 	// Set some modules to light
-	setModule(qrcode, 3, 8, false);
-	setModule(qrcode, 61, 49, false);
+	setModuleBounded(qrcode, 3, 8, false);
+	setModuleBounded(qrcode, 61, 49, false);
 	for (int y = 0; y < size; y++) {  // Check most dark
 		for (int x = 0; x < size; x++) {
 			bool light = (x == 3 && y == 8) || (x == 61 && y == 49);
@@ -518,7 +518,7 @@ static void testGetSetModuleRandomly(void) {
 		if (isInBounds)
 			modules[y][x] = newColor;
 		if (isInBounds && rand() % 2 == 0)
-			setModule(qrcode, x, y, newColor);
+			setModuleBounded(qrcode, x, y, newColor);
 		else
 			setModuleUnbounded(qrcode, x, y, newColor);
 	}
