@@ -205,7 +205,7 @@ impl QrCode {
 	/// long to fit in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
 			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Result<Self,DataTooLong> {
-		assert!(minversion.value() <= maxversion.value(), "Invalid value");
+		assert!(minversion <= maxversion, "Invalid value");
 		
 		// Find the minimal version number to use
 		let mut version: Version = minversion;
@@ -214,7 +214,7 @@ impl QrCode {
 			let dataused: Option<usize> = QrSegment::get_total_bits(segs, version);
 			if dataused.map_or(false, |n| n <= datacapacitybits) {
 				break dataused.unwrap();  // This version number is found to be suitable
-			} else if version.value() >= maxversion.value() {  // All versions in the range could not fit the given data
+			} else if version >= maxversion {  // All versions in the range could not fit the given data
 				let msg: String = match dataused {
 					None => String::from("Segment too long"),
 					Some(n) => format!("Data length = {} bits, Max capacity = {} bits",
