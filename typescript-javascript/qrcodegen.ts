@@ -155,6 +155,11 @@ namespace qrcodegen {
 		// 21 and 177 (inclusive). This is equal to version * 4 + 17.
 		public readonly size: int;
 		
+		// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
+		// Even if a QR Code is created with automatic masking requested (mask = -1),
+		// the resulting object still has a mask value between 0 and 7.
+		public readonly mask: int;
+		
 		// The modules of this QR Code (false = light, true = dark).
 		// Immutable after constructor finishes. Accessed through getModule().
 		private readonly modules   : Array<Array<boolean>> = [];
@@ -179,15 +184,12 @@ namespace qrcodegen {
 				
 				dataCodewords: Readonly<Array<byte>>,
 				
-				// The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
-				// Even if a QR Code is created with automatic masking requested (mask = -1),
-				// the resulting object still has a mask value between 0 and 7.
-				public readonly mask: int) {
+				msk: int) {
 			
 			// Check scalar arguments
 			if (version < QrCode.MIN_VERSION || version > QrCode.MAX_VERSION)
 				throw "Version value out of range";
-			if (mask < -1 || mask > 7)
+			if (msk < -1 || msk > 7)
 				throw "Mask value out of range";
 			this.size = version * 4 + 17;
 			
@@ -206,24 +208,24 @@ namespace qrcodegen {
 			this.drawCodewords(allCodewords);
 			
 			// Do masking
-			if (mask == -1) {  // Automatically choose best mask
+			if (msk == -1) {  // Automatically choose best mask
 				let minPenalty: int = 1000000000;
 				for (let i = 0; i < 8; i++) {
 					this.applyMask(i);
 					this.drawFormatBits(i);
 					const penalty: int = this.getPenaltyScore();
 					if (penalty < minPenalty) {
-						mask = i;
+						msk = i;
 						minPenalty = penalty;
 					}
 					this.applyMask(i);  // Undoes the mask due to XOR
 				}
 			}
-			if (mask < 0 || mask > 7)
+			if (msk < 0 || msk > 7)
 				throw "Assertion error";
-			this.mask = mask;
-			this.applyMask(mask);  // Apply the final choice of mask
-			this.drawFormatBits(mask);  // Overwrite old format bits
+			this.mask = msk;
+			this.applyMask(msk);  // Apply the final choice of mask
+			this.drawFormatBits(msk);  // Overwrite old format bits
 			
 			this.isFunction = [];
 		}

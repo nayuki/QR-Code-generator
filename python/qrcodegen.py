@@ -161,7 +161,7 @@ class QrCode:
 	
 	# ---- Constructor (low level) ----
 	
-	def __init__(self, version: int, errcorlvl: QrCode.Ecc, datacodewords: Union[bytes,Sequence[int]], mask: int) -> None:
+	def __init__(self, version: int, errcorlvl: QrCode.Ecc, datacodewords: Union[bytes,Sequence[int]], msk: int) -> None:
 		"""Creates a new QR Code with the given version number,
 		error correction level, data codeword bytes, and mask number.
 		This is a low-level API that most users should not use directly.
@@ -170,7 +170,7 @@ class QrCode:
 		# Check scalar arguments and set fields
 		if not (QrCode.MIN_VERSION <= version <= QrCode.MAX_VERSION):
 			raise ValueError("Version value out of range")
-		if not (-1 <= mask <= 7):
+		if not (-1 <= msk <= 7):
 			raise ValueError("Mask value out of range")
 		if not isinstance(errcorlvl, QrCode.Ecc):
 			raise TypeError("QrCode.Ecc expected")
@@ -189,20 +189,20 @@ class QrCode:
 		self._draw_codewords(allcodewords)
 		
 		# Do masking
-		if mask == -1:  # Automatically choose best mask
+		if msk == -1:  # Automatically choose best mask
 			minpenalty: int = 1 << 32
 			for i in range(8):
 				self._apply_mask(i)
 				self._draw_format_bits(i)
 				penalty = self._get_penalty_score()
 				if penalty < minpenalty:
-					mask = i
+					msk = i
 					minpenalty = penalty
 				self._apply_mask(i)  # Undoes the mask due to XOR
-		assert 0 <= mask <= 7
-		self._mask = mask
-		self._apply_mask(mask)  # Apply the final choice of mask
-		self._draw_format_bits(mask)  # Overwrite old format bits
+		assert 0 <= msk <= 7
+		self._mask = msk
+		self._apply_mask(msk)  # Apply the final choice of mask
+		self._draw_format_bits(msk)  # Overwrite old format bits
 		
 		del self._isfunction
 	

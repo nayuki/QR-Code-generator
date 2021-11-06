@@ -277,7 +277,7 @@ impl QrCode {
 	/// 
 	/// This is a low-level API that most users should not use directly.
 	/// A mid-level API is the `encode_segments()` function.
-	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mut mask: Option<Mask>) -> Self {
+	pub fn encode_codewords(ver: Version, ecl: QrCodeEcc, datacodewords: &[u8], mut msk: Option<Mask>) -> Self {
 		// Initialize fields
 		let size = usize::from(ver.value()) * 4 + 17;
 		let mut result = Self {
@@ -295,7 +295,7 @@ impl QrCode {
 		result.draw_codewords(&allcodewords);
 		
 		// Do masking
-		if mask.is_none() {  // Automatically choose best mask
+		if msk.is_none() {  // Automatically choose best mask
 			let mut minpenalty = std::i32::MAX;
 			for i in 0u8 .. 8 {
 				let newmask = Mask::new(i);
@@ -303,16 +303,16 @@ impl QrCode {
 				result.draw_format_bits(newmask);
 				let penalty: i32 = result.get_penalty_score();
 				if penalty < minpenalty {
-					mask = Some(newmask);
+					msk = Some(newmask);
 					minpenalty = penalty;
 				}
 				result.apply_mask(newmask);  // Undoes the mask due to XOR
 			}
 		}
-		let mask: Mask = mask.unwrap();
-		result.mask = mask;
-		result.apply_mask(mask);  // Apply the final choice of mask
-		result.draw_format_bits(mask);  // Overwrite old format bits
+		let msk: Mask = msk.unwrap();
+		result.mask = msk;
+		result.apply_mask(msk);  // Apply the final choice of mask
+		result.draw_format_bits(msk);  // Overwrite old format bits
 		
 		result.isfunction.clear();
 		result.isfunction.shrink_to_fit();
