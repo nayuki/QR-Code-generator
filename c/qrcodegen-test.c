@@ -54,7 +54,7 @@ void reedSolomonComputeRemainder(const uint8_t data[], int dataLen, const uint8_
 uint8_t reedSolomonMultiply(uint8_t x, uint8_t y);
 void initializeFunctionModules(int version, uint8_t qrcode[]);
 int getAlignmentPatternPositions(int version, uint8_t result[7]);
-bool getModule(const uint8_t qrcode[], int x, int y);
+bool getModuleBounded(const uint8_t qrcode[], int x, int y);
 void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark);
 void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark);
 int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
@@ -511,7 +511,7 @@ static void testGetSetModuleRandomly(void) {
 		bool isInBounds = 0 <= x && x < size && 0 <= y && y < size;
 		bool oldColor = isInBounds && modules[y][x];
 		if (isInBounds)
-			assert(getModule(qrcode, x, y) == oldColor);
+			assert(getModuleBounded(qrcode, x, y) == oldColor);
 		assert(qrcodegen_getModule(qrcode, x, y) == oldColor);
 		
 		bool newColor = rand() % 2 == 0;

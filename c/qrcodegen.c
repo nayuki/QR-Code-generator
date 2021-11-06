@@ -76,7 +76,7 @@ static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize);
 static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, int runHistory[7], int qrsize);
 static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7], int qrsize);
 
-testable bool getModule(const uint8_t qrcode[], int x, int y);
+testable bool getModuleBounded(const uint8_t qrcode[], int x, int y);
 testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark);
 testable void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark);
 static bool getBit(int x, int i);
@@ -586,7 +586,7 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 				int x = right - j;  // Actual x coordinate
 				bool upward = ((right + 1) & 2) == 0;
 				int y = upward ? qrsize - 1 - vert : vert;  // Actual y coordinate
-				if (!getModule(qrcode, x, y) && i < dataLen * 8) {
+				if (!getModuleBounded(qrcode, x, y) && i < dataLen * 8) {
 					bool dark = getBit(data[i >> 3], 7 - (i & 7));
 					setModuleBounded(qrcode, x, y, dark);
 					i++;
@@ -610,7 +610,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qr
 	int qrsize = qrcodegen_getSize(qrcode);
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0; x < qrsize; x++) {
-			if (getModule(functionModules, x, y))
+			if (getModuleBounded(functionModules, x, y))
 				continue;
 			bool invert;
 			switch ((int)mask) {
@@ -624,7 +624,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qr
 				case 7:  invert = ((x + y) % 2 + x * y % 3) % 2 == 0;  break;
 				default:  assert(false);  return;
 			}
-			bool val = getModule(qrcode, x, y);
+			bool val = getModuleBounded(qrcode, x, y);
 			setModuleBounded(qrcode, x, y, val ^ invert);
 		}
 	}
@@ -643,7 +643,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 		int runX = 0;
 		int runHistory[7] = {0};
 		for (int x = 0; x < qrsize; x++) {
-			if (getModule(qrcode, x, y) == runColor) {
+			if (getModuleBounded(qrcode, x, y) == runColor) {
 				runX++;
 				if (runX == 5)
 					result += PENALTY_N1;
@@ -653,7 +653,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 				finderPenaltyAddHistory(runX, runHistory, qrsize);
 				if (!runColor)
 					result += finderPenaltyCountPatterns(runHistory, qrsize) * PENALTY_N3;
-				runColor = getModule(qrcode, x, y);
+				runColor = getModuleBounded(qrcode, x, y);
 				runX = 1;
 			}
 		}
@@ -665,7 +665,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 		int runY = 0;
 		int runHistory[7] = {0};
 		for (int y = 0; y < qrsize; y++) {
-			if (getModule(qrcode, x, y) == runColor) {
+			if (getModuleBounded(qrcode, x, y) == runColor) {
 				runY++;
 				if (runY == 5)
 					result += PENALTY_N1;
@@ -675,7 +675,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 				finderPenaltyAddHistory(runY, runHistory, qrsize);
 				if (!runColor)
 					result += finderPenaltyCountPatterns(runHistory, qrsize) * PENALTY_N3;
-				runColor = getModule(qrcode, x, y);
+				runColor = getModuleBounded(qrcode, x, y);
 				runY = 1;
 			}
 		}
@@ -685,10 +685,10 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	// 2*2 blocks of modules having same color
 	for (int y = 0; y < qrsize - 1; y++) {
 		for (int x = 0; x < qrsize - 1; x++) {
-			bool  color = getModule(qrcode, x, y);
-			if (  color == getModule(qrcode, x + 1, y) &&
-			      color == getModule(qrcode, x, y + 1) &&
-			      color == getModule(qrcode, x + 1, y + 1))
+			bool  color = getModuleBounded(qrcode, x, y);
+			if (  color == getModuleBounded(qrcode, x + 1, y) &&
+			      color == getModuleBounded(qrcode, x, y + 1) &&
+			      color == getModuleBounded(qrcode, x + 1, y + 1))
 				result += PENALTY_N2;
 		}
 	}
@@ -697,7 +697,7 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	int dark = 0;
 	for (int y = 0; y < qrsize; y++) {
 		for (int x = 0; x < qrsize; x++) {
-			if (getModule(qrcode, x, y))
+			if (getModuleBounded(qrcode, x, y))
 				dark++;
 		}
 	}
@@ -760,12 +760,12 @@ int qrcodegen_getSize(const uint8_t qrcode[]) {
 bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y) {
 	assert(qrcode != NULL);
 	int qrsize = qrcode[0];
-	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModule(qrcode, x, y);
+	return (0 <= x && x < qrsize && 0 <= y && y < qrsize) && getModuleBounded(qrcode, x, y);
 }
 
 
 // Gets the module at the given coordinates, which must be in bounds.
-testable bool getModule(const uint8_t qrcode[], int x, int y) {
+testable bool getModuleBounded(const uint8_t qrcode[], int x, int y) {
 	int qrsize = qrcode[0];
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
 	int index = y * qrsize + x;
