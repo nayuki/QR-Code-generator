@@ -240,16 +240,16 @@ impl QrCode {
 			bb.append_bits(seg.numchars as u32, seg.mode.num_char_count_bits(version));
 			bb.0.extend_from_slice(&seg.data);
 		}
-		assert_eq!(bb.0.len(), datausedbits);
+		debug_assert_eq!(bb.0.len(), datausedbits);
 		
 		// Add terminator and pad up to a byte if applicable
 		let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
-		assert!(bb.0.len() <= datacapacitybits);
+		debug_assert!(bb.0.len() <= datacapacitybits);
 		let numzerobits: usize = std::cmp::min(4, datacapacitybits - bb.0.len());
 		bb.append_bits(0, numzerobits as u8);
 		let numzerobits: usize = bb.0.len().wrapping_neg() & 7;
 		bb.append_bits(0, numzerobits as u8);
-		assert_eq!(bb.0.len() % 8, 0);
+		debug_assert_eq!(bb.0.len() % 8, 0);
 		
 		// Pad with alternating bytes until data capacity is reached
 		for &padbyte in [0xEC, 0x11].iter().cycle() {
@@ -415,7 +415,7 @@ impl QrCode {
 			}
 			(data << 10 | rem) ^ 0x5412  // uint15
 		};
-		assert_eq!(bits >> 15, 0);
+		debug_assert_eq!(bits >> 15, 0);
 		
 		// Draw first copy
 		for i in 0 .. 6 {
@@ -456,7 +456,7 @@ impl QrCode {
 			}
 			data << 12 | rem  // uint18
 		};
-		assert_eq!(bits >> 18, 0);
+		debug_assert_eq!(bits >> 18, 0);
 		
 		// Draw two copies
 		for i in 0 .. 18 {
@@ -577,7 +577,7 @@ impl QrCode {
 			}
 			right -= 2;
 		}
-		assert_eq!(i, data.len() * 8);
+		debug_assert_eq!(i, data.len() * 8);
 	}
 	
 	
@@ -678,9 +678,9 @@ impl QrCode {
 		let total: i32 = size * size;  // Note that size is odd, so dark/total != 1/2
 		// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 		let k: i32 = ((dark * 20 - total * 10).abs() + total - 1) / total - 1;
-		assert!(0 <= k && k <= 9);
+		debug_assert!(0 <= k && k <= 9);
 		result += k * PENALTY_N4;
-		assert!(0 <= result && result <= 2568888);  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
+		debug_assert!(0 <= result && result <= 2568888);  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
 		result
 	}
 	
@@ -720,7 +720,7 @@ impl QrCode {
 				result -= 36;
 			}
 		}
-		assert!((208 ..= 29648).contains(&result));
+		debug_assert!((208 ..= 29648).contains(&result));
 		result
 	}
 	
@@ -832,7 +832,7 @@ impl FinderPenalty {
 	pub fn count_patterns(&self) -> i32 {
 		let rh = &self.run_history;
 		let n = rh[1];
-		assert!(n <= self.qr_size * 3);
+		debug_assert!(n <= self.qr_size * 3);
 		let core = n > 0 && rh[2] == n && rh[3] == n * 3 && rh[4] == n && rh[5] == n;
 		( i32::from(core && rh[0] >= n * 4 && rh[6] >= n)
 		+ i32::from(core && rh[6] >= n * 4 && rh[0] >= n))

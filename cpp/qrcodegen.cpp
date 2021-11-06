@@ -22,6 +22,7 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <climits>
 #include <cstddef>
 #include <cstdlib>
@@ -278,8 +279,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 			throw data_too_long(sb.str());
 		}
 	}
-	if (dataUsedBits == -1)
-		throw std::logic_error("Assertion error");
+	assert(dataUsedBits != -1);
 	
 	// Increase the error correction level while the data still fits in the current version number
 	for (Ecc newEcl : {Ecc::MEDIUM, Ecc::QUARTILE, Ecc::HIGH}) {  // From low to high
@@ -294,17 +294,14 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 		bb.appendBits(static_cast<uint32_t>(seg.getNumChars()), seg.getMode().numCharCountBits(version));
 		bb.insert(bb.end(), seg.getData().begin(), seg.getData().end());
 	}
-	if (bb.size() != static_cast<unsigned int>(dataUsedBits))
-		throw std::logic_error("Assertion error");
+	assert(bb.size() == static_cast<unsigned int>(dataUsedBits));
 	
 	// Add terminator and pad up to a byte if applicable
 	size_t dataCapacityBits = static_cast<size_t>(getNumDataCodewords(version, ecl)) * 8;
-	if (bb.size() > dataCapacityBits)
-		throw std::logic_error("Assertion error");
+	assert(bb.size() <= dataCapacityBits);
 	bb.appendBits(0, std::min(4, static_cast<int>(dataCapacityBits - bb.size())));
 	bb.appendBits(0, (8 - static_cast<int>(bb.size() % 8)) % 8);
-	if (bb.size() % 8 != 0)
-		throw std::logic_error("Assertion error");
+	assert(bb.size() % 8 == 0);
 	
 	// Pad with alternating bytes until data capacity is reached
 	for (uint8_t padByte = 0xEC; bb.size() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
@@ -352,8 +349,7 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 			applyMask(i);  // Undoes the mask due to XOR
 		}
 	}
-	if (msk < 0 || msk > 7)
-		throw std::logic_error("Assertion error");
+	assert(0 <= msk && msk <= 7);
 	mask = msk;
 	applyMask(msk);  // Apply the final choice of mask
 	drawFormatBits(msk);  // Overwrite old format bits
@@ -424,8 +420,7 @@ void QrCode::drawFormatBits(int msk) {
 	for (int i = 0; i < 10; i++)
 		rem = (rem << 1) ^ ((rem >> 9) * 0x537);
 	int bits = (data << 10 | rem) ^ 0x5412;  // uint15
-	if (bits >> 15 != 0)
-		throw std::logic_error("Assertion error");
+	assert(bits >> 15 == 0);
 	
 	// Draw first copy
 	for (int i = 0; i <= 5; i++)
@@ -454,8 +449,7 @@ void QrCode::drawVersion() {
 	for (int i = 0; i < 12; i++)
 		rem = (rem << 1) ^ ((rem >> 11) * 0x1F25);
 	long bits = static_cast<long>(version) << 12 | rem;  // uint18
-	if (bits >> 18 != 0)
-		throw std::logic_error("Assertion error");
+	assert(bits >> 18 == 0);
 	
 	// Draw two copies
 	for (int i = 0; i < 18; i++) {
@@ -534,8 +528,7 @@ vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 				result.push_back(blocks.at(j).at(i));
 		}
 	}
-	if (result.size() != static_cast<unsigned int>(rawCodewords))
-		throw std::logic_error("Assertion error");
+	assert(result.size() == static_cast<unsigned int>(rawCodewords));
 	return result;
 }
 
@@ -563,8 +556,7 @@ void QrCode::drawCodewords(const vector<uint8_t> &data) {
 			}
 		}
 	}
-	if (i != data.size() * 8)
-		throw std::logic_error("Assertion error");
+	assert(i == data.size() * 8);
 }
 
 
@@ -662,11 +654,9 @@ long QrCode::getPenaltyScore() const {
 	int total = size * size;  // Note that size is odd, so dark/total != 1/2
 	// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 	int k = static_cast<int>((std::abs(dark * 20L - total * 10L) + total - 1) / total) - 1;
-	if (!(0 <= k && k <= 9))
-		throw std::logic_error("Assertion error");
+	assert(0 <= k && k <= 9);
 	result += k * PENALTY_N4;
-	if (!(0 <= result && result <= 2568888L))  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
-		throw std::logic_error("Assertion error");
+	assert(0 <= result && result <= 2568888L);  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
 	return result;
 }
 
@@ -697,8 +687,7 @@ int QrCode::getNumRawDataModules(int ver) {
 		if (ver >= 7)
 			result -= 36;
 	}
-	if (!(208 <= result && result <= 29648))
-		throw std::logic_error("Assertion error");
+	assert(208 <= result && result <= 29648);
 	return result;
 }
 
@@ -755,16 +744,14 @@ uint8_t QrCode::reedSolomonMultiply(uint8_t x, uint8_t y) {
 		z = (z << 1) ^ ((z >> 7) * 0x11D);
 		z ^= ((y >> i) & 1) * x;
 	}
-	if (z >> 8 != 0)
-		throw std::logic_error("Assertion error");
+	assert(z >> 8 == 0);
 	return static_cast<uint8_t>(z);
 }
 
 
 int QrCode::finderPenaltyCountPatterns(const std::array<int,7> &runHistory) const {
 	int n = runHistory.at(1);
-	if (n > size * 3)
-		throw std::logic_error("Assertion error");
+	assert(n <= size * 3);
 	bool core = n > 0 && runHistory.at(2) == n && runHistory.at(3) == n * 3 && runHistory.at(4) == n && runHistory.at(5) == n;
 	return (core && runHistory.at(0) >= n * 4 && runHistory.at(6) >= n ? 1 : 0)
 	     + (core && runHistory.at(6) >= n * 4 && runHistory.at(0) >= n ? 1 : 0);

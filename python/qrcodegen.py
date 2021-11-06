@@ -95,8 +95,7 @@ class QrCode:
 				if datausedbits is not None:
 					msg = "Data length = {} bits, Max capacity = {} bits".format(datausedbits, datacapacitybits)
 				raise DataTooLongError(msg)
-		if datausedbits is None:
-			raise AssertionError()
+		assert datausedbits is not None
 		
 		# Increase the error correction level while the data still fits in the current version number
 		for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):  # From low to high
