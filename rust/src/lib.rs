@@ -456,7 +456,7 @@ impl QrCode {
 			}
 			data << 12 | rem  // uint18
 		};
-		assert!(bits >> 18 == 0, "Assertion error");
+		assert_eq!(bits >> 18, 0, "Assertion error");
 		
 		// Draw two copies
 		for i in 0 .. 18 {

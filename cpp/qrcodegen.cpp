@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
-#include <stdexcept>
 #include <utility>
 #include "qrcodegen.hpp"
 
