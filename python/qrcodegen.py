@@ -200,9 +200,9 @@ class QrCode:
 					minpenalty = penalty
 				self._apply_mask(i)  # Undoes the mask due to XOR
 		assert 0 <= mask <= 7
+		self._mask = mask
 		self._apply_mask(mask)  # Apply the final choice of mask
 		self._draw_format_bits(mask)  # Overwrite old format bits
-		self._mask = mask
 		
 		del self._isfunction
 	

@@ -210,8 +210,7 @@ impl QrCode {
 		// Find the minimal version number to use
 		let mut version: Version = minversion;
 		let datausedbits: usize = loop {
-			// Number of data bits available
-			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;
+			let datacapacitybits: usize = QrCode::get_num_data_codewords(version, ecl) * 8;  // Number of data bits available
 			let dataused: Option<usize> = QrSegment::get_total_bits(segs, version);
 			if dataused.map_or(false, |n| n <= datacapacitybits) {
 				break dataused.unwrap();  // This version number is found to be suitable
