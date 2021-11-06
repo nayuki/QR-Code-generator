@@ -249,7 +249,7 @@ impl QrCode {
 		bb.append_bits(0, numzerobits as u8);
 		let numzerobits: usize = bb.0.len().wrapping_neg() & 7;
 		bb.append_bits(0, numzerobits as u8);
-		assert_eq!(bb.0.len() % 8, 0, "Assertion error");
+		assert_eq!(bb.0.len() % 8, 0);
 		
 		// Pad with alternating bytes until data capacity is reached
 		for &padbyte in [0xEC, 0x11].iter().cycle() {
@@ -415,7 +415,7 @@ impl QrCode {
 			}
 			(data << 10 | rem) ^ 0x5412  // uint15
 		};
-		assert_eq!(bits >> 15, 0, "Assertion error");
+		assert_eq!(bits >> 15, 0);
 		
 		// Draw first copy
 		for i in 0 .. 6 {
@@ -456,7 +456,7 @@ impl QrCode {
 			}
 			data << 12 | rem  // uint18
 		};
-		assert_eq!(bits >> 18, 0, "Assertion error");
+		assert_eq!(bits >> 18, 0);
 		
 		// Draw two copies
 		for i in 0 .. 18 {
@@ -577,7 +577,7 @@ impl QrCode {
 			}
 			right -= 2;
 		}
-		assert_eq!(i, data.len() * 8, "Assertion error");
+		assert_eq!(i, data.len() * 8);
 	}
 	
 	
