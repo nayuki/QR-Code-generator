@@ -255,14 +255,14 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	for (uint8_t padByte = 0xEC; bitLen < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 		appendBitsToBuffer(padByte, 8, qrcode, &bitLen);
 	
-	// Draw function and data codeword modules
+	// Compute ECC, draw modules
 	addEccAndInterleave(qrcode, version, ecl, tempBuffer);
 	initializeFunctionModules(version, qrcode);
 	drawCodewords(tempBuffer, getNumRawDataModules(version) / 8, qrcode);
 	drawLightFunctionModules(qrcode, version);
 	initializeFunctionModules(version, tempBuffer);
 	
-	// Handle masking
+	// Do masking
 	if (mask == qrcodegen_Mask_AUTO) {  // Automatically choose best mask
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
@@ -278,8 +278,8 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 		}
 	}
 	assert(0 <= (int)mask && (int)mask <= 7);
-	applyMask(tempBuffer, qrcode, mask);
-	drawFormatBits(ecl, mask, qrcode);
+	applyMask(tempBuffer, qrcode, mask);  // Apply the final choice of mask
+	drawFormatBits(ecl, mask, qrcode);  // Overwrite old format bits
 	return true;
 }
 
