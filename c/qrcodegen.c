@@ -78,7 +78,7 @@ static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7], int
 
 testable bool getModule(const uint8_t qrcode[], int x, int y);
 testable void setModule(uint8_t qrcode[], int x, int y, bool isDark);
-testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark);
+testable void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark);
 static bool getBit(int x, int i);
 
 testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
@@ -467,9 +467,9 @@ static void drawLightFunctionModules(uint8_t qrcode[], int version) {
 			if (abs(dy) > dist)
 				dist = abs(dy);
 			if (dist == 2 || dist == 4) {
-				setModuleBounded(qrcode, 3 + dx, 3 + dy, false);
-				setModuleBounded(qrcode, qrsize - 4 + dx, 3 + dy, false);
-				setModuleBounded(qrcode, 3 + dx, qrsize - 4 + dy, false);
+				setModuleUnbounded(qrcode, 3 + dx, 3 + dy, false);
+				setModuleUnbounded(qrcode, qrsize - 4 + dx, 3 + dy, false);
+				setModuleUnbounded(qrcode, 3 + dx, qrsize - 4 + dy, false);
 			}
 		}
 	}
@@ -788,7 +788,7 @@ testable void setModule(uint8_t qrcode[], int x, int y, bool isDark) {
 
 
 // Sets the module at the given coordinates, doing nothing if out of bounds.
-testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark) {
+testable void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark) {
 	int qrsize = qrcode[0];
 	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)
 		setModule(qrcode, x, y, isDark);

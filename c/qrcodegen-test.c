@@ -56,7 +56,7 @@ void initializeFunctionModules(int version, uint8_t qrcode[]);
 int getAlignmentPatternPositions(int version, uint8_t result[7]);
 bool getModule(const uint8_t qrcode[], int x, int y);
 void setModule(uint8_t qrcode[], int x, int y, bool isDark);
-void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark);
+void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark);
 int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars);
 int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version);
 
@@ -469,12 +469,12 @@ static void testGetSetModule(void) {
 	}
 	
 	// Set some out of bounds modules to light
-	setModuleBounded(qrcode, -1, -1, false);
-	setModuleBounded(qrcode, -1, 0, false);
-	setModuleBounded(qrcode, 0, -1, false);
-	setModuleBounded(qrcode, size, 5, false);
-	setModuleBounded(qrcode, 72, size, false);
-	setModuleBounded(qrcode, size, size, false);
+	setModuleUnbounded(qrcode, -1, -1, false);
+	setModuleUnbounded(qrcode, -1, 0, false);
+	setModuleUnbounded(qrcode, 0, -1, false);
+	setModuleUnbounded(qrcode, size, 5, false);
+	setModuleUnbounded(qrcode, 72, size, false);
+	setModuleUnbounded(qrcode, size, size, false);
 	for (int y = 0; y < size; y++) {  // Check all dark
 		for (int x = 0; x < size; x++)
 			assert(qrcodegen_getModule(qrcode, x, y) == true);
@@ -520,7 +520,7 @@ static void testGetSetModuleRandomly(void) {
 		if (isInBounds && rand() % 2 == 0)
 			setModule(qrcode, x, y, newColor);
 		else
-			setModuleBounded(qrcode, x, y, newColor);
+			setModuleUnbounded(qrcode, x, y, newColor);
 	}
 	numTestCases++;
 }
