@@ -568,7 +568,7 @@ impl QrCode {
 					let upward: bool = (right + 1) & 2 == 0;
 					let y: i32 = if upward { self.size - 1 - vert } else { vert };  // Actual y coordinate
 					if !self.isfunction[(y * self.size + x) as usize] && i < data.len() * 8 {
-						*self.module_mut(x, y) = get_bit(u32::from(data[i >> 3]), 7 - ((i & 7) as i32));
+						*self.module_mut(x, y) = get_bit(u32::from(data[i >> 3]), 7 - ((i as i32) & 7));
 						i += 1;
 					}
 					// If this QR Code has any remainder bits (0 to 7), they were assigned as
@@ -1109,7 +1109,7 @@ impl QrSegment {
 		for seg in segs {
 			let ccbits: u8 = seg.mode.num_char_count_bits(version);
 			// ccbits can be as large as 16, but usize can be as small as 16
-			if let Some(limit) = 1usize.checked_shl(u32::from(ccbits)) {
+			if let Some(limit) = 1usize.checked_shl(ccbits.into()) {
 				if seg.numchars >= limit {
 					return None;  // The segment's length doesn't fit the field's bit width
 				}
@@ -1205,7 +1205,7 @@ impl BitBuffer {
 	/// 
 	/// Requires len &#x2264; 31 and val &lt; 2<sup>len</sup>.
 	pub fn append_bits(&mut self, val: u32, len: u8) {
-		assert!(len <= 31 && (val >> len) == 0, "Value out of range");
+		assert!(len <= 31 && val >> len == 0, "Value out of range");
 		self.0.extend((0 .. i32::from(len)).rev().map(|i| get_bit(val, i)));  // Append bit by bit
 	}
 }
