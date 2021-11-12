@@ -220,12 +220,10 @@ impl QrCode {
 			if dataused.map_or(false, |n| n <= datacapacitybits) {
 				break dataused.unwrap();  // This version number is found to be suitable
 			} else if version >= maxversion {  // All versions in the range could not fit the given data
-				let msg: String = match dataused {
-					None => String::from("Segment too long"),
-					Some(n) => format!("Data length = {} bits, Max capacity = {} bits",
-						n, datacapacitybits),
-				};
-				return Err(DataTooLong(msg));
+				return Err(match dataused {
+					None => DataTooLong::SegmentTooLong,
+					Some(n) => DataTooLong::DataOverCapacity(n, datacapacitybits),
+				});
 			} else {
 				version = Version::new(version.value() + 1);
 			}
@@ -1232,17 +1230,20 @@ impl BitBuffer {
 /// - Change the text to fit the character set of a particular segment mode (e.g. alphanumeric).
 /// - Propagate the error upward to the caller/user.
 #[derive(Debug, Clone)]
-pub struct DataTooLong(String);
-
-impl std::error::Error for DataTooLong {
-	fn description(&self) -> &str {
-		&self.0
-	}
+pub enum DataTooLong {
+	SegmentTooLong,
+	DataOverCapacity(usize, usize),
 }
+
+impl std::error::Error for DataTooLong {}
 
 impl std::fmt::Display for DataTooLong {
 	fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-		f.write_str(&self.0)
+		match *self {
+			Self::SegmentTooLong => write!(f, "Segment too long"),
+			Self::DataOverCapacity(datalen, maxcapacity) =>
+				write!(f, "Data length = {} bits, Max capacity = {} bits", datalen, maxcapacity),
+		}
 	}
 }
 
