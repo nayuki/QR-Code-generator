@@ -811,10 +811,10 @@ namespace qrcodegen {
 			else if (assignVal < (1 << 7))
 				appendBits(assignVal, 8, bb);
 			else if (assignVal < (1 << 14)) {
-				appendBits(2, 2, bb);
+				appendBits(0b10, 2, bb);
 				appendBits(assignVal, 14, bb);
 			} else if (assignVal < 1000000) {
-				appendBits(6, 3, bb);
+				appendBits(0b110, 3, bb);
 				appendBits(assignVal, 21, bb);
 			} else
 				throw "ECI assignment value out of range";

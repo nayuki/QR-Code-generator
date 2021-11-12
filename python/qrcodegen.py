@@ -746,10 +746,10 @@ class QrSegment:
 		elif assignval < (1 << 7):
 			bb.append_bits(assignval, 8)
 		elif assignval < (1 << 14):
-			bb.append_bits(2, 2)
+			bb.append_bits(0b10, 2)
 			bb.append_bits(assignval, 14)
 		elif assignval < 1000000:
-			bb.append_bits(6, 3)
+			bb.append_bits(0b110, 3)
 			bb.append_bits(assignval, 21)
 		else:
 			raise ValueError("ECI assignment value out of range")

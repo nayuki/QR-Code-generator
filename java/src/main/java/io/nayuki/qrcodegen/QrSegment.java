@@ -151,10 +151,10 @@ public final class QrSegment {
 		else if (assignVal < (1 << 7))
 			bb.appendBits(assignVal, 8);
 		else if (assignVal < (1 << 14)) {
-			bb.appendBits(2, 2);
+			bb.appendBits(0b10, 2);
 			bb.appendBits(assignVal, 14);
 		} else if (assignVal < 1_000_000) {
-			bb.appendBits(6, 3);
+			bb.appendBits(0b110, 3);
 			bb.appendBits(assignVal, 21);
 		} else
 			throw new IllegalArgumentException("ECI assignment value out of range");

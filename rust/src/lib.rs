@@ -1059,10 +1059,10 @@ impl QrSegment {
 		if assignval < (1 << 7) {
 			bb.append_bits(assignval, 8);
 		} else if assignval < (1 << 14) {
-			bb.append_bits(2, 2);
+			bb.append_bits(0b10, 2);
 			bb.append_bits(assignval, 14);
 		} else if assignval < 1_000_000 {
-			bb.append_bits(6, 3);
+			bb.append_bits(0b110, 3);
 			bb.append_bits(assignval, 21);
 		} else {
 			panic!("ECI assignment value out of range");
