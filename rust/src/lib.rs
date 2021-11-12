@@ -529,7 +529,7 @@ impl QrCode {
 		let mut k: usize = 0;
 		for i in 0 .. numblocks {
 			let datlen: usize = shortblocklen - blockecclen + usize::from(i >= numshortblocks);
-			let mut dat = data[k .. k + datlen].to_vec();
+			let mut dat = data[k .. k+datlen].to_vec();
 			k += datlen;
 			let ecc: Vec<u8> = QrCode::reed_solomon_compute_remainder(&dat, &rsdiv);
 			if i < numshortblocks {
@@ -665,8 +665,8 @@ impl QrCode {
 		}
 		
 		// 2*2 blocks of modules having same color
-		for y in 0 .. size - 1 {
-			for x in 0 .. size - 1 {
+		for y in 0 .. size-1 {
+			for x in 0 .. size-1 {
 				let color: bool = self.module(x, y);
 				if color == self.module(x + 1, y) &&
 				   color == self.module(x, y + 1) &&
@@ -701,7 +701,7 @@ impl QrCode {
 			let numalign = i32::from(ver) / 7 + 2;
 			let step: i32 = if ver == 32 { 26 } else
 				{(i32::from(ver) * 4 + numalign * 2 + 1) / (numalign * 2 - 2) * 2};
-			let mut result: Vec<i32> = (0 .. numalign - 1).map(
+			let mut result: Vec<i32> = (0 .. numalign-1).map(
 				|i| self.size - 7 - i * step).collect();
 			result.push(6);
 			result.reverse();
