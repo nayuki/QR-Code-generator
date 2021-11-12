@@ -207,7 +207,9 @@ impl QrCode {
 	/// Returns a wrapped `QrCode` if successful, or `Err` if the data is too
 	/// long to fit in any version in the given range at the given ECC level.
 	pub fn encode_segments_advanced(segs: &[QrSegment], mut ecl: QrCodeEcc,
-			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool) -> Result<Self,DataTooLong> {
+			minversion: Version, maxversion: Version, mask: Option<Mask>, boostecl: bool)
+			-> Result<Self,DataTooLong> {
+		
 		assert!(minversion <= maxversion, "Invalid value");
 		
 		// Find the minimal version number to use
