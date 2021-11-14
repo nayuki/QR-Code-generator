@@ -560,7 +560,7 @@ testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 }
 
 
-// Sets every pixel in the range [left : left + width] * [top : top + height] to dark.
+// Sets every module in the range [left : left + width] * [top : top + height] to dark.
 static void fillRectangle(int left, int top, int width, int height, uint8_t qrcode[]) {
 	for (int dy = 0; dy < height; dy++) {
 		for (int dx = 0; dx < width; dx++)
@@ -600,8 +600,8 @@ static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]) {
 }
 
 
-// XORs the codeword modules in this QR Code with the given mask pattern.
-// The function modules must be marked and the codeword bits must be drawn
+// XORs the codeword modules in this QR Code with the given mask pattern
+// and given pattern of function modules. The codeword bits must be drawn
 // before masking. Due to the arithmetic of XOR, calling applyMask() with
 // the same mask value a second time will undo the mask. A final well-formed
 // QR Code needs exactly one (not zero, two, etc.) mask applied.
@@ -766,7 +766,7 @@ bool qrcodegen_getModule(const uint8_t qrcode[], int x, int y) {
 }
 
 
-// Gets the module at the given coordinates, which must be in bounds.
+// Returns the color of the module at the given coordinates, which must be in bounds.
 testable bool getModuleBounded(const uint8_t qrcode[], int x, int y) {
 	int qrsize = qrcode[0];
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
@@ -775,7 +775,7 @@ testable bool getModuleBounded(const uint8_t qrcode[], int x, int y) {
 }
 
 
-// Sets the module at the given coordinates, which must be in bounds.
+// Sets the color of the module at the given coordinates, which must be in bounds.
 testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark) {
 	int qrsize = qrcode[0];
 	assert(21 <= qrsize && qrsize <= 177 && 0 <= x && x < qrsize && 0 <= y && y < qrsize);
@@ -789,7 +789,7 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark) {
 }
 
 
-// Sets the module at the given coordinates, doing nothing if out of bounds.
+// Sets the color of the module at the given coordinates, doing nothing if out of bounds.
 testable void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark) {
 	int qrsize = qrcode[0];
 	if (0 <= x && x < qrsize && 0 <= y && y < qrsize)

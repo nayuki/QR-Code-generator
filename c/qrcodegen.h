@@ -247,8 +247,8 @@ bool qrcodegen_isAlphanumeric(const char *text);
 /* 
  * Returns the number of bytes (uint8_t) needed for the data buffer of a segment
  * containing the given number of characters using the given mode. Notes:
- * - Returns SIZE_MAX on failure, i.e. numChars > INT16_MAX or
- *   the number of needed bits exceeds INT16_MAX (i.e. 32767).
+ * - Returns SIZE_MAX on failure, i.e. numChars > INT16_MAX or the internal
+ *   calculation of the number of needed bits exceeds INT16_MAX (i.e. 32767).
  * - Otherwise, all valid results are in the range [0, ceil(INT16_MAX / 8)], i.e. at most 4096.
  * - It is okay for the user to allocate more bytes for the buffer than needed.
  * - For byte mode, numChars measures the number of bytes, not Unicode code points.
