@@ -57,8 +57,6 @@
 //! use qrcodegen::Mask;
 //! use qrcodegen::QrCode;
 //! use qrcodegen::QrCodeEcc;
-//! use qrcodegen::QrSegment;
-//! use qrcodegen::QrSegmentMode;
 //! use qrcodegen::Version;
 //! ```
 //! 
@@ -75,8 +73,8 @@
 //! Binary data:
 //! 
 //! ```
-//! let mut dataandtemp = vec![0u8; Version::MAX.buffer_len()];
 //! let mut outbuffer   = vec![0u8; Version::MAX.buffer_len()];
+//! let mut dataandtemp = vec![0u8; Version::MAX.buffer_len()];
 //! dataandtemp[0] = 0xE3;
 //! dataandtemp[1] = 0x81;
 //! dataandtemp[2] = 0x82;
