@@ -1,19 +1,21 @@
 /**
  * Generates QR Codes from text strings and byte arrays.
  * 
- * <p>This library generates QR Code symbols, and its design is optimized for speed. It contrasts with another QR library by the same author which is slow but which optimizes for clarity and conciseness. The functionality of this library and its API are nearly identical to the slow library, but it runs anywhere from 1.5&#xD7; to 6&#xD7; as fast.</p>
- * <p>Home page for the fast library (design explanation, benchmarks): <a href="https://www.nayuki.io/page/fast-qr-code-generator-library">https://www.nayuki.io/page/fast-qr-code-generator-library</a></p>
- * <p>Home page for the slow library (live demo, QR Code introduction, competitor comparisons): <a href="https://www.nayuki.io/page/qr-code-generator-library">https://www.nayuki.io/page/qr-code-generator-library</a></p>
+ * <p>This project aims to be the best, clearest QR Code generator library. The primary goals are flexible options and absolute correctness. Secondary goals are compact implementation size and good documentation comments.</p>
+ * <p>Home page for this fast library with design explanation and benchmarks: <a href="https://www.nayuki.io/page/fast-qr-code-generator-library">https://www.nayuki.io/page/fast-qr-code-generator-library</a></p>
+ * <p>Home page for the main project with live JavaScript demo, extensive descriptions, and competitor comparisons: <a href="https://www.nayuki.io/page/qr-code-generator-library">https://www.nayuki.io/page/qr-code-generator-library</a></p>
  * 
  * <h2>Features</h2>
  * <p>Core features:</p>
  * <ul>
+ *   <li><p>Approximately 1.5× to 10× faster than other Java implementation</p></li>
+ *   <li><p>Shorter code but more documentation comments compared to competing libraries</p></li>
  *   <li><p>Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard</p></li>
  *   <li><p>Output format: Raw modules/pixels of the QR symbol</p></li>
+ *   <li><p>Detects finder-like penalty patterns more accurately than other implementations</p></li>
  *   <li><p>Encodes numeric and special-alphanumeric text in less space than general text</p></li>
  *   <li><p>Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes</p></li>
  *   <li><p>Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts</p></li>
- *   <li><p>Detects finder-like penalty patterns more accurately than other implementations</p></li>
  *   <li><p>Open-source code under the permissive MIT License</p></li>
  * </ul>
  * <p>Manual parameters:</p>

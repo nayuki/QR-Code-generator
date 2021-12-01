@@ -1,5 +1,5 @@
-QR Code generator library
-=========================
+QR Code generator library - Rust
+================================
 
 
 Introduction
@@ -35,27 +35,30 @@ More information about QR Code technology and this library's design can be found
 Examples
 --------
 
-    extern crate qrcodegen;
-    use qrcodegen::Mask;
-    use qrcodegen::QrCode;
-    use qrcodegen::QrCodeEcc;
-    use qrcodegen::QrSegment;
-    use qrcodegen::Version;
-    
-    // Simple operation
-    let qr = QrCode::encode_text("Hello, world!",
-        QrCodeEcc::Medium).unwrap();
-    let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
-    
-    // Manual operation
-    let text: &str = "3141592653589793238462643383";
-    let segs = QrSegment::make_segments(text);
-    let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High,
-        Version::new(5), Version::new(5), Some(Mask::new(2)), false).unwrap();
-    for y in 0 .. qr.size() {
-        for x in 0 .. qr.size() {
-            (... paint qr.get_module(x, y) ...)
-        }
+```rust
+extern crate qrcodegen;
+use qrcodegen::Mask;
+use qrcodegen::QrCode;
+use qrcodegen::QrCodeEcc;
+use qrcodegen::QrSegment;
+use qrcodegen::Version;
+
+// Simple operation
+let qr = QrCode::encode_text("Hello, world!",
+    QrCodeEcc::Medium).unwrap();
+let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
+
+// Manual operation
+let text: &str = "3141592653589793238462643383";
+let segs = QrSegment::make_segments(text);
+let qr = QrCode::encode_segments_advanced(&segs,
+    QrCodeEcc::High, Version::new(5), Version::new(5),
+    Some(Mask::new(2)), false).unwrap();
+for y in 0 .. qr.size() {
+    for x in 0 .. qr.size() {
+        (... paint qr.get_module(x, y) ...)
     }
+}
+```
 
 More complete set of examples: https://github.com/nayuki/QR-Code-generator/blob/master/rust/examples/qrcodegen-demo.rs .
