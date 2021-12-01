@@ -25,6 +25,7 @@
  *   <li><p>Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes</p></li>
  *   <li><p>Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts</p></li>
  * </ul>
+ * <p>More information about QR Code technology and this library's design can be found on the project home page.</p>
  * 
  * <h2>Examples</h2>
  * <p>Simple operation:</p>

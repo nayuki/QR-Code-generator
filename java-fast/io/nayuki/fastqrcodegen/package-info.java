@@ -23,6 +23,7 @@
  *   <li><p>User can specify absolute error correction level, or allow the library to boost it if it doesn't increase the version number</p></li>
  *   <li><p>User can create a list of data segments manually and add ECI segments</p></li>
  * </ul>
+ * <p>More information about QR Code technology and this library's design can be found on the project home page.</p>
  * 
  * <h2>Examples</h2>
  * <p>Simple operation:</p>

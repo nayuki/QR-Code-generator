@@ -29,6 +29,8 @@ Manual parameters:
 * User can specify absolute error correction level, or allow the library to boost it if it doesn't increase the version number
 * User can create a list of data segments manually and add ECI segments
 
+More information about QR Code technology and this library's design can be found on the project home page.
+
 
 Examples
 --------
