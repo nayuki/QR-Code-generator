@@ -148,7 +148,7 @@ struct qrcodegen_Segment {
 /*---- Functions (high level) to generate QR Codes ----*/
 
 /* 
- * Encodes the given text string to a QR Code, returning true if encoding succeeded.
+ * Encodes the given text string to a QR Code, returning true if successful.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
  * - The input text must be encoded in UTF-8 and contain no NULs.
@@ -179,7 +179,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 
 
 /* 
- * Encodes the given binary data to a QR Code, returning true if encoding succeeded.
+ * Encodes the given binary data to a QR Code, returning true if successful.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
  * - The variables ecl and mask must correspond to enum constant values.
