@@ -139,7 +139,14 @@ impl<'a> QrCode<'a> {
 	/// version. The mask number is either between 0 to 7 (inclusive) to force that
 	/// mask, or `None` to automatically choose an appropriate mask (which may be slow).
 	/// 
-	/// The arrays tempbuffer and outbuffer must each have a length of at least maxversion.buffer_len().
+	/// About the slices, letting len = maxversion.buffer_len():
+	/// - Before calling the function:
+	///   - The slices tempbuffer and outbuffer each must have a length of at least len.
+	///   - If a slice is longer than len, then the function will not
+	///     read from or write to the suffix array[len .. array.len()].
+	///   - The initial values of both slices can be arbitrary
+	///     because the function always writes before reading.
+	/// - After the function returns, both slices have no guarantee on what values are stored.
 	/// 
 	/// In the most optimistic case, a QR Code at version 40 with low ECC
 	/// can hold any UTF-8 string up to 2953 bytes, or any alphanumeric string
@@ -148,8 +155,6 @@ impl<'a> QrCode<'a> {
 	/// 
 	/// Please consult the QR Code specification for information on
 	/// data capacities per version, ECC level, and text encoding mode.
-	/// 
-	/// After the function returns, tempbuffer contains no useful data.
 	/// 
 	/// If successful, the resulting QR Code may use numeric, alphanumeric, or byte mode to encode the text.
 	/// 
@@ -185,16 +190,22 @@ impl<'a> QrCode<'a> {
 	
 	/// Returns a QR Code representing the given binary data with the given encoding parameters.
 	/// 
-	/// The arrays dataandtemp and outbuffer must each have a length of at least maxversion.buffer_len().
+	/// About the slices, letting len = maxversion.buffer_len():
+	/// - Before calling the function:
+	///   - The slices dataandtempbuffer and outbuffer each must have a length of at least len.
+	///   - If a slice is longer than len, then the function will not
+	///     read from or write to the suffix array[len .. array.len()].
+	///   - The input slice range dataandtempbuffer[0 .. datalen] should normally be
+	///     valid UTF-8 text, but is not required by the QR Code standard.
+	///   - The initial values of dataandtempbuffer[datalen .. len] and outbuffer[0 .. len]
+	///     can be arbitrary because the function always writes before reading.
+	/// - After the function returns, both slices have no guarantee on what values are stored.
 	/// 
 	/// In the most optimistic case, a QR Code at version 40 with low ECC can hold any byte
 	/// sequence up to length 2953. This is the hard upper limit of the QR Code standard.
 	/// 
 	/// Please consult the QR Code specification for information on
 	/// data capacities per version, ECC level, and text encoding mode.
-	/// 
-	/// After the function returns, the contents of dataandtemp may have changed,
-	/// and does not represent useful data anymore.
 	/// 
 	/// If successful, the resulting QR Code will use byte mode to encode the data.
 	/// 
