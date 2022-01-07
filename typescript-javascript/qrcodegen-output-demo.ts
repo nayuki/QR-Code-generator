@@ -206,7 +206,7 @@ namespace app {
 	// The scale must be a positive integer and the border must be a non-negative integer.
 	function drawCanvas(qr: qrcodegen.QrCode, scale: number, border: number, lightColor: string, darkColor: string, canvas: HTMLCanvasElement): void {
 		if (scale <= 0 || border < 0)
-			throw "Value out of range";
+			throw new RangeError("Value out of range");
 		const width: number = (qr.size + border * 2) * scale;
 		canvas.width = width;
 		canvas.height = width;

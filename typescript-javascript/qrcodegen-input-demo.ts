@@ -137,7 +137,7 @@ namespace app {
 					if (0xDC00 <= d && d < 0xE000)  // Low surrogate
 						continue;
 				}
-				throw "Invalid UTF-16 string";
+				throw new RangeError("Invalid UTF-16 string");
 			}
 			return result;
 		}
@@ -158,7 +158,7 @@ namespace app {
 	// The scale must be a positive integer and the border must be a non-negative integer.
 	function drawCanvas(qr: qrcodegen.QrCode, scale: number, border: number, lightColor: string, darkColor: string, canvas: HTMLCanvasElement): void {
 		if (scale <= 0 || border < 0)
-			throw "Value out of range";
+			throw new RangeError("Value out of range");
 		const width: number = (qr.size + border * 2) * scale;
 		canvas.width = width;
 		canvas.height = width;
@@ -176,7 +176,7 @@ namespace app {
 	// of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 	function toSvgString(qr: qrcodegen.QrCode, border: number, lightColor: string, darkColor: string): string {
 		if (border < 0)
-			throw "Border must be non-negative";
+			throw new RangeError("Border must be non-negative");
 		let parts: Array<string> = [];
 		for (let y = 0; y < qr.size; y++) {
 			for (let x = 0; x < qr.size; x++) {
@@ -215,7 +215,7 @@ namespace app {
 		const result: HTMLElement|null = document.getElementById(id);
 		if (result instanceof HTMLElement)
 			return result;
-		throw "Assertion error";
+		throw new Error("Assertion error");
 	}
 	
 	
@@ -223,7 +223,7 @@ namespace app {
 		const result: HTMLElement = getElem(id);
 		if (result instanceof HTMLInputElement)
 			return result;
-		throw "Assertion error";
+		throw new Error("Assertion error");
 	}
 	
 	
