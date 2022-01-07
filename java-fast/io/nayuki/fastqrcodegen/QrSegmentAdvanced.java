@@ -76,7 +76,7 @@ public final class QrSegmentAdvanced {
 			assert segs != null;
 			
 			// Check if the segments fit
-			int dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
+			int dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
 			int dataUsedBits = QrSegment.getTotalBits(segs, version);
 			if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
 				return segs;  // This version number is found to be suitable
