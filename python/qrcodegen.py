@@ -171,8 +171,6 @@ class QrCode:
 			raise ValueError("Version value out of range")
 		if not (-1 <= msk <= 7):
 			raise ValueError("Mask value out of range")
-		if not isinstance(errcorlvl, QrCode.Ecc):
-			raise TypeError("QrCode.Ecc expected")
 		
 		self._version = version
 		self._size = version * 4 + 17
@@ -722,8 +720,6 @@ class QrSegment:
 	def make_segments(text: str) -> List[QrSegment]:
 		"""Returns a new mutable list of zero or more segments to represent the given Unicode text string.
 		The result may use various segment modes and switch modes to optimize the length of the bit stream."""
-		if not isinstance(text, str):
-			raise TypeError("Text string expected")
 		
 		# Select the most efficient segment encoding automatically
 		if text == "":
@@ -792,8 +788,6 @@ class QrSegment:
 		"""Creates a new QR Code segment with the given attributes and data.
 		The character count (numch) must agree with the mode and the bit buffer length,
 		but the constraint isn't checked. The given bit buffer is cloned and stored."""
-		if not isinstance(mode, QrSegment.Mode):
-			raise TypeError("QrSegment.Mode expected")
 		if numch < 0:
 			raise ValueError()
 		self._mode = mode
