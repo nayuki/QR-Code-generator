@@ -193,6 +193,12 @@ impl<'a> QrCode<'a> {
 	/// If the data is too long to fit in any version in the given range
 	/// at the given ECC level, then `Err` is returned.
 	/// 
+	/// The smallest possible QR Code version within the given range is automatically
+	/// chosen for the output. Iff boostecl is `true`, then the ECC level of the result
+	/// may be higher than the ecl argument if it can be done without increasing the
+	/// version. The mask number is either between 0 to 7 (inclusive) to force that
+	/// mask, or `None` to automatically choose an appropriate mask (which may be slow).
+	/// 
 	/// About the slices, letting len = maxversion.buffer_len():
 	/// - Before calling the function:
 	///   - The slices dataandtempbuffer and outbuffer each must have a length of at least len.
@@ -231,6 +237,12 @@ impl<'a> QrCode<'a> {
 	
 	/// Returns an intermediate state representing the given segments
 	/// with the given encoding parameters being encoded into codewords.
+	/// 
+	/// The smallest possible QR Code version within the given range is automatically
+	/// chosen for the output. Iff boostecl is `true`, then the ECC level of the result
+	/// may be higher than the ecl argument if it can be done without increasing the
+	/// version. The mask number is either between 0 to 7 (inclusive) to force that
+	/// mask, or `None` to automatically choose an appropriate mask (which may be slow).
 	/// 
 	/// This function exists to allow segments to use parts of a temporary buffer,
 	/// then have the segments be encoded to an output buffer, then invalidate all the segments,
