@@ -163,7 +163,7 @@ struct qrcodegen_Segment {
  *       because the function always writes before reading.
  *   - After the function returns:
  *     - Both ranges have no guarantee on which elements are initialized and what values are stored.
- *     - tempBuffer contains no useful data and should be treated as entirely uninitialzed.
+ *     - tempBuffer contains no useful data and should be treated as entirely uninitialized.
  *     - If successful, qrcode can be passed into qrcodegen_getSize() and qrcodegen_getModule().
  * - If successful, the resulting QR Code may use numeric,
  *   alphanumeric, or byte mode to encode the text.
@@ -195,7 +195,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
  *       can be uninitialized because the function always writes before reading.
  *   - After the function returns:
  *     - Both ranges have no guarantee on which elements are initialized and what values are stored.
- *     - dataAndTemp contains no useful data and should be treated as entirely uninitialzed.
+ *     - dataAndTemp contains no useful data and should be treated as entirely uninitialized.
  *     - If successful, qrcode can be passed into qrcodegen_getSize() and qrcodegen_getModule().
  * - If successful, the resulting QR Code will use byte mode to encode the data.
  * - In the most optimistic case, a QR Code at version 40 with low ECC can hold any byte
