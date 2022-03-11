@@ -376,6 +376,11 @@ class QrCode final {
 	private: void drawFunctionPatterns();
 	
 	
+	// Marks two copies of the format bits.
+	// Basically this function does the same as drawFormatBits without drawing the bits.
+	private: void markFormatBits();
+
+
 	// Draws two copies of the format bits (with its own error correction code)
 	// based on the given mask and this object's error correction level field.
 	private: void drawFormatBits(int msk);

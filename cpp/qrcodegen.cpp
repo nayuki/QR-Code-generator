@@ -340,7 +340,6 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 		long minPenalty = LONG_MAX;
 		for (int i = 0; i < 8; i++) {
 			applyMask(i);
-			drawFormatBits(i);
 			long penalty = getPenaltyScore();
 			if (penalty < minPenalty) {
 				msk = i;
@@ -408,10 +407,27 @@ void QrCode::drawFunctionPatterns() {
 	}
 	
 	// Draw configuration data
-	drawFormatBits(0);  // Dummy mask value; overwritten later in the constructor
+	markFormatBits();
 	drawVersion();
 }
 
+void QrCode::markFormatBits() {
+	// Mask first copy
+	for (int i = 0; i <= 5; i++)
+		setFunctionModule(8, i, false);
+	setFunctionModule(8, 7, false);
+	setFunctionModule(8, 8, false);
+	setFunctionModule(7, 8, false);
+	for (int i = 9; i < 15; i++)
+		setFunctionModule(14 - i, 8, false);
+	
+	// Mask second copy
+	for (int i = 0; i < 8; i++)
+		setFunctionModule(size - 1 - i, 8, false);
+	for (int i = 8; i < 15; i++)
+		setFunctionModule(8, size - 15 + i, false);
+	setFunctionModule(8, size - 8, false);  // Always dark
+}
 
 void QrCode::drawFormatBits(int msk) {
 	// Calculate error correction code and pack bits
@@ -754,7 +770,7 @@ int QrCode::finderPenaltyCountPatterns(const std::array<int,7> &runHistory) cons
 	assert(n <= size * 3);
 	bool core = n > 0 && runHistory.at(2) == n && runHistory.at(3) == n * 3 && runHistory.at(4) == n && runHistory.at(5) == n;
 	return (core && runHistory.at(0) >= n * 4 && runHistory.at(6) >= n ? 1 : 0)
-	     + (core && runHistory.at(6) >= n * 4 && runHistory.at(0) >= n ? 1 : 0);
+	     | (core && runHistory.at(6) >= n * 4 && runHistory.at(0) >= n ? 1 : 0);
 }
 
 
