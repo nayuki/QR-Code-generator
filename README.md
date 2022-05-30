@@ -10,7 +10,8 @@
 ---
 
 [![Button Demo]][Demo]   
-[![Button Website]][Website]
+[![Button Website]][Website]   
+[![Button Languages]][Languages]
 
 ---
 
@@ -43,17 +44,17 @@ Code generator library in multiple languages.
 
 <br>
 
-![Badge TypeScript] 
-![Badge JavaScript] 
+[![Badge TypeScript]][TypeScript] 
+[![Badge JavaScript]][Javascript] 
 
-![Badge C++] 
-![Badge C] 
+[![Badge C++]][C++] 
+[![Badge C]][C] 
 
-![Badge Python] 
+[![Badge Python]][Python] 
 
-![Badge Java] 
+[![Badge Java]][Java] 
 
-![Badge Rust] 
+[![Badge Rust]][Rust] 
 
 <br>
 <br>
@@ -162,9 +163,20 @@ for(int y = 0;y < codeB.size;y++)
 [Website]: https://www.nayuki.io/page/qr-code-generator-library
 [Demo]: https://www.nayuki.io/page/qr-code-generator-library#live-demo-javascript
 
-[Java Demo]: java/QrCodeGeneratorDemo.java
+[Languages]: #Languages 'Language Selection'
+[Java Demo]: java/QrCodeGeneratorDemo.java 'Java Example'
 [License]: LICENSE
 
+
+<!------------------------------{ Languages }---------------------------------->
+
+[TypeScript]: typescript-javascript 'TypeScript Overview'
+[JavaScript]: typescript-javascript 'JavaScript Overview'
+[Python]: python 'Python Overview'
+[Java]: java 'Java Overview'
+[Rust]: rust 'Rust Overview'
+[C++]: cpp 'C++ Overview'
+[C]: c 'C Overview'
 
 <!-------------------------------{ Badges }------------------------------------>
 
