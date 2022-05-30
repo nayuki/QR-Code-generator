@@ -1,5 +1,5 @@
 
-# QR Code Generator
+# QR Code Generator    [![Badge License]][License]
 
 *A Library For A Multitude Of Languages.*
 
@@ -163,9 +163,12 @@ for(int y = 0;y < codeB.size;y++)
 [Demo]: https://www.nayuki.io/page/qr-code-generator-library#live-demo-javascript
 
 [Java Demo]: java/QrCodeGeneratorDemo.java
+[License]: LICENSE
 
 
 <!-------------------------------{ Badges }------------------------------------>
+
+[Badge License]: https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge
 
 [Badge TypeScript]: https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logoColor=white&logo=TypeScript
 [Badge JavaScript]: https://img.shields.io/badge/JavaScript-cfbb1b?style=for-the-badge&logoColor=white&logo=JavaScript
