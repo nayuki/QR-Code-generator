@@ -157,9 +157,6 @@ for(int y = 0;y < codeB.size;y++)
   
 <!----------------------------------------------------------------------------->
 
-[Button Website]: https://img.shields.io/badge/Website-4298B8?style=for-the-badge&logoColor=white&logo=Apostrophe
-[Button Demo]: https://img.shields.io/badge/Demo-006600?style=for-the-badge&logoColor=white&logo=AppleArcade
-
 [Website]: https://www.nayuki.io/page/qr-code-generator-library
 [Demo]: https://www.nayuki.io/page/qr-code-generator-library#live-demo-javascript
 
@@ -168,7 +165,7 @@ for(int y = 0;y < codeB.size;y++)
 [License]: LICENSE
 
 
-<!------------------------------{ Languages }---------------------------------->
+<!-------------------------------{ Languages }--------------------------------->
 
 [TypeScript]: typescript-javascript 'TypeScript Overview'
 [JavaScript]: typescript-javascript 'JavaScript Overview'
@@ -178,7 +175,7 @@ for(int y = 0;y < codeB.size;y++)
 [C++]: cpp 'C++ Overview'
 [C]: c 'C Overview'
 
-<!-------------------------------{ Badges }------------------------------------>
+<!--------------------------------{ Badges }----------------------------------->
 
 [Badge License]: https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge
 
@@ -189,3 +186,10 @@ for(int y = 0;y < codeB.size;y++)
 [Badge Java]: https://img.shields.io/badge/Java-c00711?style=for-the-badge&logoColor=white&logo=CoffeeScript
 [Badge C++]: https://img.shields.io/badge/C++-00599C?style=for-the-badge&logoColor=white&logo=CPlusPlus
 [Badge C]: https://img.shields.io/badge/C-999999?style=for-the-badge&logoColor=white&logo=C
+
+
+<!--------------------------------{ Buttons }---------------------------------->
+
+[Button Languages]: https://img.shields.io/badge/Languages-A22846?style=for-the-badge&logoColor=white&logo=ROS
+[Button Website]: https://img.shields.io/badge/Website-4298B8?style=for-the-badge&logoColor=white&logo=Apostrophe
+[Button Demo]: https://img.shields.io/badge/Demo-006600?style=for-the-badge&logoColor=white&logo=AppleArcade
