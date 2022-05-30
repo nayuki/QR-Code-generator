@@ -51,32 +51,42 @@ Optional advanced features (Java only):
 
 More information about QR Code technology and this library's design can be found on the project home page.
 
+<br>
+<br>
 
-Examples
---------
+## Example   [![Badge Java]][Java Demo]
 
-The code below is in Java, but the other language ports are designed with essentially the same API naming and behavior.
+While the code below is written in Java, the <br>
+ports to other languages are designed with <br>
+essentially the same API naming / behavior.
 
-```java
+```Java
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.List;
+import java.io.File;
+
 import javax.imageio.ImageIO;
 import io.nayuki.qrcodegen.*;
 
-// Simple operation
-QrCode qr0 = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
-BufferedImage img = toImage(qr0, 4, 10);  // See QrCodeGeneratorDemo
-ImageIO.write(img, "png", new File("qr-code.png"));
 
-// Manual operation
-List<QrSegment> segs = QrSegment.makeSegments("3141592653589793238462643383");
-QrCode qr1 = QrCode.encodeSegments(segs, QrCode.Ecc.HIGH, 5, 5, 2, false);
-for (int y = 0; y < qr1.size; y++) {
-    for (int x = 0; x < qr1.size; x++) {
-        (... paint qr1.getModule(x, y) ...)
+//  Simple Operation
+
+QrCode codeA = QrCode.encodeText("Hello, world!",QrCode.Ecc.MEDIUM);
+BufferedImage image = toImage(codeA,4,10);
+ImageIO.write(image,"png",new File("qr-code.png"));
+
+
+//  Manual Operation
+
+List<QrSegment> segments = QrSegment.makeSegments("3141592653589793238462643383");
+QrCode codeB = QrCode.encodeSegments(segments,QrCode.Ecc.HIGH,5,5,2,false);
+
+for(int y = 0;y < codeB.size;y++)
+    for(int x = 0;x < codeB.size;x++){
+        ...
+        paint codeB.getModule(x,y)
+        ...
     }
-}
 ```
 
 <br>
@@ -84,8 +94,12 @@ for (int y = 0; y < qr1.size; y++) {
   
 <!----------------------------------------------------------------------------->
 
+[Badge Java]: https://img.shields.io/badge/Java-c00711?style=for-the-badge&logoColor=white&logo=CoffeeScript
+
 [Button Website]: https://img.shields.io/badge/Website-4298B8?style=for-the-badge&logoColor=white&logo=Apostrophe
 [Button Demo]: https://img.shields.io/badge/Demo-006600?style=for-the-badge&logoColor=white&logo=AppleArcade
 
 [Website]: https://www.nayuki.io/page/qr-code-generator-library
 [Demo]: https://www.nayuki.io/page/qr-code-generator-library#live-demo-javascript
+
+[Java Demo]: java/QrCodeGeneratorDemo.java
