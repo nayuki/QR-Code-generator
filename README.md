@@ -1,13 +1,27 @@
-QR Code generator library
-=========================
 
+# QR Code Generator
+
+*A Library For A Multitude Of Languages.*
+
+<br>
+
+<div align = center>
+
+---
+
+[![Button Demo]][Demo]   
+[![Button Website]][Website]
+
+---
+
+</div>
 
 Introduction
 ------------
 
 This project aims to be the best, clearest QR Code generator library in multiple languages. The primary goals are flexible options and absolute correctness. Secondary goals are compact implementation size and good documentation comments.
 
-Home page with live JavaScript demo, extensive descriptions, and competitor comparisons: [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
+Home page with live JavaScript demo, extensive descriptions, and competitor comparisons: [https://www.nayuki.io/page/qr-code-generator-library]()
 
 
 Features
@@ -89,3 +103,14 @@ subject to the following conditions:
   liability, whether in an action of contract, tort or otherwise, arising from,
   out of or in connection with the Software or the use or other dealings in the
   Software.
+  
+  
+  
+  
+<!----------------------------------------------------------------------------->
+
+[Button Website]: https://img.shields.io/badge/Website-4298B8?style=for-the-badge&logoColor=white&logo=Apostrophe
+[Button Demo]: https://img.shields.io/badge/Demo-006600?style=for-the-badge&logoColor=white&logo=AppleArcade
+
+[Website]: https://www.nayuki.io/page/qr-code-generator-library
+[Demo]: https://www.nayuki.io/page/qr-code-generator-library#live-demo-javascript
