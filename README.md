@@ -24,32 +24,83 @@ This project aims to be the best, clearest QR Code generator library in multiple
 Home page with live JavaScript demo, extensive descriptions, and competitor comparisons: [https://www.nayuki.io/page/qr-code-generator-library]()
 
 
-Features
---------
+<br>
+<br>
 
-Core features:
+## Languages
 
-* Available in 6 programming languages, all with nearly equal functionality: Java, TypeScript/JavaScript, Python, Rust, C++, C
-* Significantly shorter code but more documentation comments compared to competing libraries
-* Supports encoding all 40 versions (sizes) and all 4 error correction levels, as per the QR Code Model 2 standard
-* Output format: Raw modules/pixels of the QR symbol
-* Detects finder-like penalty patterns more accurately than other implementations
-* Encodes numeric and special-alphanumeric text in less space than general text
-* Open-source code under the permissive MIT License
+*The library is available in multiple languages* <br>
+*with mostly the same amount of functionality.*
 
-Manual parameters:
+<br>
 
-* User can specify minimum and maximum version numbers allowed, then library will automatically choose smallest version in the range that fits the data
-* User can specify mask pattern manually, otherwise library will automatically evaluate all 8 masks and select the optimal one
-* User can specify absolute error correction level, or allow the library to boost it if it doesn't increase the version number
-* User can create a list of data segments manually and add ECI segments
+![Badge TypeScript] 
+![Badge JavaScript] 
 
-Optional advanced features (Java only):
+![Badge C++] 
+![Badge C] 
 
-* Encodes Japanese Unicode text in kanji mode to save a lot of space compared to UTF-8 bytes
-* Computes optimal segment mode switching for text with mixed numeric/alphanumeric/general/kanji parts
+![Badge Python] 
 
-More information about QR Code technology and this library's design can be found on the project home page.
+![Badge Java] 
+
+![Badge Rust] 
+
+<br>
+<br>
+
+## Features
+
+#### Core
+
+- Significantly shorter code but more documentation <br>
+  comments compared to competing libraries.
+
+- Supports encoding all 40 versions (sizes) and all 4 error <br>
+  correction levels, as per the QR Code Model 2 standard.
+
+- Output format: Raw modules/pixels of the QR symbol
+
+- Detects finder-like penalty patterns more <br>
+  accurately than other implementations.
+
+- Encodes numeric and special-alphanumeric <br>
+  strings into less space than general text.
+
+<br>
+
+#### Parameters
+
+- Minimum / Maximum allowed version number can be <br>
+  specified, which the library will use to automatically <br>
+  choose smallest version in the range that fits the data.
+
+- User can specify mask pattern manually, otherwise <br>
+  library will automatically evaluate all 8 masks and <br>
+  select the optimal one.
+
+- User can specify absolute error correction level, or <br>
+  allow the library to boost it if it doesn't increase the <br>
+  version number
+
+- User can create a list of data segments <br>
+  manually and add ECI segments.
+
+<br>
+
+#### Advanced <kbd> Optional </kbd> <kbd> Java Only </kbd>
+
+- Encodes Japanese Unicode text in kanji <br>
+  mode to save a lot of space compared <br>
+  to UTF-8 bytes.
+  
+- Computes optimal segment mode switching <br>
+  for text with mixed numeric / alphanumeric <br>
+  / general / kanji parts.
+
+<br>
+
+*Check the project website for more information.*
 
 <br>
 <br>
@@ -94,8 +145,6 @@ for(int y = 0;y < codeB.size;y++)
   
 <!----------------------------------------------------------------------------->
 
-[Badge Java]: https://img.shields.io/badge/Java-c00711?style=for-the-badge&logoColor=white&logo=CoffeeScript
-
 [Button Website]: https://img.shields.io/badge/Website-4298B8?style=for-the-badge&logoColor=white&logo=Apostrophe
 [Button Demo]: https://img.shields.io/badge/Demo-006600?style=for-the-badge&logoColor=white&logo=AppleArcade
 
@@ -103,3 +152,14 @@ for(int y = 0;y < codeB.size;y++)
 [Demo]: https://www.nayuki.io/page/qr-code-generator-library#live-demo-javascript
 
 [Java Demo]: java/QrCodeGeneratorDemo.java
+
+
+<!-------------------------------{ Badges }------------------------------------>
+
+[Badge TypeScript]: https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logoColor=white&logo=TypeScript
+[Badge JavaScript]: https://img.shields.io/badge/JavaScript-cfbb1b?style=for-the-badge&logoColor=white&logo=JavaScript
+[Badge Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logoColor=white&logo=Python
+[Badge Rust]: https://img.shields.io/badge/Rust-f44a00?style=for-the-badge&logoColor=white&logo=Rust
+[Badge Java]: https://img.shields.io/badge/Java-c00711?style=for-the-badge&logoColor=white&logo=CoffeeScript
+[Badge C++]: https://img.shields.io/badge/C++-00599C?style=for-the-badge&logoColor=white&logo=CPlusPlus
+[Badge C]: https://img.shields.io/badge/C-999999?style=for-the-badge&logoColor=white&logo=C
