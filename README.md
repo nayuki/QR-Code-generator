@@ -16,13 +16,22 @@
 
 </div>
 
-Introduction
-------------
+<br>
 
-This project aims to be the best, clearest QR Code generator library in multiple languages. The primary goals are flexible options and absolute correctness. Secondary goals are compact implementation size and good documentation comments.
+## Introduction
 
-Home page with live JavaScript demo, extensive descriptions, and competitor comparisons: [https://www.nayuki.io/page/qr-code-generator-library]()
+This project aims to be the best, clearest QR <br>
+Code generator library in multiple languages.
 
+#### Primary Goals
+
+- Flexible options
+- Absolute correctness
+
+#### Secondary Goals
+
+- Compact implementation size
+- Good documentation comments
 
 <br>
 <br>
@@ -88,7 +97,7 @@ Home page with live JavaScript demo, extensive descriptions, and competitor comp
 
 <br>
 
-#### Advanced <kbd> Optional </kbd> <kbd> Java Only </kbd>
+#### Advanced   <kbd> Optional </kbd> <kbd> Java Only </kbd>
 
 - Encodes Japanese Unicode text in kanji <br>
   mode to save a lot of space compared <br>
@@ -110,6 +119,8 @@ Home page with live JavaScript demo, extensive descriptions, and competitor comp
 While the code below is written in Java, the <br>
 ports to other languages are designed with <br>
 essentially the same API naming / behavior.
+
+<br>
 
 ```Java
 import java.awt.image.BufferedImage;
