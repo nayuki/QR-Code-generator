@@ -3,7 +3,6 @@
 
 *A Library For A Multitude Of Languages.*
 
-<br>
 
 <div align = center>
 
@@ -13,7 +12,6 @@
     width = 160
 />    
 
-<br>
 
 ---
 
