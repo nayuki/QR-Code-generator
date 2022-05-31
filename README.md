@@ -3,6 +3,7 @@
 
 *A Library For A Multitude Of Languages.*
 
+<br>
 
 <div align = center>
 
@@ -11,7 +12,6 @@
     title = 'QRCode With Link To This Repository'
     width = 160
 />    
-
 
 ---
 
@@ -180,6 +180,7 @@ for(int y = 0;y < codeB.size;y++)
 [Rust]: rust 'Rust Overview'
 [C++]: cpp 'C++ Overview'
 [C]: c 'C Overview'
+
 
 <!--------------------------------{ Badges }----------------------------------->
 
