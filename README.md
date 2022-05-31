@@ -7,6 +7,14 @@
 
 <div align = center>
 
+<img
+    src = 'Resources/QRCode.svg'
+    title = 'QRCode With Link To This Repository'
+    width = 160
+/>    
+
+<br>
+
 ---
 
 [![Button Demo]][Demo]   
