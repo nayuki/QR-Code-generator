@@ -26,6 +26,15 @@ import collections, itertools, re
 from collections.abc import Sequence
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
+def print_qr(qrcode: QrCode) -> None:
+	"""Prints the given QrCode object to the console."""
+	border = 4
+	for y in range(-border, qrcode.get_size() + border):
+		for x in range(-border, qrcode.get_size() + border):
+			print("\u2588 "[1 if qrcode.get_module(x,y) else 0] * 2, end="")
+		print()
+	print()
+
 
 # ---- QR Code symbol class ----
 
@@ -96,18 +105,19 @@ class QrCode:
 					msg = f"Data length = {datausedbits} bits, Max capacity = {datacapacitybits} bits"
 				raise DataTooLongError(msg)
 		assert datausedbits is not None
-		
+
 		# Increase the error correction level while the data still fits in the current version number
 		for newecl in (QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH):  # From low to high
 			if boostecl and (datausedbits <= QrCode._get_num_data_codewords(version, newecl) * 8):
 				ecl = newecl
-		
+
 		# Concatenate all segments to create the data bit string
 		bb = _BitBuffer()
 		for seg in segs:
 			bb.append_bits(seg.get_mode().get_mode_bits(), 4)
 			bb.append_bits(seg.get_num_chars(), seg.get_mode().num_char_count_bits(version))
 			bb.extend(seg._bitdata)
+			#print ("bb = ", bb)
 		assert len(bb) == datausedbits
 		
 		# Add terminator and pad up to a byte if applicable
@@ -127,6 +137,7 @@ class QrCode:
 		datacodewords = bytearray([0] * (len(bb) // 8))
 		for (i, bit) in enumerate(bb):
 			datacodewords[i >> 3] |= bit << (7 - (i & 7))
+		#print ("bb = ", bb)
 		
 		# Create the QR Code object
 		return QrCode(version, ecl, datacodewords, mask)
@@ -166,6 +177,11 @@ class QrCode:
 		This is a low-level API that most users should not use directly.
 		A mid-level API is the encode_segments() function."""
 		
+		#print( "version = ", version)
+		#print( "errcorlvl = ", errcorlvl.ordinal)
+		#print( "data = ", datacodewords)
+		#print( "msk = ", msk)
+
 		# Check scalar arguments and set fields
 		if not (QrCode.MIN_VERSION <= version <= QrCode.MAX_VERSION):
 			raise ValueError("Version value out of range")
@@ -182,8 +198,12 @@ class QrCode:
 		
 		# Compute ECC, draw modules
 		self._draw_function_patterns()
+		#print("=[A]="); print_qr(self)
+		#print( "datacodewords = ", bytearray(datacodewords ))
 		allcodewords: bytes = self._add_ecc_and_interleave(bytearray(datacodewords))
+		#print( "allcodewords = ", allcodewords )
 		self._draw_codewords(allcodewords)
+		#print("=[B]="); print_qr(self)
 		
 		# Do masking
 		if msk == -1:  # Automatically choose best mask
@@ -192,14 +212,20 @@ class QrCode:
 				self._apply_mask(i)
 				self._draw_format_bits(i)
 				penalty = self._get_penalty_score()
+				#print("MASK ",i," penalty ",penalty)
+				#print_qr(self)
 				if penalty < minpenalty:
 					msk = i
 					minpenalty = penalty
 				self._apply_mask(i)  # Undoes the mask due to XOR
+		#print("MASK = ", msk)
+		#print("=[C]="); print_qr(self)
 		assert 0 <= msk <= 7
 		self._mask = msk
 		self._apply_mask(msk)  # Apply the final choice of mask
+		#print("=[D]="); print_qr(self)
 		self._draw_format_bits(msk)  # Overwrite old format bits
+		#print("=[E]="); print_qr(self)
 		
 		del self._isfunction
 	
@@ -238,11 +264,13 @@ class QrCode:
 			self._set_function_module(6, i, i % 2 == 0)
 			self._set_function_module(i, 6, i % 2 == 0)
 		
+		#print("=[1]="); print_qr(self)
 		# Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
 		self._draw_finder_pattern(3, 3)
 		self._draw_finder_pattern(self._size - 4, 3)
 		self._draw_finder_pattern(3, self._size - 4)
 		
+		#print("=[2]="); print_qr(self)
 		# Draw numerous alignment patterns
 		alignpatpos: List[int] = self._get_alignment_pattern_positions()
 		numalign: int = len(alignpatpos)
@@ -252,8 +280,10 @@ class QrCode:
 				if (i, j) not in skips:  # Don't draw on the three finder corners
 					self._draw_alignment_pattern(alignpatpos[i], alignpatpos[j])
 		
+		#print("=[3]="); print_qr(self)
 		# Draw configuration data
 		self._draw_format_bits(0)  # Dummy mask value; overwritten later in the constructor
+		#print("=[4]="); print_qr(self)
 		self._draw_version()
 	
 	
@@ -348,7 +378,7 @@ class QrCode:
 		rawcodewords: int = QrCode._get_num_raw_data_modules(version) // 8
 		numshortblocks: int = numblocks - rawcodewords % numblocks
 		shortblocklen: int = rawcodewords // numblocks
-		
+
 		# Split data into blocks and append ECC to each block
 		blocks: List[bytes] = []
 		rsdiv: bytes = QrCode._reed_solomon_compute_divisor(blockecclen)
@@ -416,6 +446,10 @@ class QrCode:
 		result: int = 0
 		size: int = self._size
 		modules: List[List[bool]] = self._modules
+		penalty1: int = 0
+		penalty2: int = 0
+		penalty3: int = 0
+		penalty4: int = 0
 		
 		# Adjacent modules in row having same color, and finder-like patterns
 		for y in range(size):
@@ -426,16 +460,16 @@ class QrCode:
 				if modules[y][x] == runcolor:
 					runx += 1
 					if runx == 5:
-						result += QrCode._PENALTY_N1
+						penalty1 += QrCode._PENALTY_N1
 					elif runx > 5:
-						result += 1
+						penalty1 += 1
 				else:
 					self._finder_penalty_add_history(runx, runhistory)
 					if not runcolor:
-						result += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
+						penalty1 += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
 					runcolor = modules[y][x]
 					runx = 1
-			result += self._finder_penalty_terminate_and_count(runcolor, runx, runhistory) * QrCode._PENALTY_N3
+			penalty1 += self._finder_penalty_terminate_and_count(runcolor, runx, runhistory) * QrCode._PENALTY_N3
 		# Adjacent modules in column having same color, and finder-like patterns
 		for x in range(size):
 			runcolor = False
@@ -445,22 +479,22 @@ class QrCode:
 				if modules[y][x] == runcolor:
 					runy += 1
 					if runy == 5:
-						result += QrCode._PENALTY_N1
+						penalty2 += QrCode._PENALTY_N1
 					elif runy > 5:
-						result += 1
+						penalty2 += 1
 				else:
 					self._finder_penalty_add_history(runy, runhistory)
 					if not runcolor:
-						result += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
+						penalty2 += self._finder_penalty_count_patterns(runhistory) * QrCode._PENALTY_N3
 					runcolor = modules[y][x]
 					runy = 1
-			result += self._finder_penalty_terminate_and_count(runcolor, runy, runhistory) * QrCode._PENALTY_N3
+			penalty2 += self._finder_penalty_terminate_and_count(runcolor, runy, runhistory) * QrCode._PENALTY_N3
 		
 		# 2*2 blocks of modules having same color
 		for y in range(size - 1):
 			for x in range(size - 1):
 				if modules[y][x] == modules[y][x + 1] == modules[y + 1][x] == modules[y + 1][x + 1]:
-					result += QrCode._PENALTY_N2
+					penalty3 += QrCode._PENALTY_N2
 		
 		# Balance of dark and light modules
 		dark: int = sum((1 if cell else 0) for row in modules for cell in row)
@@ -468,7 +502,9 @@ class QrCode:
 		# Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 		k: int = (abs(dark * 20 - total * 10) + total - 1) // total - 1
 		assert 0 <= k <= 9
-		result += k * QrCode._PENALTY_N4
+		penalty4 += k * QrCode._PENALTY_N4
+		result = penalty1 + penalty2 + penalty3 + penalty4
+		#print("p1 ",penalty1," p2 ",penalty2," p3 ",penalty3," p4 ",penalty4)
 		assert 0 <= result <= 2568888  # Non-tight upper bound based on default values of PENALTY_N1, ..., N4
 		return result
 	
