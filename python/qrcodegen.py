@@ -228,6 +228,28 @@ class QrCode:
 		If the given coordinates are out of bounds, then False (light) is returned."""
 		return (0 <= x < self._size) and (0 <= y < self._size) and self._modules[y][x]
 	
+	def get_ascii(self, white_pixel_char: str = "██", black_pixel_char: str = "  ") -> str:
+		"""Returns a string containing the visual representation of the QrCode as an ASCII 
+		character encoded string. The ASCII characters to be used can be defined as 
+		white_pixel_char and black_pixel_char."""
+		ascii_string = ""
+		for y in range(self._size):
+			for x in range(self._size):
+				if self.get_module(x,y):
+					ascii_string += white_pixel_char
+				else:
+					ascii_string += black_pixel_char
+			ascii_string += "\n"
+		return ascii_string[:-1]
+	
+	
+	# ---- Dunder methods ----
+
+	def __str__(self) -> str:
+		"""Returns a string containing the visual representation of the QrCode as an ASCII 
+		character encoded string."""
+		return self.get_ascii()
+	
 	
 	# ---- Private helper methods for constructor: Drawing function modules ----
 	
