@@ -38,6 +38,34 @@ using std::uint8_t;
 using qrcodegen::QrCode;
 using qrcodegen::QrSegment;
 
+#pragma pack(2)// need this, otherwise cant get correct result of sizeof
+
+typedef unsigned char  BYTE;
+typedef unsigned short WORD;
+typedef unsigned long  DWORD;
+typedef long    LONG;
+typedef struct {
+    WORD    bfType;
+    DWORD   bfSize;
+    WORD    bfReserved1;
+    WORD    bfReserved2;
+    DWORD   bfOffBits;
+} BITMAPFILEHEADER;
+
+typedef struct {
+    DWORD      biSize;
+    LONG       biWidth;
+    LONG       biHeight;
+    WORD       biPlanes;
+    WORD       biBitCount;
+    DWORD      biCompression;
+    DWORD      biSizeImage;
+    LONG       biXPelsPerMeter;
+    LONG       biYPelsPerMeter;
+    DWORD      biClrUsed;
+    DWORD      biClrImportant;
+} BITMAPINFOHEADER;
+
 
 // Function prototypes
 static void doBasicDemo();
