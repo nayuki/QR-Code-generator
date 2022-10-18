@@ -31,9 +31,7 @@
 #include <utility>
 #include "qrcodegen.hpp"
 
-using std::int8_t;
-using std::uint8_t;
-using std::size_t;
+
 using std::vector;
 
 
@@ -70,9 +68,9 @@ QrSegment QrSegment::makeBytes(const vector<uint8_t> &data) {
 	if (data.size() > static_cast<unsigned int>(INT_MAX))
 		throw std::length_error("Data too long");
 	BitBuffer bb;
-	for (uint8_t b : data)
-		bb.appendBits(b, 8);
-	return QrSegment(Mode::BYTE, static_cast<int>(data.size()), std::move(bb));
+	for (vector<uint8_t>::size_type i = 0; i < data.size(); i++)
+		bb.appendBits(data[i], 8);
+	return QrSegment(Mode::BYTE, static_cast<int>(data.size()), bb);
 }
 
 
@@ -95,7 +93,7 @@ QrSegment QrSegment::makeNumeric(const char *digits) {
 	}
 	if (accumCount > 0)  // 1 or 2 digits remaining
 		bb.appendBits(static_cast<uint32_t>(accumData), accumCount * 3 + 1);
-	return QrSegment(Mode::NUMERIC, charCount, std::move(bb));
+	return QrSegment(Mode::NUMERIC, charCount, bb);
 }
 
 
@@ -106,7 +104,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	int charCount = 0;
 	for (; *text != '\0'; text++, charCount++) {
 		const char *temp = std::strchr(ALPHANUMERIC_CHARSET, *text);
-		if (temp == nullptr)
+		if (temp == NULL)
 			throw std::domain_error("String contains unencodable characters in alphanumeric mode");
 		accumData = accumData * 45 + static_cast<int>(temp - ALPHANUMERIC_CHARSET);
 		accumCount++;
@@ -118,7 +116,7 @@ QrSegment QrSegment::makeAlphanumeric(const char *text) {
 	}
 	if (accumCount > 0)  // 1 character remaining
 		bb.appendBits(static_cast<uint32_t>(accumData), 6);
-	return QrSegment(Mode::ALPHANUMERIC, charCount, std::move(bb));
+	return QrSegment(Mode::ALPHANUMERIC, charCount, bb);
 }
 
 
@@ -154,7 +152,7 @@ QrSegment QrSegment::makeEci(long assignVal) {
 		bb.appendBits(static_cast<uint32_t>(assignVal), 21);
 	} else
 		throw std::domain_error("ECI assignment value out of range");
-	return QrSegment(Mode::ECI, 0, std::move(bb));
+	return QrSegment(Mode::ECI, 0, bb);
 }
 
 
@@ -167,10 +165,10 @@ QrSegment::QrSegment(const Mode &md, int numCh, const std::vector<bool> &dt) :
 }
 
 
-QrSegment::QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt) :
+QrSegment::QrSegment(const Mode &md, int numCh, std::vector<bool> &dt) :
 		mode(&md),
 		numChars(numCh),
-		data(std::move(dt)) {
+		data(dt) {
 	if (numCh < 0)
 		throw std::domain_error("Invalid value");
 }
@@ -178,16 +176,16 @@ QrSegment::QrSegment(const Mode &md, int numCh, std::vector<bool> &&dt) :
 
 int QrSegment::getTotalBits(const vector<QrSegment> &segs, int version) {
 	int result = 0;
-	for (const QrSegment &seg : segs) {
-		int ccbits = seg.mode->numCharCountBits(version);
-		if (seg.numChars >= (1L << ccbits))
+	for (vector<QrSegment>::size_type i = 0; i <segs.size(); i++) {
+		int ccbits = segs[i].mode->numCharCountBits(version);
+		if (segs[i].numChars >= (1L << ccbits))
 			return -1;  // The segment's length doesn't fit the field's bit width
 		if (4 + ccbits > INT_MAX - result)
 			return -1;  // The sum will overflow an int type
 		result += 4 + ccbits;
-		if (seg.data.size() > static_cast<unsigned int>(INT_MAX - result))
+		if (segs[i].data.size() > static_cast<unsigned int>(INT_MAX - result))
 			return -1;  // The sum will overflow an int type
-		result += static_cast<int>(seg.data.size());
+		result += static_cast<int>(segs[i].data.size());
 	}
 	return result;
 }
@@ -205,7 +203,7 @@ bool QrSegment::isNumeric(const char *text) {
 
 bool QrSegment::isAlphanumeric(const char *text) {
 	for (; *text != '\0'; text++) {
-		if (std::strchr(ALPHANUMERIC_CHARSET, *text) == nullptr)
+		if (std::strchr(ALPHANUMERIC_CHARSET, *text) == NULL)
 			return false;
 	}
 	return true;
@@ -235,10 +233,10 @@ const char *QrSegment::ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVW
 
 int QrCode::getFormatBits(Ecc ecl) {
 	switch (ecl) {
-		case Ecc::LOW     :  return 1;
-		case Ecc::MEDIUM  :  return 0;
-		case Ecc::QUARTILE:  return 3;
-		case Ecc::HIGH    :  return 2;
+		case LOW     :  return 1;
+		case MEDIUM  :  return 0;
+		case QUARTILE:  return 3;
+		case HIGH    :  return 2;
 		default:  throw std::logic_error("Unreachable");
 	}
 }
@@ -251,7 +249,8 @@ QrCode QrCode::encodeText(const char *text, Ecc ecl) {
 
 
 QrCode QrCode::encodeBinary(const vector<uint8_t> &data, Ecc ecl) {
-	vector<QrSegment> segs{QrSegment::makeBytes(data)};
+	vector<QrSegment> segs;
+	segs.push_back(QrSegment::makeBytes(data));
 	return encodeSegments(segs, ecl);
 }
 
@@ -282,17 +281,18 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	assert(dataUsedBits != -1);
 	
 	// Increase the error correction level while the data still fits in the current version number
-	for (Ecc newEcl : {Ecc::MEDIUM, Ecc::QUARTILE, Ecc::HIGH}) {  // From low to high
-		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
-			ecl = newEcl;
+	Ecc ecls[3] = {MEDIUM, QUARTILE, HIGH};
+	for (uint8_t i = 0; i < 3; ++i) {  // From low to high
+		if (boostEcl && dataUsedBits <= getNumDataCodewords(version, ecls[i]) * 8)
+			ecl = ecls[i];
 	}
 	
 	// Concatenate all segments to create the data bit string
 	BitBuffer bb;
-	for (const QrSegment &seg : segs) {
-		bb.appendBits(static_cast<uint32_t>(seg.getMode().getModeBits()), 4);
-		bb.appendBits(static_cast<uint32_t>(seg.getNumChars()), seg.getMode().numCharCountBits(version));
-		bb.insert(bb.end(), seg.getData().begin(), seg.getData().end());
+	for (vector<QrSegment>::size_type i = 0; i < segs.size(); ++i) {
+		bb.appendBits(static_cast<uint32_t>(segs[i].getMode().getModeBits()), 4);
+		bb.appendBits(static_cast<uint32_t>(segs[i].getNumChars()), segs[i].getMode().numCharCountBits(version));
+		bb.insert(bb.end(), segs[i].getData().begin(), segs[i].getData().end());
 	}
 	assert(bb.size() == static_cast<unsigned int>(dataUsedBits));
 	
@@ -355,7 +355,9 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 	drawFormatBits(msk);  // Overwrite old format bits
 	
 	isFunction.clear();
-	isFunction.shrink_to_fit();
+	//isFunction.shrink_to_fit();
+
+	//vector<int>(isFunction).swap(isFunction);
 }
 
 
@@ -510,13 +512,13 @@ vector<uint8_t> QrCode::addEccAndInterleave(const vector<uint8_t> &data) const {
 	vector<vector<uint8_t> > blocks;
 	const vector<uint8_t> rsDiv = reedSolomonComputeDivisor(blockEccLen);
 	for (int i = 0, k = 0; i < numBlocks; i++) {
-		vector<uint8_t> dat(data.cbegin() + k, data.cbegin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
+		vector<uint8_t> dat(data.begin() + k, data.begin() + (k + shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1)));
 		k += static_cast<int>(dat.size());
 		const vector<uint8_t> ecc = reedSolomonComputeRemainder(dat, rsDiv);
 		if (i < numShortBlocks)
 			dat.push_back(0);
-		dat.insert(dat.end(), ecc.cbegin(), ecc.cend());
-		blocks.push_back(std::move(dat));
+		dat.insert(dat.end(), ecc.begin(), ecc.end());
+		blocks.push_back(dat);
 	}
 	
 	// Interleave (not concatenate) the bytes from every block into a single sequence
@@ -591,7 +593,7 @@ long QrCode::getPenaltyScore() const {
 	for (int y = 0; y < size; y++) {
 		bool runColor = false;
 		int runX = 0;
-		std::array<int,7> runHistory = {};
+		int runHistory[7] = {};
 		for (int x = 0; x < size; x++) {
 			if (module(x, y) == runColor) {
 				runX++;
@@ -613,7 +615,7 @@ long QrCode::getPenaltyScore() const {
 	for (int x = 0; x < size; x++) {
 		bool runColor = false;
 		int runY = 0;
-		std::array<int,7> runHistory = {};
+		int runHistory[7] = {};
 		for (int y = 0; y < size; y++) {
 			if (module(x, y) == runColor) {
 				runY++;
@@ -645,9 +647,9 @@ long QrCode::getPenaltyScore() const {
 	
 	// Balance of dark and light modules
 	int dark = 0;
-	for (const vector<bool> &row : modules) {
-		for (bool color : row) {
-			if (color)
+	for (std::vector<std::vector<bool> >::const_iterator row = modules.begin(); row != modules.end(); ++row) {
+		for (std::vector<bool>::const_iterator color = row->begin(); color != row->end(); ++color) {
+			if (*color)
 				dark++;
 		}
 	}
@@ -726,8 +728,8 @@ vector<uint8_t> QrCode::reedSolomonComputeDivisor(int degree) {
 
 vector<uint8_t> QrCode::reedSolomonComputeRemainder(const vector<uint8_t> &data, const vector<uint8_t> &divisor) {
 	vector<uint8_t> result(divisor.size());
-	for (uint8_t b : data) {  // Polynomial division
-		uint8_t factor = b ^ result.at(0);
+	for (vector<uint8_t>::size_type n = 0; n < data.size(); ++n) {  // Polynomial division
+		uint8_t factor = data[n] ^ result.at(0);
 		result.erase(result.begin());
 		result.push_back(0);
 		for (size_t i = 0; i < result.size(); i++)
@@ -749,16 +751,16 @@ uint8_t QrCode::reedSolomonMultiply(uint8_t x, uint8_t y) {
 }
 
 
-int QrCode::finderPenaltyCountPatterns(const std::array<int,7> &runHistory) const {
-	int n = runHistory.at(1);
+int QrCode::finderPenaltyCountPatterns(const int runHistory[7]) const {
+	int n = runHistory[1];
 	assert(n <= size * 3);
-	bool core = n > 0 && runHistory.at(2) == n && runHistory.at(3) == n * 3 && runHistory.at(4) == n && runHistory.at(5) == n;
-	return (core && runHistory.at(0) >= n * 4 && runHistory.at(6) >= n ? 1 : 0)
-	     + (core && runHistory.at(6) >= n * 4 && runHistory.at(0) >= n ? 1 : 0);
+	bool core = n > 0 && runHistory[2] == n && runHistory[3] == n * 3 && runHistory[4] == n && runHistory[5] == n;
+	return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
+	     + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
 }
 
 
-int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, std::array<int,7> &runHistory) const {
+int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, int runHistory[7]) const {
 	if (currentRunColor) {  // Terminate dark run
 		finderPenaltyAddHistory(currentRunLength, runHistory);
 		currentRunLength = 0;
@@ -769,11 +771,11 @@ int QrCode::finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunL
 }
 
 
-void QrCode::finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory) const {
-	if (runHistory.at(0) == 0)
+void QrCode::finderPenaltyAddHistory(int currentRunLength, int runHistory[7]) const {
+	if (runHistory[0] == 0)
 		currentRunLength += size;  // Add light border to initial run
-	std::copy_backward(runHistory.cbegin(), runHistory.cend() - 1, runHistory.end());
-	runHistory.at(0) = currentRunLength;
+	std::copy_backward(runHistory, runHistory + 6, runHistory + 7);
+	runHistory[0] = currentRunLength;
 }
 
 
@@ -820,11 +822,13 @@ BitBuffer::BitBuffer()
 	: std::vector<bool>() {}
 
 
-void BitBuffer::appendBits(std::uint32_t val, int len) {
+void BitBuffer::appendBits(uint32_t val, int len) {
 	if (len < 0 || len > 31 || val >> len != 0)
 		throw std::domain_error("Value out of range");
 	for (int i = len - 1; i >= 0; i--)  // Append bit by bit
 		this->push_back(((val >> i) & 1) != 0);
 }
+
+
 
 }
