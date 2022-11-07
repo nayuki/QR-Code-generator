@@ -148,7 +148,7 @@ struct qrcodegen_Segment {
 /*---- Functions (high level) to generate QR Codes ----*/
 
 /* 
- * Encodes the given text string to a QR Code, returning true if successful.
+ * Encodes the given null-terminated text string to a QR Code, returning true if successful.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
  * 
@@ -185,6 +185,13 @@ struct qrcodegen_Segment {
  * data capacities per version, ECC level, and text encoding mode.
  */
 bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
+	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
+
+/*
+* Same as qrcodegen_encodeText but when the length of the text is known and not necessarily
+* null-terminated.
+*/
+bool qrcodegen_encodeTextOfLength(const char *text, size_t textLen, uint8_t tempBuffer[], uint8_t qrcode[],
 	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
 
@@ -304,18 +311,31 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 
 
 /* 
- * Tests whether the given string can be encoded as a segment in numeric mode.
+ * Tests whether the given null-terminated string can be encoded as a segment in numeric mode.
  * A string is encodable iff each character is in the range 0 to 9.
  */
-bool qrcodegen_isNumeric(const char *text);
+bool qrcodegen_isNumeric(const char *textBegin);
+
+/*
+ * Tests whether the given character range can be encoded as a segment in numeric mode.
+ * A string is encodable iff each character is in the range 0 to 9.
+ */
+bool qrcodegen_isNumericRange(const char *textBegin, const char *textEnd);
 
 
 /* 
- * Tests whether the given string can be encoded as a segment in alphanumeric mode.
+ * Tests whether the given null-terminated string can be encoded as a segment in alphanumeric mode.
  * A string is encodable iff each character is in the following set: 0 to 9, A to Z
  * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
  */
 bool qrcodegen_isAlphanumeric(const char *text);
+
+/*
+ * Tests whether the given character range can be encoded as a segment in alphanumeric mode.
+ * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+ * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+ */
+bool qrcodegen_isAlphanumericRange(const char *textBegin, const char *textEnd);
 
 
 /* 
@@ -341,17 +361,29 @@ struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, u
 
 
 /* 
- * Returns a segment representing the given string of decimal digits encoded in numeric mode.
+ * Returns a segment representing the given null-terminated string of decimal digits encoded in numeric mode.
  */
 struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]);
 
+/*
+ * Returns a segment representing the given string of decimal digits encoded in numeric mode.
+ */
+struct qrcodegen_Segment qrcodegen_makeNumericOfLength(const char *digits, size_t len, uint8_t buf[]);
 
-/* 
+
+/*
  * Returns a segment representing the given text string encoded in alphanumeric mode.
  * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
  * dollar, percent, asterisk, plus, hyphen, period, slash, colon.
  */
 struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t buf[]);
+
+/*
+* Returns a segment representing the given text string encoded in alphanumeric mode.
+* The characters allowed are: 0 to 9, A to Z (uppercase only), space,
+* dollar, percent, asterisk, plus, hyphen, period, slash, colon.
+*/
+struct qrcodegen_Segment qrcodegen_makeAlphanumericOfLength(const char *text, size_t len, uint8_t buf[]);
 
 
 /* 
