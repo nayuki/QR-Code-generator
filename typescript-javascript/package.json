@@ -1,0 +1,67 @@
+{
+  "name": "qr-code-generator",
+  "version": "1.8.1",
+  "description": "QR Code generator library in multiple languages",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types/qrcodegen.d.ts",
+      "require": "./index.cjs",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json",
+    "./utils": {
+      "types": "./types/utils/index.d.ts",
+      "require": "./dist/utils/index.cjs",
+      "default": "./dist-esm/utils/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "utils": [
+        "types/utils/index.d.ts"
+      ]
+    }
+  },
+  "types": "types/qrcodegen.d.ts",
+  "files": [
+    "index.cjs",
+    "index.js",
+    "dist",
+    "dist-esm",
+    "types"
+  ],
+  "engines": {
+    "node": ">=14.16"
+  },
+  "scripts": {
+    "build:es5": "tsc -p ./tsconfig.es5.json",
+    "postbuild:es5": "find ./dist -name \"*.js\" -exec sh -c 'mv \"$1\" \"${1%.js}.cjs\"' _ {} \\;",
+    "build:es6": "tsc -p ./tsconfig.es6.json",
+    "prebuild": "npm run clean",
+    "build": "npm run build:es5 & npm run build:es6",
+    "clean": "rm -rf dist dist-* types",
+    "predemo": "./build.sh",
+    "demo": "npx --yes browser-sync start --server --index qrcodegen-$npm_config_type-demo.html --no-notify --no-open --no-snippet --no-ui --no-ghost-mode",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nayuki/QR-Code-generator.git"
+  },
+  "keywords": [
+    "qr",
+    "qrcode",
+    "generator",
+    "svg"
+  ],
+  "author": "Project Nayuki (me@nayuki.io)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nayuki/QR-Code-generator/issues"
+  },
+  "homepage": "https://github.com/nayuki/QR-Code-generator#readme"
+}

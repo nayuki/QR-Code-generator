@@ -989,3 +989,6 @@ namespace qrcodegen.QrSegment {
 		
 	}
 }
+
+// https://github.com/nayuki/QR-Code-generator/issues/10#issuecomment-831582482
+export default qrcodegen;

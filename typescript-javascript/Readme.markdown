@@ -41,7 +41,7 @@ const QRC = qrcodegen.QrCode;
 
 // Simple operation
 const qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
-const svg = toSvgString(qr0, 4);  // See qrcodegen-input-demo
+const svg = toSvgString(qr0, 4, "#FFFFFF", "#000000");  // See qrcodegen-input-demo
 
 // Manual operation
 const segs = qrcodegen.QrSegment.makeSegments("3141592653589793238462643383");

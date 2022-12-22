@@ -1,0 +1,7 @@
+# Dependency directories
+node_modules/
+
+# build artifacts
+dist
+dist-*
+types

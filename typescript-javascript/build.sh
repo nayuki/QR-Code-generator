@@ -21,5 +21,4 @@
 #   Software.
 # 
 
-tsc --strict --lib DOM,DOM.Iterable,ES6 --target ES6 qrcodegen.ts qrcodegen-input-demo.ts
-tsc --strict --lib DOM,DOM.Iterable,ES6 --target ES6 qrcodegen.ts qrcodegen-output-demo.ts
+./node_modules/.bin/tsc --strict --lib DOM,DOM.Iterable,ES6 --target ES6 *.ts utils/index.ts --outDir dist-demo

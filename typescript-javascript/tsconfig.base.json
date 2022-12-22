@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "declaration": true,
+    "declarationDir": "./types"
+  },
+  "include": ["qrcodegen.ts", "utils/index.ts"]
+}
