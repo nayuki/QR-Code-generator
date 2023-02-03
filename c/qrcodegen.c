@@ -93,6 +93,9 @@ static int numCharCountBits(enum qrcodegen_Mode mode, int version);
 // value maps to the index in the string. For checking text and encoding segments.
 static const char *ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
+// Sentinel value for use in only some functions.
+#define LENGTH_OVERFLOW -1
+
 // For generating error correction codes.
 testable const int8_t ECC_CODEWORDS_PER_BLOCK[4][41] = {
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
@@ -150,7 +153,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 			tempBuffer[i] = (uint8_t)text[i];
 		seg.mode = qrcodegen_Mode_BYTE;
 		seg.bitLength = calcSegmentBitLength(seg.mode, textLen);
-		if (seg.bitLength == -1)
+		if (seg.bitLength == LENGTH_OVERFLOW)
 			goto fail;
 		seg.numChars = (int)textLen;
 		seg.data = tempBuffer;
@@ -170,7 +173,7 @@ bool qrcodegen_encodeBinary(uint8_t dataAndTemp[], size_t dataLen, uint8_t qrcod
 	struct qrcodegen_Segment seg;
 	seg.mode = qrcodegen_Mode_BYTE;
 	seg.bitLength = calcSegmentBitLength(seg.mode, dataLen);
-	if (seg.bitLength == -1) {
+	if (seg.bitLength == LENGTH_OVERFLOW) {
 		qrcode[0] = 0;  // Set size to invalid value for safety
 		return false;
 	}
@@ -212,14 +215,14 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 	for (version = minVersion; ; version++) {
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
 		dataUsedBits = getTotalBits(segs, len, version);
-		if (dataUsedBits != -1 && dataUsedBits <= dataCapacityBits)
+		if (dataUsedBits != LENGTH_OVERFLOW && dataUsedBits <= dataCapacityBits)
 			break;  // This version number is found to be suitable
 		if (version >= maxVersion) {  // All versions in the range could not fit the given data
 			qrcode[0] = 0;  // Set size to invalid value for safety
 			return false;
 		}
 	}
-	assert(dataUsedBits != -1);
+	assert(dataUsedBits != LENGTH_OVERFLOW);
 	
 	// Increase the error correction level while the data still fits in the current version number
 	for (int i = (int)qrcodegen_Ecc_MEDIUM; i <= (int)qrcodegen_Ecc_HIGH; i++) {  // From low to high
@@ -831,7 +834,7 @@ bool qrcodegen_isAlphanumeric(const char *text) {
 // Public function - see documentation comment in header file.
 size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars) {
 	int temp = calcSegmentBitLength(mode, numChars);
-	if (temp == -1)
+	if (temp == LENGTH_OVERFLOW)
 		return SIZE_MAX;
 	assert(0 <= temp && temp <= INT16_MAX);
 	return ((size_t)temp + 7) / 8;
@@ -840,8 +843,8 @@ size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars
 
 // Returns the number of data bits needed to represent a segment
 // containing the given number of characters using the given mode. Notes:
-// - Returns -1 on failure, i.e. numChars > INT16_MAX or
-//   the number of needed bits exceeds INT16_MAX (i.e. 32767).
+// - Returns LENGTH_OVERFLOW on failure, i.e. numChars > INT16_MAX
+//   or the number of needed bits exceeds INT16_MAX (i.e. 32767).
 // - Otherwise, all valid results are in the range [0, INT16_MAX].
 // - For byte mode, numChars measures the number of bytes, not Unicode code points.
 // - For ECI mode, numChars must be 0, and the worst-case number of bits is returned.
@@ -849,7 +852,7 @@ size_t qrcodegen_calcSegmentBufferSize(enum qrcodegen_Mode mode, size_t numChars
 testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars) {
 	// All calculations are designed to avoid overflow on all platforms
 	if (numChars > (unsigned int)INT16_MAX)
-		return -1;
+		return LENGTH_OVERFLOW;
 	long result = (long)numChars;
 	if (mode == qrcodegen_Mode_NUMERIC)
 		result = (result * 10 + 2) / 3;  // ceil(10/3 * n)
@@ -863,11 +866,11 @@ testable int calcSegmentBitLength(enum qrcodegen_Mode mode, size_t numChars) {
 		result = 3 * 8;
 	else {  // Invalid argument
 		assert(false);
-		return -1;
+		return LENGTH_OVERFLOW;
 	}
 	assert(result >= 0);
 	if (result > INT16_MAX)
-		return -1;
+		return LENGTH_OVERFLOW;
 	return (int)result;
 }
 
@@ -878,7 +881,7 @@ struct qrcodegen_Segment qrcodegen_makeBytes(const uint8_t data[], size_t len, u
 	struct qrcodegen_Segment result;
 	result.mode = qrcodegen_Mode_BYTE;
 	result.bitLength = calcSegmentBitLength(result.mode, len);
-	assert(result.bitLength != -1);
+	assert(result.bitLength != LENGTH_OVERFLOW);
 	result.numChars = (int)len;
 	if (len > 0)
 		memcpy(buf, data, len * sizeof(buf[0]));
@@ -894,7 +897,7 @@ struct qrcodegen_Segment qrcodegen_makeNumeric(const char *digits, uint8_t buf[]
 	size_t len = strlen(digits);
 	result.mode = qrcodegen_Mode_NUMERIC;
 	int bitLen = calcSegmentBitLength(result.mode, len);
-	assert(bitLen != -1);
+	assert(bitLen != LENGTH_OVERFLOW);
 	result.numChars = (int)len;
 	if (bitLen > 0)
 		memset(buf, 0, ((size_t)bitLen + 7) / 8 * sizeof(buf[0]));
@@ -928,7 +931,7 @@ struct qrcodegen_Segment qrcodegen_makeAlphanumeric(const char *text, uint8_t bu
 	size_t len = strlen(text);
 	result.mode = qrcodegen_Mode_ALPHANUMERIC;
 	int bitLen = calcSegmentBitLength(result.mode, len);
-	assert(bitLen != -1);
+	assert(bitLen != LENGTH_OVERFLOW);
 	result.numChars = (int)len;
 	if (bitLen > 0)
 		memset(buf, 0, ((size_t)bitLen + 7) / 8 * sizeof(buf[0]));
@@ -983,8 +986,8 @@ struct qrcodegen_Segment qrcodegen_makeEci(long assignVal, uint8_t buf[]) {
 
 
 // Calculates the number of bits needed to encode the given segments at the given version.
-// Returns a non-negative number if successful. Otherwise returns -1 if a segment has too
-// many characters to fit its length field, or the total bits exceeds INT16_MAX.
+// Returns a non-negative number if successful. Otherwise returns LENGTH_OVERFLOW if a segment
+// has too many characters to fit its length field, or the total bits exceeds INT16_MAX.
 testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int version) {
 	assert(segs != NULL || len == 0);
 	long result = 0;
@@ -996,10 +999,10 @@ testable int getTotalBits(const struct qrcodegen_Segment segs[], size_t len, int
 		int ccbits = numCharCountBits(segs[i].mode, version);
 		assert(0 <= ccbits && ccbits <= 16);
 		if (numChars >= (1L << ccbits))
-			return -1;  // The segment's length doesn't fit the field's bit width
+			return LENGTH_OVERFLOW;  // The segment's length doesn't fit the field's bit width
 		result += 4L + ccbits + bitLength;
 		if (result > INT16_MAX)
-			return -1;  // The sum might overflow an int type
+			return LENGTH_OVERFLOW;  // The sum might overflow an int type
 	}
 	assert(0 <= result && result <= INT16_MAX);
 	return (int)result;
@@ -1020,3 +1023,6 @@ static int numCharCountBits(enum qrcodegen_Mode mode, int version) {
 		default:  assert(false);  return -1;  // Dummy value
 	}
 }
+
+
+#undef LENGTH_OVERFLOW
