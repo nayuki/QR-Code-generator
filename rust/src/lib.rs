@@ -1264,13 +1264,13 @@ impl Version {
 	/// Creates a version object from the given number.
 	/// 
 	/// Panics if the number is outside the range [1, 40].
-	pub fn new(ver: u8) -> Self {
-		assert!((Version::MIN.value() ..= Version::MAX.value()).contains(&ver), "Version number out of range");
+	pub const fn new(ver: u8) -> Self {
+		assert!((Version::MIN.value() <= ver && ver <= Version::MAX.value()), "Version number out of range");
 		Self(ver)
 	}
 	
 	/// Returns the value, which is in the range [1, 40].
-	pub fn value(self) -> u8 {
+	pub const fn value(self) -> u8 {
 		self.0
 	}
 }
