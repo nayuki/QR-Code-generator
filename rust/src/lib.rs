@@ -1266,7 +1266,7 @@ impl Version {
 	/// 
 	/// Panics if the number is outside the range [1, 40].
 	pub fn new(ver: u8) -> Self {
-		assert!((Version::MIN.value() ..= Version::MAX.value()).contains(&ver), "Version number out of range");
+		assert!(Version::MIN.value() <= ver && ver <= Version::MAX.value(), "Version number out of range");
 		Self(ver)
 	}
 	
