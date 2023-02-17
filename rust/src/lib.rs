@@ -839,6 +839,7 @@ impl FinderPenalty {
 		let n = rh[1];
 		debug_assert!(n <= self.qr_size * 3);
 		let core = n > 0 && rh[2] == n && rh[3] == n * 3 && rh[4] == n && rh[5] == n;
+		#[allow(unused_parens)]
 		( i32::from(core && rh[0] >= n * 4 && rh[6] >= n)
 		+ i32::from(core && rh[6] >= n * 4 && rh[0] >= n))
 	}
