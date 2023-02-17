@@ -1432,13 +1432,13 @@ impl Version {
 	/// Creates a version object from the given number.
 	/// 
 	/// Panics if the number is outside the range [1, 40].
-	pub fn new(ver: u8) -> Self {
+	pub const fn new(ver: u8) -> Self {
 		assert!(Version::MIN.value() <= ver && ver <= Version::MAX.value(), "Version number out of range");
 		Self(ver)
 	}
 	
 	/// Returns the value, which is in the range [1, 40].
-	pub fn value(self) -> u8 {
+	pub const fn value(self) -> u8 {
 		self.0
 	}
 	
@@ -1459,13 +1459,13 @@ impl Mask {
 	/// Creates a mask object from the given number.
 	/// 
 	/// Panics if the number is outside the range [0, 7].
-	pub fn new(mask: u8) -> Self {
+	pub const fn new(mask: u8) -> Self {
 		assert!(mask <= 7, "Mask value out of range");
 		Self(mask)
 	}
 	
 	/// Returns the value, which is in the range [0, 7].
-	pub fn value(self) -> u8 {
+	pub const fn value(self) -> u8 {
 		self.0
 	}
 }
