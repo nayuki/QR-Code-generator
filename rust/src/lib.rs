@@ -839,6 +839,7 @@ impl FinderPenalty {
 		let n = rh[1];
 		debug_assert!(n <= self.qr_size * 3);
 		let core = n > 0 && rh[2] == n && rh[3] == n * 3 && rh[4] == n && rh[5] == n;
+		#[allow(unused_parens)]
 		( i32::from(core && rh[0] >= n * 4 && rh[6] >= n)
 		+ i32::from(core && rh[6] >= n * 4 && rh[0] >= n))
 	}
@@ -1264,13 +1265,13 @@ impl Version {
 	/// Creates a version object from the given number.
 	/// 
 	/// Panics if the number is outside the range [1, 40].
-	pub fn new(ver: u8) -> Self {
-		assert!((Version::MIN.value() ..= Version::MAX.value()).contains(&ver), "Version number out of range");
+	pub const fn new(ver: u8) -> Self {
+		assert!(Version::MIN.value() <= ver && ver <= Version::MAX.value(), "Version number out of range");
 		Self(ver)
 	}
 	
 	/// Returns the value, which is in the range [1, 40].
-	pub fn value(self) -> u8 {
+	pub const fn value(self) -> u8 {
 		self.0
 	}
 }
@@ -1284,13 +1285,13 @@ impl Mask {
 	/// Creates a mask object from the given number.
 	/// 
 	/// Panics if the number is outside the range [0, 7].
-	pub fn new(mask: u8) -> Self {
+	pub const fn new(mask: u8) -> Self {
 		assert!(mask <= 7, "Mask value out of range");
 		Self(mask)
 	}
 	
 	/// Returns the value, which is in the range [0, 7].
-	pub fn value(self) -> u8 {
+	pub const fn value(self) -> u8 {
 		self.0
 	}
 }
