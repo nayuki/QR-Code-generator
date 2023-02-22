@@ -359,6 +359,18 @@ QrCode::QrCode(int ver, Ecc ecl, const vector<uint8_t> &dataCodewords, int msk) 
 }
 
 
+QrCode::QrCode() :
+	version(MIN_VERSION),
+	size(0),
+	mask(0),
+	errorCorrectionLevel(Ecc::LOW) {
+}
+
+
+bool QrCode::isValid() const {
+	return size > 0;
+}
+
 int QrCode::getVersion() const {
 	return version;
 }

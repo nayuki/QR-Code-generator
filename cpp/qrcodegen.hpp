@@ -333,9 +333,20 @@ class QrCode final {
 	 */
 	public: QrCode(int ver, Ecc ecl, const std::vector<std::uint8_t> &dataCodewords, int msk);
 	
-	
+	/* 
+     * Default constructor for an uninitialized (empty) QrCode. Useful for when a
+	 * QrCode instance is needed prior to being assigned to. Subsequent calls
+	 * to isValid will return false until a copy assignment is made.
+	 */
+	public: QrCode();	
 	
 	/*---- Public instance methods ----*/
+
+	/* 
+	 * returns false if constructed with the default constructor and not updated with a valid
+     * assignment
+	 */
+    public: bool isValid() const;
 	
 	/* 
 	 * Returns this QR Code's version, in the range [1, 40].
