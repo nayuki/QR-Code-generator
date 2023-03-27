@@ -46,7 +46,7 @@ static void doSegmentDemo();
 static void doMaskDemo();
 static std::string toSvgString(const QrCode &qr, int border);
 static void printQr(const QrCode &qr);
-
+static void PrettyPrintQr(const QrCode &qr);
 
 // The main application program.
 int main() {
@@ -68,7 +68,7 @@ static void doBasicDemo() {
 	
 	// Make and print the QR Code symbol
 	const QrCode qr = QrCode::encodeText(text, errCorLvl);
-	printQr(qr);
+	PrettyPrintQr(qr);
 	std::cout << toSvgString(qr, 4) << std::endl;
 }
 
@@ -225,6 +225,22 @@ static void printQr(const QrCode &qr) {
 	for (int y = -border; y < qr.getSize() + border; y++) {
 		for (int x = -border; x < qr.getSize() + border; x++) {
 			std::cout << (qr.getModule(x, y) ? "##" : "  ");
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+
+// Prints the given QrCode object to the console.
+static void PrettyPrintQr(const QrCode &qr) 
+{
+	int border = 4;
+	for (int y = -border; y < qr.getSize() + border; y++) 
+	{
+		for (int x = -border; x < qr.getSize() + border; x++) 
+		{
+			std::cout << (qr.getModule(x, y) ? (char)255 : (char)219);
 		}
 		std::cout << std::endl;
 	}
