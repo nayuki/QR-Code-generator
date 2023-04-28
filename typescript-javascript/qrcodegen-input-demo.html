@@ -79,7 +79,7 @@
 						<td><textarea placeholder="Enter your text to be put into the QR Code" id="text-input" style="width:30em; height:5em"></textarea></td>
 					</tr>
 					<tr>
-						<td><strong>QR Code:</strong></td>
+						<td><strong>QR Code:</strong><br/><a id="download">(download)</a></td>
 						<td>
 							<canvas id="qrcode-canvas" style="padding:1em; background-color:#E8E8E8"></canvas>
 							<svg id="qrcode-svg" style="width:30em; height:30em; padding:1em; background-color:#E8E8E8">
@@ -137,12 +137,6 @@
 					<tr>
 						<td>Statistics:</td>
 						<td id="statistics-output" style="white-space:pre"></td>
-					</tr>
-					<tr id="svg-xml-row">
-						<td>SVG XML code:</td>
-						<td>
-							<textarea id="svg-xml-output" readonly="readonly" style="width:100%; max-width:50em; height:15em; font-family:monospace"></textarea>
-						</td>
 					</tr>
 				</tbody>
 			</table>

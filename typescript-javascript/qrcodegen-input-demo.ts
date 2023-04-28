@@ -45,16 +45,15 @@ namespace app {
 		// Show/hide rows based on bitmap/vector image output
 		const bitmapOutput: boolean = getInput("output-format-bitmap").checked;
 		const scaleRow : HTMLElement = getElem("scale-row");
-		const svgXmlRow: HTMLElement = getElem("svg-xml-row");
+		let download = getElem("download") as HTMLAnchorElement;
 		if (bitmapOutput) {
 			scaleRow.style.removeProperty("display");
-			svgXmlRow.style.display = "none";
+			download.download = "qr-code.png";
 		} else {
 			scaleRow.style.display = "none";
-			svgXmlRow.style.removeProperty("display");
+			download.download = "qr-code.svg";
 		}
-		const svgXml = getElem("svg-xml-output") as HTMLTextAreaElement;
-		svgXml.value = "";
+		download.removeAttribute("href");
 		
 		// Reset output images in case of early termination
 		const canvas = getElem("qrcode-canvas") as HTMLCanvasElement;
@@ -96,6 +95,7 @@ namespace app {
 				return;
 			drawCanvas(qr, scale, border, lightColor, darkColor, canvas);
 			canvas.style.removeProperty("display");
+			download.href = canvas.toDataURL("image/png");
 		} else {
 			const code: string = toSvgString(qr, border, lightColor, darkColor);
 			const viewBox: string = (/ viewBox="([^"]*)"/.exec(code) as RegExpExecArray)[1];
@@ -105,7 +105,7 @@ namespace app {
 			(svg.querySelector("rect") as Element).setAttribute("fill", lightColor);
 			(svg.querySelector("path") as Element).setAttribute("fill", darkColor);
 			svg.style.removeProperty("display");
-			svgXml.value = code;
+			download.href = "data:application/svg+xml," + encodeURIComponent(code);
 		}
 		
 		// Returns a string to describe the given list of segments.
