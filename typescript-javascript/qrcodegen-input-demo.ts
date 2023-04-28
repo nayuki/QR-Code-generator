@@ -184,8 +184,8 @@ namespace app {
 	<rect width="100%" height="100%" fill="${lightColor}"/>
 	<path d="${parts.join(" ")}" fill="${darkColor}"/>
 </svg>
-`
-		}
+`;
+	}
 	
 	
 	export function handleVersionMinMax(which: "min"|"max"): void {
