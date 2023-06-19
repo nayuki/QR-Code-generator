@@ -1,5 +1,5 @@
 [package]
-name = "qrcodegen"
+name = "qrcodegen-noheap"
 version = "1.8.0"
 authors = ["Project Nayuki"]
 description = "High-quality QR Code generator library"
