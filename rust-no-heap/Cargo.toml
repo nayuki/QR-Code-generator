@@ -1,8 +1,12 @@
 [package]
 name = "qrcodegen-no-heap"
-version = "1.8.0"
+version = "1.8.1"
 authors = ["Project Nayuki"]
 description = "High-quality QR Code generator library"
 homepage = "https://www.nayuki.io/page/qr-code-generator-library"
 repository = "https://github.com/nayuki/QR-Code-generator"
+readme = "Readme.markdown"
+keywords = ["qr-code", "barcode", "encoder", "image"]
+categories = ["encoding", "multimedia::images"]
 license = "MIT"
+exclude = ["examples/*"]
