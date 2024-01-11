@@ -1,12 +1,12 @@
-/* 
+/*
  * QR Code generator demo (C)
- * 
+ *
  * Run this command-line program with no arguments. The program
  * computes a demonstration QR Codes and print it to the console.
- * 
+ *
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -39,9 +39,126 @@ static void doSegmentDemo(void);
 static void doMaskDemo(void);
 static void printQr(const uint8_t qrcode[]);
 
+static int border = 4;
+
+typedef struct output_formatting {
+	char const *begin_code;
+	char const *begin_line;
+	char const *light;
+	char const *dark;
+	char const *same;
+	char const *end_line;
+	char const *end_code;
+	bool braille_map;
+	uint32_t *charMap;
+	int num_across;
+	int num_down;
+} OFM;
+
+typedef enum {
+    blackOnWhite,
+    whiteOnBlack,
+    ansiColour,
+    unicodeHalfBlock,
+    unicodeBraille,
+} TermMode;
+
+static TermMode outputMode = blackOnWhite;
+
+static OFM ofmt[] = {
+
+	[blackOnWhite] = (OFM){
+		/* this assumes dark text on light background */
+		.light = "  ",
+		.dark  = "##",
+	},
+
+	[whiteOnBlack] = (OFM){
+		/* this assumes light text on dark background */
+		.light = "##",
+		.dark  = "  ",
+	},
+
+	[ansiColour] = (OFM){
+		.begin_line = "",
+		.light = "\033[47m  ",
+		.dark  = "\033[40m  ",
+		.same  = "  ",
+		.end_line = "\033[m\n",
+	},
+
+	[unicodeHalfBlock] = (OFM){
+		.begin_line = "\033[30;47m",
+		.end_line   = "\033[39;49m\n",
+		.num_across = 1,
+		.num_down   = 2,
+		.charMap = (uint32_t[4]){
+				 ' ',		/*   clear bottom & top */
+				 0x2580,	/* ▀ clear bottom, marked top */
+				 0x2584,	/* ▄ marked bottom, clear top */
+				 0x2588,	/* █ marked bottom & top */
+			},
+	},
+
+	[unicodeBraille] = (OFM){
+		.begin_line = "\033[30;47m",
+		.end_line   = "\033[39;49m\n",
+		.braille_map = true,
+		.num_across = 2,
+		.num_down   = 4,
+	},
+
+};
 
 // The main application program.
-int main(void) {
+int main(int argc/*unused*/, char const*const*argv) {
+	char const*argv0 = *argv++;
+	for (;;) {
+		char const*arg = *argv++;
+		if (!arg || *arg++ != '-') break;	/* "-" as a non-option arg */
+		char opt = *arg++;
+		if (!opt) { --argv; break; }
+		if (opt == '-') {
+			if (!*arg) break;		/* "--" marks end of options */
+			     if (!strcmp(arg, "border"   )) opt = 'b';
+			else if (!strcmp(arg, "plain"    )) opt = 'p';
+			else if (!strcmp(arg, "plain=bow")) opt = 'p';
+			else if (!strcmp(arg, "plain=wob")) opt = 'P';
+			else if (!strcmp(arg, "unicode=braille")) opt = 'Q';
+			else if (!strcmp(arg, "unicode=halfblock")) opt = 'R';
+			else if (!strcmp(arg, "ansi"     )) opt = 'S';
+			else goto bad_opt;
+			arg = NULL;
+		}
+		switch (opt) {
+		  case 'P':	outputMode = blackOnWhite; break;
+		  case 'Q':     outputMode = unicodeBraille; break;
+		  case 'R':     outputMode = unicodeHalfBlock; break;
+		  case 'S':	outputMode = ansiColour; break;
+		  case 'p':	outputMode = whiteOnBlack; break;
+		  case 'b':	arg = arg && *arg ? arg : *argv++;
+				if (!arg) goto missing_value;
+				border = strtol(arg, (char**)&arg, 10);
+				if (*arg) goto bad_value;
+				arg = NULL;
+				break;
+		  default:	goto bad_opt;
+		}
+		if (arg && *arg) {
+			fprintf(stderr, "Bundled options not supported at '%s'\n", arg);
+			return EXIT_FAILURE;
+		}
+		continue;
+	bad_opt:
+		fprintf(stderr, "Invalid option '%s'\n", argv[-1]);
+		return EXIT_FAILURE;
+	missing_value:
+		fprintf(stderr, "Missing value for option '%s'\n", argv[-1]);
+		return EXIT_FAILURE;
+	bad_value:
+		fprintf(stderr, "Improper numeric value '%s'\n", argv[-1]);
+		return EXIT_FAILURE;
+	}
 	doBasicDemo();
 	doVarietyDemo();
 	doSegmentDemo();
@@ -57,7 +174,7 @@ int main(void) {
 static void doBasicDemo(void) {
 	const char *text = "Hello, world!";                // User-supplied text
 	enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;  // Error correction level
-	
+
 	// Make and print the QR Code symbol
 	uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 	uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
@@ -78,7 +195,7 @@ static void doVarietyDemo(void) {
 		if (ok)
 			printQr(qrcode);
 	}
-	
+
 	{  // Alphanumeric mode encoding (5.5 bits per character)
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
@@ -87,7 +204,7 @@ static void doVarietyDemo(void) {
 		if (ok)
 			printQr(qrcode);
 	}
-	
+
 	{  // Unicode text as UTF-8
 		const char *text = "\xE3\x81\x93\xE3\x82\x93\xE3\x81\xAB\xE3\x81\xA1wa\xE3\x80\x81"
 			"\xE4\xB8\x96\xE7\x95\x8C\xEF\xBC\x81\x20\xCE\xB1\xCE\xB2\xCE\xB3\xCE\xB4";
@@ -98,7 +215,7 @@ static void doVarietyDemo(void) {
 		if (ok)
 			printQr(qrcode);
 	}
-	
+
 	{  // Moderately large QR Code using longer text (from Lewis Carroll's Alice in Wonderland)
 		const char *text =
 			"Alice was beginning to get very tired of sitting by her sister on the bank, "
@@ -158,7 +275,7 @@ static void doSegmentDemo(void) {
 				printQr(qrcode);
 		}
 	}
-	
+
 	{  // Illustration "golden"
 		const char *golden0 = "Golden ratio \xCF\x86 = 1.";
 		const char *golden1 = "6180339887498948482045868343656381177203091798057628621354486227052604628189024497072072041893911374";
@@ -210,7 +327,7 @@ static void doSegmentDemo(void) {
 				printQr(qrcode);
 		}
 	}
-	
+
 	{  // Illustration "Madoka": kanji, kana, Cyrillic, full-width Latin, Greek characters
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
@@ -270,18 +387,18 @@ static void doMaskDemo(void) {
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
 		bool ok;
-		
+
 		ok = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 		if (ok)
 			printQr(qrcode);
-		
+
 		ok = qrcodegen_encodeText("https://www.nayuki.io/", tempBuffer, qrcode,
 			qrcodegen_Ecc_HIGH, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_3, true);
 		if (ok)
 			printQr(qrcode);
 	}
-	
+
 	{  // Chinese text as UTF-8
 		const char *text =
 			"\xE7\xB6\xAD\xE5\x9F\xBA\xE7\x99\xBE\xE7\xA7\x91\xEF\xBC\x88\x57\x69\x6B\x69\x70"
@@ -294,22 +411,22 @@ static void doMaskDemo(void) {
 		uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 		uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
 		bool ok;
-		
+
 		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_0, true);
 		if (ok)
 			printQr(qrcode);
-		
+
 		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_1, true);
 		if (ok)
 			printQr(qrcode);
-		
+
 		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_5, true);
 		if (ok)
 			printQr(qrcode);
-		
+
 		ok = qrcodegen_encodeText(text, tempBuffer, qrcode,
 			qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_7, true);
 		if (ok)
@@ -321,15 +438,79 @@ static void doMaskDemo(void) {
 
 /*---- Utilities ----*/
 
+static inline void wputchar(uint32_t ch) {
+	if      (ch < 0x80)
+		putchar(ch);
+	else if (ch < 0x800)
+		putchar(0xc0 | ch >> 6  & 0x1f),
+		putchar(0x80 | ch	      & 0x3f);
+	else if (ch < 0x10000)
+		putchar(0xe0 | ch >> 12 & 0x0f),
+		putchar(0x80 | ch >> 6  & 0x3f),
+		putchar(0x80 | ch       & 0x3f);
+	else if (ch < 0x200000)
+		putchar(0xf0 | ch >> 18 & 0x07),
+		putchar(0x80 | ch >> 12 & 0x3f),
+		putchar(0x80 | ch >> 6  & 0x3f),
+		putchar(0x80 | ch       & 0x3f);
+	else
+		putchar('?');
+}
+
 // Prints the given QR Code to the console.
 static void printQr(const uint8_t qrcode[]) {
 	int size = qrcodegen_getSize(qrcode);
-	int border = 4;
-	for (int y = -border; y < size + border; y++) {
-		for (int x = -border; x < size + border; x++) {
-			fputs((qrcodegen_getModule(qrcode, x, y) ? "##" : "  "), stdout);
+	struct output_formatting *of = &ofmt[outputMode];
+	if (of->begin_code)
+		fputs(of->begin_code, stdout);
+	int const num_across = of->num_across;
+	int const num_down   = of->num_down;
+	if (num_across && num_down)
+		for (int y = -border; y < size + border; y += num_down) {
+			if (of->begin_line)
+				fputs(of->begin_line, stdout);
+			for (int x = -border; x < size + border; x += num_across) {
+				uint32_t cellBits = 0;
+				for (int dx = num_across; dx-- > 0;) {
+					for (int dy = num_down; dy-- > 0;) {
+						cellBits <<= 1;
+						bool bit  = qrcodegen_getModule(qrcode, x+dx, y+dy);
+						cellBits |= bit;
+					}
+				}
+				wchar_t cellChar = '?';
+				if (of->braille_map) {
+					/*
+					 *  cellChar                       Braille
+					 *    0  4  ⇒      must be      ⇒   0  3
+					 *    1  5  ⇒   rearranged to   ⇒   1  4
+					 *    2  6  ⇒     this order    ⇒   2  5
+					 *    3  7  ⇒                   ⇒   6  7
+					 */
+					 cellChar = cellBits	  & 0x87
+						  | cellBits << 3 & 0x40
+						  | cellBits >> 1 & 0x38
+						  | 0x2800; /* start of Braille range in Unicode */
+				} else if (of->charMap)
+					cellChar = of->charMap[cellBits];
+				else
+					cellChar = cellBits;
+				wputchar(cellChar);
+			}
+			fputs(of->end_line ?: "\n", stdout);
 		}
-		fputs("\n", stdout);
-	}
-	fputs("\n", stdout);
+	else
+		for (int y = -border; y < size + border; y++) {
+			int prevBit = -1;   /* neither true nor false */
+			if (of->begin_line)
+				fputs(of->begin_line, stdout);
+			for (int x = -border; x < size + border; x++) {
+				bool thisBit = qrcodegen_getModule(qrcode, x, y);
+				fputs( ! of->same || prevBit != thisBit ? thisBit ? of->dark : of->light : of->same,
+				       stdout );
+				prevBit = thisBit;
+			}
+			fputs(of->end_line ?: "\n", stdout);
+		}
+	fputs(of->end_code ?: "\n", stdout);
 }
