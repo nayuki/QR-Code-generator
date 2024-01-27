@@ -24,13 +24,13 @@
  *   Software.
  */
 
-extern crate qrcodegen;
-use qrcodegen::Mask;
-use qrcodegen::QrCode;
-use qrcodegen::QrCodeEcc;
-use qrcodegen::QrSegment;
-use qrcodegen::QrSegmentMode;
-use qrcodegen::Version;
+extern crate qrcodegen_no_heap;
+use qrcodegen_no_heap::Mask;
+use qrcodegen_no_heap::QrCode;
+use qrcodegen_no_heap::QrCodeEcc;
+use qrcodegen_no_heap::QrSegment;
+use qrcodegen_no_heap::QrSegmentMode;
+use qrcodegen_no_heap::Version;
 
 
 // The main application program.
@@ -167,14 +167,14 @@ fn do_segment_demo() {
 			0x0000, 0x0104, 0x0105, 0x0113, 0x0115,
 			0x0000, 0x0208, 0x01FF, 0x0008,
 		];
-		let mut bb = qrcodegen::BitBuffer::new(&mut tempbuffer);
+		let mut bb = qrcodegen_no_heap::BitBuffer::new(&mut tempbuffer);
 		for &c in &kanjichars {
 			bb.append_bits(c, 13);
 		}
 		let segs = [
 			{
 				let bitlen = bb.len();
-				QrSegment::new(qrcodegen::QrSegmentMode::Kanji, kanjichars.len(), &tempbuffer, bitlen)
+				QrSegment::new(qrcodegen_no_heap::QrSegmentMode::Kanji, kanjichars.len(), &tempbuffer, bitlen)
 			},
 		];
 		let (datacodewordslen, ecl, version) = QrCode::encode_segments_to_codewords(
