@@ -69,7 +69,7 @@ for (int y = 0; y < qr1.size; y++) {
 License
 -------
 
-Copyright © 2022 Project Nayuki. (MIT License)  
+Copyright © 2024 Project Nayuki. (MIT License)  
 [https://www.nayuki.io/page/qr-code-generator-library](https://www.nayuki.io/page/qr-code-generator-library)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of

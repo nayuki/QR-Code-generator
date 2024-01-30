@@ -37,11 +37,11 @@ Examples
 --------
 
 ```rust
-extern crate qrcodegen;
-use qrcodegen::Mask;
-use qrcodegen::QrCode;
-use qrcodegen::QrCodeEcc;
-use qrcodegen::Version;
+extern crate qrcodegen_no_heap;
+use qrcodegen_no_heap::Mask;
+use qrcodegen_no_heap::QrCode;
+use qrcodegen_no_heap::QrCodeEcc;
+use qrcodegen_no_heap::Version;
 
 // Text data
 let mut outbuffer  = vec![0u8; Version::MAX.buffer_len()];
