@@ -1,0 +1,61 @@
+name: Linux CI
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    name: Build, test and install project
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: ['clang', 'gcc']
+        include:
+          - compiler: 'clang'
+            cc: 'clang'
+            cxx: 'clang++'
+          - compiler: 'gcc'
+            cc: 'gcc'
+            cxx: 'g++'
+    steps:
+    - name: Fetching sources
+      uses: actions/checkout@v3
+    - name: Updating apt package metadata
+      run: |
+        sudo apt-get update
+    - name: Installing compiler
+      run: |
+        sudo apt-get -y install ${{ matrix.compiler }}
+    - name: Installing build system
+      run: |
+        sudo apt-get -y install cmake make
+    - name: Building project with CMake
+      run: |
+        cmake -S . -B build \
+            -DCMAKE_C_COMPILER=${{ matrix.cc }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+            -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+            -DCMAKE_INSTALL_PREFIX:PATH=/usr \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DBUILD_EXAMPLES:BOOL=ON \
+            -DBUILD_TESTS:BOOL=ON
+        cmake --build build
+      env:
+        CFLAGS: -O2 -fexceptions -pipe -Wall -Wextra -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fPIC -fstack-protector-strong -fasynchronous-unwind-tables -fcf-protection
+        CXXFLAGS: -O2 -fexceptions -pipe -Wall -Wextra -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fPIC -fstack-protector-strong -fasynchronous-unwind-tables -fcf-protection
+        LDFLAGS: -Wl,-z,relro -Wl,--as-needed -Wl,-z,now
+    - name: Running unit tests with CTest
+      run: |
+        pushd build
+        ctest --output-on-failure
+        popd
+    - name: Installing project with CMake
+      run: |
+        sudo cmake --install build

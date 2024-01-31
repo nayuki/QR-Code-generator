@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@/@QRCODEGEN_NAME@
+
+Name: @QRCODEGEN_NAME@
+Description: @CMAKE_PROJECT_DESCRIPTION@
+Version: @CMAKE_PROJECT_VERSION@
+
+Libs: -L${libdir} -l@QRCODEGEN_NAME@
+Cflags: -I${includedir}
