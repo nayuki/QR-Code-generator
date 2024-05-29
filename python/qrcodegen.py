@@ -24,7 +24,7 @@
 from __future__ import annotations
 import collections, itertools, re
 from collections.abc import Sequence
-from typing import Callable, Deque, Dict, List, Optional, Pattern, Tuple, Union
+from typing import Optional, Union
 
 
 # ---- QR Code symbol class ----
@@ -54,7 +54,7 @@ class QrCode:
 		Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
 		QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
 		ecl argument if it can be done without increasing the version."""
-		segs: List[QrSegment] = QrSegment.make_segments(text)
+		segs: list[QrSegment] = QrSegment.make_segments(text)
 		return QrCode.encode_segments(segs, ecl)
 	
 	
@@ -152,10 +152,10 @@ class QrCode:
 	
 	# The modules of this QR Code (False = light, True = dark).
 	# Immutable after constructor finishes. Accessed through get_module().
-	_modules: List[List[bool]]
+	_modules: list[list[bool]]
 	
 	# Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
-	_isfunction: List[List[bool]]
+	_isfunction: list[list[bool]]
 	
 	
 	# ---- Constructor (low level) ----
@@ -244,9 +244,9 @@ class QrCode:
 		self._draw_finder_pattern(3, self._size - 4)
 		
 		# Draw numerous alignment patterns
-		alignpatpos: List[int] = self._get_alignment_pattern_positions()
+		alignpatpos: list[int] = self._get_alignment_pattern_positions()
 		numalign: int = len(alignpatpos)
-		skips: Sequence[Tuple[int,int]] = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
+		skips: Sequence[tuple[int,int]] = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
 		for i in range(numalign):
 			for j in range(numalign):
 				if (i, j) not in skips:  # Don't draw on the three finder corners
@@ -350,7 +350,7 @@ class QrCode:
 		shortblocklen: int = rawcodewords // numblocks
 		
 		# Split data into blocks and append ECC to each block
-		blocks: List[bytes] = []
+		blocks: list[bytes] = []
 		rsdiv: bytes = QrCode._reed_solomon_compute_divisor(blockecclen)
 		k: int = 0
 		for i in range(numblocks):
@@ -404,7 +404,7 @@ class QrCode:
 		QR Code needs exactly one (not zero, two, etc.) mask applied."""
 		if not (0 <= mask <= 7):
 			raise ValueError("Mask value out of range")
-		masker: Callable[[int,int],int] = QrCode._MASK_PATTERNS[mask]
+		masker: collections.abc.Callable[[int,int],int] = QrCode._MASK_PATTERNS[mask]
 		for y in range(self._size):
 			for x in range(self._size):
 				self._modules[y][x] ^= (masker(x, y) == 0) and (not self._isfunction[y][x])
@@ -415,7 +415,7 @@ class QrCode:
 		This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score."""
 		result: int = 0
 		size: int = self._size
-		modules: List[List[bool]] = self._modules
+		modules: list[list[bool]] = self._modules
 		
 		# Adjacent modules in row having same color, and finder-like patterns
 		for y in range(size):
@@ -475,7 +475,7 @@ class QrCode:
 	
 	# ---- Private helper functions ----
 	
-	def _get_alignment_pattern_positions(self) -> List[int]:
+	def _get_alignment_pattern_positions(self) -> list[int]:
 		"""Returns an ascending list of positions of alignment patterns for this version number.
 		Each position is in the range [0,177), and are used on both the x and y axes.
 		This could be implemented as lookup table of 40 variable-length lists of integers."""
@@ -486,7 +486,7 @@ class QrCode:
 			numalign: int = ver // 7 + 2
 			step: int = 26 if (ver == 32) else \
 				(ver * 4 + numalign * 2 + 1) // (numalign * 2 - 2) * 2
-			result: List[int] = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
+			result: list[int] = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
 			return list(reversed(result))
 	
 	
@@ -568,7 +568,7 @@ class QrCode:
 		return z
 	
 	
-	def _finder_penalty_count_patterns(self, runhistory: Deque[int]) -> int:
+	def _finder_penalty_count_patterns(self, runhistory: collections.deque[int]) -> int:
 		"""Can only be called immediately after a light run is added, and
 		returns either 0, 1, or 2. A helper function for _get_penalty_score()."""
 		n: int = runhistory[1]
@@ -578,7 +578,7 @@ class QrCode:
 		     + (1 if (core and runhistory[6] >= n * 4 and runhistory[0] >= n) else 0)
 	
 	
-	def _finder_penalty_terminate_and_count(self, currentruncolor: bool, currentrunlength: int, runhistory: Deque[int]) -> int:
+	def _finder_penalty_terminate_and_count(self, currentruncolor: bool, currentrunlength: int, runhistory: collections.deque[int]) -> int:
 		"""Must be called at the end of a line (row or column) of modules. A helper function for _get_penalty_score()."""
 		if currentruncolor:  # Terminate dark run
 			self._finder_penalty_add_history(currentrunlength, runhistory)
@@ -588,7 +588,7 @@ class QrCode:
 		return self._finder_penalty_count_patterns(runhistory)
 	
 	
-	def _finder_penalty_add_history(self, currentrunlength: int, runhistory: Deque[int]) -> None:
+	def _finder_penalty_add_history(self, currentrunlength: int, runhistory: collections.deque[int]) -> None:
 		if runhistory[0] == 0:
 			currentrunlength += self._size  # Add light border to initial run
 		runhistory.appendleft(currentrunlength)
@@ -621,7 +621,7 @@ class QrCode:
 		(-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8,  8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68),  # Quartile
 		(-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81))  # High
 	
-	_MASK_PATTERNS: Sequence[Callable[[int,int],int]] = (
+	_MASK_PATTERNS: Sequence[collections.abc.Callable[[int,int],int]] = (
 		(lambda x, y:  (x + y) % 2                  ),
 		(lambda x, y:  y % 2                        ),
 		(lambda x, y:  x % 3                        ),
@@ -717,7 +717,7 @@ class QrSegment:
 	
 	
 	@staticmethod
-	def make_segments(text: str) -> List[QrSegment]:
+	def make_segments(text: str) -> list[QrSegment]:
 		"""Returns a new mutable list of zero or more segments to represent the given Unicode text string.
 		The result may use various segment modes and switch modes to optimize the length of the bit stream."""
 		
@@ -779,7 +779,7 @@ class QrSegment:
 	_numchars: int
 	
 	# The data bits of this segment. Accessed through get_data().
-	_bitdata: List[int]
+	_bitdata: list[int]
 	
 	
 	# ---- Constructor (low level) ----
@@ -805,7 +805,7 @@ class QrSegment:
 		"""Returns the character count field of this segment."""
 		return self._numchars
 	
-	def get_data(self) -> List[int]:
+	def get_data(self) -> list[int]:
 		"""Returns a new copy of the data bits of this segment."""
 		return list(self._bitdata)  # Make defensive copy
 	
@@ -828,13 +828,13 @@ class QrSegment:
 	# ---- Constants ----
 	
 	# Describes precisely all strings that are encodable in numeric mode.
-	_NUMERIC_REGEX: Pattern[str] = re.compile(r"[0-9]*")
+	_NUMERIC_REGEX: re.Pattern[str] = re.compile(r"[0-9]*")
 	
 	# Describes precisely all strings that are encodable in alphanumeric mode.
-	_ALPHANUMERIC_REGEX: Pattern[str] = re.compile(r"[A-Z0-9 $%*+./:-]*")
+	_ALPHANUMERIC_REGEX: re.Pattern[str] = re.compile(r"[A-Z0-9 $%*+./:-]*")
 	
 	# Dictionary of "0"->0, "A"->10, "$"->37, etc.
-	_ALPHANUMERIC_ENCODING_TABLE: Dict[str,int] = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
+	_ALPHANUMERIC_ENCODING_TABLE: dict[str,int] = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
 	
 	
 	# ---- Public helper enumeration ----
@@ -843,10 +843,10 @@ class QrSegment:
 		"""Describes how a segment's data bits are interpreted. Immutable."""
 		
 		_modebits: int  # The mode indicator bits, which is a uint4 value (range 0 to 15)
-		_charcounts: Tuple[int,int,int]  # Number of character count bits for three different version ranges
+		_charcounts: tuple[int,int,int]  # Number of character count bits for three different version ranges
 		
 		# Private constructor
-		def __init__(self, modebits: int, charcounts: Tuple[int,int,int]):
+		def __init__(self, modebits: int, charcounts: tuple[int,int,int]):
 			self._modebits = modebits
 			self._charcounts = charcounts
 		
@@ -879,7 +879,7 @@ class QrSegment:
 
 # ---- Private helper class ----
 
-class _BitBuffer(List[int]):
+class _BitBuffer(list[int]):
 	"""An appendable sequence of bits (0s and 1s). Mainly used by QrSegment."""
 	
 	def append_bits(self, val: int, n: int) -> None:

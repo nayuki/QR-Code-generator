@@ -24,7 +24,7 @@
 #   Software.
 # 
 
-from typing import List
+from __future__ import annotations
 from qrcodegen import QrCode, QrSegment
 
 
@@ -176,7 +176,7 @@ def to_svg_str(qr: QrCode, border: int) -> str:
 	of border modules. The string always uses Unix newlines (\n), regardless of the platform."""
 	if border < 0:
 		raise ValueError("Border must be non-negative")
-	parts: List[str] = []
+	parts: list[str] = []
 	for y in range(qr.get_size()):
 		for x in range(qr.get_size()):
 			if qr.get_module(x, y):
