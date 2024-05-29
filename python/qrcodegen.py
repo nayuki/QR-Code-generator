@@ -439,7 +439,7 @@ class QrCode:
 		# Adjacent modules in column having same color, and finder-like patterns
 		for x in range(size):
 			runcolor = False
-			runy = 0
+			runy: int = 0
 			runhistory = collections.deque([0] * 7, 7)
 			for y in range(size):
 				if modules[y][x] == runcolor:
