@@ -24,7 +24,7 @@
 from __future__ import annotations
 import collections, itertools, re
 from collections.abc import Sequence
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Deque, Dict, List, Optional, Pattern, Tuple, Union
 
 
 # ---- QR Code symbol class ----
@@ -568,7 +568,7 @@ class QrCode:
 		return z
 	
 	
-	def _finder_penalty_count_patterns(self, runhistory: collections.deque) -> int:
+	def _finder_penalty_count_patterns(self, runhistory: Deque[int]) -> int:
 		"""Can only be called immediately after a light run is added, and
 		returns either 0, 1, or 2. A helper function for _get_penalty_score()."""
 		n: int = runhistory[1]
@@ -578,7 +578,7 @@ class QrCode:
 		     + (1 if (core and runhistory[6] >= n * 4 and runhistory[0] >= n) else 0)
 	
 	
-	def _finder_penalty_terminate_and_count(self, currentruncolor: bool, currentrunlength: int, runhistory: collections.deque) -> int:
+	def _finder_penalty_terminate_and_count(self, currentruncolor: bool, currentrunlength: int, runhistory: Deque[int]) -> int:
 		"""Must be called at the end of a line (row or column) of modules. A helper function for _get_penalty_score()."""
 		if currentruncolor:  # Terminate dark run
 			self._finder_penalty_add_history(currentrunlength, runhistory)
@@ -588,7 +588,7 @@ class QrCode:
 		return self._finder_penalty_count_patterns(runhistory)
 	
 	
-	def _finder_penalty_add_history(self, currentrunlength: int, runhistory: collections.deque) -> None:
+	def _finder_penalty_add_history(self, currentrunlength: int, runhistory: Deque[int]) -> None:
 		if runhistory[0] == 0:
 			currentrunlength += self._size  # Add light border to initial run
 		runhistory.appendleft(currentrunlength)
@@ -828,10 +828,10 @@ class QrSegment:
 	# ---- Constants ----
 	
 	# Describes precisely all strings that are encodable in numeric mode.
-	_NUMERIC_REGEX: re.Pattern = re.compile(r"[0-9]*")
+	_NUMERIC_REGEX: Pattern[str] = re.compile(r"[0-9]*")
 	
 	# Describes precisely all strings that are encodable in alphanumeric mode.
-	_ALPHANUMERIC_REGEX: re.Pattern = re.compile(r"[A-Z0-9 $%*+./:-]*")
+	_ALPHANUMERIC_REGEX: Pattern[str] = re.compile(r"[A-Z0-9 $%*+./:-]*")
 	
 	# Dictionary of "0"->0, "A"->10, "$"->37, etc.
 	_ALPHANUMERIC_ENCODING_TABLE: Dict[str,int] = {ch: i for (i, ch) in enumerate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:")}
@@ -879,7 +879,7 @@ class QrSegment:
 
 # ---- Private helper class ----
 
-class _BitBuffer(list):
+class _BitBuffer(List[int]):
 	"""An appendable sequence of bits (0s and 1s). Mainly used by QrSegment."""
 	
 	def append_bits(self, val: int, n: int) -> None:
