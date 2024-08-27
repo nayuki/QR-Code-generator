@@ -52,8 +52,7 @@ import io.nayuki.qrcodegen.*;
 
 // Simple operation
 QrCode qr0 = QrCode.encodeText("Hello, world!", QrCode.Ecc.MEDIUM);
-BufferedImage img = toImage(qr0, 4, 10);  // See QrCodeGeneratorDemo
-ImageIO.write(img, "png", new File("qr-code.png"));
+File qrCodeImage = new QrCodeRenderer().scale(4).border(10).renderFile(qr0, "png", new File("qr-code.png");
 
 // Manual operation
 List<QrSegment> segs = QrSegment.makeSegments("3141592653589793238462643383");
