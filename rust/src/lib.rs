@@ -413,7 +413,7 @@ impl QrCode {
 		// Calculate error correction code and pack bits
 		let bits: u32 = {
 			// errcorrlvl is uint2, mask is uint3
-			let data: u32 = u32::from(self.errorcorrectionlevel.format_bits() << 3 | mask.value());
+			let data = u32::from(self.errorcorrectionlevel.format_bits() << 3 | mask.value());
 			let mut rem: u32 = data;
 			for _ in 0 .. 10 {
 				rem = (rem << 1) ^ ((rem >> 9) * 0x537);
@@ -696,12 +696,12 @@ impl QrCode {
 	// Each position is in the range [0,177), and are used on both the x and y axes.
 	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
 	fn get_alignment_pattern_positions(&self) -> Vec<i32> {
-		let ver: u8 = self.version.value();
+		let ver = i32::from(self.version.value());
 		if ver == 1 {
 			vec![]
 		} else {
-			let numalign = i32::from(ver) / 7 + 2;
-			let step: i32 = (i32::from(ver) * 8 + numalign * 3 + 5) / (numalign * 4 - 4) * 2;
+			let numalign: i32 = ver / 7 + 2;
+			let step: i32 = (ver * 8 + numalign * 3 + 5) / (numalign * 4 - 4) * 2;
 			let mut result: Vec<i32> = (0 .. numalign-1).map(
 				|i| self.size - 7 - i * step).collect();
 			result.push(6);

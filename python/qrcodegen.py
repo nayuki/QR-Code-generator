@@ -479,12 +479,11 @@ class QrCode:
 		"""Returns an ascending list of positions of alignment patterns for this version number.
 		Each position is in the range [0,177), and are used on both the x and y axes.
 		This could be implemented as lookup table of 40 variable-length lists of integers."""
-		ver: int = self._version
-		if ver == 1:
+		if self._version == 1:
 			return []
 		else:
-			numalign: int = ver // 7 + 2
-			step: int = (ver * 8 + numalign * 3 + 8) // (numalign * 4 - 4) * 2
+			numalign: int = self._version // 7 + 2
+			step: int = (self._version * 8 + numalign * 3 + 8) // (numalign * 4 - 4) * 2
 			result: list[int] = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
 			return list(reversed(result))
 	
