@@ -484,8 +484,7 @@ class QrCode:
 			return []
 		else:
 			numalign: int = ver // 7 + 2
-			step: int = 26 if (ver == 32) else \
-				(ver * 4 + numalign * 2 + 1) // (numalign * 2 - 2) * 2
+			step: int = (ver * 8 + numalign * 3 + 8) // (numalign * 4 - 4) * 2
 			result: list[int] = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
 			return list(reversed(result))
 	

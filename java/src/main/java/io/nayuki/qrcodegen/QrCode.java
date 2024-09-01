@@ -612,11 +612,7 @@ public final class QrCode {
 			return new int[]{};
 		else {
 			int numAlign = version / 7 + 2;
-			int step;
-			if (version == 32)  // Special snowflake
-				step = 26;
-			else  // step = ceil[(size - 13) / (numAlign * 2 - 2)] * 2
-				step = (version * 4 + numAlign * 2 + 1) / (numAlign * 2 - 2) * 2;
+			int step = (version * 8 + numAlign * 3 + 5) / (numAlign * 4 - 4) * 2;
 			int[] result = new int[numAlign];
 			result[0] = 6;
 			for (int i = result.length - 1, pos = size - 7; i >= 1; i--, pos -= step)

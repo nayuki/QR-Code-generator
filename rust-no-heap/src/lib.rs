@@ -796,8 +796,8 @@ impl<'a> QrCode<'a> {
 			&resultbuf[ .. 0]
 		} else {
 			let numalign: u8 = ver / 7 + 2;
-			let step: u8 = if ver == 32 { 26 } else
-				{(ver * 4 + numalign * 2 + 1) / (numalign * 2 - 2) * 2};
+			let step = u8::try_from((i32::from(ver) * 8 + i32::from(numalign) * 3 + 5)
+				/ (i32::from(numalign) * 4 - 4) * 2).unwrap();
 			let result = &mut resultbuf[ .. usize::from(numalign)];
 			for i in 0 .. numalign-1 {
 				result[usize::from(i)] = *self.size - 7 - i * step;

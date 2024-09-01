@@ -554,8 +554,7 @@ testable int getAlignmentPatternPositions(int version, uint8_t result[7]) {
 	if (version == 1)
 		return 0;
 	int numAlign = version / 7 + 2;
-	int step = (version == 32) ? 26 :
-		(version * 4 + numAlign * 2 + 1) / (numAlign * 2 - 2) * 2;
+	int step = (version * 8 + numAlign * 3 + 5) / (numAlign * 4 - 4) * 2;
 	for (int i = numAlign - 1, pos = version * 4 + 10; i >= 1; i--, pos -= step)
 		result[i] = (uint8_t)pos;
 	result[0] = 6;

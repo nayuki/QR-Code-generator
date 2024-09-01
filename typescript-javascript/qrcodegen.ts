@@ -540,8 +540,7 @@ namespace qrcodegen {
 				return [];
 			else {
 				const numAlign: int = Math.floor(this.version / 7) + 2;
-				const step: int = (this.version == 32) ? 26 :
-					Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2;
+				const step: int = Math.floor((this.version * 8 + numAlign * 3 + 5) / (numAlign * 4 - 4)) * 2;
 				let result: Array<int> = [6];
 				for (let pos = this.size - 7; result.length < numAlign; pos -= step)
 					result.splice(1, 0, pos);
