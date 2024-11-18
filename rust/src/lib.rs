@@ -973,7 +973,7 @@ impl QrSegment {
 	/// 
 	/// Any text string can be converted to UTF-8 bytes and encoded as a byte mode segment.
 	pub fn make_bytes(data: &[u8]) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
+		let mut bb = BitBuffer(Vec::with_capacity(data.len().checked_mul(8).unwrap()));
 		for &b in data {
 			bb.append_bits(u32::from(b), 8);
 		}
@@ -985,7 +985,8 @@ impl QrSegment {
 	/// 
 	/// Panics if the string contains non-digit characters.
 	pub fn make_numeric(text: &str) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + text.len().div_ceil(3)));
+		let mut bb = BitBuffer(Vec::with_capacity(
+			text.len().checked_mul(3).unwrap().checked_add(text.len().div_ceil(3)).unwrap()));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u8 = 0;
 		for b in text.bytes() {
@@ -1012,7 +1013,8 @@ impl QrSegment {
 	/// 
 	/// Panics if the string contains non-encodable characters.
 	pub fn make_alphanumeric(text: &str) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + text.len().div_ceil(2)));
+		let mut bb = BitBuffer(Vec::with_capacity(
+			text.len().checked_mul(5).unwrap().checked_add(text.len().div_ceil(2)).unwrap()));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text.chars() {
