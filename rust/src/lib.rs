@@ -973,7 +973,7 @@ impl QrSegment {
 	/// 
 	/// Any text string can be converted to UTF-8 bytes and encoded as a byte mode segment.
 	pub fn make_bytes(data: &[u8]) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(data.len() * 8));
+		let mut bb = BitBuffer(Vec::with_capacity(data.len().checked_mul(8).unwrap()));
 		for &b in data {
 			bb.append_bits(u32::from(b), 8);
 		}
@@ -985,21 +985,13 @@ impl QrSegment {
 	/// 
 	/// Panics if the string contains non-digit characters.
 	pub fn make_numeric(text: &str) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3));
-		let mut accumdata: u32 = 0;
-		let mut accumcount: u8 = 0;
-		for b in text.bytes() {
-			assert!((b'0' ..= b'9').contains(&b), "String contains non-numeric characters");
-			accumdata = accumdata * 10 + u32::from(b - b'0');
-			accumcount += 1;
-			if accumcount == 3 {
-				bb.append_bits(accumdata, 10);
-				accumdata = 0;
-				accumcount = 0;
-			}
-		}
-		if accumcount > 0 {  // 1 or 2 digits remaining
-			bb.append_bits(accumdata, accumcount * 3 + 1);
+		assert!(text.bytes().all(|b| (b'0' ..= b'9').contains(&b)), "String contains non-numeric characters");
+		let mut bb = BitBuffer(Vec::with_capacity(
+			text.len().checked_mul(3).unwrap().checked_add(text.len().div_ceil(3)).unwrap()));
+		for chunk in text.as_bytes().chunks(3) {
+			let data: u32 = chunk.iter().fold(0u32,
+				|acc, &b| acc * 10 + u32::from(b - b'0'));
+			bb.append_bits(data, (chunk.len() as u8) * 3 + 1);
 		}
 		QrSegment::new(QrSegmentMode::Numeric, text.len(), bb.0)
 	}
@@ -1012,22 +1004,12 @@ impl QrSegment {
 	/// 
 	/// Panics if the string contains non-encodable characters.
 	pub fn make_alphanumeric(text: &str) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
-		let mut accumdata: u32 = 0;
-		let mut accumcount: u32 = 0;
-		for c in text.chars() {
-			let i: usize = ALPHANUMERIC_CHARSET.find(c)
-				.expect("String contains unencodable characters in alphanumeric mode");
-			accumdata = accumdata * 45 + u32::try_from(i).unwrap();
-			accumcount += 1;
-			if accumcount == 2 {
-				bb.append_bits(accumdata, 11);
-				accumdata = 0;
-				accumcount = 0;
-			}
-		}
-		if accumcount > 0 {  // 1 character remaining
-			bb.append_bits(accumdata, 6);
+		let mut bb = BitBuffer(Vec::with_capacity(
+			text.len().checked_mul(5).unwrap().checked_add(text.len().div_ceil(2)).unwrap()));
+		for chunk in text.as_bytes().chunks(2) {
+			let data: u32 = chunk.iter().fold(0u32, |acc, &b| acc * 45 + u32::try_from(
+				ALPHANUMERIC_CHARSET.find(char::from(b)).expect("String contains unencodable characters in alphanumeric mode")).unwrap());
+			bb.append_bits(data, (chunk.len() as u8) * 5 + 1);
 		}
 		QrSegment::new(QrSegmentMode::Alphanumeric, text.len(), bb.0)
 	}

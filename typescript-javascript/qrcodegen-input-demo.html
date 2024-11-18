@@ -44,17 +44,16 @@
 				white-space: pre;
 				padding-right: 0.5em;
 			}
-			input[type=number], input[type=text], textarea {
+			input, textarea {
 				font-size: inherit;
 				font-family: inherit;
 			}
 			input[type=radio], input[type=checkbox] {
-				margin: 0em;
+				margin: 0em 0.2em 0em 0em;
 				padding: 0em;
 			}
-			input[type=radio] + label, input[type=checkbox] + label {
-				margin-right: 0.8em;
-				padding-left: 0.2em;
+			label + label {
+				margin-left: 0.8em;
 			}
 			hr {
 				margin: 2em 0em;
@@ -91,17 +90,17 @@
 					<tr>
 						<td><strong>Error correction:</strong></td>
 						<td>
-							<input type="radio" name="errcorlvl" id="errcorlvl-low" checked="checked"><label for="errcorlvl-low">Low</label>
-							<input type="radio" name="errcorlvl" id="errcorlvl-medium"><label for="errcorlvl-medium">Medium</label>
-							<input type="radio" name="errcorlvl" id="errcorlvl-quartile"><label for="errcorlvl-quartile">Quartile</label>
-							<input type="radio" name="errcorlvl" id="errcorlvl-high"><label for="errcorlvl-high">High</label>
+							<label><input type="radio" name="errcorlvl" id="errcorlvl-low" checked="checked">Low</label>
+							<label><input type="radio" name="errcorlvl" id="errcorlvl-medium">Medium</label>
+							<label><input type="radio" name="errcorlvl" id="errcorlvl-quartile">Quartile</label>
+							<label><input type="radio" name="errcorlvl" id="errcorlvl-high">High</label>
 						</td>
 					</tr>
 					<tr>
 						<td>Output format:</td>
 						<td>
-							<input type="radio" name="output-format" id="output-format-bitmap" checked="checked"><label for="output-format-bitmap">Bitmap</label>
-							<input type="radio" name="output-format" id="output-format-vector"><label for="output-format-vector">Vector</label>
+							<label><input type="radio" name="output-format" id="output-format-bitmap" checked="checked">Bitmap</label>
+							<label><input type="radio" name="output-format" id="output-format-vector">Vector</label>
 						</td>
 					</tr>
 					<tr>
@@ -132,7 +131,7 @@
 					</tr>
 					<tr>
 						<td>Boost ECC:</td>
-						<td><input type="checkbox" checked="checked" id="boost-ecc-input"><label for="boost-ecc-input">Increase <abbr title="error-correcting code">ECC</abbr> level within same version</label></td>
+						<td><label><input type="checkbox" checked="checked" id="boost-ecc-input">Increase <abbr title="error-correcting code">ECC</abbr> level within same version</label></td>
 					</tr>
 					<tr>
 						<td>Statistics:</td>
