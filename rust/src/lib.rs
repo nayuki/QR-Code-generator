@@ -985,7 +985,7 @@ impl QrSegment {
 	/// 
 	/// Panics if the string contains non-digit characters.
 	pub fn make_numeric(text: &str) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + (text.len() + 2) / 3));
+		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 3 + text.len().div_ceil(3)));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u8 = 0;
 		for b in text.bytes() {
@@ -1012,7 +1012,7 @@ impl QrSegment {
 	/// 
 	/// Panics if the string contains non-encodable characters.
 	pub fn make_alphanumeric(text: &str) -> Self {
-		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + (text.len() + 1) / 2));
+		let mut bb = BitBuffer(Vec::with_capacity(text.len() * 5 + text.len().div_ceil(2)));
 		let mut accumdata: u32 = 0;
 		let mut accumcount: u32 = 0;
 		for c in text.chars() {
