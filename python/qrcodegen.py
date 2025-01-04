@@ -483,7 +483,7 @@ class QrCode:
 			return []
 		else:
 			numalign: int = self._version // 7 + 2
-			step: int = (self._version * 8 + numalign * 3 + 8) // (numalign * 4 - 4) * 2
+			step: int = (self._version * 8 + numalign * 3 + 5) // (numalign * 4 - 4) * 2
 			result: list[int] = [(self._size - 7 - i * step) for i in range(numalign - 1)] + [6]
 			return list(reversed(result))
 	
