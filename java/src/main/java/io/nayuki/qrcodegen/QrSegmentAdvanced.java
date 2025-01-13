@@ -90,7 +90,9 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns a new list of segments that is optimal for the given text at the given version number.
+	/**
+	 * Returns a new list of segments that is optimal for the given text at the given version number.
+	*/
 	private static List<QrSegment> makeSegmentsOptimally(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			return new ArrayList<>();
@@ -99,7 +101,9 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns a new array representing the optimal mode per code point based on the given text and version.
+	/**
+	 * Returns a new array representing the optimal mode per code point based on the given text and version.
+	*/
 	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
@@ -189,8 +193,10 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns a new list of segments based on the given text and modes, such that
-	// consecutive code points in the same mode are put into the same segment.
+	/**
+	 * Returns a new list of segments based on the given text and modes, such that
+	 * consecutive code points in the same mode are put into the same segment.
+	 */
 	private static List<QrSegment> splitIntoSegments(int[] codePoints, Mode[] charModes) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
@@ -221,8 +227,10 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns a new array of Unicode code points (effectively
-	// UTF-32 / UCS-4) representing the given UTF-16 string.
+	/**
+	 * Returns a new array of Unicode code points (effectively
+	 * UTF-32 / UCS-4) representing the given UTF-16 string.
+	*/
 	private static int[] toCodePoints(CharSequence s) {
 		int[] result = s.codePoints().toArray();
 		for (int c : result) {
@@ -233,7 +241,9 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
-	// Returns the number of UTF-8 bytes needed to encode the given Unicode code point.
+	/**
+	 * Returns the number of UTF-8 bytes needed to encode the given Unicode code point.
+	 */
 	private static int countUtf8Bytes(int cp) {
 		if      (cp <        0) throw new IllegalArgumentException("Invalid code point");
 		else if (cp <     0x80) return 1;

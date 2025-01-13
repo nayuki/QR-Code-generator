@@ -221,11 +221,13 @@ public final class QrCode {
 	
 	// Private grids of modules/pixels, with dimensions of size*size:
 	
-	// The modules of this QR Code (false = light, true = dark).
-	// Immutable after constructor finishes. Accessed through getModule().
+	/**
+	 * The modules of this QR Code (false = light, true = dark).<br/>
+	 * Immutable after constructor finishes. Accessed through <code>getModule()</code>. */
 	private boolean[][] modules;
 	
-	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
+	/**
+	 * Indicates function modules that are not subjected to masking. Discarded when constructor finishes. */
 	private boolean[][] isFunction;
 	
 	
@@ -306,7 +308,9 @@ public final class QrCode {
 	
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
-	// Reads this object's version field, and draws and marks all function modules.
+	/**
+	 * Reads this object's version field, and draws and marks all function modules.
+	 */
 	private void drawFunctionPatterns() {
 		// Draw horizontal and vertical timing patterns
 		for (int i = 0; i < size; i++) {
@@ -336,8 +340,10 @@ public final class QrCode {
 	}
 	
 	
-	// Draws two copies of the format bits (with its own error correction code)
-	// based on the given mask and this object's error correction level field.
+	/**
+	 * Draws two copies of the format bits (with its own error correction code)
+	 * based on the given mask and this object's error correction level field.
+	 */
 	private void drawFormatBits(int msk) {
 		// Calculate error correction code and pack bits
 		int data = errorCorrectionLevel.formatBits << 3 | msk;  // errCorrLvl is uint2, mask is uint3
@@ -365,8 +371,10 @@ public final class QrCode {
 	}
 	
 	
-	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field, iff 7 <= version <= 40.
+	/**
+	 * Draws two copies of the version bits (with its own error correction code),
+	 * based on this object's version field, iff 7 <= version <= 40.
+	 */
 	private void drawVersion() {
 		if (version < 7)
 			return;
@@ -389,8 +397,10 @@ public final class QrCode {
 	}
 	
 	
-	// Draws a 9*9 finder pattern including the border separator,
-	// with the center module at (x, y). Modules can be out of bounds.
+	/**
+	 * Draws a 9*9 finder pattern including the border separator,
+	 * with the center module at (x, y). Modules can be out of bounds.
+	 */
 	private void drawFinderPattern(int x, int y) {
 		for (int dy = -4; dy <= 4; dy++) {
 			for (int dx = -4; dx <= 4; dx++) {
@@ -403,8 +413,10 @@ public final class QrCode {
 	}
 	
 	
-	// Draws a 5*5 alignment pattern, with the center module
-	// at (x, y). All modules must be in bounds.
+	/**
+	 * Draws a 5*5 alignment pattern, with the center module
+	 * at (x, y). All modules must be in bounds.
+	 */
 	private void drawAlignmentPattern(int x, int y) {
 		for (int dy = -2; dy <= 2; dy++) {
 			for (int dx = -2; dx <= 2; dx++)
@@ -413,8 +425,10 @@ public final class QrCode {
 	}
 	
 	
-	// Sets the color of a module and marks it as a function module.
-	// Only used by the constructor. Coordinates must be in bounds.
+	/**
+	 * Sets the color of a module and marks it as a function module.
+	 * Only used by the constructor. Coordinates must be in bounds.
+	 */
 	private void setFunctionModule(int x, int y, boolean isDark) {
 		modules[y][x] = isDark;
 		isFunction[y][x] = true;
@@ -423,8 +437,10 @@ public final class QrCode {
 	
 	/*---- Private helper methods for constructor: Codewords and masking ----*/
 	
-	// Returns a new byte string representing the given data with the appropriate error correction
-	// codewords appended to it, based on this object's version and error correction level.
+	/** 
+	 * Returns a new byte string representing the given data with the appropriate error correction
+	 * codewords appended to it, based on this object's version and error correction level.
+	 */
 	private byte[] addEccAndInterleave(byte[] data) {
 		Objects.requireNonNull(data);
 		if (data.length != getNumDataCodewords(version, errorCorrectionLevel))
@@ -464,8 +480,10 @@ public final class QrCode {
 	}
 	
 	
-	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
-	// data area of this QR Code. Function modules need to be marked off before this is called.
+	/**
+	 * Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
+	 * data area of this QR Code. Function modules need to be marked off before this is called.
+	*/
 	private void drawCodewords(byte[] data) {
 		Objects.requireNonNull(data);
 		if (data.length != getNumRawDataModules(version) / 8)
@@ -494,11 +512,13 @@ public final class QrCode {
 	}
 	
 	
-	// XORs the codeword modules in this QR Code with the given mask pattern.
-	// The function modules must be marked and the codeword bits must be drawn
-	// before masking. Due to the arithmetic of XOR, calling applyMask() with
-	// the same mask value a second time will undo the mask. A final well-formed
-	// QR Code needs exactly one (not zero, two, etc.) mask applied.
+	/**
+	 * XORs the codeword modules in this QR Code with the given mask pattern.
+	 * The function modules must be marked and the codeword bits must be drawn
+	 * before masking. Due to the arithmetic of XOR, calling applyMask() with
+	 * the same mask value a second time will undo the mask. A final well-formed
+	 * QR Code needs exactly one (not zero, two, etc.) mask applied.
+	 */
 	private void applyMask(int msk) {
 		if (msk < 0 || msk > 7)
 			throw new IllegalArgumentException("Mask value out of range");
@@ -522,8 +542,10 @@ public final class QrCode {
 	}
 	
 	
-	// Calculates and returns the penalty score based on state of this QR Code's current modules.
-	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+	/**
+	 * Calculates and returns the penalty score based on state of this QR Code's current modules.
+	 * This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+	 */
 	private int getPenaltyScore() {
 		int result = 0;
 		
@@ -604,9 +626,11 @@ public final class QrCode {
 	
 	/*---- Private helper functions ----*/
 	
-	// Returns an ascending list of positions of alignment patterns for this version number.
-	// Each position is in the range [0,177), and are used on both the x and y axes.
-	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
+	/**
+	 * Returns an ascending list of positions of alignment patterns for this version number.
+	 * Each position is in the range [0,177), and are used on both the x and y axes.
+	 * This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
+	 */
 	private int[] getAlignmentPatternPositions() {
 		if (version == 1)
 			return new int[]{};
@@ -622,9 +646,11 @@ public final class QrCode {
 	}
 	
 	
-	// Returns the number of data bits that can be stored in a QR Code of the given version number, after
-	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
-	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
+	/**
+	 * Returns the number of data bits that can be stored in a QR Code of the given version number, after
+	 * all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
+	 * The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
+	 */
 	private static int getNumRawDataModules(int ver) {
 		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
@@ -648,8 +674,10 @@ public final class QrCode {
 	}
 	
 	
-	// Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
-	// implemented as a lookup table over all possible parameter values, instead of as an algorithm.
+	/**
+	 * Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
+	 * implemented as a lookup table over all possible parameter values, instead of as an algorithm.
+	 */
 	private static byte[] reedSolomonComputeDivisor(int degree) {
 		if (degree < 1 || degree > 255)
 			throw new IllegalArgumentException("Degree out of range");
@@ -675,7 +703,9 @@ public final class QrCode {
 	}
 	
 	
-	// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
+	/**
+	 * Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
+	 */
 	private static byte[] reedSolomonComputeRemainder(byte[] data, byte[] divisor) {
 		Objects.requireNonNull(data);
 		Objects.requireNonNull(divisor);
@@ -691,8 +721,10 @@ public final class QrCode {
 	}
 	
 	
-	// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
-	// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
+	/**
+	 * Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
+	 * are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
+	 */
 	private static int reedSolomonMultiply(int x, int y) {
 		assert x >> 8 == 0 && y >> 8 == 0;
 		// Russian peasant multiplication
@@ -706,9 +738,11 @@ public final class QrCode {
 	}
 	
 	
-	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
-	// QR Code of the given version number and error correction level, with remainder bits discarded.
-	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
+	/**
+	 * Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
+	 * QR Code of the given version number and error correction level, with remainder bits discarded.<br/>
+	 * This stateless pure function could be implemented as a (40*4)-cell lookup table.
+	 */
 	static int getNumDataCodewords(int ver, Ecc ecl) {
 		return getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal()][ver]
@@ -716,8 +750,10 @@ public final class QrCode {
 	}
 	
 	
-	// Can only be called immediately after a light run is added, and
-	// returns either 0, 1, or 2. A helper function for getPenaltyScore().
+	/**
+	 * Can only be called immediately after a light run is added, and
+	 * returns either 0, 1, or 2. A helper function for <code>getPenaltyScore()</code>.
+	 */
 	private int finderPenaltyCountPatterns(int[] runHistory) {
 		int n = runHistory[1];
 		assert n <= size * 3;
@@ -727,7 +763,9 @@ public final class QrCode {
 	}
 	
 	
-	// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
+	/**
+	 * Must be called at the end of a line (row or column) of modules. A helper function for <code>getPenaltyScore()</code>.
+	 */
 	private int finderPenaltyTerminateAndCount(boolean currentRunColor, int currentRunLength, int[] runHistory) {
 		if (currentRunColor) {  // Terminate dark run
 			finderPenaltyAddHistory(currentRunLength, runHistory);
@@ -739,7 +777,9 @@ public final class QrCode {
 	}
 	
 	
-	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
+	/**
+	 * Pushes the given value to the front and drops the last value. A helper function for <code>getPenaltyScore()</code>.
+	 */
 	private void finderPenaltyAddHistory(int currentRunLength, int[] runHistory) {
 		if (runHistory[0] == 0)
 			currentRunLength += size;  // Add light border to initial run

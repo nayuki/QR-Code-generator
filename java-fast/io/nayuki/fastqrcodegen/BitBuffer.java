@@ -40,7 +40,9 @@ final class BitBuffer {
 	
 	/*---- Constructor ----*/
 	
-	// Creates an empty bit buffer.
+	/**
+	 * Creates an empty bit buffer.
+	 */
 	public BitBuffer() {
 		data = new int[64];
 		bitLength = 0;
@@ -50,7 +52,9 @@ final class BitBuffer {
 	
 	/*---- Methods ----*/
 	
-	// Returns the bit at the given index, yielding 0 or 1.
+	/**
+	 * Returns the bit at the given index, yielding 0 or 1.
+	 */
 	public int getBit(int index) {
 		if (index < 0 || index >= bitLength)
 			throw new IndexOutOfBoundsException();
@@ -58,8 +62,10 @@ final class BitBuffer {
 	}
 	
 	
-	// Returns a new array representing this buffer's bits packed into
-	// bytes in big endian. The current bit length must be a multiple of 8.
+	/**
+	 * Returns a new array representing this buffer's bits packed into
+	 * bytes in big endian. The current bit length must be a multiple of 8.
+	 */
 	public byte[] getBytes() {
 		if (bitLength % 8 != 0)
 			throw new IllegalStateException("Data is not a whole number of bytes");
@@ -70,8 +76,10 @@ final class BitBuffer {
 	}
 	
 	
-	// Appends the given number of low-order bits of the given value
-	// to this buffer. Requires 0 <= len <= 31 and 0 <= val < 2^len.
+	/**
+	 * Appends the given number of low-order bits of the given value
+	 * to this buffer. Requires <code>0 <= len <= 31</code> and <code>0 <= val < 2^len</code>.
+	 */
 	public void appendBits(int val, int len) {
 		if (len < 0 || len > 31 || val >>> len != 0)
 			throw new IllegalArgumentException("Value out of range");
@@ -97,8 +105,10 @@ final class BitBuffer {
 	}
 	
 	
-	// Appends to this buffer the sequence of bits represented by the given
-	// word array and given bit length. Requires 0 <= len <= 32 * vals.length.
+	/**
+	 * Appends to this buffer the sequence of bits represented by the given
+	 * word array and given bit length. Requires 0 <= len <= 32 * vals.length.
+	 */
 	public void appendBits(int[] vals, int len) {
 		Objects.requireNonNull(vals);
 		if (len == 0)

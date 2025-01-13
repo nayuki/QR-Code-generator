@@ -31,7 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 
-// A thread-safe cache based on soft references.
+/**
+ * A thread-safe cache based on soft references.
+ */ 
 final class Memoizer<T,R> {
 	
 	private final Function<T,R> function;
@@ -39,13 +41,17 @@ final class Memoizer<T,R> {
 	private Set<T> pending = new HashSet<>();
 	
 	
-	// Creates a memoizer based on the given function that takes one input to compute an output.
+	/**
+	 * Creates a memoizer based on the given function that takes one input to compute an output.
+	 */
 	public Memoizer(Function<T,R> func) {
 		function = func;
 	}
 	
 	
-	// Computes function.apply(arg) or returns a cached copy of a previous call.
+	/**
+	 * Computes function.apply(arg) or returns a cached copy of a previous call.
+	 */
 	public R get(T arg) {
 		// Non-blocking fast path
 		{

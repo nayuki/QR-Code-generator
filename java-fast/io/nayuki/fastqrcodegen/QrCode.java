@@ -280,8 +280,10 @@ public final class QrCode {
 	
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
 	
-	// Draws two copies of the format bits (with its own error correction code)
-	// based on the given mask and this object's error correction level field.
+	/**
+	 * Draws two copies of the format bits (with its own error correction code)
+	 * based on the given mask and this object's error correction level field.
+	 */
 	private void drawFormatBits(int msk) {
 		// Calculate error correction code and pack bits
 		int data = errorCorrectionLevel.formatBits << 3 | msk;  // errCorrLvl is uint2, mask is uint3
@@ -309,8 +311,10 @@ public final class QrCode {
 	}
 	
 	
-	// Sets the module at the given coordinates to the given color.
-	// Only used by the constructor. Coordinates must be in bounds.
+	/**
+	 * Sets the module at the given coordinates to the given color.
+	 * Only used by the constructor. Coordinates must be in bounds.
+	 */
 	private void setModule(int x, int y, int dark) {
 		assert 0 <= x && x < size;
 		assert 0 <= y && y < size;
@@ -323,8 +327,10 @@ public final class QrCode {
 	
 	/*---- Private helper methods for constructor: Codewords and masking ----*/
 	
-	// Returns a new byte string representing the given data with the appropriate error correction
-	// codewords appended to it, based on this object's version and error correction level.
+	/**
+	 * Returns a new byte string representing the given data with the appropriate error correction
+	 * codewords appended to it, based on this object's version and error correction level.
+	 */
 	private byte[] addEccAndInterleave(byte[] data) {
 		Objects.requireNonNull(data);
 		if (data.length != getNumDataCodewords(version, errorCorrectionLevel))
@@ -357,8 +363,10 @@ public final class QrCode {
 	}
 	
 	
-	// Draws the given sequence of 8-bit codewords (data and error correction)
-	// onto the entire data area of this QR Code, based on the given bit indexes.
+	/**
+	 * Draws the given sequence of 8-bit codewords (data and error correction)
+	 * onto the entire data area of this QR Code, based on the given bit indexes.
+	 */
 	private void drawCodewords(int[] dataOutputBitIndexes, byte[] allCodewords) {
 		Objects.requireNonNull(dataOutputBitIndexes);
 		Objects.requireNonNull(allCodewords);
@@ -372,11 +380,13 @@ public final class QrCode {
 	}
 	
 	
-	// XORs the codeword modules in this QR Code with the given mask pattern.
-	// The function modules must be marked and the codeword bits must be drawn
-	// before masking. Due to the arithmetic of XOR, calling applyMask() with
-	// the same mask value a second time will undo the mask. A final well-formed
-	// QR Code needs exactly one (not zero, two, etc.) mask applied.
+	/**
+	 * XORs the codeword modules in this QR Code with the given mask pattern.
+	 * The function modules must be marked and the codeword bits must be drawn
+	 * before masking. Due to the arithmetic of XOR, calling applyMask() with
+	 * the same mask value a second time will undo the mask. A final well-formed
+	 * QR Code needs exactly one (not zero, two, etc.) mask applied.
+	 */
 	private void applyMask(int[] msk) {
 		if (msk.length != modules.length)
 			throw new IllegalArgumentException();
@@ -385,9 +395,11 @@ public final class QrCode {
 	}
 	
 	
-	// A messy helper function for the constructor. This QR Code must be in an unmasked state when this
-	// method is called. The 'mask' argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
-	// This method applies and returns the actual mask chosen, from 0 to 7.
+	/**
+	 * A messy helper function for the constructor. This QR Code must be in an unmasked state when this
+	 * method is called. The 'mask' argument is the requested mask, which is -1 for auto or 0 to 7 for fixed.
+	 * This method applies and returns the actual mask chosen, from 0 to 7.
+	 */
 	private int handleConstructorMasking(int[][] masks, int msk) {
 		if (msk == -1) {  // Automatically choose best mask
 			int minPenalty = Integer.MAX_VALUE;
@@ -409,8 +421,10 @@ public final class QrCode {
 	}
 	
 	
-	// Calculates and returns the penalty score based on state of this QR Code's current modules.
-	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+	/**
+	 * Calculates and returns the penalty score based on state of this QR Code's current modules.
+	 * This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
+	 */
 	private int getPenaltyScore() {
 		int result = 0;
 		int dark = 0;
@@ -486,9 +500,11 @@ public final class QrCode {
 	
 	/*---- Private helper functions ----*/
 	
-	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
-	// QR Code of the given version number and error correction level, with remainder bits discarded.
-	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
+	/**
+	 * Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
+	 * QR Code of the given version number and error correction level, with remainder bits discarded.
+	 * This stateless pure function could be implemented as a (40*4)-cell lookup table.
+	 */
 	static int getNumDataCodewords(int ver, Ecc ecl) {
 		return QrTemplate.getNumRawDataModules(ver) / 8
 			- ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal()][ver]
@@ -496,8 +512,10 @@ public final class QrCode {
 	}
 	
 	
-	// Can only be called immediately after a light run is added, and
-	// returns either 0, 1, or 2. A helper function for getPenaltyScore().
+	/**
+	 * Can only be called immediately after a light run is added, and
+	 * returns either 0, 1, or 2. A helper function for <code>getPenaltyScore()</code>.
+	 */
 	private int finderPenaltyCountPatterns(int[] runHistory) {
 		int n = runHistory[1];
 		assert n <= size * 3;
@@ -507,7 +525,9 @@ public final class QrCode {
 	}
 	
 	
-	// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
+	/**
+	 * Must be called at the end of a line (row or column) of modules. A helper function for <code>getPenaltyScore()</code>.
+	 */
 	private int finderPenaltyTerminateAndCount(int currentRunColor, int currentRunLength, int[] runHistory) {
 		if (currentRunColor == 1) {  // Terminate dark run
 			finderPenaltyAddHistory(currentRunLength, runHistory);
@@ -519,7 +539,9 @@ public final class QrCode {
 	}
 	
 	
-	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
+	/**
+	 * Pushes the given value to the front and drops the last value. A helper function for <code>getPenaltyScore()</code>.
+	 */
 	private void finderPenaltyAddHistory(int currentRunLength, int[] runHistory) {
 		if (runHistory[0] == 0)
 			currentRunLength += size;  // Add light border to initial run
@@ -528,7 +550,9 @@ public final class QrCode {
 	}
 	
 	
-	// Returns 0 or 1 based on the (i mod 32)'th bit of x.
+	/**
+	 * Returns 0 or 1 based on the (i mod 32)'th bit of x.
+	 */
 	static int getBit(int x, int i) {
 		return (x >>> i) & 1;
 	}
