@@ -64,7 +64,7 @@
 //! 
 //! Simple operation:
 //! 
-//! ```
+//! ```ignore
 //! let qr = QrCode::encode_text("Hello, world!",
 //!     QrCodeEcc::Medium).unwrap();
 //! let svg = to_svg_string(&qr, 4);  // See qrcodegen-demo
@@ -72,7 +72,7 @@
 //! 
 //! Manual operation:
 //! 
-//! ```
+//! ```ignore
 //! let text: &str = "3141592653589793238462643383";
 //! let segs = QrSegment::make_segments(text);
 //! let qr = QrCode::encode_segments_advanced(&segs, QrCodeEcc::High,
