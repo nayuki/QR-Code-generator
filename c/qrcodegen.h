@@ -156,7 +156,7 @@ struct qrcodegen_Segment {
  * Requires 1 <= minVersion <= maxVersion <= 40.
  * 
  * The smallest possible QR Code version within the given range is automatically
- * chosen for the output. Iff boostEcl is true, then the ECC level of the result
+ * chosen for the output. If boostEcl is true, then the ECC level of the result
  * may be higher than the ecl argument if it can be done without increasing the
  * version. The mask is either between qrcodegen_Mask_0 to 7 to force that mask, or
  * qrcodegen_Mask_AUTO to automatically choose an appropriate mask (which may be slow).
@@ -196,7 +196,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
  * Requires 1 <= minVersion <= maxVersion <= 40.
  * 
  * The smallest possible QR Code version within the given range is automatically
- * chosen for the output. Iff boostEcl is true, then the ECC level of the result
+ * chosen for the output. If boostEcl is true, then the ECC level of the result
  * may be higher than the ecl argument if it can be done without increasing the
  * version. The mask is either between qrcodegen_Mask_0 to 7 to force that mask, or
  * qrcodegen_Mask_AUTO to automatically choose an appropriate mask (which may be slow).
@@ -272,7 +272,7 @@ bool qrcodegen_encodeSegments(const struct qrcodegen_Segment segs[], size_t len,
  * Requires 1 <= minVersion <= maxVersion <= 40.
  * 
  * The smallest possible QR Code version within the given range is automatically
- * chosen for the output. Iff boostEcl is true, then the ECC level of the result
+ * chosen for the output. If boostEcl is true, then the ECC level of the result
  * may be higher than the ecl argument if it can be done without increasing the
  * version. The mask is either between qrcodegen_Mask_0 to 7 to force that mask, or
  * qrcodegen_Mask_AUTO to automatically choose an appropriate mask (which may be slow).
@@ -305,14 +305,14 @@ bool qrcodegen_encodeSegmentsAdvanced(const struct qrcodegen_Segment segs[], siz
 
 /* 
  * Tests whether the given string can be encoded as a segment in numeric mode.
- * A string is encodable iff each character is in the range 0 to 9.
+ * A string is encodable if each character is in the range 0 to 9.
  */
 bool qrcodegen_isNumeric(const char *text);
 
 
 /* 
  * Tests whether the given string can be encoded as a segment in alphanumeric mode.
- * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+ * A string is encodable if each character is in the following set: 0 to 9, A to Z
  * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
  */
 bool qrcodegen_isAlphanumeric(const char *text);

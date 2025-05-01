@@ -164,9 +164,9 @@ public final class QrSegment {
 	
 	/**
 	 * Tests whether the specified string can be encoded as a segment in numeric mode.
-	 * A string is encodable iff each character is in the range 0 to 9.
+	 * A string is encodable if each character is in the range 0 to 9.
 	 * @param text the string to test for encodability (not {@code null})
-	 * @return {@code true} iff each character is in the range 0 to 9.
+	 * @return {@code true} if each character is in the range 0 to 9.
 	 * @throws NullPointerException if the string is {@code null}
 	 * @see #makeNumeric(CharSequence)
 	 */
@@ -177,10 +177,10 @@ public final class QrSegment {
 	
 	/**
 	 * Tests whether the specified string can be encoded as a segment in alphanumeric mode.
-	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	 * A string is encodable if each character is in the following set: 0 to 9, A to Z
 	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 * @param text the string to test for encodability (not {@code null})
-	 * @return {@code true} iff each character is in the alphanumeric mode character set
+	 * @return {@code true} if each character is in the alphanumeric mode character set
 	 * @throws NullPointerException if the string is {@code null}
 	 * @see #makeAlphanumeric(CharSequence)
 	 */

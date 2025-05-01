@@ -134,14 +134,14 @@ class QrSegment final {
 	
 	/* 
 	 * Tests whether the given string can be encoded as a segment in numeric mode.
-	 * A string is encodable iff each character is in the range 0 to 9.
+	 * A string is encodable if each character is in the range 0 to 9.
 	 */
 	public: static bool isNumeric(const char *text);
 	
 	
 	/* 
 	 * Tests whether the given string can be encoded as a segment in alphanumeric mode.
-	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	 * A string is encodable if each character is in the following set: 0 to 9, A to Z
 	 * (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	 */
 	public: static bool isAlphanumeric(const char *text);
@@ -279,7 +279,7 @@ class QrCode final {
 	/* 
 	 * Returns a QR Code representing the given segments with the given encoding parameters.
 	 * The smallest possible QR Code version within the given range is automatically
-	 * chosen for the output. Iff boostEcl is true, then the ECC level of the result
+	 * chosen for the output. If boostEcl is true, then the ECC level of the result
 	 * may be higher than the ecl argument if it can be done without increasing the
 	 * version. The mask number is either between 0 to 7 (inclusive) to force that
 	 * mask, or -1 to automatically choose an appropriate mask (which may be slow).
@@ -382,7 +382,7 @@ class QrCode final {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field, iff 7 <= version <= 40.
+	// based on this object's version field, if 7 <= version <= 40.
 	private: void drawVersion();
 	
 	
@@ -478,7 +478,7 @@ class QrCode final {
 	private: void finderPenaltyAddHistory(int currentRunLength, std::array<int,7> &runHistory) const;
 	
 	
-	// Returns true iff the i'th bit of x is set to 1.
+	// Returns true if the i'th bit of x is set to 1.
 	private: static bool getBit(long x, int i);
 	
 	

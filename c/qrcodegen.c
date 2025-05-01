@@ -799,7 +799,7 @@ testable void setModuleUnbounded(uint8_t qrcode[], int x, int y, bool isDark) {
 }
 
 
-// Returns true iff the i'th bit of x is set to 1. Requires x >= 0 and 0 <= i <= 14.
+// Returns true if the i'th bit of x is set to 1. Requires x >= 0 and 0 <= i <= 14.
 static bool getBit(int x, int i) {
 	return ((x >> i) & 1) != 0;
 }

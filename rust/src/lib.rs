@@ -197,7 +197,7 @@ impl QrCode {
 	/// Returns a QR Code representing the given segments with the given encoding parameters.
 	/// 
 	/// The smallest possible QR Code version within the given range is automatically
-	/// chosen for the output. Iff boostecl is `true`, then the ECC level of the result
+	/// chosen for the output. If boostecl is `true`, then the ECC level of the result
 	/// may be higher than the ecl argument if it can be done without increasing the
 	/// version. The mask number is either between 0 to 7 (inclusive) to force that
 	/// mask, or `None` to automatically choose an appropriate mask (which may be slow).
@@ -446,7 +446,7 @@ impl QrCode {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field, iff 7 <= version <= 40.
+	// based on this object's version field, if 7 <= version <= 40.
 	fn draw_version(&mut self) {
 		if self.version.value() < 7 {
 			return;
@@ -1110,7 +1110,7 @@ impl QrSegment {
 	
 	/// Tests whether the given string can be encoded as a segment in numeric mode.
 	/// 
-	/// A string is encodable iff each character is in the range 0 to 9.
+	/// A string is encodable if each character is in the range 0 to 9.
 	pub fn is_numeric(text: &str) -> bool {
 		text.chars().all(|c| ('0' ..= '9').contains(&c))
 	}
@@ -1118,7 +1118,7 @@ impl QrSegment {
 	
 	/// Tests whether the given string can be encoded as a segment in alphanumeric mode.
 	/// 
-	/// A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	/// A string is encodable if each character is in the following set: 0 to 9, A to Z
 	/// (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	pub fn is_alphanumeric(text: &str) -> bool {
 		text.chars().all(|c| ALPHANUMERIC_CHARSET.contains(c))
@@ -1278,7 +1278,7 @@ impl Mask {
 }
 
 
-// Returns true iff the i'th bit of x is set to 1.
+// Returns true if the i'th bit of x is set to 1.
 fn get_bit(x: u32, i: i32) -> bool {
 	(x >> i) & 1 != 0
 }

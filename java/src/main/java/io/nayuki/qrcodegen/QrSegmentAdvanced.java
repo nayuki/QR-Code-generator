@@ -279,7 +279,7 @@ public final class QrSegmentAdvanced {
 	 * Examples of non-encodable characters include {ordinary ASCII, half-width katakana,
 	 * more extensive Chinese hanzi}.
 	 * @param text the string to test for encodability (not {@code null})
-	 * @return {@code true} iff each character is in the kanji mode character set
+	 * @return {@code true} if each character is in the kanji mode character set
 	 * @throws NullPointerException if the string is {@code null}
 	 * @see #makeKanji(CharSequence)
 	 */

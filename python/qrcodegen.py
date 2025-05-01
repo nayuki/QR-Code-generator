@@ -73,7 +73,7 @@ class QrCode:
 	def encode_segments(segs: Sequence[QrSegment], ecl: QrCode.Ecc, minversion: int = 1, maxversion: int = 40, mask: int = -1, boostecl: bool = True) -> QrCode:
 		"""Returns a QR Code representing the given segments with the given encoding parameters.
 		The smallest possible QR Code version within the given range is automatically
-		chosen for the output. Iff boostecl is true, then the ECC level of the result
+		chosen for the output. If boostecl is true, then the ECC level of the result
 		may be higher than the ecl argument if it can be done without increasing the
 		version. The mask number is either between 0 to 7 (inclusive) to force that
 		mask, or -1 to automatically choose an appropriate mask (which may be slow).
@@ -287,7 +287,7 @@ class QrCode:
 	
 	def _draw_version(self) -> None:
 		"""Draws two copies of the version bits (with its own error correction code),
-		based on this object's version field, iff 7 <= version <= 40."""
+		based on this object's version field, if 7 <= version <= 40."""
 		if self._version < 7:
 			return
 		
@@ -751,14 +751,14 @@ class QrSegment:
 	
 	
 	# Tests whether the given string can be encoded as a segment in numeric mode.
-	# A string is encodable iff each character is in the range 0 to 9.
+	# A string is encodable if each character is in the range 0 to 9.
 	@staticmethod
 	def is_numeric(text: str) -> bool:
 		return QrSegment._NUMERIC_REGEX.fullmatch(text) is not None
 	
 	
 	# Tests whether the given string can be encoded as a segment in alphanumeric mode.
-	# A string is encodable iff each character is in the following set: 0 to 9, A to Z
+	# A string is encodable if each character is in the following set: 0 to 9, A to Z
 	# (uppercase only), space, dollar, percent, asterisk, plus, hyphen, period, slash, colon.
 	@staticmethod
 	def is_alphanumeric(text: str) -> bool:
@@ -889,7 +889,7 @@ class _BitBuffer(list[int]):
 
 
 def _get_bit(x: int, i: int) -> bool:
-	"""Returns true iff the i'th bit of x is set to 1."""
+	"""Returns true if the i'th bit of x is set to 1."""
 	return (x >> i) & 1 != 0
 
 

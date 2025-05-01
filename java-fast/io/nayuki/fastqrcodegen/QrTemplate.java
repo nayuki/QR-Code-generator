@@ -112,7 +112,7 @@ final class QrTemplate {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field, iff 7 <= version <= 40.
+	// based on this object's version field, if 7 <= version <= 40.
 	private void drawVersion() {
 		if (version < 7)
 			return;

@@ -119,7 +119,7 @@ public final class QrCode {
 	/**
 	 * Returns a QR Code representing the specified segments with the specified encoding parameters.
 	 * The smallest possible QR Code version within the specified range is automatically
-	 * chosen for the output. Iff boostEcl is {@code true}, then the ECC level of the
+	 * chosen for the output. If boostEcl is {@code true}, then the ECC level of the
 	 * result may be higher than the ecl argument if it can be done without increasing
 	 * the version. The mask number is either between 0 to 7 (inclusive) to force that
 	 * mask, or &#x2212;1 to automatically choose an appropriate mask (which may be slow).

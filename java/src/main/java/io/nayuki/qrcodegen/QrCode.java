@@ -119,7 +119,7 @@ public final class QrCode {
 	/**
 	 * Returns a QR Code representing the specified segments with the specified encoding parameters.
 	 * The smallest possible QR Code version within the specified range is automatically
-	 * chosen for the output. Iff boostEcl is {@code true}, then the ECC level of the
+	 * chosen for the output. If boostEcl is {@code true}, then the ECC level of the
 	 * result may be higher than the ecl argument if it can be done without increasing
 	 * the version. The mask number is either between 0 to 7 (inclusive) to force that
 	 * mask, or &#x2212;1 to automatically choose an appropriate mask (which may be slow).
@@ -366,7 +366,7 @@ public final class QrCode {
 	
 	
 	// Draws two copies of the version bits (with its own error correction code),
-	// based on this object's version field, iff 7 <= version <= 40.
+	// based on this object's version field, if 7 <= version <= 40.
 	private void drawVersion() {
 		if (version < 7)
 			return;
@@ -748,7 +748,7 @@ public final class QrCode {
 	}
 	
 	
-	// Returns true iff the i'th bit of x is set to 1.
+	// Returns true if the i'th bit of x is set to 1.
 	static boolean getBit(int x, int i) {
 		return ((x >>> i) & 1) != 0;
 	}
