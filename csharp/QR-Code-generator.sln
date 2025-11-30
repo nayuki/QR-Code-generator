@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QrCodeGen", "QrCodeGen/QrCodeGen.csproj", "{6A9E9E3E-2B2E-4B60-9D2B-6F5F09E3A1B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QrCodeGen.Demo", "QrCodeGen.Demo/QrCodeGen.Demo.csproj", "{F7C6C6A2-3B2E-4E1B-9D7B-0F5C9C1E2F23}"
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {6A9E9E3E-2B2E-4B60-9D2B-6F5F09E3A1B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {6A9E9E3E-2B2E-4B60-9D2B-6F5F09E3A1B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {6A9E9E3E-2B2E-4B60-9D2B-6F5F09E3A1B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {6A9E9E3E-2B2E-4B60-9D2B-6F5F09E3A1B1}.Release|Any CPU.Build.0 = Release|Any CPU
+        {F7C6C6A2-3B2E-4E1B-9D7B-0F5C9C1E2F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {F7C6C6A2-3B2E-4E1B-9D7B-0F5C9C1E2F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {F7C6C6A2-3B2E-4E1B-9D7B-0F5C9C1E2F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {F7C6C6A2-3B2E-4E1B-9D7B-0F5C9C1E2F23}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
+EndGlobal
