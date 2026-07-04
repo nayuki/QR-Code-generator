@@ -87,11 +87,20 @@ namespace qrcodegen {
 		// This is a mid-level API; the high-level API is encodeText() and encodeBinary().
 		public static encodeSegments(segs: Readonly<Array<QrSegment>>, ecl: QrCode.Ecc,
 				minVersion: int = 1, maxVersion: int = 40,
-				mask: int = -1, boostEcl: boolean = true): QrCode {
+				mask: int = -1, boostEcl: boolean = true,
+				structuredAppend?: { index: int, total: int, parity: int }): QrCode {
 			
 			if (!(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION)
 					|| mask < -1 || mask > 7)
 				throw new RangeError("Invalid value");
+			if (structuredAppend !== undefined) {
+				if (structuredAppend.total < 1 || structuredAppend.total > 16
+						|| structuredAppend.index < 0 || structuredAppend.index >= structuredAppend.total
+						|| structuredAppend.parity >>> 8 !== 0)
+					throw new RangeError("Invalid structured append values");
+			}
+			
+			const headerBits: int = structuredAppend !== undefined ? 20 : 0;
 			
 			// Find the minimal version number to use
 			let version: int;
@@ -99,8 +108,8 @@ namespace qrcodegen {
 			for (version = minVersion; ; version++) {
 				const dataCapacityBits: int = QrCode.getNumDataCodewords(version, ecl) * 8;  // Number of data bits available
 				const usedBits: number = QrSegment.getTotalBits(segs, version);
-				if (usedBits <= dataCapacityBits) {
-					dataUsedBits = usedBits;
+				if (usedBits + headerBits <= dataCapacityBits) {
+					dataUsedBits = usedBits + headerBits;
 					break;  // This version number is found to be suitable
 				}
 				if (version >= maxVersion)  // All versions in the range could not fit the given data
@@ -115,6 +124,13 @@ namespace qrcodegen {
 			
 			// Concatenate all segments to create the data bit string
 			let bb: Array<bit> = []
+			// Prepend structured append header if requested (ISO/IEC 18004 §8.3)
+			if (structuredAppend !== undefined) {
+				appendBits(0b0011, 4, bb);                       // Mode indicator
+				appendBits(structuredAppend.index, 4, bb);       // Symbol sequence indicator (0-based)
+				appendBits(structuredAppend.total - 1, 4, bb);   // Number of symbols minus 1
+				appendBits(structuredAppend.parity, 8, bb);      // Parity data
+			}
 			for (const seg of segs) {
 				appendBits(seg.mode.modeBits, 4, bb);
 				appendBits(seg.numChars, seg.mode.numCharCountBits(version), bb);
