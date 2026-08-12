@@ -1,4 +1,5 @@
 [package]
+edition = "2015"
 name = "qrcodegen"
 version = "1.8.0"
 authors = ["Project Nayuki"]

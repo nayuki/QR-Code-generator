@@ -1,4 +1,5 @@
 [package]
+edition = "2015"
 name = "qrcodegen-no-heap"
 version = "1.8.1"
 authors = ["Project Nayuki"]
