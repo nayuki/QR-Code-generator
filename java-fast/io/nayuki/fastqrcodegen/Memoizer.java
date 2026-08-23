@@ -35,7 +35,7 @@ import java.util.function.Function;
 final class Memoizer<T,R> {
 	
 	private final Function<T,R> function;
-	Map<T,SoftReference<R>> cache = new ConcurrentHashMap<>();
+	private Map<T,SoftReference<R>> cache = new ConcurrentHashMap<>();
 	private Set<T> pending = new HashSet<>();
 	
 	
