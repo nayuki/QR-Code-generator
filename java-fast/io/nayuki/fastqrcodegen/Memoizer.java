@@ -34,16 +34,24 @@ import java.util.function.Function;
 // A thread-safe cache based on soft references.
 final class Memoizer<T,R> {
 	
+	/*---- Fields ----*/
+	
 	private final Function<T,R> function;
 	private Map<T,SoftReference<R>> cache = new ConcurrentHashMap<>();
 	private Set<T> pending = new HashSet<>();
 	
+	
+	
+	/*---- Constructor ----*/
 	
 	// Creates a memoizer based on the given function that takes one input to compute an output.
 	public Memoizer(Function<T,R> func) {
 		function = func;
 	}
 	
+	
+	
+	/*---- Method ----*/
 	
 	// Computes function.apply(arg) or returns a cached copy of a previous call.
 	public R get(T arg) {

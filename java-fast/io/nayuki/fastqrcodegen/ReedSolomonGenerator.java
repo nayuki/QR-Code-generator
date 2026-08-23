@@ -30,15 +30,23 @@ import java.util.Objects;
 // Computes Reed-Solomon error correction codewords for given data codewords.
 final class ReedSolomonGenerator {
 	
+	/*---- Constant ----*/
+	
 	// Use this memoizer to get instances of this class.
 	public static final Memoizer<Integer,ReedSolomonGenerator> MEMOIZER
 		= new Memoizer<>(ReedSolomonGenerator::new);
 	
 	
+	
+	/*---- Field ----*/
+	
 	// A table of size 256 * degree, where polynomialMultiply[i][j] = multiply(i, coefficients[j]).
 	// 'coefficients' is the temporary array computed in the constructor.
 	private byte[][] polynomialMultiply;
 	
+	
+	
+	/*---- Constructor ----*/
 	
 	// Creates a Reed-Solomon ECC generator polynomial for the given degree.
 	private ReedSolomonGenerator(int degree) {
@@ -72,6 +80,9 @@ final class ReedSolomonGenerator {
 	}
 	
 	
+	
+	/*---- Method ----*/
+	
 	// Returns the error correction codeword for the given data polynomial and this divisor polynomial.
 	public void getRemainder(byte[] data, int dataOff, int dataLen, byte[] result) {
 		Objects.requireNonNull(data);
@@ -88,6 +99,9 @@ final class ReedSolomonGenerator {
 		}
 	}
 	
+	
+	
+	/*---- Utility function ----*/
 	
 	// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 	// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.

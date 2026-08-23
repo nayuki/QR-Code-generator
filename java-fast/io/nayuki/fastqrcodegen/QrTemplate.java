@@ -28,10 +28,15 @@ package io.nayuki.fastqrcodegen;
 // and does not depend on the data or error correction level or mask.
 final class QrTemplate {
 	
+	/*---- Constant ----*/
+	
 	// Use this memoizer to get instances of this class.
 	public static final Memoizer<Integer,QrTemplate> MEMOIZER
 		= new Memoizer<>(QrTemplate::new);
 	
+	
+	
+	/*---- Fields ----*/
 	
 	private final int version;  // In the range [1, 40].
 	private final int size;  // Derived from version.
@@ -44,6 +49,9 @@ final class QrTemplate {
 	// Otherwise when the constructor is running, isFunction.length == template.length.
 	private int[] isFunction;
 	
+	
+	
+	/*---- Constructor ----*/
 	
 	// Creates a QR Code template for the given version number.
 	private QrTemplate(int ver) {
@@ -60,6 +68,9 @@ final class QrTemplate {
 		isFunction = null;
 	}
 	
+	
+	
+	/*---- Methods ----*/
 	
 	// Reads this object's version field, and draws and marks all function modules.
 	private void drawFunctionPatterns() {
