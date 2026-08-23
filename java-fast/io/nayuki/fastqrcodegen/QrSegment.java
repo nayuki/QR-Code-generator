@@ -281,10 +281,7 @@ public final class QrSegment {
 	
 	static {
 		final String ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
-		int maxCh = -1;
-		for (int i = 0; i < ALPHANUMERIC_CHARSET.length(); i++)
-			maxCh = Math.max(ALPHANUMERIC_CHARSET.charAt(i), maxCh);
-		ALPHANUMERIC_MAP = new int[maxCh + 1];
+		ALPHANUMERIC_MAP = new int[ALPHANUMERIC_CHARSET.chars().max().getAsInt() + 1];
 		Arrays.fill(ALPHANUMERIC_MAP, -1);
 		for (int i = 0; i < ALPHANUMERIC_CHARSET.length(); i++)
 			ALPHANUMERIC_MAP[ALPHANUMERIC_CHARSET.charAt(i)] = i;
