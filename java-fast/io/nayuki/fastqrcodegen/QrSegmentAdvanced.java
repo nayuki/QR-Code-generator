@@ -130,7 +130,7 @@ public final class QrSegmentAdvanced {
 				charModes[i][0] = modeTypes[0];
 			}
 			// Extend a segment if possible
-			if (QrSegment.ALPHANUMERIC_MAP[c] != -1) {  // Is alphanumeric
+			if (c < QrSegment.ALPHANUMERIC_MAP.length && QrSegment.ALPHANUMERIC_MAP[c] != -1) {  // Is alphanumeric
 				curCosts[1] = prevCosts[1] + 33;  // 5.5 bits per alphanumeric char
 				charModes[i][1] = modeTypes[1];
 			}
