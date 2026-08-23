@@ -237,7 +237,8 @@ public final class QrSegment {
 	/**
 	 * Constructs a QR Code segment with the specified attributes and data.
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
-	 * but the constraint isn't checked. The specified bit buffer is cloned and stored.
+	 * but the constraint isn't checked. The specified bit buffer is stored, and other
+	 * code must not change any value in the array until this segment is discarded.
 	 * @param md the mode (not {@code null})
 	 * @param numCh the data length in characters or bytes, which is non-negative
 	 * @param data the data bits (not {@code null})
