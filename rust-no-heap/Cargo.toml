@@ -2,6 +2,7 @@
 name = "qrcodegen-no-heap"
 version = "1.8.1"
 authors = ["Project Nayuki"]
+edition = "2015"
 description = "High-quality QR Code generator library"
 homepage = "https://www.nayuki.io/page/qr-code-generator-library"
 repository = "https://github.com/nayuki/QR-Code-generator"
