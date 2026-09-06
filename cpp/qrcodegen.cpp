@@ -310,7 +310,7 @@ QrCode QrCode::encodeSegments(const vector<QrSegment> &segs, Ecc ecl,
 	// Pack bits into bytes in big endian
 	vector<uint8_t> dataCodewords(bb.size() / 8);
 	for (size_t i = 0; i < bb.size(); i++)
-		dataCodewords.at(i >> 3) |= (bb.at(i) ? 1 : 0) << (7 - (i & 7));
+		dataCodewords.at(i >> 3) |= static_cast<uint8_t>((bb.at(i) ? 1 : 0) << (7 - (i & 7)));
 	
 	// Create the QR Code object
 	return QrCode(version, ecl, dataCodewords, mask);
