@@ -1,0 +1,6 @@
+# Outputs of make for C target
+c/.deps
+c/*.o
+c/*.a
+c/qrcodegen-demo
+c/qrcodegen-test
