@@ -161,7 +161,7 @@ public final class QrSegmentAdvanced {
 			// A non-tight upper bound is when each of 7089 characters switches to
 			// byte mode (4-bit header + 16-bit count) and requires 4 bytes in UTF-8
 			for (int cost : curCosts)
-				assert 0 <= cost && cost <= (4 + 16 + 32) * 6 * 7089;
+				assert 0 <= cost && cost <= (4 + 16 + 4 * 8) * 6 * 7089;
 			prevCosts = curCosts;
 		}
 		
