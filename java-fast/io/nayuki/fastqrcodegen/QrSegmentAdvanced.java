@@ -125,7 +125,7 @@ public final class QrSegmentAdvanced {
 		
 		// Calculate costs using dynamic programming
 		for (int i = 0; i < codePoints.length; i++) {
-			int c = codePoints[i];
+			final int c = codePoints[i];
 			int[] curCosts = new int[numModes];
 			{  // Always extend a byte mode segment
 				curCosts[0] = prevCosts[0] + countUtf8Bytes(c) * 8 * 6;
