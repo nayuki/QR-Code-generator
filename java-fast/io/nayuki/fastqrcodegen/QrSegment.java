@@ -34,7 +34,7 @@ import java.util.Objects;
  * A segment of character/binary/control data in a QR Code symbol.
  * Instances of this class are immutable.
  * <p>The mid-level way to create a segment is to take the payload data and call a
- * static factory function such as {@link QrSegment#makeNumeric(String)}. The low-level
+ * static factory function such as {@link QrSegment#makeNumeric(CharSequence)}. The low-level
  * way to create a segment is to custom-make the bit buffer and call the {@link
  * QrSegment#QrSegment(Mode,int,int[],int) constructor} with appropriate values.</p>
  * <p>This segment class imposes no length restrictions, but QR Codes have restrictions.
@@ -74,7 +74,7 @@ public final class QrSegment {
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-digit characters
 	 */
-	public static QrSegment makeNumeric(String digits) {
+	public static QrSegment makeNumeric(CharSequence digits) {
 		Objects.requireNonNull(digits);
 		BitBuffer bb = new BitBuffer();
 		int accumData = 0;
@@ -106,7 +106,7 @@ public final class QrSegment {
 	 * @throws NullPointerException if the string is {@code null}
 	 * @throws IllegalArgumentException if the string contains non-encodable characters
 	 */
-	public static QrSegment makeAlphanumeric(String text) {
+	public static QrSegment makeAlphanumeric(CharSequence text) {
 		Objects.requireNonNull(text);
 		BitBuffer bb = new BitBuffer();
 		int accumData = 0;
@@ -136,7 +136,7 @@ public final class QrSegment {
 	 * @return a new mutable list (not {@code null}) of segments (not {@code null}) containing the text
 	 * @throws NullPointerException if the text is {@code null}
 	 */
-	public static List<QrSegment> makeSegments(String text) {
+	public static List<QrSegment> makeSegments(CharSequence text) {
 		Objects.requireNonNull(text);
 		
 		// Select the most efficient segment encoding automatically
@@ -147,7 +147,7 @@ public final class QrSegment {
 		else if (isAlphanumeric(text))
 			result.add(makeAlphanumeric(text));
 		else
-			result.add(makeBytes(text.getBytes(StandardCharsets.UTF_8)));
+			result.add(makeBytes(text.toString().getBytes(StandardCharsets.UTF_8)));
 		return result;
 	}
 	
@@ -183,9 +183,9 @@ public final class QrSegment {
 	 * @param text the string to test for encodability (not {@code null})
 	 * @return {@code true} iff each character is in the range 0 to 9.
 	 * @throws NullPointerException if the string is {@code null}
-	 * @see #makeNumeric(String)
+	 * @see #makeNumeric(CharSequence)
 	 */
-	public static boolean isNumeric(String text) {
+	public static boolean isNumeric(CharSequence text) {
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
 			if (c < '0' || c > '9')
@@ -202,9 +202,9 @@ public final class QrSegment {
 	 * @param text the string to test for encodability (not {@code null})
 	 * @return {@code true} iff each character is in the alphanumeric mode character set
 	 * @throws NullPointerException if the string is {@code null}
-	 * @see #makeAlphanumeric(String)
+	 * @see #makeAlphanumeric(CharSequence)
 	 */
-	public static boolean isAlphanumeric(String text) {
+	public static boolean isAlphanumeric(CharSequence text) {
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
 			if (c >= ALPHANUMERIC_MAP.length || ALPHANUMERIC_MAP[c] == -1)
