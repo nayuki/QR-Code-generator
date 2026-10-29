@@ -103,6 +103,8 @@ public final class QrSegmentAdvanced {
 	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			throw new IllegalArgumentException();
+		if (codePoints.length > 7089)  // Upper bound is the number of characters that fit in QR Code version 40, low error correction, numeric mode
+			throw new DataTooLongException("String too long");
 		final Mode[] modeTypes = {Mode.BYTE, Mode.ALPHANUMERIC, Mode.NUMERIC, Mode.KANJI};  // Do not modify
 		final int numModes = modeTypes.length;
 		
