@@ -127,35 +127,29 @@ public final class QrSegmentAdvanced {
 		for (int i = 0; i < codePoints.length; i++) {
 			final int c = codePoints[i];
 			int[] curCosts = new int[numModes];
-			{  // Always extend a byte mode segment
-				curCosts[0] = prevCosts[0] + countUtf8Bytes(c) * 8 * 6;
-				charModes[i][0] = modeTypes[0];
-			}
-			// Extend a segment if possible
-			if (c < QrSegment.ALPHANUMERIC_MAP.length && QrSegment.ALPHANUMERIC_MAP[c] != -1) {  // Is alphanumeric
-				curCosts[1] = prevCosts[1] + 33;  // 5.5 bits per alphanumeric char
-				charModes[i][1] = modeTypes[1];
-			}
-			if ('0' <= c && c <= '9') {  // Is numeric
-				curCosts[2] = prevCosts[2] + 20;  // 3.33 bits per digit
-				charModes[i][2] = modeTypes[2];
-			}
-			if (isKanji(c)) {
-				curCosts[3] = prevCosts[3] + 78;  // 13 bits per Shift JIS char
-				charModes[i][3] = modeTypes[3];
-			}
-			
-			// Start new segment at the end to switch modes
-			for (int j = 0; j < numModes; j++) {  // To mode
-				for (int k = 0; k < numModes; k++) {  // From mode
-					int newCost = (curCosts[k] + 5) / 6 * 6 + headCosts[j];
-					if (charModes[i][k] != null && (charModes[i][j] == null || newCost < curCosts[j])) {
-						curCosts[j] = newCost;
-						charModes[i][j] = modeTypes[k];
+			for (int fromMode = 0; fromMode < numModes; fromMode++) {
+				int baseCost = prevCosts[fromMode];
+				if (fromMode == 0)  // Always extend a byte mode segment
+					baseCost += QrSegmentAdvanced.countUtf8Bytes(c) * 8 * 6;
+				else if (fromMode == 1 && c < QrSegment.ALPHANUMERIC_MAP.length && QrSegment.ALPHANUMERIC_MAP[c] != -1)
+					baseCost += 33;  // 5.5 bits per alphanumeric char
+				else if (fromMode == 2 && '0' <= c && c <= '9')
+					baseCost += 20;  // 3.33 bits per digit
+				else if (fromMode == 3 && QrSegmentAdvanced.isKanji(c))
+					baseCost += 13 * 6;  // 13 bits per Shift JIS char
+				else  // Cannot extend the segment to include the current character
+					continue;
+				// Account for the cost of possibly starting a new segment after this character
+				for (int toMode = 0; toMode < numModes; toMode++) {
+					int cost = baseCost;
+					if (toMode != fromMode)  // Round up to whole bit and append new initially empty segment
+						cost = (cost + 5) / 6 * 6 + headCosts[toMode];
+					if (charModes[i][toMode] == null || cost < curCosts[toMode]) {
+						curCosts[toMode] = cost;
+						charModes[i][toMode] = modeTypes[fromMode];
 					}
 				}
 			}
-			
 			prevCosts = curCosts;
 		}
 		
