@@ -24,7 +24,7 @@
 from __future__ import annotations
 import collections, itertools, re
 from collections.abc import Sequence
-from typing import Optional, Union
+from typing import Optional
 
 
 # ---- QR Code symbol class ----
@@ -59,7 +59,7 @@ class QrCode:
 	
 	
 	@staticmethod
-	def encode_binary(data: Union[bytes,Sequence[int]], ecl: QrCode.Ecc) -> QrCode:
+	def encode_binary(data: bytes|Sequence[int], ecl: QrCode.Ecc) -> QrCode:
 		"""Returns a QR Code representing the given binary data at the given error correction level.
 		This function always encodes using the binary segment mode, not any text mode. The maximum number of
 		bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
@@ -160,7 +160,7 @@ class QrCode:
 	
 	# ---- Constructor (low level) ----
 	
-	def __init__(self, version: int, errcorlvl: QrCode.Ecc, datacodewords: Union[bytes,Sequence[int]], msk: int) -> None:
+	def __init__(self, version: int, errcorlvl: QrCode.Ecc, datacodewords: bytes|Sequence[int], msk: int) -> None:
 		"""Creates a new QR Code with the given version number,
 		error correction level, data codeword bytes, and mask number.
 		This is a low-level API that most users should not use directly.
@@ -673,7 +673,7 @@ class QrSegment:
 	# ---- Static factory functions (mid level) ----
 	
 	@staticmethod
-	def make_bytes(data: Union[bytes,Sequence[int]]) -> QrSegment:
+	def make_bytes(data: bytes|Sequence[int]) -> QrSegment:
 		"""Returns a segment representing the given binary data encoded in byte mode.
 		All input byte lists are acceptable. Any text string can be converted to
 		UTF-8 bytes (s.encode("UTF-8")) and encoded as a byte mode segment."""
