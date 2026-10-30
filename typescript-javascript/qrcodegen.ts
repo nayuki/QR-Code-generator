@@ -254,11 +254,10 @@ namespace qrcodegen {
 			
 			// Draw numerous alignment patterns
 			const alignPatPos: Array<int> = this.getAlignmentPatternPositions();
-			const numAlign: int = alignPatPos.length;
 			alignPatPos.forEach((x: int, i: int): void => {
 				alignPatPos.forEach((y: int, j: int): void => {
 					// Don't draw on the three finder corners
-					if (!(i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0))
+					if (!(i == 0 && j == 0 || i == 0 && j == alignPatPos.length - 1 || i == alignPatPos.length - 1 && j == 0))
 						this.drawAlignmentPattern(x, y);
 				});
 			});

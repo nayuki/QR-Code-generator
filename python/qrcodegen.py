@@ -245,8 +245,7 @@ class QrCode:
 		
 		# Draw numerous alignment patterns
 		alignpatpos: list[int] = self._get_alignment_pattern_positions()
-		numalign: int = len(alignpatpos)
-		skips: Sequence[tuple[int,int]] = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
+		skips: Sequence[tuple[int,int]] = ((0, 0), (0, len(alignpatpos) - 1), (len(alignpatpos) - 1, 0))
 		for (i, x) in enumerate(alignpatpos):
 			for (j, y) in enumerate(alignpatpos):
 				if (i, j) not in skips:  # Don't draw on the three finder corners

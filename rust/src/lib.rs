@@ -391,11 +391,10 @@ impl QrCode {
 		
 		// Draw numerous alignment patterns
 		let alignpatpos: Vec<i32> = self.get_alignment_pattern_positions();
-		let numalign: usize = alignpatpos.len();
 		for (i, &x) in alignpatpos.iter().enumerate() {
 			for (j, &y) in alignpatpos.iter().enumerate() {
 				// Don't draw on the three finder corners
-				if !(i == 0 && j == 0 || i == 0 && j == numalign - 1 || i == numalign - 1 && j == 0) {
+				if !(i == 0 && j == 0 || i == 0 && j == alignpatpos.len() - 1 || i == alignpatpos.len() - 1 && j == 0) {
 					self.draw_alignment_pattern(x, y);
 				}
 			}
