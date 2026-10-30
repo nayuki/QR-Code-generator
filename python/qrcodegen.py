@@ -247,10 +247,10 @@ class QrCode:
 		alignpatpos: list[int] = self._get_alignment_pattern_positions()
 		numalign: int = len(alignpatpos)
 		skips: Sequence[tuple[int,int]] = ((0, 0), (0, numalign - 1), (numalign - 1, 0))
-		for i in range(numalign):
-			for j in range(numalign):
+		for (i, x) in enumerate(alignpatpos):
+			for (j, y) in enumerate(alignpatpos):
 				if (i, j) not in skips:  # Don't draw on the three finder corners
-					self._draw_alignment_pattern(alignpatpos[i], alignpatpos[j])
+					self._draw_alignment_pattern(x, y)
 		
 		# Draw configuration data
 		self._draw_format_bits(0)  # Dummy mask value; overwritten later in the constructor

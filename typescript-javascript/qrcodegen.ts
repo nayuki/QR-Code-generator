@@ -255,13 +255,13 @@ namespace qrcodegen {
 			// Draw numerous alignment patterns
 			const alignPatPos: Array<int> = this.getAlignmentPatternPositions();
 			const numAlign: int = alignPatPos.length;
-			for (let i = 0; i < numAlign; i++) {
-				for (let j = 0; j < numAlign; j++) {
+			alignPatPos.forEach((x: int, i: int): void => {
+				alignPatPos.forEach((y: int, j: int): void => {
 					// Don't draw on the three finder corners
 					if (!(i == 0 && j == 0 || i == 0 && j == numAlign - 1 || i == numAlign - 1 && j == 0))
-						this.drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
-				}
-			}
+						this.drawAlignmentPattern(x, y);
+				});
+			});
 			
 			// Draw configuration data
 			this.drawFormatBits(0);  // Dummy mask value; overwritten later in the constructor
