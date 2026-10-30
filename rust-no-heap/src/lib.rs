@@ -506,8 +506,8 @@ impl<'a> QrCode<'a> {
 		// Fill numerous alignment patterns
 		let mut alignpatposbuf = [0u8; 7];
 		let alignpatpos: &[u8] = result.get_alignment_pattern_positions(&mut alignpatposbuf);
-		for (i, pos0) in alignpatpos.iter().enumerate() {
-			for (j, pos1) in alignpatpos.iter().enumerate() {
+		for (i, &pos0) in alignpatpos.iter().enumerate() {
+			for (j, &pos1) in alignpatpos.iter().enumerate() {
 				// Don't draw on the three finder corners
 				if !((i == 0 && j == 0) || (i == 0 && j == alignpatpos.len() - 1) || (i == alignpatpos.len() - 1 && j == 0)) {
 					result.fill_rectangle(pos0 - 2, pos1 - 2, 5, 5);
