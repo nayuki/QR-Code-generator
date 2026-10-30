@@ -23,6 +23,8 @@
 
 package io.nayuki.fastqrcodegen;
 
+import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -402,12 +404,13 @@ public final class QrSegmentAdvanced {
 	static {  // Unpack the Shift JIS table into a more computation-friendly form
 		Arrays.fill(UNICODE_TO_QR_KANJI, (short)-1);
 		byte[] bytes = Base64.getDecoder().decode(PACKED_QR_KANJI_TO_UNICODE);
-		for (int i = 0; i < bytes.length; i += 2) {
-			char c = (char)(((bytes[i] & 0xFF) << 8) | (bytes[i + 1] & 0xFF));
+		ShortBuffer buf = ByteBuffer.wrap(bytes).asShortBuffer();
+		while (buf.hasRemaining()) {
+			char c = (char)buf.get();
 			if (c == 0xFFFF)
 				continue;
 			assert UNICODE_TO_QR_KANJI[c] == -1;
-			UNICODE_TO_QR_KANJI[c] = (short)(i / 2);
+			UNICODE_TO_QR_KANJI[c] = (short)(buf.position() - 1);
 		}
 	}
 	
