@@ -461,9 +461,9 @@ namespace qrcodegen {
 			
 			// Adjacent modules in row having same color, and finder-like patterns
 			for (let y = 0; y < this.size; y++) {
-				let runColor = false;
-				let runX = 0;
-				let runHistory = [0,0,0,0,0,0,0];
+				let runColor: boolean = false;
+				let runX: int = 0;
+				let runHistory: Array<int> = [0,0,0,0,0,0,0];
 				for (let x = 0; x < this.size; x++) {
 					if (this.modules[y][x] == runColor) {
 						runX++;
@@ -483,9 +483,9 @@ namespace qrcodegen {
 			}
 			// Adjacent modules in column having same color, and finder-like patterns
 			for (let x = 0; x < this.size; x++) {
-				let runColor = false;
-				let runY = 0;
-				let runHistory = [0,0,0,0,0,0,0];
+				let runColor: boolean = false;
+				let runY: int = 0;
+				let runHistory: Array<int> = [0,0,0,0,0,0,0];
 				for (let y = 0; y < this.size; y++) {
 					if (this.modules[y][x] == runColor) {
 						runY++;
@@ -591,7 +591,7 @@ namespace qrcodegen {
 			// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
 			// and drop the highest monomial term which is always 1x^degree.
 			// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
-			let root = 1;
+			let root: byte = 1;
 			for (let i = 0; i < degree; i++) {
 				// Multiply the current product by (x - r^i)
 				for (let j = 0; j < result.length; j++) {
