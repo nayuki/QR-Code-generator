@@ -24,7 +24,6 @@
 from __future__ import annotations
 import collections, itertools, re
 from collections.abc import Sequence
-from typing import Optional
 
 
 # ---- QR Code symbol class ----
@@ -87,7 +86,7 @@ class QrCode:
 		# Find the minimal version number to use
 		for version in range(minversion, maxversion + 1):
 			datacapacitybits: int = QrCode._get_num_data_codewords(version, ecl) * 8  # Number of data bits available
-			datausedbits: Optional[int] = QrSegment.get_total_bits(segs, version)
+			datausedbits: int|None = QrSegment.get_total_bits(segs, version)
 			if (datausedbits is not None) and (datausedbits <= datacapacitybits):
 				break  # This version number is found to be suitable
 			if version >= maxversion:  # All versions in the range could not fit the given data
@@ -810,7 +809,7 @@ class QrSegment:
 	
 	# Package-private function
 	@staticmethod
-	def get_total_bits(segs: Sequence[QrSegment], version: int) -> Optional[int]:
+	def get_total_bits(segs: Sequence[QrSegment], version: int) -> int|None:
 		"""Calculates the number of bits needed to encode the given segments at
 		the given version. Returns a non-negative number if successful. Otherwise
 		returns None if a segment has too many characters to fit its length field."""
