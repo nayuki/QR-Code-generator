@@ -506,11 +506,11 @@ impl<'a> QrCode<'a> {
 		// Fill numerous alignment patterns
 		let mut alignpatposbuf = [0u8; 7];
 		let alignpatpos: &[u8] = result.get_alignment_pattern_positions(&mut alignpatposbuf);
-		for (i, &pos0) in alignpatpos.iter().enumerate() {
-			for (j, &pos1) in alignpatpos.iter().enumerate() {
+		for (i, &x) in alignpatpos.iter().enumerate() {
+			for (j, &y) in alignpatpos.iter().enumerate() {
 				// Don't draw on the three finder corners
 				if !((i == 0 && j == 0) || (i == 0 && j == alignpatpos.len() - 1) || (i == alignpatpos.len() - 1 && j == 0)) {
-					result.fill_rectangle(pos0 - 2, pos1 - 2, 5, 5);
+					result.fill_rectangle(x - 2, y - 2, 5, 5);
 				}
 			}
 		}
@@ -551,14 +551,14 @@ impl<'a> QrCode<'a> {
 		// Draw numerous alignment patterns
 		let mut alignpatposbuf = [0u8; 7];
 		let alignpatpos: &[u8] = self.get_alignment_pattern_positions(&mut alignpatposbuf);
-		for (i, &pos0) in alignpatpos.iter().enumerate() {
-			for (j, &pos1) in alignpatpos.iter().enumerate() {
+		for (i, &x) in alignpatpos.iter().enumerate() {
+			for (j, &y) in alignpatpos.iter().enumerate() {
 				if (i == 0 && j == 0) || (i == 0 && j == alignpatpos.len() - 1) || (i == alignpatpos.len() - 1 && j == 0) {
 					continue;  // Don't draw on the three finder corners
 				}
 				for dy in -1 ..= 1 {
 					for dx in -1 ..= 1 {
-						self.set_module_bounded((i32::from(pos0) + dx) as u8, (i32::from(pos1) + dy) as u8, dx == 0 && dy == 0);
+						self.set_module_bounded((i32::from(x) + dx) as u8, (i32::from(y) + dy) as u8, dx == 0 && dy == 0);
 					}
 				}
 			}
