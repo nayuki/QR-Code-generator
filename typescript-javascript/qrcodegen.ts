@@ -138,7 +138,7 @@ namespace qrcodegen {
 			let dataCodewords: Array<byte> = [];
 			while (dataCodewords.length * 8 < bb.length)
 				dataCodewords.push(0);
-			bb.forEach((b: bit, i: int) =>
+			bb.forEach((b: bit, i: int): unknown =>
 				dataCodewords[i >>> 3] |= b << (7 - (i & 7)));
 			
 			// Create the QR Code object
@@ -387,7 +387,7 @@ namespace qrcodegen {
 			// Interleave (not concatenate) the bytes from every block into a single sequence
 			let result: Array<byte> = [];
 			for (let i = 0; i < blocks[0].length; i++) {
-				blocks.forEach((block, j) => {
+				blocks.forEach((block: Array<byte>, j: int): void => {
 					// Skip the padding byte in short blocks
 					if (i != shortBlockLen - blockEccLen || j >= numShortBlocks)
 						result.push(block[i]);
@@ -519,7 +519,7 @@ namespace qrcodegen {
 			// Balance of dark and light modules
 			let dark: int = 0;
 			for (const row of this.modules)
-				dark = row.reduce((sum, color) => sum + (color ? 1 : 0), dark);
+				dark = row.reduce((sum: int, color: boolean): int => sum + (color ? 1 : 0), dark);
 			const total: int = this.size * this.size;  // Note that size is odd, so dark/total != 1/2
 			// Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
 			const k: int = Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1;
@@ -612,7 +612,7 @@ namespace qrcodegen {
 			for (const b of data) {  // Polynomial division
 				const factor: byte = b ^ (result.shift() as byte);
 				result.push(0);
-				divisor.forEach((coef, i) =>
+				divisor.forEach((coef: byte, i: int): unknown =>
 					result[i] ^= QrCode.reedSolomonMultiply(coef, factor));
 			}
 			return result;
