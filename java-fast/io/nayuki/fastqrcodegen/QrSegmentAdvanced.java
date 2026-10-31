@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import io.nayuki.fastqrcodegen.QrSegment.Mode;
 
 
@@ -92,121 +93,85 @@ public final class QrSegmentAdvanced {
 	}
 	
 	
+	private static final List<Mode> MODE_TYPES = Arrays.asList(Mode.BYTE, Mode.ALPHANUMERIC, Mode.NUMERIC, Mode.KANJI);  // Do not modify
+	private static final int NUM_MODES = MODE_TYPES.size();
+	
 	// Returns a new list of segments that is optimal for the given text at the given version number.
 	private static List<QrSegment> makeSegmentsOptimally(int[] codePoints, int version) {
 		if (codePoints.length == 0)
 			return new ArrayList<>();
-		Mode[] charModes = computeCharacterModes(codePoints, version);
-		return splitIntoSegments(codePoints, charModes);
-	}
-	
-	
-	// Returns a new array representing the optimal mode per code point based on the given text and version.
-	private static Mode[] computeCharacterModes(int[] codePoints, int version) {
-		if (codePoints.length == 0)
-			throw new IllegalArgumentException();
 		if (codePoints.length > 7089)  // Upper bound is the number of characters that fit in QR Code version 40, low error correction, numeric mode
 			throw new DataTooLongException("String too long");
-		final Mode[] modeTypes = {Mode.BYTE, Mode.ALPHANUMERIC, Mode.NUMERIC, Mode.KANJI};  // Do not modify
-		final int numModes = modeTypes.length;
 		
 		// Segment header sizes, measured in 1/6 bits
-		final int[] headCosts = new int[numModes];
-		for (int i = 0; i < numModes; i++)
-			headCosts[i] = (4 + modeTypes[i].numCharCountBits(version)) * 6;
+		final int[] headCosts = MODE_TYPES.stream().mapToInt(mode -> (4 + mode.numCharCountBits(version)) * 6).toArray();
 		
-		// charModes[i][j] represents the mode to encode the code point at
-		// index i such that the final segment ends in modeTypes[j] and the
-		// total number of bits is minimized over all possible choices
-		Mode[][] charModes = new Mode[codePoints.length][numModes];
+		// charModes[i][j] is the mode to encode the code point at index i such that the initial
+		// segment (possibly empty) uses MODE_TYPES[j] and the total number of bits to encode
+		// the suffix codePoints[i : codePoints.length] is minimized over all possible choices
+		Mode[][] charModes = new Mode[codePoints.length][NUM_MODES];
 		
-		// At the beginning of each iteration of the loop below,
-		// prevCosts[j] is the exact minimum number of 1/6 bits needed to
-		// encode the entire string prefix of length i, and end in modeTypes[j]
-		int[] prevCosts = headCosts.clone();
+		// At the beginning of each iteration of the loop below, rightCosts[j] is the exact
+		// minimum number of 1/6 bits needed to encode the entire suffix codePoints[i + 1 :
+		// codePoints.length] such that the initial segment (possibly empty) uses MODE_TYPES[j]
+		int[] rightCosts = headCosts.clone();
 		
 		// Calculate costs using dynamic programming
-		for (int i = 0; i < codePoints.length; i++) {
+		for (int i = codePoints.length - 1; i >= 0; i--) {
 			final int c = codePoints[i];
-			int[] curCosts = new int[numModes];
-			for (int fromMode = 0; fromMode < numModes; fromMode++) {
-				int baseCost = prevCosts[fromMode];
-				if (fromMode == 0)  // Always extend a byte mode segment
+			int[] leftCosts = new int[NUM_MODES];
+			for (int rightModeIdx = 0; rightModeIdx < NUM_MODES; rightModeIdx++) {
+				int baseCost = rightCosts[rightModeIdx];
+				if (rightModeIdx == 0)  // Always extend a byte mode segment
 					baseCost += QrSegmentAdvanced.countUtf8Bytes(c) * 8 * 6;
-				else if (fromMode == 1 && c < QrSegment.ALPHANUMERIC_MAP.length && QrSegment.ALPHANUMERIC_MAP[c] != -1)
+				else if (rightModeIdx == 1 && c < QrSegment.ALPHANUMERIC_MAP.length && QrSegment.ALPHANUMERIC_MAP[c] != -1)
 					baseCost += 33;  // 5.5 bits per alphanumeric char
-				else if (fromMode == 2 && '0' <= c && c <= '9')
+				else if (rightModeIdx == 2 && '0' <= c && c <= '9')
 					baseCost += 20;  // 3.33 bits per digit
-				else if (fromMode == 3 && QrSegmentAdvanced.isKanji(c))
+				else if (rightModeIdx == 3 && isKanji(c))
 					baseCost += 13 * 6;  // 13 bits per Shift JIS char
 				else  // Cannot extend the segment to include the current character
 					continue;
-				// Account for the cost of possibly starting a new segment after this character
-				for (int toMode = 0; toMode < numModes; toMode++) {
+				// Account for the cost of possibly starting a new segment before this character
+				for (int leftModeIdx = 0; leftModeIdx < NUM_MODES; leftModeIdx++) {
 					int cost = baseCost;
-					if (toMode != fromMode)  // Round up to whole bit and append new initially empty segment
-						cost = (cost + 5) / 6 * 6 + headCosts[toMode];
-					if (charModes[i][toMode] == null || cost < curCosts[toMode]) {
-						curCosts[toMode] = cost;
-						charModes[i][toMode] = modeTypes[fromMode];
+					if (leftModeIdx != rightModeIdx)  // Round up to whole bit and prepend new initially empty segment
+						cost = (cost + 5) / 6 * 6 + headCosts[leftModeIdx];
+					if (charModes[i][leftModeIdx] == null || cost < leftCosts[leftModeIdx]) {
+						leftCosts[leftModeIdx] = cost;
+						charModes[i][leftModeIdx] = MODE_TYPES.get(rightModeIdx);
 					}
 				}
 			}
-			prevCosts = curCosts;
+			rightCosts = leftCosts;
 		}
 		
-		// Find optimal ending mode
-		Mode curMode = null;
-		for (int i = 0, minCost = 0; i < numModes; i++) {
-			if (curMode == null || prevCosts[i] < minCost) {
-				minCost = prevCosts[i];
-				curMode = modeTypes[i];
-			}
-		}
+		// Find a starting mode that minimizes the total bit length
+		final int[] rightCostsFinal = rightCosts;
+		Mode prevMode = MODE_TYPES.stream()
+			.min((m0, m1) -> Integer.compare(rightCostsFinal[MODE_TYPES.indexOf(m0)], rightCostsFinal[MODE_TYPES.indexOf(m1)]))
+			.get();
 		
-		// Get optimal mode for each code point by tracing backwards
-		Mode[] result = new Mode[charModes.length];
-		for (int i = result.length - 1; i >= 0; i--) {
-			for (int j = 0; j < numModes; j++) {
-				if (modeTypes[j] == curMode) {
-					curMode = charModes[i][j];
-					result[i] = curMode;
-					break;
-				}
-			}
-		}
-		return result;
-	}
-	
-	
-	// Returns a new list of segments based on the given text and modes, such that
-	// consecutive code points in the same mode are put into the same segment.
-	private static List<QrSegment> splitIntoSegments(int[] codePoints, Mode[] charModes) {
-		if (codePoints.length == 0)
-			throw new IllegalArgumentException();
+		// Trace the chain of modes forward, accumulate runs, make segments
 		List<QrSegment> result = new ArrayList<>();
-		
-		// Accumulate run of modes
-		Mode curMode = charModes[0];
-		int start = 0;
-		for (int i = 1; ; i++) {
-			if (i < codePoints.length && charModes[i] == curMode)
-				continue;
-			String s = new String(codePoints, start, i - start);
-			if (curMode == Mode.BYTE)
-				result.add(QrSegment.makeBytes(s.getBytes(StandardCharsets.UTF_8)));
-			else if (curMode == Mode.NUMERIC)
-				result.add(QrSegment.makeNumeric(s));
-			else if (curMode == Mode.ALPHANUMERIC)
-				result.add(QrSegment.makeAlphanumeric(s));
-			else if (curMode == Mode.KANJI)
-				result.add(makeKanji(s));
-			else
-				throw new AssertionError();
-			if (i >= codePoints.length)
-				return result;
-			curMode = charModes[i];
-			start = i;
+		for (int i = 1, runStart = 0; ; i++) {
+			Optional<Mode> curMode = i < codePoints.length ?
+				Optional.of(charModes[i][MODE_TYPES.indexOf(prevMode)]) :
+				Optional.empty();
+			if (i >= codePoints.length || curMode.get() != prevMode) {
+				String s = new String(codePoints, runStart, i - runStart);
+				result.add(switch(prevMode) {
+					case BYTE         -> QrSegment.makeBytes(s.getBytes(StandardCharsets.UTF_8));
+					case NUMERIC      -> QrSegment.makeNumeric(s);
+					case ALPHANUMERIC -> QrSegment.makeAlphanumeric(s);
+					case KANJI        -> makeKanji(s);
+					default           -> throw new AssertionError();
+				});
+				if (i >= codePoints.length)
+					return result;
+				prevMode = curMode.get();
+				runStart = i;
+			}
 		}
 	}
 	
