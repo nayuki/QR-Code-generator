@@ -920,62 +920,62 @@ class QrSegmentAdvanced:
 			return []
 		if len(codepoints) > 7089:  # Upper bound is the number of characters that fit in QR Code version 40, low error correction, numeric mode
 			raise DataTooLongError("String too long")
-		modetypes: tuple[QrSegment.Mode,...] = (QrSegment.Mode.BYTE, QrSegment.Mode.ALPHANUMERIC, QrSegment.Mode.NUMERIC, QrSegment.Mode.KANJI)  # Do not modify
+		modetypes: set[QrSegment.Mode] = {QrSegment.Mode.BYTE, QrSegment.Mode.ALPHANUMERIC, QrSegment.Mode.NUMERIC, QrSegment.Mode.KANJI}
 		
 		# Segment header sizes, measured in 1/6 bits
-		headcosts: list[int] = [(4 + mode.num_char_count_bits(version)) * 6 for mode in modetypes]
-		assert all((0 <= cost <= (4 + 16) * 6) for cost in headcosts)
+		headcosts: dict[QrSegment.Mode,int] = {mode: (4 + mode.num_char_count_bits(version)) * 6 for mode in modetypes}
+		assert all((0 <= cost <= (4 + 16) * 6) for cost in headcosts.values())
 		
-		# charmodes[i][j] is the mode to encode the code point at index i such that the initial
-		# segment (possibly empty) uses modetypes[j] and the total number of bits to encode
+		# charmodes[i][m] is the mode to encode the code point at index i such that the initial
+		# segment (possibly empty) uses m and the total number of bits to encode
 		# the suffix codepoints[i : len(codepoints)] is minimized over all possible choices
-		charmodes: list[list[QrSegment.Mode]] = []
+		charmodes: list[dict[QrSegment.Mode,QrSegment.Mode]] = []
 		
 		# At the beginning of each iteration of the loop below, rightcosts[j] is the exact
 		# minimum number of 1/6 bits needed to encode the entire suffix codepoints[i + 1 :
 		# len(codepoints)] such that the initial segment (possibly empty) uses modetypes[j]
-		rightcosts: list[int] = list(headcosts)
+		rightcosts: dict[QrSegment.Mode,int] = dict(headcosts)
 		
 		# Calculate costs using dynamic programming
 		for c in reversed(codepoints):
-			cmodes: list[QrSegment.Mode|None] = [None] * len(modetypes)
-			leftcosts: list[int] = [0] * len(modetypes)
-			for (rightmodeidx, rightmode) in enumerate(modetypes):
-				basecost: int = rightcosts[rightmodeidx]
-				if rightmodeidx == 0:  # Always extend a byte mode segment
+			cmodes: dict[QrSegment.Mode,QrSegment.Mode] = {}
+			leftcosts: dict[QrSegment.Mode,int] = {}
+			for rightmode in modetypes:
+				basecost: int = rightcosts[rightmode]
+				if rightmode == QrSegment.Mode.BYTE:  # Always extend a byte mode segment
 					basecost += len(c.encode("UTF-8")) * 8 * 6
-				elif (rightmodeidx == 1) and QrSegment.is_alphanumeric(c):
+				elif (rightmode == QrSegment.Mode.ALPHANUMERIC) and QrSegment.is_alphanumeric(c):
 					basecost += 33  # 5.5 bits per alphanumeric char
-				elif (rightmodeidx == 2) and QrSegment.is_numeric(c):
+				elif (rightmode == QrSegment.Mode.NUMERIC) and QrSegment.is_numeric(c):
 					basecost += 20  # 3.33 bits per digit
-				elif (rightmodeidx == 3) and QrSegmentAdvanced._is_kanji(c):
+				elif (rightmode == QrSegment.Mode.KANJI) and QrSegmentAdvanced._is_kanji(c):
 					basecost += 13 * 6  # 13 bits per Shift JIS char
 				else:  # Cannot extend the segment to include the current character
 					continue
 				# Account for the cost of possibly starting a new segment before this character
-				for (leftmodeidx, _) in enumerate(modetypes):
+				for leftmode in modetypes:
 					cost: int = basecost
-					if leftmodeidx != rightmodeidx:  # Round up to whole bit and append new initially empty segment
-						cost = (cost + 5) // 6 * 6 + headcosts[leftmodeidx]
-					if (cmodes[leftmodeidx] is None) or (cost < leftcosts[leftmodeidx]):
-						leftcosts[leftmodeidx] = cost
-						cmodes[leftmodeidx] = rightmode
+					if leftmode != rightmode:  # Round up to whole bit and append new initially empty segment
+						cost = (cost + 5) // 6 * 6 + headcosts[leftmode]
+					if (leftmode not in cmodes) or (cost < leftcosts[leftmode]):
+						leftcosts[leftmode] = cost
+						cmodes[leftmode] = rightmode
 			
 			# A non-tight upper bound is when each of 7089 characters switches to
 			# byte mode (4-bit header + 16-bit count) and requires 4 bytes in UTF-8
-			assert((0 <= cost <= (4 + 16 + 4 * 8) * 6 * 7089) for cost in leftcosts)
-			charmodes.append(cast(list[QrSegment.Mode], cmodes))
+			assert((0 <= cost <= (4 + 16 + 4 * 8) * 6 * 7089) for cost in leftcosts.values())
+			charmodes.append(cmodes)
 			rightcosts = leftcosts
 		charmodes.reverse()
 		
 		# Find a starting mode that minimizes the total bit length
-		prevmode: QrSegment.Mode = min(zip(rightcosts, modetypes), key=(lambda x: x[0]))[1]
+		prevmode: QrSegment.Mode = min(modetypes, key=(lambda mode: rightcosts[mode]))
 		
 		# Trace the chain of modes forward, accumulate runs, make segments
 		result: list[QrSegment] = []
 		runstart: int = 0
 		for i in itertools.count(1):
-			curmode: QrSegment.Mode|None = charmodes[i][modetypes.index(prevmode)] if (i < len(codepoints)) else None
+			curmode: QrSegment.Mode|None = charmodes[i][prevmode] if (i < len(codepoints)) else None
 			if (i >= len(codepoints)) or (curmode != prevmode):
 				s: str = codepoints[runstart : i]
 				match prevmode:
