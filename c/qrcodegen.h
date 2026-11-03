@@ -34,7 +34,7 @@ extern "C" {
 
 
 /* 
- * This library creates QR Code symbols, which is a type of two-dimension barcode.
+ * This library creates QR Code symbols, which is a type of two-dimensional barcode.
  * Invented by Denso Wave and described in the ISO/IEC 18004 standard.
  * A QR Code structure is an immutable square grid of dark and light cells.
  * The library provides functions to create a QR Code from text or binary data.

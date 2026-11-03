@@ -30,7 +30,7 @@ from typing import cast
 # ---- QR Code symbol class ----
 
 class QrCode:
-	"""A QR Code symbol, which is a type of two-dimension barcode.
+	"""A QR Code symbol, which is a type of two-dimensional barcode.
 	Invented by Denso Wave and described in the ISO/IEC 18004 standard.
 	Instances of this class represent an immutable square grid of dark and light cells.
 	The class provides static factory functions to create a QR Code from text or binary data.
