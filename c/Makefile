@@ -73,7 +73,7 @@ qrcodegen-test: qrcodegen-test.c $(LIBOBJ:%.o=%.c)
 
 # The library
 $(LIBFILE): $(LIBOBJ)
-	$(AR) -crs $@ -- $^
+	$(AR) -crs $@ $^
 
 # Object files
 %.o: %.c .deps/timestamp
