@@ -1,0 +1,19 @@
+{
+  "name": "qrcodegen-wat",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "QR Code generator implemented in WebAssembly text format",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.mjs",
+    "demo": "node qrcodegen-demo.mjs",
+    "test": "node qrcodegen-test.mjs"
+  },
+  "devDependencies": {
+    "wabt": "1.0.39"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
