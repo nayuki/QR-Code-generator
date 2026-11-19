@@ -69,7 +69,7 @@ clean:
 
 # The library
 $(LIBFILE): $(LIBOBJ)
-	$(AR) -crs $@ -- $^
+	$(AR) -crs $@ $^
 
 # Object files
 %.o: %.cpp .deps/timestamp
